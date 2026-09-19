@@ -26,6 +26,10 @@ and the place. It is **not** the spec's `Context` model (§4), which stays
 deferred; this is the parameter §26 asks for, carrying only what exists. Naming
 them apart now avoids a rename when the model lands.
 
+`now` carries the person's timezone, the way the capture pipeline already reads
+one. A deadline comparator that plans backwards in UTC for someone who is not in
+UTC is wrong by hours in the direction that recommends too late.
+
 Depth check: behind that one method sit candidate gathering, session
 continuity, six comparators and the `why` composition. Delete the module and
 that logic reappears in the home controller, the API controller, the mobile
@@ -39,8 +43,16 @@ No score. §9 rejects "task #183 has priority 87", and a score is also what make
 Three stages:
 
 **1. Eligibility.** Hard filters, no ordering: step is `pending`, its intention
-is active, its intention has been decomposed. Ineligible steps are invisible,
-never ranked low.
+is active, its intention has been decomposed, and its intention is not
+`needs_clarification`. Ineligible steps are invisible, never ranked low.
+
+Everything decomposed and clear competes — there is no triage gate, because
+promoting work by hand is the mandatory categorisation §35 rules out.
+
+An intention the model could not name is held back rather than ranked low.
+Offering "Sort the thing out" as the one thing to do now is §8's failure, and
+`product-invariants.md` forbids an inference becoming fact on its own. It
+surfaces in slice 5's "Needs attention" band instead, which is where §5 puts it.
 
 **2. Continuity.** An open `execution_session` with a `current_step_id` wins
 outright. Someone mid-task is not asking what to do — they are asking what is
@@ -114,6 +126,8 @@ Scenario tests pass. Each builds a whole world and asserts both the step and the
 - Deadline tomorrow with three steps left beats a bigger deadline-free intention.
 - A step skipped twice is not offered a third time in the same stretch, and is
   offered again after it.
+- An intention the model could not name is never offered, even when it is the
+  only work in the world — the answer is `null`.
 - Two identical worlds → the same step, run repeatedly.
 - Every non-null answer has a non-empty `why`.
 - Skipped state is reached by calling the skip action, never by writing the row

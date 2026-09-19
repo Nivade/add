@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('why')->nullable();
             $table->string('status', 32);
+            $table->boolean('needs_clarification')->default(false);
             // A real appointment or legal date only. Never an invented deadline.
             $table->timestamp('deadline_at')->nullable();
             $table->timestamp('decomposed_at')->nullable();

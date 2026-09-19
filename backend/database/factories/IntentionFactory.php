@@ -20,6 +20,7 @@ class IntentionFactory extends Factory
             'title' => 'Clean the apartment',
             'why' => null,
             'status' => IntentionStatus::Captured,
+            'needs_clarification' => false,
             'deadline_at' => null,
             'decomposed_at' => null,
             'completed_at' => null,

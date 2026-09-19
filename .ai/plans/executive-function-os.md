@@ -43,7 +43,7 @@ classes live. "Next action" stays the product word and is what
 | Table | Carries | Notes |
 | --- | --- | --- |
 | `captures` | raw text, source, `intention_id` nullable | immutable, `created_at` only |
-| `intentions` | title, why, status, `deadline_at` nullable | the thing the person wants handled |
+| `intentions` | title, why, status, `deadline_at` nullable, `needs_clarification` | the thing the person wants handled |
 | `steps` | intention, title, `estimated_seconds`, position, status | one physical action each |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
@@ -56,6 +56,11 @@ normalisation it warns against.
 Status enums avoid failure words. Session outcome is
 `continued | completed | stopped`. There is no `abandoned`, no `overdue`, no
 `due_at` — a real appointment time is `deadline_at` and it is nullable.
+
+`users.timezone` is the zone every relative phrase and every backwards
+calculation is read against. Timestamps are stored as the instant they name;
+Eloquent writes a Carbon instance in whatever zone it carries, so a value
+computed in the person's zone is converted before it reaches a column.
 
 ## API boundaries
 
@@ -81,9 +86,9 @@ between the two frontends.
 
 ## Deterministic vs AI
 
-Deterministic, always: next-action selection, time arithmetic (leave-by,
-backwards planning), session state machine, progress counting, reminder
-scheduling, overwhelm reduction. These must be explainable and testable, and the
+Deterministic, always: next-action selection, time arithmetic (deadline
+extraction, leave-by, backwards planning), session state machine, progress
+counting, reminder scheduling, overwhelm reduction. These must be explainable and testable, and the
 spec's "why this?" line is generated from the ranking inputs, not written by a
 model.
 
@@ -99,7 +104,11 @@ API key, and a missing fixture throws rather than inventing an answer.
    It gets its own test suite with hand-built scenarios before any UI polish.
 2. **Decomposition quality decides whether execution mode works.** A ten-step
    plan with a vague first step fails exactly the person it is for. Needs an
-   eval corpus from day one, same shape as first-move's.
+   eval corpus, same shape as first-move's. Violations are logged rather than
+   rejected, because rejecting leaves the person with nothing. The log is not a
+   corpus — it is neither queryable nor durable — but the trigger for building
+   one is the first `openai` run against a live key, not a slice number, since
+   `canned` and `fake` answers are never worth scoring.
 3. **Privacy surface is large and grows with ingestion.** Nothing leaves the
    machine before the AI path is explicit, consented and logged; ingestion is
    scoped out of the MVP for this reason, not only for effort.
@@ -134,7 +143,7 @@ stays at one line each.
 | # | Slice | Spec | State |
 | --- | --- | --- | --- |
 | 1 | Foundations — enums, migrations, models, Data classes, generated types, guard tests | §25, §37 | done |
-| 2 | [Capture → intention](slices/02-capture-intention.md) — one text field, deterministic extraction, queued decomposition | §6, §7, §8, §27 | in progress |
+| 2 | [Capture → intention](slices/02-capture-intention.md) — one text field, deterministic extraction, queued decomposition | §6, §7, §8, §27 | done |
 | 3 | [Next action](slices/03-next-action.md) — `NextActionResolver`, ordered comparators, composed `why` | §9, §26 | next |
 | 4 | [Execution mode](slices/04-execution-mode.md) — one step, six controls, stuck and distracted | §10–§12, §18 | scoped |
 | 5 | [Home](slices/05-home.md) — four bands, one action, the first complete journey | §5, §29, §39 | scoped |

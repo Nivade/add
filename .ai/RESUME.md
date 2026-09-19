@@ -15,15 +15,14 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 2, capture → intention.** The AI layer is built and tested — contract,
-request, prompts, schemas, providers and the driver binding. Nothing calls it
-yet: `app/Support/Ai/Parsers/` is empty, so are the directories under
-`app/Actions/`, and there is no API route file.
+**Slice 3, next action.** Nothing is built: there is no `NextActionResolver`, no
+`ResolutionContext`, no comparators, and `GET /api/v1/next-action` does not
+exist. `routes/api.php` carries the capture endpoint only.
 
-Next, in the slice plan's order: the parsers, then `RecordCapture`,
-`ConvertCaptureToIntention` and `DecomposeIntention`, then the endpoint.
+Next, in the slice plan's order: `ResolutionContext`, then the comparator chain,
+then the composed `why`, then the endpoint.
 
-Slices 3–6 are scoped in `.ai/plans/slices/`. Slice 7, mobile, is the point
+Slices 4–6 are scoped in `.ai/plans/slices/`. Slice 7, mobile, is the point
 where Expo joins the root workspace list and not before.
 
 ## Learning the state

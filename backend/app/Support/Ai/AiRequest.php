@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Ai;
 
 use App\Enums\Ai\AiOperation;
+use App\Support\Ai\Schemas\DecomposeIntentionSchema;
+use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Closure;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 
@@ -22,6 +24,32 @@ final readonly class AiRequest
         public int $maxOutputTokens,
     ) {}
 
+    public static function parseCapture(string $user): self
+    {
+        return new self(
+            operation: AiOperation::ParseCapture,
+            system: Prompts::PARSE_CAPTURE,
+            user: $user,
+            schema: ParseCaptureSchema::builder(),
+            promptVersion: Prompts::PARSE_CAPTURE_VERSION,
+            schemaVersion: ParseCaptureSchema::VERSION,
+            maxOutputTokens: self::maxOutputTokens(),
+        );
+    }
+
+    public static function decomposeIntention(string $user): self
+    {
+        return new self(
+            operation: AiOperation::DecomposeIntention,
+            system: Prompts::DECOMPOSE,
+            user: $user,
+            schema: DecomposeIntentionSchema::builder(),
+            promptVersion: Prompts::DECOMPOSE_VERSION,
+            schemaVersion: DecomposeIntentionSchema::VERSION,
+            maxOutputTokens: self::maxOutputTokens(),
+        );
+    }
+
     /** Prompt and schema versions are in the key, so editing either invalidates every stored answer. */
     public function cacheKey(): string
     {
@@ -30,5 +58,10 @@ final readonly class AiRequest
             0,
             32
         );
+    }
+
+    private static function maxOutputTokens(): int
+    {
+        return (int) config('ai.openai.max_output_tokens', 900);
     }
 }

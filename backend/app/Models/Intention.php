@@ -52,6 +52,7 @@ class Intention extends Model
     {
         return [
             'status' => IntentionStatus::class,
+            'needs_clarification' => 'boolean',
             'deadline_at' => 'immutable_datetime',
             'decomposed_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',

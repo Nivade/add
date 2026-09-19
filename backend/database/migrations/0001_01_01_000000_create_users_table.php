@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // Every relative phrase a capture contains is read against this.
+            $table->string('timezone', 64)->default('UTC');
             $table->rememberToken();
             $table->timestamps();
         });

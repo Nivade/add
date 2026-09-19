@@ -89,6 +89,6 @@ not a priority — slice 3 is free to disagree.
 
 ## Open
 
-`needs_clarification` has a home in the parse schema and nothing reads it yet.
-Decide in slice 5 whether an unclear intention is offered as a next action at
-all, or held back until the person says what they meant.
+Nothing. `needs_clarification` is parsed and stored; slice 3 decided it excludes
+an intention at the eligibility stage rather than ranking it low, and slice 5
+owns where it surfaces instead.

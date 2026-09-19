@@ -87,7 +87,7 @@ it('resolves every relative link in an agent document', function () {
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
 it('names only paths that exist', function () {
     // Designed but unbuilt. Delete an entry in the change that builds it.
-    $planned = ['routes/api.php', 'backend/routes/api.php'];
+    $planned = [];
 
     foreach ($planned as $path) {
         expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');
