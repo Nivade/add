@@ -34,10 +34,9 @@ services:
             - "traefik.http.routers.${APP_SLUG}-vite.service=${APP_SLUG}-vite"
             - 'traefik.http.services.${APP_SLUG}-vite.loadbalancer.server.port=${VITE_PORT:-5173}'
         volumes:
+            # The repo root sits above the app mount, and .ai, packages and the guard tests all read it.
+            - '..:/var/www'
             - '.:/var/www/html'
-            # base_path('../packages') and the backend/.ai symlink both resolve above the app mount.
-            - '../packages:/var/www/packages'
-            - '../.ai:/var/www/.ai'
         networks:
             - sail
             - web

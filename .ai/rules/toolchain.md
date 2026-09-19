@@ -29,13 +29,10 @@ CI checks out the repo root, so every workflow needs
 block — `hashFiles('backend/composer.lock')`, not `composer.lock`.
 
 Every root script routes through Sail — `artisan`, `composer`, `test`,
-`test:serial`, `test:impact`, `lint`, `stan`, `types:generate`. The container is
+`test:serial`, `test:impact`, `lint`, `stan`, `types:generate`, `boost:update`. The container is
 where PHP 8.5 and the real Redis live, so it is the environment the code is
 written against. `npm run artisan:host` and `npm run test:host` are the opt-outs
 for SQLite-only work when the containers are down.
-
-`boost:update` is the one exception and stays on the host: Boost walks up from
-the Laravel base path to find `.claude/`, which is above the mount.
 
 ## React Native and Inertia React share less than it looks
 
@@ -56,15 +53,19 @@ works. Host `php artisan` is fine for SQLite-only work, and `php artisan test`
 is fine because `phpunit.xml` pins `CACHE_STORE=array`, `QUEUE_CONNECTION=sync`,
 `SESSION_DRIVER=array`.
 
-## The container mounts three paths, not one
+## The container mounts the repo root, not just the app
 
-Sail mounts `backend/` at `/var/www/html`, so anything the app reaches above its
-own base path is invisible by default. Two writes need it:
-`base_path('../packages/shared/src')` for the generated TypeScript, and the
-`backend/.ai` symlink, which points at `../.ai`. `compose.yaml` therefore also
-mounts `../packages` at `/var/www/packages` and `../.ai` at `/var/www/.ai`, so
-both resolve to the same files the host sees. Drop either mount and
-`types:generate` writes into the container and disappears on the next rebuild.
+Sail's own mount is `backend/` at `/var/www/html`, which makes everything above
+the base path invisible: `base_path('../packages/shared/src')` for the generated
+TypeScript, the `backend/.ai` symlink pointing at `../.ai`, and the guard tests,
+which read `CLAUDE.md`, `package.json` and any path a document names from the
+root. Mounting those one by one meant a document could name a real file that the
+suite could not see in the container but could on the host.
+
+`compose.yaml` therefore mounts `..` at `/var/www` and keeps `.` at
+`/var/www/html` nested inside it, so every path resolves to the file the host
+sees. Drop the root mount and `types:generate` writes into the container and
+disappears on the next rebuild.
 
 ## PHP is 8.5 in both places
 

@@ -34,8 +34,7 @@ generated mirrors only — `overview.md` explains which is which and why.
 `.git`, `.ai/rules`, `.claude` and the workspace list all anchor here, and most
 changes cross a workspace boundary. Root scripts exist so nothing needs a `cd`:
 
-Everything below runs inside Sail (PHP 8.5) except the two `:host` opt-outs and
-`boost:update`, which cannot see `.claude/` from the container:
+Everything below runs inside Sail (PHP 8.5) except the two `:host` opt-outs:
 
 ```bash
 npm run artisan -- migrate    # through sail
@@ -48,7 +47,7 @@ npm run test:impact
 npm run lint                  # pint --test; `npm run composer -- lint` writes the fixes
 npm run stan                  # phpstan
 npm run types:generate        # PHP Data classes -> packages/shared/src/generated.ts
-npm run boost:update          # host only: .ai/guidelines.md + the .claude/skills mirror
+npm run boost:update          # .ai/guidelines.md + the .claude/skills mirror
 npm run web                   # vite
 ```
 

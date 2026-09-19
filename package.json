@@ -21,7 +21,7 @@
     "lint": "cd backend && ./vendor/bin/sail php vendor/bin/pint --test",
     "stan": "cd backend && ./vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G",
     "types:generate": "cd backend && ./vendor/bin/sail artisan typescript:transform",
-    "boost:update": "cd backend && php artisan boost:update"
+    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update"
   },
   "devDependencies": {
     "typescript": "^5.9.0"
