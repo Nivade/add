@@ -1,0 +1,11 @@
+# PhpStorm's real-time inspection runs PHPStan against a temp copy of the file,
+# so larastan cannot tell config/*.php apart from application code.
+
+includes:
+    - ./phpstan.neon
+
+parameters:
+    ignoreErrors:
+        -
+            message: "#^Called 'env' outside of the config directory which returns null when the config is cached, use 'config'.$#"
+            path: config/*.php

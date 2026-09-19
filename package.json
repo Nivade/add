@@ -1,0 +1,29 @@
+{
+  "name": "add",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "packages/*"
+  ],
+  "scripts": {
+    "web": "npm run dev --workspace backend",
+    "mobile": "npm run start --workspace mobile",
+    "shared:build": "npm run build --workspace @add/shared",
+    "typecheck": "npm run types:check --workspaces --if-present",
+    "sail": "cd backend && ./vendor/bin/sail",
+    "artisan": "cd backend && ./vendor/bin/sail artisan",
+    "artisan:host": "cd backend && php artisan",
+    "composer": "cd backend && ./vendor/bin/sail composer",
+    "test": "cd backend && ./vendor/bin/sail composer test",
+    "test:host": "cd backend && composer test",
+    "test:serial": "cd backend && ./vendor/bin/sail composer test:serial",
+    "test:impact": "cd backend && ./vendor/bin/sail composer test:impact",
+    "lint": "cd backend && ./vendor/bin/sail php vendor/bin/pint --test",
+    "stan": "cd backend && ./vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G",
+    "types:generate": "cd backend && ./vendor/bin/sail artisan typescript:transform",
+    "boost:update": "cd backend && php artisan boost:update"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

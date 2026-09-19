@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+*.md diff=markdown
+*.php diff=php
+
+packages/shared/src/generated.ts linguist-generated=true

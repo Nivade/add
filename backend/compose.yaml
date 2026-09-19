@@ -1,0 +1,88 @@
+services:
+    laravel.test:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.5'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.5/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            VITE_PORT: '${VITE_PORT:-5173}'
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.docker.network=web'
+            - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.${BASE_DOMAIN}`)"
+            - "traefik.http.routers.${APP_SLUG}.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}.entrypoints=websecure'
+            - 'traefik.http.routers.${APP_SLUG}.tls=true'
+            - "traefik.http.routers.${APP_SLUG}.service=${APP_SLUG}"
+            - 'traefik.http.services.${APP_SLUG}.loadbalancer.server.port=80'
+            # Vite must share the app page's https origin or the browser blocks assets as mixed content.
+            - "traefik.http.routers.${APP_SLUG}-vite.rule=Host(`vite.${APP_SLUG}.${BASE_DOMAIN}`)"
+            - "traefik.http.routers.${APP_SLUG}-vite.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}-vite.entrypoints=websecure'
+            - 'traefik.http.routers.${APP_SLUG}-vite.tls=true'
+            - "traefik.http.routers.${APP_SLUG}-vite.service=${APP_SLUG}-vite"
+            - 'traefik.http.services.${APP_SLUG}-vite.loadbalancer.server.port=${VITE_PORT:-5173}'
+        volumes:
+            - '.:/var/www/html'
+            # base_path('../packages') and the backend/.ai symlink both resolve above the app mount.
+            - '../packages:/var/www/packages'
+            - '../.ai:/var/www/.ai'
+        networks:
+            - sail
+            - web
+        depends_on:
+            redis:
+                condition: service_healthy
+            mailpit:
+                condition: service_started
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            interval: 2s
+            retries: 3
+            timeout: 5s
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        ports:
+            - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - sail
+            - web
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.docker.network=web'
+            - "traefik.http.routers.${APP_SLUG}-mailpit.rule=Host(`mailpit.${APP_SLUG}.${BASE_DOMAIN}`)"
+            - "traefik.http.routers.${APP_SLUG}-mailpit.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}-mailpit.entrypoints=websecure'
+            - 'traefik.http.routers.${APP_SLUG}-mailpit.tls=true'
+            - 'traefik.http.services.${APP_SLUG}-mailpit.loadbalancer.server.port=8025'
+networks:
+    sail:
+        driver: bridge
+    web:
+        external: true
+volumes:
+    sail-redis:
+        driver: local
