@@ -17,7 +17,7 @@ final class RecordCapture
 
     public function handle(User $user, string $body, CaptureSource $source = CaptureSource::Text): Capture
     {
-        $capture = Capture::create([
+        $capture = Capture::query()->create([
             'user_id' => $user->id,
             'body' => trim($body),
             'source' => $source,

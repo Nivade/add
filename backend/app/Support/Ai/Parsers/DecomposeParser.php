@@ -93,7 +93,7 @@ final class DecomposeParser
 
         $seconds = $row['estimated_seconds'] ?? null;
 
-        if (! is_int($seconds) && ! (is_string($seconds) && ctype_digit($seconds))) {
+        if (! is_int($seconds) && (! is_string($seconds) || ! ctype_digit($seconds))) {
             throw new AiResponseInvalid('decompose_intention step '.$position.' has no estimated_seconds.');
         }
 

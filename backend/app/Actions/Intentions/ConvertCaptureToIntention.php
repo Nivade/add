@@ -49,7 +49,7 @@ final class ConvertCaptureToIntention
         $deadlineAt = ($extracted instanceof ExtractedDeadline ? $extracted->at : $parsed->deadlineAt)?->utc();
 
         $intention = DB::transaction(function () use ($capture, $parsed, $deadlineAt): Intention {
-            $intention = Intention::create([
+            $intention = Intention::query()->create([
                 'user_id' => $capture->user_id,
                 'title' => $parsed->title,
                 'why' => $parsed->why,

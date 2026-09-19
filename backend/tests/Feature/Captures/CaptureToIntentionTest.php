@@ -59,8 +59,8 @@ it('turns one typed sentence into an intention with usable steps, with no API ke
         ->assertCreated()
         ->assertJsonPath('source', 'text');
 
-    $capture = Capture::sole();
-    $intention = Intention::sole();
+    $capture = Capture::query()->sole();
+    $intention = Intention::query()->sole();
 
     expect($capture->processed_at)->not->toBeNull()
         ->and($capture->intention_id)->toBe($intention->id)
@@ -82,8 +82,8 @@ it('returns the capture before anything is parsed', function (): void {
         ->assertJsonPath('body', 'buy dishwasher tablets')
         ->assertJsonPath('intentionId', null);
 
-    expect(Capture::sole()->processed_at)->toBeNull()
-        ->and(Intention::count())->toBe(0);
+    expect(Capture::query()->sole()->processed_at)->toBeNull()
+        ->and(Intention::query()->count())->toBe(0);
 });
 
 it('refuses an unauthenticated capture', function (): void {
@@ -104,7 +104,7 @@ it('lets the deadline extractor beat the model when the two disagree', function 
 
     RecordCapture::run(User::factory()->create(), 'clean the apartment before Saturday');
 
-    expect(Intention::sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59')
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59')
         ->and($provider->received[0]->user)->toBe('clean the apartment');
 });
 
@@ -118,7 +118,7 @@ it('reads "tomorrow morning" in the person\'s zone and stores the instant it nam
     );
 
     // 09:00 in Amsterdam, which is 07:00 UTC, which is what the column holds.
-    expect(Intention::sole()->deadline_at?->toDateTimeString())->toBe('2026-09-17 07:00:00');
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-17 07:00:00');
 });
 
 it('accepts the model\'s deadline only when the extractor found nothing', function (): void {
@@ -126,7 +126,7 @@ it('accepts the model\'s deadline only when the extractor found nothing', functi
 
     RecordCapture::run(User::factory()->create(), 'renew my passport');
 
-    $intention = Intention::sole();
+    $intention = Intention::query()->sole();
 
     expect($intention->deadline_at?->toDateTimeString())->toBe('2026-10-02 09:00:00')
         ->and($intention->needs_clarification)->toBeTrue();
@@ -138,12 +138,12 @@ it('leaves the capture intact and the intention uncreated when the parse throws'
     expect(fn () => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
         ->toThrow(AiResponseInvalid::class);
 
-    $capture = Capture::sole();
+    $capture = Capture::query()->sole();
 
     expect($capture->body)->toBe('sort the thing out')
         ->and($capture->intention_id)->toBeNull()
         ->and($capture->processed_at)->toBeNull()
-        ->and(Intention::count())->toBe(0);
+        ->and(Intention::query()->count())->toBe(0);
 });
 
 it('logs a decomposition quality violation against the intention it came from', function (): void {
@@ -152,7 +152,7 @@ it('logs a decomposition quality violation against the intention it came from', 
 
     RecordCapture::run(User::factory()->create(), 'move apartment');
 
-    $intention = Intention::sole();
+    $intention = Intention::query()->sole();
 
     Log::shouldHaveReceived('warning')
         ->withArgs(fn (string $message, array $context): bool => $context['intention_id'] === $intention->id
@@ -169,5 +169,5 @@ it('converts a capture once, however many times the job runs', function (): void
     $again = ConvertCaptureToIntention::run($capture);
 
     expect($again->id)->toBe($capture->intention_id)
-        ->and(Intention::count())->toBe(1);
+        ->and(Intention::query()->count())->toBe(1);
 });
