@@ -108,6 +108,18 @@ a class from the first of them, so `bootstrap/providers.php` filters it out when
 that class is absent. Without the guard, `composer install --no-dev` fatals on
 boot.
 
+## Boost ships skills per package major, and Inertia 3 falls off the end
+
+`inertia-react-development` exists in Boost for Inertia 1 and 2 only, so nothing
+matches the installed 3 and `boost:update` writes no skill while
+`.ai/guidelines.md` keeps saying to activate one. It is therefore rendered from
+Boost's own `SKILL.blade.php` into `.ai/skills/`, by hand, with the v3 deltas
+folded in.
+
+`SkillComposer` merges `.ai/skills/` last, so a Boost release that does add a
+v3 skill will be masked by ours silently. On a Boost upgrade, check
+`boost:list-skills` for the name and delete the local copy if it appears.
+
 ## Pint does not run Rector
 
 `npm run lint` runs Pint only. Rector lives in `composer refactor` and nothing
