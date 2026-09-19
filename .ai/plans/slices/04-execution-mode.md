@@ -15,6 +15,11 @@ reachable only if the person asks for it.
 Six controls, always present, same size and tone: Done, Skip, Pause, I'm stuck,
 I got distracted, Stop. Skip advances; it does not accuse.
 
+`SkipStep` already records the skip and leaves the step `pending`, because the
+resolver's cool-off needs the step back afterwards. This slice decides the one
+thing that is still open about it: what moves a step to `StepStatus::Skipped`,
+which is a step the intention finished without.
+
 ## I'm stuck (§11)
 
 First-class interaction, not a link to help. Asks what is blocking, from

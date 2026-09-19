@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
+use Carbon\CarbonImmutable;
 use Database\Factories\IntentionFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -15,6 +16,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $id
+ * @property int $user_id
+ * @property string $title
+ * @property string|null $why
+ * @property IntentionStatus $status
+ * @property bool $needs_clarification
+ * @property CarbonImmutable|null $deadline_at
+ * @property CarbonImmutable|null $decomposed_at
+ * @property CarbonImmutable|null $completed_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ */
 #[Unguarded]
 #[UseFactory(IntentionFactory::class)]
 class Intention extends Model

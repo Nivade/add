@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Support\NextAction;
+
+use App\Models\Intention;
+use App\Models\Step;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Carbon\CarbonInterval;
+
+final readonly class Candidate
+{
+    /** A step nobody estimated is assumed to cost this much when planning backwards. */
+    private const int UNESTIMATED_SECONDS = 900;
+
+    /** Work fits "only just" when doing it at half speed would still run past the deadline. */
+    private const int FIT_SLACK = 2;
+
+    public function __construct(
+        public Step $step,
+        public Intention $intention,
+        public int $remainingSeconds,
+    ) {}
+
+    public function estimatedSeconds(): ?int
+    {
+        return $this->step->estimated_seconds;
+    }
+
+    public function cost(): int
+    {
+        return self::costOf($this->step);
+    }
+
+    public static function costOf(Step $step): int
+    {
+        return $step->estimated_seconds ?? self::UNESTIMATED_SECONDS;
+    }
+
+    public function deadlineAt(): ?CarbonImmutable
+    {
+        return $this->intention->deadline_at;
+    }
+
+    public function deadlineInWords(CarbonImmutable $now): ?string
+    {
+        return $this->deadlineAt()?->setTimezone($now->getTimezone())->diffForHumans([
+            'other' => $now,
+            'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW,
+        ]);
+    }
+
+    public function estimateInWords(): ?string
+    {
+        $seconds = $this->estimatedSeconds();
+
+        return $seconds === null ? null : CarbonInterval::seconds($seconds)->cascade()->forHumans();
+    }
+
+    public function onlyJustFits(CarbonImmutable $now): bool
+    {
+        $deadline = $this->deadlineAt();
+
+        return $deadline instanceof CarbonImmutable && $now->addSeconds($this->remainingSeconds * self::FIT_SLACK) >= $deadline;
+    }
+}

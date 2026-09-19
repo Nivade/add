@@ -144,8 +144,8 @@ stays at one line each.
 | --- | --- | --- | --- |
 | 1 | Foundations — enums, migrations, models, Data classes, generated types, guard tests | §25, §37 | done |
 | 2 | [Capture → intention](slices/02-capture-intention.md) — one text field, deterministic extraction, queued decomposition | §6, §7, §8, §27 | done |
-| 3 | [Next action](slices/03-next-action.md) — `NextActionResolver`, ordered comparators, composed `why` | §9, §26 | next |
-| 4 | [Execution mode](slices/04-execution-mode.md) — one step, six controls, stuck and distracted | §10–§12, §18 | scoped |
+| 3 | [Next action](slices/03-next-action.md) — `NextActionResolver`, ordered comparators, composed `why` | §9, §26 | done |
+| 4 | [Execution mode](slices/04-execution-mode.md) — one step, six controls, stuck and distracted | §10–§12, §18 | next |
 | 5 | [Home](slices/05-home.md) — four bands, one action, the first complete journey | §5, §29, §39 | scoped |
 | 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | scoped |
 | 7 | Mobile — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | paragraph below |
