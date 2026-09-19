@@ -1,3 +1,4 @@
+import type { RailData } from '@add/shared';
 import type { Auth } from '@/types/auth';
 
 declare module 'react' {
@@ -11,7 +12,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
-            sidebarOpen: boolean;
+            rail: RailData | null;
             [key: string]: unknown;
         };
     }

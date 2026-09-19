@@ -46,6 +46,13 @@ step: StepData,
 intention: IntentionData,
 why: string[],
 };
+export type RailData = {
+nowAt: string,
+minuteOfDay: number,
+sessionStartedAt: string | null,
+deadlineAt: string | null,
+deadlineTitle: string | null,
+};
 export type SessionOutcome = 'continued' | 'completed' | 'stopped';
 export type StepData = {
 id: string,

@@ -10,7 +10,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { focus } from '@/routes';
 import focusRoutes from '@/routes/focus';
 
 const stuckReasons: { value: StuckReason; label: string }[] = [
@@ -36,7 +35,11 @@ function Control({
 }) {
     return (
         <Form {...form}>
-            <Button type="submit" variant="outline" className="h-11 w-full">
+            <Button
+                type="submit"
+                variant="outline"
+                className="h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase"
+            >
                 {label}
             </Button>
         </Form>
@@ -54,39 +57,38 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
         <>
             <Head title={intention.title} />
 
-            <div className="mx-auto flex w-full max-w-xl flex-col gap-8 px-6 py-10">
-                <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+            <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 pt-6 pb-20 lg:mx-0 lg:ml-[8vw]">
+                <p className="text-muted-foreground font-mono text-[11px] tracking-[0.18em] uppercase">
                     {intention.title}
                 </p>
 
                 {paused ? (
-                    <div className="space-y-5">
-                        <h1 className="border-now border-l-2 pl-4 text-[clamp(1.75rem,5vw,2.75rem)] leading-[1.1] font-semibold tracking-tight">
+                    <div className="space-y-6">
+                        <h1 className="border-now border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em]">
                             Welcome back.
                         </h1>
-                        <p className="text-muted-foreground">
-                            You left off at {step?.title ?? intention.title}
+                        <p className="text-muted-foreground pl-5 font-mono text-[13px]">
+                            you left off at{' '}
+                            {(step?.title ?? intention.title).toLowerCase()}
                         </p>
-                        <Form {...focusRoutes.resume.form(session.id)}>
-                            <Button type="submit" size="lg">
-                                Continue
-                            </Button>
-                        </Form>
+                        <div className="pl-5">
+                            <Form {...focusRoutes.resume.form(session.id)}>
+                                <Button type="submit">Continue</Button>
+                            </Form>
+                        </div>
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-3">
-                            <h1 className="border-now border-l-2 pl-4 text-[clamp(1.75rem,5vw,2.75rem)] leading-[1.1] font-semibold tracking-tight text-balance">
+                        <div className="space-y-4">
+                            <h1 className="border-now border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
                                 {step?.title}
                             </h1>
-                            {estimate && (
-                                <p className="text-muted-foreground pl-4">
-                                    About {estimate}.
-                                </p>
-                            )}
+                            <p className="text-muted-foreground pl-5 font-mono text-[13px]">
+                                {estimate ? `~${estimate}` : 'unestimated'}
+                            </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             <Control
                                 label="Done"
                                 form={focusRoutes.completeStep.form(session.id)}
@@ -102,7 +104,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="h-11 w-full"
+                                className="h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase"
                                 onClick={() => setStuckOpen(true)}
                             >
                                 I'm stuck
@@ -120,9 +122,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                 )}
 
                 {progress.length > 0 && (
-                    <ul className="text-muted-foreground border-border space-y-1 border-t pt-4 text-sm">
+                    <ul className="text-muted-foreground border-border space-y-1 border-t pt-5 font-mono text-[13px]">
                         {progress.map((line) => (
-                            <li key={line}>{line}</li>
+                            <li key={line}>{line.toLowerCase()}</li>
                         ))}
                     </ul>
                 )}
@@ -160,7 +162,3 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
         </>
     );
 }
-
-Focus.layout = {
-    breadcrumbs: [{ title: 'Focus', href: focus() }],
-};

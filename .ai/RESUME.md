@@ -15,18 +15,20 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 5, home.** Nothing of it is built: `resources/js/pages/` still holds the
-starter kit's `dashboard.tsx` and `welcome.tsx`, no page reads
-`GET /api/v1/next-action` or `GET /api/v1/sessions/current`, and no Inertia
-controller renders a band. The whole slice is web, over an API that is finished.
+**Slice 6, overwhelm and time.** Nothing of it is built: there is no overwhelm
+entry point, nothing plans backwards from a `deadline_at`, no reminder is
+scheduled, and `ResolutionContext` still carries `now` alone — the minutes
+available and the place it was designed to grow are not there yet.
 
-Next, in the slice plan's order: the four bands as one page, then Start wired to
-the session endpoints, then the journey end to end in a browser, with
-accessibility part of it rather than after it. The slice's open question — what
-"Needs attention" offers for an intention nobody could name — is unanswered.
+Next, in the slice plan's order: the shortest-finishable-step question as its
+own entry point rather than a flag on `resolve()`, then backwards planning, then
+contextual reminders.
 
-Slice 6 is scoped in `.ai/plans/slices/`. Slice 7, mobile, is the point where
-Expo joins the root workspace list and not before.
+The home slice left one question open: what "Needs attention" offers to resolve
+an intention nobody could name. Nothing on that screen acts on it yet.
+
+Slice 7, mobile, is the point where Expo joins the root workspace list and not
+before.
 
 ## Learning the state
 

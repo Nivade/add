@@ -1,4 +1,4 @@
-/** A band is a hairline, a label and its answer. No boxes: a box implies a list to work through. */
+/** A band is a hairline, a mono label and its answer. No boxes: a box implies a list to work through. */
 export function Band({
     label,
     children,
@@ -9,10 +9,10 @@ export function Band({
     const id = `band-${label.replace(/\s+/g, '-').toLowerCase()}`;
 
     return (
-        <section aria-labelledby={id} className="border-border border-t pt-4">
+        <section aria-labelledby={id} className="border-border border-t pt-5">
             <h2
                 id={id}
-                className="text-muted-foreground mb-4 text-xs font-medium tracking-[0.18em] uppercase"
+                className="text-muted-foreground mb-4 font-mono text-[11px] tracking-[0.18em] uppercase"
             >
                 {label}
             </h2>
