@@ -16,6 +16,13 @@ person leaves.
 A different question from slice 3's, so it gets its own entry point rather than
 a flag on `resolve()`. Same invariant applies: one step, never a list.
 
+It reads rather than writes, so the entry point is a `GET`, not the `POST` the
+build plan first sketched. `ReduceToOneStep` ranks the same candidate pool the
+resolver uses — shortest first, a timed step ahead of an unestimated one of the
+same assumed cost — and honours the skip cool-off, because offering back the
+thing just skipped is what the mode exists to avoid. The screen drops the shell:
+no rail, no nav, no capture, one way back.
+
 ## Time blindness (§13)
 
 Arithmetic, never a model: elapsed time in the session, typical duration for

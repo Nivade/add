@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\ReportStuckController;
 use App\Http\Controllers\Web\ResumeFocusController;
 use App\Http\Controllers\Web\ShowFocusController;
 use App\Http\Controllers\Web\ShowHomeController;
+use App\Http\Controllers\Web\ShowOverwhelmedController;
 use App\Http\Controllers\Web\ShowWelcomeController;
 use App\Http\Controllers\Web\SkipStepController;
 use App\Http\Controllers\Web\StartFocusController;
@@ -21,6 +22,7 @@ Route::get('/', ShowWelcomeController::class)->name('welcome');
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
+    Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

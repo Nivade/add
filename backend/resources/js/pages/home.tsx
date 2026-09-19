@@ -3,7 +3,7 @@ import { formatEstimate } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { Band } from '@/components/band';
 import { Button } from '@/components/ui/button';
-import { focus } from '@/routes';
+import { focus, overwhelmed } from '@/routes';
 import focusRoutes from '@/routes/focus';
 
 function OneThing({ children }: { children: React.ReactNode }) {
@@ -124,11 +124,19 @@ export default function Home({ home: data }: { home: HomeData }) {
                     </Band>
                 )}
 
-                <p className="text-muted-foreground border-border border-t pt-5 font-mono text-[13px]">
-                    {restCount === 0
-                        ? 'nothing else is waiting'
-                        : `${restCount} other ${restCount === 1 ? 'thing' : 'things'}, none of which you need to think about`}
-                </p>
+                <div className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-5">
+                    <p className="text-muted-foreground font-mono text-[13px]">
+                        {restCount === 0
+                            ? 'nothing else is waiting'
+                            : `${restCount} other ${restCount === 1 ? 'thing' : 'things'}, none of which you need to think about`}
+                    </p>
+                    <Link
+                        href={overwhelmed()}
+                        className="text-muted-foreground hover:text-foreground ml-auto font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"
+                    >
+                        {"I'm overwhelmed"}
+                    </Link>
+                </div>
             </div>
         </>
     );

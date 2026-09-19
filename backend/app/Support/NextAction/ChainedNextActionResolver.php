@@ -8,9 +8,7 @@ use App\Contracts\NextActionResolver;
 use App\Data\IntentionData;
 use App\Data\NextActionData;
 use App\Data\StepData;
-use App\Enums\IntentionStatus;
 use App\Models\ExecutionSession;
-use App\Models\Step;
 use App\Models\User;
 use App\Support\NextAction\Comparators\DeadlineWithinReach;
 use App\Support\NextAction\Comparators\EarliestPosition;
@@ -18,7 +16,6 @@ use App\Support\NextAction\Comparators\HasDeadline;
 use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\Comparators\OldestIntention;
 use App\Support\NextAction\Comparators\StartableNow;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /** No score: a number six inputs went into cannot be explained, and the `why` has to be. */
 final class ChainedNextActionResolver implements NextActionResolver
@@ -40,7 +37,7 @@ final class ChainedNextActionResolver implements NextActionResolver
 
     public function resolve(User $user, ResolutionContext $context): ?NextActionData
     {
-        $candidates = $this->candidates($user);
+        $candidates = CandidatePool::forUser($user);
 
         if ($candidates === []) {
             return null;
@@ -55,34 +52,6 @@ final class ChainedNextActionResolver implements NextActionResolver
         usort($candidates, fn (Candidate $a, Candidate $b): int => $this->rank($a, $b, $context));
 
         return $this->answer($candidates[0], $this->why($candidates, $context));
-    }
-
-    /** @return list<Candidate> */
-    private function candidates(User $user): array
-    {
-        $steps = Step::query()
-            ->pending()
-            ->whereHas('intention', fn (Builder $intention) => $intention
-                ->where('user_id', $user->id)
-                ->where('status', IntentionStatus::Active)
-                ->whereNotNull('decomposed_at')
-                ->where('needs_clarification', false))
-            ->with('intention')
-            ->get();
-
-        $remaining = [];
-
-        foreach ($steps as $step) {
-            $remaining[$step->intention_id] = ($remaining[$step->intention_id] ?? 0) + Candidate::costOf($step);
-        }
-
-        return array_values($steps
-            ->map(fn (Step $step): Candidate => new Candidate(
-                $step,
-                $step->intention,
-                $remaining[$step->intention_id],
-            ))
-            ->all());
     }
 
     /** @param  list<Candidate>  $candidates */

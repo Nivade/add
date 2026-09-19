@@ -46,6 +46,10 @@ step: StepData,
 intention: IntentionData,
 why: string[],
 };
+export type OverwhelmedData = {
+smallestStep: NextActionData | null,
+restCount: number,
+};
 export type RailData = {
 nowAt: string,
 minuteOfDay: number,

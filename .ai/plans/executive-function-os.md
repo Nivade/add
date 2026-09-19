@@ -78,7 +78,7 @@ POST   /api/v1/sessions/{session}/skip
 POST   /api/v1/sessions/{session}/stuck
 POST   /api/v1/sessions/{session}/distracted
 POST   /api/v1/sessions/{session}/stop
-POST   /api/v1/overwhelmed                collapses the world to one small step
+GET    /api/v1/overwhelmed               collapses the world to one small step
 ```
 
 Same Data classes serve Inertia props and JSON, so the wire shape cannot drift
