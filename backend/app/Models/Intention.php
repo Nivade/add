@@ -24,6 +24,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property IntentionStatus $status
  * @property bool $needs_clarification
  * @property CarbonImmutable|null $deadline_at
+ * @property int|null $travel_seconds
+ * @property int|null $preparation_seconds
+ * @property int|null $gathering_seconds
  * @property CarbonImmutable|null $decomposed_at
  * @property CarbonImmutable|null $completed_at
  * @property CarbonImmutable|null $created_at

@@ -1,6 +1,7 @@
 import type { HomeData } from '@add/shared';
 import { formatEstimate } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
+import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
@@ -105,6 +106,9 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 · {comingUp.inWords}
                             </span>
                         </p>
+                        {comingUp.plan && (
+                            <BackwardsPlan plan={comingUp.plan} />
+                        )}
                     </Band>
                 )}
 

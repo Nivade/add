@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AdjustPlanController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
@@ -20,6 +21,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('next-action', ShowNextActionController::class)->name('next-action.show');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed.show');
+    Route::patch('intentions/{intention}/plan', AdjustPlanController::class)->name('intentions.plan');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

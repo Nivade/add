@@ -1,3 +1,8 @@
+export type BackwardsPlanData = {
+intentionId: string,
+deadlineClock: string,
+rungs: PlanRungData[],
+};
 export type CaptureData = {
 id: string,
 body: string,
@@ -9,6 +14,7 @@ export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 
 export type ComingUpData = {
 intention: IntentionData,
 inWords: string,
+plan: BackwardsPlanData | null,
 };
 export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
 export type ExecutionSessionData = {
@@ -49,6 +55,15 @@ why: string[],
 export type OverwhelmedData = {
 smallestStep: NextActionData | null,
 restCount: number,
+};
+export type PlanRung = 'find_things' | 'get_ready' | 'leave';
+export type PlanRungData = {
+rung: PlanRung,
+at: string,
+clock: string,
+seconds: number,
+assumed: boolean,
+alreadyPassed: boolean,
 };
 export type RailData = {
 nowAt: string,

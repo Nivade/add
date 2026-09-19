@@ -14,5 +14,6 @@ class ComingUpData extends Data
     public function __construct(
         public IntentionData $intention,
         public string $inWords,
+        public ?BackwardsPlanData $plan,
     ) {}
 }

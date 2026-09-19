@@ -15,14 +15,15 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 6, overwhelm and time.** "I'm overwhelmed" is built end to end — its own
-action, a `GET` on both adapters, and a screen with the shell suppressed. The
-rest of the slice is not: nothing plans backwards from a `deadline_at`, no
-calendar is read, no reminder is scheduled, and `ResolutionContext` still
-carries `now` alone — the minutes available and the place it was designed to
-grow are not there yet.
+**Slice 6, overwhelm and time.** "I'm overwhelmed" and backwards planning are
+both built: a same-day plan hangs off "Coming up" on home, each rung editable in
+minutes and labelled assumed until it is not. The rest of the slice is not. No
+calendar is read, no reminder is scheduled, nothing says how long the current
+session has been running, and `ResolutionContext` still carries `now` alone —
+the minutes available and the place it was designed to grow are not there yet.
 
-Next, in the slice plan's order: backwards planning, then contextual reminders.
+Next, in the slice plan's order: the calendar, read-only, then contextual
+reminders over it.
 
 The home slice left one question open: what "Needs attention" offers to resolve
 an intention nobody could name. Nothing on that screen acts on it yet.

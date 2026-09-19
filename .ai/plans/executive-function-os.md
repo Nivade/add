@@ -43,7 +43,7 @@ classes live. "Next action" stays the product word and is what
 | Table | Carries | Notes |
 | --- | --- | --- |
 | `captures` | raw text, source, `intention_id` nullable | immutable, `created_at` only |
-| `intentions` | title, why, status, `deadline_at` nullable, `needs_clarification` | the thing the person wants handled |
+| `intentions` | title, why, status, `deadline_at` nullable, `needs_clarification`, plan assumptions | the thing the person wants handled |
 | `steps` | intention, title, `estimated_seconds`, position, status | one physical action each |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
@@ -79,6 +79,7 @@ POST   /api/v1/sessions/{session}/stuck
 POST   /api/v1/sessions/{session}/distracted
 POST   /api/v1/sessions/{session}/stop
 GET    /api/v1/overwhelmed               collapses the world to one small step
+PATCH  /api/v1/intentions/{id}/plan      states a minute count the plan assumed
 ```
 
 Same Data classes serve Inertia props and JSON, so the wire shape cannot drift

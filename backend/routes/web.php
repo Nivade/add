@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Web\AdjustPlanController;
 use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\PauseFocusController;
 use App\Http\Controllers\Web\RecordDistractionController;
@@ -23,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');
+    Route::post('intentions/{intention}/plan', AdjustPlanController::class)->name('intentions.plan');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

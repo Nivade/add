@@ -14,6 +14,7 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
 use App\Support\NextAction\ResolutionContext;
+use App\Support\Time\BackwardsPlan;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -68,6 +69,7 @@ final class BuildHome
                 'other' => $context->now,
                 'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW,
             ]),
+            BackwardsPlan::for($next, $context->now),
         );
     }
 

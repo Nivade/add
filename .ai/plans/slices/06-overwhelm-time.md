@@ -33,6 +33,16 @@ Every generated assumption is visible and editable. §13 is explicit that the
 person can correct them, and a travel-time guess presented as fact is how the
 app starts lying.
 
+Built as three nullable columns on `intentions`, one per rung: null is the
+assumption, a number is what the person stated, and `assumed` rides on every
+rung so the screen can say which is which. The plan is same-day only — a leave-by
+time three weeks out is noise, not orientation — and it is counted in the
+person's zone, so an appointment stored in UTC still lands on their clock.
+
+`BackwardsPlan` is a static computation over an intention, not a resolver: it
+ranks nothing and decides nothing, so it does not belong in the comparator
+chain.
+
 ## Calendar (§22)
 
 Enters read-only. An event stops being a row to display and becomes something
@@ -54,5 +64,6 @@ ignored — or it is not sent.
 
 ## Open
 
-Where estimated travel time comes from, and whether the first version simply
-asks the person once and remembers.
+Travel time is assumed per intention and corrected there. Remembering a
+correction across appointments needs somewhere for "this place" to live, which
+is the calendar half of this slice, so it waits for it.
