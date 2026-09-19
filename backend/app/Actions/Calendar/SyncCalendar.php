@@ -29,7 +29,7 @@ final class SyncCalendar
     /** @return list<CalendarEvent> */
     public function handle(User $user, ?CarbonImmutable $now = null): array
     {
-        $now = $now ?? ResolutionContext::forUser($user)->now;
+        $now ??= ResolutionContext::forUser($user)->now;
         $from = $now->startOfDay();
         $until = $from->addDays((int) config('calendar.horizon_days'))->endOfDay();
 
