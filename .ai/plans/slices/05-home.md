@@ -32,5 +32,7 @@ screen-reader labelled, focus visible, no colour-only state (§31).
 
 ## Open
 
-Whether an intention flagged `needs_clarification` in slice 2 is eligible to be
-the right-now action, or is held back until the person says what they meant.
+The resolver already holds a `needs_clarification` intention back at the
+eligibility stage, so it can never be the right-now action. What is still open
+is the other half: what "Needs attention" offers the person to resolve it with,
+and whether answering there is a confirmation or a fresh capture.

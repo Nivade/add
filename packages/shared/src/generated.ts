@@ -17,6 +17,11 @@ startedAt: string,
 pausedAt: string | null,
 endedAt: string | null,
 };
+export type ExecutionStateData = {
+session: ExecutionSessionData,
+intention: IntentionData,
+progress: string[],
+};
 export type IntentionData = {
 id: string,
 title: string,

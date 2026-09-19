@@ -15,17 +15,18 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 4, execution mode.** Nothing of it is built: there is no `StartSession`,
-`CompleteStep`, `PauseSession` or `StopSession`, nothing writes an
-`execution_event`, and no route touches a session. `app/Actions/Steps/` holds
-`SkipStep` alone, which records a skip and leaves the step pending.
+**Slice 5, home.** Nothing of it is built: `resources/js/pages/` still holds the
+starter kit's `dashboard.tsx` and `welcome.tsx`, no page reads
+`GET /api/v1/next-action` or `GET /api/v1/sessions/current`, and no Inertia
+controller renders a band. The whole slice is web, over an API that is finished.
 
-Next, in the slice plan's order: the session state machine, then the six
-controls' actions, then "I'm stuck" over `StuckReason`, then the endpoints.
-The slice's own open question — pause versus stop — is unanswered.
+Next, in the slice plan's order: the four bands as one page, then Start wired to
+the session endpoints, then the journey end to end in a browser, with
+accessibility part of it rather than after it. The slice's open question — what
+"Needs attention" offers for an intention nobody could name — is unanswered.
 
-Slices 5 and 6 are scoped in `.ai/plans/slices/`. Slice 7, mobile, is the point
-where Expo joins the root workspace list and not before.
+Slice 6 is scoped in `.ai/plans/slices/`. Slice 7, mobile, is the point where
+Expo joins the root workspace list and not before.
 
 ## Learning the state
 

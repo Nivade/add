@@ -50,6 +50,20 @@ final readonly class AiRequest
         );
     }
 
+    /** The answer has the same shape as a decomposition, so it shares that schema and its parser. */
+    public static function splitStep(string $user): self
+    {
+        return new self(
+            operation: AiOperation::SplitStep,
+            system: Prompts::SPLIT_STEP,
+            user: $user,
+            schema: DecomposeIntentionSchema::builder(),
+            promptVersion: Prompts::SPLIT_STEP_VERSION,
+            schemaVersion: DecomposeIntentionSchema::VERSION,
+            maxOutputTokens: self::maxOutputTokens(),
+        );
+    }
+
     /** Prompt and schema versions are in the key, so editing either invalidates every stored answer. */
     public function cacheKey(): string
     {

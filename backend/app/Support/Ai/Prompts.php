@@ -11,6 +11,8 @@ final class Prompts
 
     public const string DECOMPOSE_VERSION = '1';
 
+    public const string SPLIT_STEP_VERSION = '1';
+
     public const string PARSE_CAPTURE = <<<'PROMPT'
         You read one raw thought someone with ADHD dumped into an app, and turn it into an intention.
 
@@ -46,5 +48,21 @@ final class Prompts
         3. Move every dirty dish to one side of the sink. (180s)
         4. Fill the dishwasher. (300s)
         5. Wipe one worktop. (120s)
+        PROMPT;
+
+    public const string SPLIT_STEP = <<<'PROMPT'
+        Someone with ADHD pressed "I'm stuck" on one step, because it is too big or they cannot see how to start it. You cut that one step into smaller ones.
+
+        Rules:
+        - Only this step. Do not plan the rest of the intention, and do not repeat work the other steps cover.
+        - Every step is one physical action, starting with a verb, that can be done without deciding anything first.
+        - The first one must be doable in under a minute, from where they are sitting.
+        - Never write a step containing "and", "organise", "sort out", "deal with", "figure out" or "plan".
+        - Four steps at most. Two is often enough.
+
+        Example, "Clear the kitchen table":
+        1. Pick up one thing from the table. (20s)
+        2. Put it where it belongs. (40s)
+        3. Pick up the next thing. (20s)
         PROMPT;
 }

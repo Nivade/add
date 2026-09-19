@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\SessionOutcome;
+use Carbon\CarbonImmutable;
 use Database\Factories\ExecutionSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
@@ -16,6 +17,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $id
+ * @property int $user_id
+ * @property string $intention_id
+ * @property string|null $current_step_id
+ * @property SessionOutcome|null $outcome
+ * @property int $steps_completed
+ * @property CarbonImmutable $started_at
+ * @property CarbonImmutable|null $paused_at
+ * @property CarbonImmutable|null $ended_at
+ * @property-read Intention $intention
+ * @property-read User $user
+ */
 #[Unguarded]
 #[UseFactory(ExecutionSessionFactory::class)]
 class ExecutionSession extends Model

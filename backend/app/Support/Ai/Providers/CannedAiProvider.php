@@ -33,6 +33,7 @@ final class CannedAiProvider implements AiProvider
             payload: match ($request->operation) {
                 AiOperation::ParseCapture => $this->parseCapture($request->user),
                 AiOperation::DecomposeIntention => $this->decompose(),
+                AiOperation::SplitStep => $this->split(),
             },
             provider: $this->name(),
             model: $this->name(),
@@ -64,6 +65,17 @@ final class CannedAiProvider implements AiProvider
                 ['title' => 'Put the thing you need on the desk.', 'estimated_seconds' => 60],
                 ['title' => 'Open it.', 'estimated_seconds' => 30],
                 ['title' => 'Write the first line.', 'estimated_seconds' => 300],
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function split(): array
+    {
+        return [
+            'steps' => [
+                ['title' => 'Pick up one thing.', 'estimated_seconds' => 20],
+                ['title' => 'Put it where it belongs.', 'estimated_seconds' => 40],
             ],
         ];
     }

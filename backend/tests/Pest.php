@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\StartSession;
+use App\Enums\ExecutionEventType;
+use App\Models\ExecutionSession;
+use App\Models\Intention;
+use App\Models\Step;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +53,41 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 function repoPath(string $relative): string
 {
     return base_path('../'.ltrim($relative, '/'));
+}
+
+/** A decomposed intention whose steps get longer as they go, so "shortest" and "next" differ. */
+function kitchen(int $steps = 3): Intention
+{
+    $intention = Intention::factory()
+        ->decomposed()
+        ->for(User::factory())
+        ->create(['title' => 'Clean the kitchen']);
+
+    foreach (range(1, $steps) as $position) {
+        Step::factory()->for($intention)->create([
+            'title' => "Step {$position}.",
+            'position' => $position,
+            'estimated_seconds' => $position * 60,
+        ]);
+    }
+
+    return $intention;
+}
+
+function started(int $steps = 3): ExecutionSession
+{
+    $intention = kitchen($steps);
+
+    return StartSession::run($intention->user, $intention->steps()->first());
+}
+
+/** @return list<string> */
+function replay(ExecutionSession $session): array
+{
+    return $session->events()
+        ->oldest()
+        ->orderBy('id')
+        ->pluck('type')
+        ->map(fn (ExecutionEventType $type): string => $type->value)
+        ->all();
 }
