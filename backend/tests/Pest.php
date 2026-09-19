@@ -44,7 +44,7 @@ expect()->extend('toBeOne', fn () => $this->toBe(1));
 |
 */
 
-function something()
+function repoPath(string $relative): string
 {
-    // ..
+    return base_path('../'.ltrim($relative, '/'));
 }

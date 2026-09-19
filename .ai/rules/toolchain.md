@@ -9,8 +9,10 @@ paths:
 ---
 # Toolchain and Monorepo
 
-npm workspaces at the root: `backend`, `mobile`, `packages/*`. Work from the
-repo root — `.git`, `.ai/rules` and `.claude` all anchor there, and most changes
+npm workspaces at the root: `backend` and `packages/*`. `mobile` is deliberately
+absent until it is scaffolded — npm fails the install on a workspace glob that
+matches no `package.json`, so the entry lands in the same change as the app.
+Work from the repo root — `.git`, `.ai/rules` and `.claude` all anchor there, and most changes
 cross a workspace boundary. Root scripts exist so nothing needs a manual `cd`.
 
 ## One lockfile, installed from the root

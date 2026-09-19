@@ -5,11 +5,6 @@ declare(strict_types=1);
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 
-function repoPath(string $relative): string
-{
-    return base_path('../'.ltrim($relative, '/'));
-}
-
 /** @return list<string> */
 function phpSourceFiles(): array
 {
