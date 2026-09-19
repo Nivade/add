@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Api;
+namespace App\Http\Requests;
 
 use App\Enums\StuckReason;
 use Illuminate\Contracts\Validation\ValidationRule;

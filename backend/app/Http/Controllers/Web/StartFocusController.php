@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Web;
 
 use App\Actions\Sessions\StartSession;
-use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
 use App\Models\Step;
 use App\Models\User;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\RedirectResponse;
 
-final class StoreSessionController extends Controller
+final class StartFocusController extends Controller
 {
-    public function __invoke(StoreSessionRequest $request): Response
+    public function __invoke(StoreSessionRequest $request): RedirectResponse
     {
         $user = $request->user();
 
@@ -24,10 +23,8 @@ final class StoreSessionController extends Controller
 
         abort_unless($step->intention->user_id === $user->id, 404);
 
-        $session = StartSession::run($user, $step);
+        StartSession::run($user, $step);
 
-        return ExecutionStateData::of($session)
-            ->toResponse($request)
-            ->setStatusCode($session->wasRecentlyCreated ? 201 : 200);
+        return to_route('focus');
     }
 }

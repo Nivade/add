@@ -6,6 +6,10 @@ intentionId: string | null,
 createdAt: string,
 };
 export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 'url';
+export type ComingUpData = {
+intention: IntentionData,
+inWords: string,
+};
 export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
 export type ExecutionSessionData = {
 id: string,
@@ -21,6 +25,13 @@ export type ExecutionStateData = {
 session: ExecutionSessionData,
 intention: IntentionData,
 progress: string[],
+};
+export type HomeData = {
+rightNow: NextActionData | null,
+session: ExecutionStateData | null,
+comingUp: ComingUpData | null,
+needsAttention: IntentionData[],
+restCount: number,
 };
 export type IntentionData = {
 id: string,
