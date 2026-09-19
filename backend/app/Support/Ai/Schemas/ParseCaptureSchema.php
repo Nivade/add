@@ -9,9 +9,13 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 
 final class ParseCaptureSchema
 {
-    public const string VERSION = '1';
+    public const string VERSION = '2';
 
-    /** @return Closure(JsonSchema):array<string, mixed> */
+    /**
+     * Strict mode requires every key, so "optional" is a nullable type, never an absent one.
+     *
+     * @return Closure(JsonSchema):array<string, mixed>
+     */
     public static function builder(): Closure
     {
         return fn (JsonSchema $schema): array => [
@@ -19,9 +23,13 @@ final class ParseCaptureSchema
                 ->description('The intention, in the person\'s own words, as a short phrase.')
                 ->required(),
             'why' => $schema->string()
-                ->description('The reason they gave, if they gave one. Null otherwise.'),
+                ->description('The reason they gave, if they gave one. Null otherwise.')
+                ->nullable()
+                ->required(),
             'deadline_at' => $schema->string()
-                ->description('ISO 8601 datetime, only when the text names a real date or appointment. Null otherwise.'),
+                ->description('ISO 8601 datetime, only when the text names a real date or appointment. Null otherwise.')
+                ->nullable()
+                ->required(),
             'needs_clarification' => $schema->boolean()
                 ->description('True when the text is too vague to act on without asking them something.')
                 ->required(),
