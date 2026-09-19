@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Home;
 
+use App\Contracts\Appointment;
 use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
 use App\Data\ExecutionStateData;
@@ -14,8 +15,7 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\Time\BackwardsPlan;
-use Carbon\CarbonInterface;
+use App\Support\Time\NextAppointment;
 use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -53,24 +53,9 @@ final class BuildHome
 
     private function comingUp(User $user, ResolutionContext $context): ?ComingUpData
     {
-        $next = $this->open($user)
-            ->whereNotNull('deadline_at')
-            ->where('deadline_at', '>=', $context->now)
-            ->oldest('deadline_at')
-            ->first();
+        $next = NextAppointment::forUser($user, $context->now);
 
-        if (! $next instanceof Intention || $next->deadline_at === null) {
-            return null;
-        }
-
-        return new ComingUpData(
-            IntentionData::from($next),
-            $next->deadline_at->setTimezone($context->now->getTimezone())->diffForHumans([
-                'other' => $context->now,
-                'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW,
-            ]),
-            BackwardsPlan::for($next, $context->now),
-        );
+        return $next instanceof Appointment ? ComingUpData::of($next, $context->now) : null;
     }
 
     /** @return Builder<Intention> */

@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contracts\Appointment;
+use App\Models\Intention;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Routing\Route as RoutedRequest;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->bindAppointments();
+    }
+
+    /** Two tables answer to {appointment}, so the route says which one it means. */
+    protected function bindAppointments(): void
+    {
+        Route::bind('appointment', function (string $value, RoutedRequest $route): Appointment&Model {
+            /** @var class-string<Appointment&Model> $model */
+            $model = $route->defaults['appointment_model'] ?? Intention::class;
+
+            return $model::query()->findOrFail($value);
+        });
     }
 
     /**

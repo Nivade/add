@@ -1,5 +1,7 @@
+export type AppointmentKind = 'intention' | 'calendar_event';
 export type BackwardsPlanData = {
-intentionId: string,
+kind: AppointmentKind,
+appointmentId: string,
 deadlineClock: string,
 rungs: PlanRungData[],
 };
@@ -12,7 +14,9 @@ createdAt: string,
 };
 export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 'url';
 export type ComingUpData = {
-intention: IntentionData,
+kind: AppointmentKind,
+id: string,
+title: string,
 inWords: string,
 plan: BackwardsPlanData | null,
 };

@@ -16,6 +16,8 @@ use App\Http\Controllers\Web\SkipStepController;
 use App\Http\Controllers\Web\StartFocusController;
 use App\Http\Controllers\Web\StopFocusController;
 use App\Http\Controllers\Web\StoreCaptureController;
+use App\Models\CalendarEvent;
+use App\Models\Intention;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', ShowWelcomeController::class)->name('welcome');
@@ -24,7 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');
-    Route::post('intentions/{intention}/plan', AdjustPlanController::class)->name('intentions.plan');
+    Route::post('intentions/{appointment}/plan', AdjustPlanController::class)
+        ->defaults('appointment_model', Intention::class)
+        ->name('intentions.plan');
+    Route::post('calendar-events/{appointment}/plan', AdjustPlanController::class)
+        ->defaults('appointment_model', CalendarEvent::class)
+        ->name('calendar-events.plan');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

@@ -70,7 +70,7 @@ it('names the next real deadline and nothing else about time', function (): void
         ->get(route('home'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('home.comingUp.intention.title', 'Renew the passport')
+            ->where('home.comingUp.title', 'Renew the passport')
             ->where('home.comingUp.inWords', '2 days from now')
         );
 });

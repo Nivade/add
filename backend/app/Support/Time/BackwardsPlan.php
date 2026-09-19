@@ -4,44 +4,45 @@ declare(strict_types=1);
 
 namespace App\Support\Time;
 
+use App\Contracts\Appointment;
 use App\Data\BackwardsPlanData;
 use App\Data\PlanRungData;
 use App\Enums\PlanRung;
-use App\Models\Intention;
 use Carbon\CarbonImmutable;
 
 /** Arithmetic, never a model: a travel-time guess presented as fact is how the app starts lying. */
 final class BackwardsPlan
 {
-    public static function for(Intention $intention, CarbonImmutable $now): ?BackwardsPlanData
+    public static function for(Appointment $appointment, CarbonImmutable $now): ?BackwardsPlanData
     {
-        $deadline = $intention->deadline_at?->setTimezone($now->getTimezone());
+        $at = $appointment->appointmentAt()?->setTimezone($now->getTimezone());
 
-        if (! $deadline instanceof CarbonImmutable || ! $deadline->isSameDay($now)) {
+        if (! $at instanceof CarbonImmutable || ! $at->isSameDay($now)) {
             return null;
         }
 
-        $at = $deadline;
+        $rungAt = $at;
         $rungs = [];
 
         foreach ([PlanRung::Leave, PlanRung::GetReady, PlanRung::FindThings] as $rung) {
-            $stated = $intention->getAttribute($rung->column());
-            $seconds = is_int($stated) ? $stated : $rung->assumedSeconds();
-            $at = $at->subSeconds($seconds);
+            $stated = $appointment->statedSeconds($rung);
+            $seconds = $stated ?? $rung->assumedSeconds();
+            $rungAt = $rungAt->subSeconds($seconds);
 
             $rungs[] = new PlanRungData(
                 $rung,
-                $at->toIso8601String(),
-                $at->format('H:i'),
+                $rungAt->toIso8601String(),
+                $rungAt->format('H:i'),
                 $seconds,
-                ! is_int($stated),
-                $at < $now,
+                $stated === null,
+                $rungAt < $now,
             );
         }
 
         return new BackwardsPlanData(
-            $intention->id,
-            $deadline->format('H:i'),
+            $appointment->appointmentKind(),
+            $appointment->appointmentId(),
+            $at->format('H:i'),
             array_reverse($rungs),
         );
     }

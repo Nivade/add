@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\AppointmentKind;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -13,7 +14,8 @@ class BackwardsPlanData extends Data
 {
     /** @param  list<PlanRungData>  $rungs */
     public function __construct(
-        public string $intentionId,
+        public AppointmentKind $kind,
+        public string $appointmentId,
         public string $deadlineClock,
         public array $rungs,
     ) {}

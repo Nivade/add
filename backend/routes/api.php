@@ -15,13 +15,20 @@ use App\Http\Controllers\Api\V1\SkipStepController;
 use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
+use App\Models\CalendarEvent;
+use App\Models\Intention;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function (): void {
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('next-action', ShowNextActionController::class)->name('next-action.show');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed.show');
-    Route::patch('intentions/{intention}/plan', AdjustPlanController::class)->name('intentions.plan');
+    Route::patch('intentions/{appointment}/plan', AdjustPlanController::class)
+        ->defaults('appointment_model', Intention::class)
+        ->name('intentions.plan');
+    Route::patch('calendar-events/{appointment}/plan', AdjustPlanController::class)
+        ->defaults('appointment_model', CalendarEvent::class)
+        ->name('calendar-events.plan');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

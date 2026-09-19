@@ -100,10 +100,12 @@ export default function Home({ home: data }: { home: HomeData }) {
                 {comingUp && (
                     <Band label="Coming up">
                         <p>
-                            {comingUp.intention.title}
+                            {comingUp.title}
                             <span className="text-muted-foreground font-mono text-[13px]">
                                 {' '}
                                 · {comingUp.inWords}
+                                {comingUp.kind === 'calendar_event' &&
+                                    ' · from your calendar'}
                             </span>
                         </p>
                         {comingUp.plan && (

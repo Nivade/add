@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Intentions\AdjustPlanAssumptions;
+use App\Actions\Time\AdjustPlanAssumptions;
 use App\Data\BackwardsPlanData;
 use App\Enums\PlanRung;
 use App\Models\Intention;

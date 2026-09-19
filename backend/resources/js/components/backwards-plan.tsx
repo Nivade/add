@@ -1,6 +1,7 @@
 import type { BackwardsPlanData, PlanRung } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import calendarEvents from '@/routes/calendar-events';
 import intentions from '@/routes/intentions';
 
 const rungLabels: Record<PlanRung, string> = {
@@ -13,7 +14,9 @@ const rungLabels: Record<PlanRung, string> = {
 export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
     return (
         <Form
-            {...intentions.plan.form(plan.intentionId)}
+            {...(plan.kind === 'calendar_event'
+                ? calendarEvents.plan.form(plan.appointmentId)
+                : intentions.plan.form(plan.appointmentId))}
             className="mt-4 space-y-2"
         >
             {plan.rungs.map((rung) => (

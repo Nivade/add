@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Intentions;
+namespace App\Actions\Time;
 
+use App\Contracts\Appointment;
 use App\Enums\PlanRung;
-use App\Models\Intention;
+use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** §13 says the assumptions are editable, so a stated minute count replaces the assumed one. */
@@ -14,7 +15,7 @@ final class AdjustPlanAssumptions
     use AsObject;
 
     /** @param  array<string, int|null>  $minutes  keyed by `PlanRung` value; null returns the rung to its assumption */
-    public function handle(Intention $intention, array $minutes): Intention
+    public function handle(Appointment&Model $appointment, array $minutes): Appointment&Model
     {
         foreach (PlanRung::cases() as $rung) {
             if (! array_key_exists($rung->value, $minutes)) {
@@ -23,11 +24,11 @@ final class AdjustPlanAssumptions
 
             $stated = $minutes[$rung->value];
 
-            $intention->setAttribute($rung->column(), $stated === null ? null : $stated * 60);
+            $appointment->stateSeconds($rung, $stated === null ? null : $stated * 60);
         }
 
-        $intention->save();
+        $appointment->save();
 
-        return $intention;
+        return $appointment;
     }
 }

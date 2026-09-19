@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\PlansBackwards;
+use App\Contracts\Appointment;
+use App\Enums\AppointmentKind;
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
 use Carbon\CarbonImmutable;
@@ -34,12 +37,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 #[Unguarded]
 #[UseFactory(IntentionFactory::class)]
-class Intention extends Model
+class Intention extends Model implements Appointment
 {
     /** @use HasFactory<IntentionFactory> */
     use HasFactory;
 
     use HasUlids;
+    use PlansBackwards;
+
+    public function appointmentKind(): AppointmentKind
+    {
+        return AppointmentKind::Intention;
+    }
+
+    public function appointmentId(): string
+    {
+        return $this->id;
+    }
+
+    public function appointmentTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function appointmentAt(): ?CarbonImmutable
+    {
+        return $this->deadline_at;
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
