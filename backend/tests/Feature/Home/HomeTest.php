@@ -10,6 +10,16 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
+it('pitches the product to a guest and sends a signed-in person to their answer', function (): void {
+    $this->get(route('welcome'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page->component('welcome'));
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('welcome'))
+        ->assertRedirect(route('home'));
+});
+
 it('sends a guest to the login page', function (): void {
     $this->get(route('home'))->assertRedirect(route('login'));
 });

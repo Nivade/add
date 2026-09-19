@@ -20,18 +20,18 @@ services:
         labels:
             - 'traefik.enable=true'
             - 'traefik.docker.network=web'
-            - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.${BASE_DOMAIN}`)"
-            - "traefik.http.routers.${APP_SLUG}.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.${BASE_DOMAIN}`)'
+            - 'traefik.http.routers.${APP_SLUG}.priority=100'
             - 'traefik.http.routers.${APP_SLUG}.entrypoints=websecure'
             - 'traefik.http.routers.${APP_SLUG}.tls=true'
-            - "traefik.http.routers.${APP_SLUG}.service=${APP_SLUG}"
+            - 'traefik.http.routers.${APP_SLUG}.service=${APP_SLUG}'
             - 'traefik.http.services.${APP_SLUG}.loadbalancer.server.port=80'
             # Vite must share the app page's https origin or the browser blocks assets as mixed content.
-            - "traefik.http.routers.${APP_SLUG}-vite.rule=Host(`vite.${APP_SLUG}.${BASE_DOMAIN}`)"
-            - "traefik.http.routers.${APP_SLUG}-vite.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}-vite.rule=Host(`vite.${APP_SLUG}.${BASE_DOMAIN}`)'
+            - 'traefik.http.routers.${APP_SLUG}-vite.priority=100'
             - 'traefik.http.routers.${APP_SLUG}-vite.entrypoints=websecure'
             - 'traefik.http.routers.${APP_SLUG}-vite.tls=true'
-            - "traefik.http.routers.${APP_SLUG}-vite.service=${APP_SLUG}-vite"
+            - 'traefik.http.routers.${APP_SLUG}-vite.service=${APP_SLUG}-vite'
             - 'traefik.http.services.${APP_SLUG}-vite.loadbalancer.server.port=${VITE_PORT:-5173}'
         volumes:
             # The repo root sits above the app mount, and .ai, packages and the guard tests all read it.
@@ -72,8 +72,8 @@ services:
         labels:
             - 'traefik.enable=true'
             - 'traefik.docker.network=web'
-            - "traefik.http.routers.${APP_SLUG}-mailpit.rule=Host(`mailpit.${APP_SLUG}.${BASE_DOMAIN}`)"
-            - "traefik.http.routers.${APP_SLUG}-mailpit.priority=100"
+            - 'traefik.http.routers.${APP_SLUG}-mailpit.rule=Host(`mailpit.${APP_SLUG}.${BASE_DOMAIN}`)'
+            - 'traefik.http.routers.${APP_SLUG}-mailpit.priority=100'
             - 'traefik.http.routers.${APP_SLUG}-mailpit.entrypoints=websecure'
             - 'traefik.http.routers.${APP_SLUG}-mailpit.tls=true'
             - 'traefik.http.services.${APP_SLUG}-mailpit.loadbalancer.server.port=8025'

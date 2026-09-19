@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -20,11 +21,13 @@ export function UserMenu() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="text-muted-foreground hover:text-foreground font-mono text-[11px] tracking-[0.16em] uppercase"
+                    aria-label={`Account and settings for ${auth.user.name}`}
+                    className="gap-1.5 font-mono text-[11px] tracking-[0.12em] uppercase"
                 >
                     {initials(auth.user.name)}
+                    <ChevronDown className="size-3 opacity-60" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

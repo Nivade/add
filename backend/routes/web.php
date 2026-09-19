@@ -9,13 +9,14 @@ use App\Http\Controllers\Web\ReportStuckController;
 use App\Http\Controllers\Web\ResumeFocusController;
 use App\Http\Controllers\Web\ShowFocusController;
 use App\Http\Controllers\Web\ShowHomeController;
+use App\Http\Controllers\Web\ShowWelcomeController;
 use App\Http\Controllers\Web\SkipStepController;
 use App\Http\Controllers\Web\StartFocusController;
 use App\Http\Controllers\Web\StopFocusController;
 use App\Http\Controllers\Web\StoreCaptureController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('welcome');
+Route::get('/', ShowWelcomeController::class)->name('welcome');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
