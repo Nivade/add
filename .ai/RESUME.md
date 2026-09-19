@@ -15,10 +15,11 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 6, overwhelm and time.** Nothing of it is built: there is no overwhelm
-entry point, nothing plans backwards from a `deadline_at`, no reminder is
-scheduled, and `ResolutionContext` still carries `now` alone — the minutes
-available and the place it was designed to grow are not there yet.
+**Slice 6, overwhelm and time.** Nothing of it is built: no entry point asks for
+the shortest finishable step and no screen offers one, nothing plans backwards
+from a `deadline_at`, no calendar is read, no reminder is scheduled, and
+`ResolutionContext` still carries `now` alone — the minutes available and the
+place it was designed to grow are not there yet.
 
 Next, in the slice plan's order: the shortest-finishable-step question as its
 own entry point rather than a flag on `resolve()`, then backwards planning, then

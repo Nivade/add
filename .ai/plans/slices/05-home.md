@@ -3,7 +3,30 @@
 *Spec: [`product-spec.md`](../product-spec.md) §5, §29, §39. Rules:
 `product-invariants.md` (no backlog dumps), `api-and-data.md`.*
 
-**Scope, not design.** Layout and copy are decided when the slice starts.
+## The visual direction, and why it is not the starter kit's
+
+Chosen against eight alternatives, and it binds every screen built after this
+one.
+
+**A rail, not a sidebar.** The left edge is today, drawn to scale: the hours, a
+marker at now, a tick for a deadline falling today, a hairline for how long an
+open session has run. Time blindness is the deficit the product exists for, so
+time is the structure rather than a field inside a card. It is a shared Inertia
+prop because every screen shows the same day.
+
+**No cards.** A card implies a list of things to work through, and this product
+shows one thing. Bands are a hairline, a label and an answer.
+
+**Ink and amber on charcoal, dark by default.** The accent lands only on the
+thing to do now, and always beside the rail that marks it, so no state is
+carried by colour alone. Plex Sans for prose, Plex Mono for anything that
+counts — labels, estimates, the rail, the controls.
+
+**The six controls are one size and one weight.** That is "skip weighs what done
+weighs" made visible instead of written down.
+
+Reopening any of this needs a new decision. Re-adding a sidebar, a card or a
+second accent is not a refactor.
 
 ## Shape
 
