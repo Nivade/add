@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\StartSession;
+use App\Contracts\AiProvider;
 use App\Enums\ExecutionEventType;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use App\Support\Ai\Providers\LoggingAiProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -90,4 +92,12 @@ function replay(ExecutionSession $session): array
         ->pluck('type')
         ->map(fn (ExecutionEventType $type): string => $type->value)
         ->all();
+}
+
+/** The container hands out the logging wrapper, and a test wants the driver inside it. */
+function aiProvider(): AiProvider
+{
+    $provider = app(AiProvider::class);
+
+    return $provider instanceof LoggingAiProvider ? $provider->inner : $provider;
 }

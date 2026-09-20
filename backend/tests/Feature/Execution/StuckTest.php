@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Sessions\ReportStuck;
 use App\Actions\Steps\SplitStep;
-use App\Contracts\AiProvider;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Enums\StuckReason;
@@ -16,7 +15,7 @@ use Lorisleiva\Actions\Decorators\JobDecorator;
 
 function answeredSplit(array $steps): FakeAiProvider
 {
-    $provider = app(AiProvider::class);
+    $provider = aiProvider();
 
     expect($provider)->toBeInstanceOf(FakeAiProvider::class);
 

@@ -46,6 +46,24 @@ first-move kept a raw-array twin of every schema and the two drifted; the parser
 was the real validator both times. There is one definition here. Do not
 reintroduce the second copy.
 
+## Consent is the driver, and every call is logged
+
+§28 asks for an explicit, consented, logged path off the machine. Two thirds of
+that is the driver: `canned`, `fixture`, `fake` and `null` never leave, `openai`
+is the only one that does, and choosing it is the consent. Per-user consent needs
+a column and a screen, and waits for the first real user rather than being
+half-built now.
+
+The logging third is `LoggingAiProvider`, which wraps whatever the driver
+resolved. It records the operation, provider, model, prompt and schema versions,
+duration and token counts — and never the prompt or the answer. A log holding the
+person's own sentences is a second copy of the thing being protected, so a config
+flag claiming to redact input was deleted rather than left reading like a feature.
+
+Notification payloads are the other half of this surface: `notifications.data`
+holds capture-derived titles in cleartext. Encrypting it belongs with the
+ingestion work, where the threat model gets written, and not before push ships.
+
 ## Prompt and schema versions live in the cache key
 
 `AiRequest::cacheKey()` folds both versions in, so editing a prompt by one byte

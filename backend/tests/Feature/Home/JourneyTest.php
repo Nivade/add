@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Contracts\AiProvider;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
@@ -11,7 +10,7 @@ use Inertia\Testing\AssertableInertia;
 
 function answeredCapture(): FakeAiProvider
 {
-    $provider = app(AiProvider::class);
+    $provider = aiProvider();
 
     expect($provider)->toBeInstanceOf(FakeAiProvider::class);
 

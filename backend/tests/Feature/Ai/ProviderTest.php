@@ -12,10 +12,12 @@ use App\Support\Ai\Prompts;
 use App\Support\Ai\Providers\CannedAiProvider;
 use App\Support\Ai\Providers\FakeAiProvider;
 use App\Support\Ai\Providers\FixtureAiProvider;
+use App\Support\Ai\Providers\LoggingAiProvider;
 use App\Support\Ai\Providers\NullAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
 use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 function aiRequest(
     AiOperation $operation = AiOperation::ParseCapture,
@@ -36,7 +38,8 @@ function aiRequest(
 it('resolves the provider named by the driver config', function (string $driver, string $expected): void {
     config()->set('ai.driver', $driver);
 
-    expect(app(AiProvider::class))->toBeInstanceOf($expected);
+    expect(aiProvider())->toBeInstanceOf($expected)
+        ->and(app(AiProvider::class))->toBeInstanceOf(LoggingAiProvider::class);
 })->with([
     ['canned', CannedAiProvider::class],
     ['fixture', FixtureAiProvider::class],
@@ -115,4 +118,38 @@ it('gives back queued answers in order and then fails loudly', function (): void
     expect($provider->complete(aiRequest())->payload)->toBe(['title' => 'first'])
         ->and($provider->complete(aiRequest())->payload)->toBe(['title' => 'second'])
         ->and(fn () => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
+});
+
+it('logs the shape of every call and none of the text', function (): void {
+    Log::spy();
+
+    $answer = (new LoggingAiProvider((new FakeAiProvider)->push(['title' => 'Renew my passport'])))
+        ->complete(aiRequest(user: 'renew my passport'));
+
+    expect($answer->provider)->toBe('fake');
+
+    Log::shouldHaveReceived('info')
+        ->withArgs(function (string $message, array $context): bool {
+            expect($context)->toHaveKeys([
+                'operation', 'provider', 'prompt_version', 'schema_version', 'duration_ms', 'model',
+                'input_tokens', 'output_tokens', 'cached_input_tokens',
+            ]);
+
+            return $context['operation'] === 'parse_capture'
+                && $context['provider'] === 'fake'
+                && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'passport');
+        })
+        ->once();
+});
+
+it('records the failed call and lets the failure through', function (): void {
+    Log::spy();
+
+    $provider = new LoggingAiProvider(new FakeAiProvider);
+
+    expect(fn () => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
+
+    Log::shouldHaveReceived('warning')
+        ->withArgs(fn (string $message, array $context): bool => $context['exception'] === AiUnavailable::class)
+        ->once();
 });

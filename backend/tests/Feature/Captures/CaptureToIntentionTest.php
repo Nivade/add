@@ -20,7 +20,7 @@ function useAiDriver(string $driver): AiProvider
     config()->set('ai.driver', $driver);
     app()->forgetInstance(AiProvider::class);
 
-    return app(AiProvider::class);
+    return aiProvider();
 }
 
 function fakeAi(): FakeAiProvider

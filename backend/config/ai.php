@@ -21,7 +21,4 @@ return [
         ],
     ],
 
-    // Nothing is sent to a provider unless the driver is one that leaves the machine.
-    'redact_input' => (bool) env('AI_REDACT_INPUT', true),
-
 ];
