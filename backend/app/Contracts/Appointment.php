@@ -19,6 +19,9 @@ interface Appointment
 
     public function appointmentAt(): ?CarbonImmutable;
 
+    /** True while the time was read out of the person's words and nobody has confirmed it. */
+    public function appointmentInferred(): bool;
+
     public function statedSeconds(PlanRung $rung): ?int;
 
     public function stateSeconds(PlanRung $rung, ?int $seconds): void;

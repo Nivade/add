@@ -67,6 +67,12 @@ class CalendarEvent extends Model implements Appointment
         return $this->starts_at;
     }
 
+    /** The calendar stated this time; nothing about it was read out of a sentence. */
+    public function appointmentInferred(): bool
+    {
+        return false;
+    }
+
     protected function casts(): array
     {
         return [

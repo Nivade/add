@@ -13,6 +13,7 @@ use Carbon\CarbonImmutable;
 use Database\Factories\IntentionFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property IntentionStatus $status
  * @property bool $needs_clarification
  * @property CarbonImmutable|null $deadline_at
+ * @property CarbonImmutable|null $deadline_confirmed_at
+ * @property-read bool $deadline_inferred
  * @property int|null $travel_seconds
  * @property int|null $preparation_seconds
  * @property int|null $gathering_seconds
@@ -65,6 +68,17 @@ class Intention extends Model implements Appointment
         return $this->deadline_at;
     }
 
+    public function appointmentInferred(): bool
+    {
+        return $this->deadline_at !== null && $this->deadline_confirmed_at === null;
+    }
+
+    /** @return Attribute<bool, never> */
+    protected function deadlineInferred(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->appointmentInferred());
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
@@ -95,6 +109,7 @@ class Intention extends Model implements Appointment
             'status' => IntentionStatus::class,
             'needs_clarification' => 'boolean',
             'deadline_at' => 'immutable_datetime',
+            'deadline_confirmed_at' => 'immutable_datetime',
             'decomposed_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',
         ];

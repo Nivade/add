@@ -22,5 +22,6 @@ class StepData extends Data
         public ?int $estimatedSeconds,
         public StepStatus $status,
         public int $skipCount,
+        public bool $generated,
     ) {}
 }

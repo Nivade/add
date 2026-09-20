@@ -6,6 +6,7 @@ import { Band } from '@/components/band';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
 import focusRoutes from '@/routes/focus';
+import intentions from '@/routes/intentions';
 
 function OneThing({ children }: { children: React.ReactNode }) {
     return (
@@ -54,6 +55,7 @@ function RightNow({ rightNow, session }: HomeData) {
             <p className="text-muted-foreground pl-5 font-mono text-[13px]">
                 {estimate ? `~${estimate}` : 'unestimated'} ·{' '}
                 {rightNow.intention.title.toLowerCase()}
+                {rightNow.step.generated && ' · suggested'}
             </p>
             <div className="pl-5">
                 <Form {...focusRoutes.start.form()}>
@@ -118,6 +120,23 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     ' · from your calendar'}
                             </span>
                         </p>
+                        {comingUp.inferred && (
+                            <Form
+                                {...intentions.deadline.form(comingUp.id)}
+                                className="mt-2 flex flex-wrap items-baseline gap-3"
+                            >
+                                <span className="text-muted-foreground font-mono text-[13px]">
+                                    read from what you wrote
+                                </span>
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                >
+                                    That{"'"}s right
+                                </Button>
+                            </Form>
+                        )}
                         {comingUp.plan && (
                             <BackwardsPlan plan={comingUp.plan} />
                         )}

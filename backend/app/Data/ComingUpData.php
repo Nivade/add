@@ -21,6 +21,7 @@ class ComingUpData extends Data
         public string $id,
         public string $title,
         public string $inWords,
+        public bool $inferred,
         public ?BackwardsPlanData $plan,
     ) {}
 
@@ -40,6 +41,7 @@ class ComingUpData extends Data
                 'other' => $now,
                 'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW,
             ]),
+            $appointment->appointmentInferred(),
             BackwardsPlan::for($appointment, $now),
         );
     }

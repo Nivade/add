@@ -85,6 +85,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             </h1>
                             <p className="text-muted-foreground pl-5 font-mono text-[13px]">
                                 {estimate ? `~${estimate}` : 'unestimated'}
+                                {step?.generated && ' · suggested'}
                             </p>
                         </div>
 

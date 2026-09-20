@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Web\AdjustPlanController;
 use App\Http\Controllers\Web\CompleteStepController;
+use App\Http\Controllers\Web\ConfirmDeadlineController;
 use App\Http\Controllers\Web\PauseFocusController;
 use App\Http\Controllers\Web\RecordDistractionController;
 use App\Http\Controllers\Web\ReportStuckController;
@@ -32,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('calendar-events/{appointment}/plan', AdjustPlanController::class)
         ->defaults('appointment_model', CalendarEvent::class)
         ->name('calendar-events.plan');
+    Route::post('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

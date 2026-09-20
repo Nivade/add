@@ -18,6 +18,7 @@ kind: AppointmentKind,
 id: string,
 title: string,
 inWords: string,
+inferred: boolean,
 plan: BackwardsPlanData | null,
 };
 export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
@@ -51,6 +52,7 @@ title: string,
 why: string | null,
 status: IntentionStatus,
 deadlineAt: string | null,
+deadlineInferred: boolean,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
 export type NextActionData = {
@@ -92,6 +94,7 @@ position: number,
 estimatedSeconds: number | null,
 status: StepStatus,
 skipCount: number,
+generated: boolean,
 };
 export type StepStatus = 'pending' | 'done' | 'skipped';
 export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';

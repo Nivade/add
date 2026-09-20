@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AdjustPlanController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
+use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::patch('calendar-events/{appointment}/plan', AdjustPlanController::class)
         ->defaults('appointment_model', CalendarEvent::class)
         ->name('calendar-events.plan');
+    Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

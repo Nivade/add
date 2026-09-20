@@ -20,5 +20,6 @@ class IntentionData extends Data
         public ?string $why,
         public IntentionStatus $status,
         public ?string $deadlineAt,
+        public bool $deadlineInferred,
     ) {}
 }
