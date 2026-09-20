@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Notifications\AppointmentReminder;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia;
+use Lorisleiva\Actions\Decorators\JobDecorator;
 
 function sendReminders(User $user, string $now): array
 {
@@ -165,4 +167,14 @@ it('hides one person\'s reminder from another person\'s dismissal', function ():
         ->assertNotFound();
 
     expect($user->unreadNotifications()->count())->toBe(1);
+});
+
+it('queues one job per person rather than doing everybody inline', function (): void {
+    Queue::fake();
+
+    User::factory()->count(3)->create();
+
+    $this->artisan('reminders:dispatch')->assertSuccessful();
+
+    Queue::assertPushed(JobDecorator::class, 3);
 });

@@ -17,13 +17,17 @@ use App\Support\Time\BackwardsPlan;
 use App\Support\Time\ReminderLines;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsCommand;
+use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** One reminder per appointment, sent when its first preparation is due and not before. */
 final class SendDueReminders
 {
     use AsCommand;
+    use AsJob;
     use AsObject;
 
     public string $commandSignature = 'reminders:dispatch {user? : the id of one person, or every person when omitted}';
@@ -47,15 +51,21 @@ final class SendDueReminders
         return $sent;
     }
 
+    /** One person per job: a slow calendar or mail provider must not hold up everybody else's minute. */
     public function asCommand(Command $command): void
     {
-        $users = User::query()
-            ->when($command->argument('user'), fn ($query, $id) => $query->whereKey($id))
-            ->get();
+        $queued = 0;
 
-        foreach ($users as $user) {
-            $command->info($user->email.': '.count($this->handle($user)).' reminders.');
-        }
+        User::query()
+            ->when($command->argument('user'), fn (Builder $query, array|bool|float|int|string $id) => $query->whereKey($id))
+            ->chunkById(200, function (Collection $users) use (&$queued): void {
+                foreach ($users as $user) {
+                    self::dispatch($user);
+                    $queued++;
+                }
+            });
+
+        $command->info($queued.' queued.');
     }
 
     /** @return list<Appointment> */

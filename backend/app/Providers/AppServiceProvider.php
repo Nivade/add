@@ -12,15 +12,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Lorisleiva\Actions\Facades\Actions;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
+    /** Without this an action's `commandSignature` is never a real command, and the schedule calls a name nothing answers. */
     public function register(): void
     {
-        //
+        Actions::registerCommands();
     }
 
     /**

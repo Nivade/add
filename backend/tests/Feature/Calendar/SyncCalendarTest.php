@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Support\Calendar\Sources\FakeCalendarSource;
 use App\Support\Calendar\Sources\NullCalendarSource;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Queue;
 use Inertia\Testing\AssertableInertia;
+use Lorisleiva\Actions\Decorators\JobDecorator;
 
 function calendar(CalendarEventDraftData ...$events): FakeCalendarSource
 {
@@ -142,4 +144,14 @@ it('does not let one person retime another person\'s appointment', function (): 
     $this->actingAs(User::factory()->create())
         ->patchJson("/api/v1/calendar-events/{$event->id}/plan", ['leave' => 45])
         ->assertNotFound();
+});
+
+it('queues the sync per person rather than reading every calendar inline', function (): void {
+    Queue::fake();
+
+    User::factory()->count(2)->create();
+
+    $this->artisan('calendar:sync')->assertSuccessful();
+
+    Queue::assertPushed(JobDecorator::class, 2);
 });

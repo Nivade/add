@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\Artisan;
 
 /** @return list<string> */
 function phpSourceFiles(): array
@@ -101,5 +103,16 @@ it('never imports a global class in a Pest file', function () {
 
         expect(preg_match('/^use [A-Za-z_][A-Za-z0-9_]*;$/m', (string) file_get_contents($file->getPathname())))
             ->toBe(0, $file->getPathname());
+    }
+});
+
+// A scheduled name that nothing answers fails every minute in silence, so the schedule is checked here.
+it('schedules only commands that exist', function () {
+    $registered = array_keys(Artisan::all());
+
+    foreach (app(Schedule::class)->events() as $event) {
+        preg_match('/artisan[\'"]? (\S+)/', (string) $event->command, $matches);
+
+        expect($registered)->toContain($matches[1] ?? $event->command);
     }
 });
