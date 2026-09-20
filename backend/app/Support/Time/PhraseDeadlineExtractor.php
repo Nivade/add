@@ -67,13 +67,18 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
     }
 
     /** @param  array<int, array{0: string, 1: int}>  $matches */
-    private function isoDate(array $matches, CarbonImmutable $now): CarbonImmutable
+    private function isoDate(array $matches, CarbonImmutable $now): ?CarbonImmutable
     {
-        $day = $now->setDate(
-            (int) $this->group($matches, 1),
-            (int) $this->group($matches, 2),
-            (int) $this->group($matches, 3)
-        );
+        $year = (int) $this->group($matches, 1);
+        $month = (int) $this->group($matches, 2);
+        $dayOfMonth = (int) $this->group($matches, 3);
+
+        // setDate() rolls the 31st of February into March, which is a date nobody wrote.
+        if (! checkdate($month, $dayOfMonth, $year)) {
+            return null;
+        }
+
+        $day = $now->setDate($year, $month, $dayOfMonth);
 
         $hour = $this->group($matches, 4);
 
@@ -94,19 +99,34 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
         return in_array($unit, ['minute', 'hour'], true) ? $at : $at->endOfDay();
     }
 
-    /** @param  array<int, array{0: string, 1: int}>  $matches */
+    /**
+     * "by the 20th" on the 20th is today, not four weeks away.
+     *
+     * @param  array<int, array{0: string, 1: int}>  $matches
+     */
     private function dayOfMonth(array $matches, CarbonImmutable $now): ?CarbonImmutable
     {
         $day = (int) $this->group($matches, 1);
-        $month = $day > $now->day ? $now : $now->addMonth();
+        $month = $day >= $now->day ? $now : $now->addMonth();
 
         return $day > $month->daysInMonth ? null : $month->setDay($day)->endOfDay();
     }
 
-    /** @param  array<int, array{0: string, 1: int}>  $matches */
+    /**
+     * Today counts as "this Friday" while any of it is left; a time already gone means next week.
+     *
+     * @param  array<int, array{0: string, 1: int}>  $matches
+     */
     private function weekday(array $matches, CarbonImmutable $now): CarbonImmutable
     {
-        return $this->applyTime($now->next((string) $this->group($matches, 1)), $matches);
+        $weekday = (string) $this->group($matches, 1);
+        $today = $this->applyTime($now, $matches);
+
+        if ($now->isDayOfWeek($weekday) && $today > $now) {
+            return $today;
+        }
+
+        return $this->applyTime($now->next($weekday), $matches);
     }
 
     /** @param  array<int, array{0: string, 1: int}>  $matches */

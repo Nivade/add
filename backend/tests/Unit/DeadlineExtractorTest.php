@@ -31,7 +31,15 @@ it('reads every phrase a regex can read with certainty', function (string $text,
     'next week' => ['book the van next week', '2026-09-23 23:59:59'],
     'clock time later today' => ['leave at 15:30', '2026-09-16 15:30:00'],
     'clock time already past rolls over' => ['leave at 9am', '2026-09-17 09:00:00'],
+    'today counts as this weekday' => ['send it on Wednesday at 4pm', '2026-09-16 16:00:00'],
+    'a weekday whose time has gone waits a week' => ['send it on Wednesday at 9am', '2026-09-23 09:00:00'],
+    'the day of the month it already is' => ['file it before the 16th', '2026-09-16 23:59:59'],
 ]);
+
+it('refuses a date that does not exist rather than rolling it forward', function (): void {
+    // setDate() would answer the 3rd of March, which is a date the person never wrote.
+    expect((new PhraseDeadlineExtractor)->extract('renew it by 2026-02-31', pinnedNow()))->toBeNull();
+});
 
 it('claims nothing when the text only sounds urgent', function (string $text): void {
     expect((new PhraseDeadlineExtractor)->extract($text, pinnedNow()))->toBeNull();
