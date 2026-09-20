@@ -72,11 +72,12 @@ assumed: boolean,
 alreadyPassed: boolean,
 };
 export type RailData = {
-nowAt: string,
-minuteOfDay: number,
-sessionStartedAt: string | null,
-deadlineAt: string | null,
-deadlineTitle: string | null,
+nowMinute: number,
+nowClock: string,
+sessionStartedMinute: number | null,
+leaveByMinute: number | null,
+leaveByClock: string | null,
+appointmentTitle: string | null,
 };
 export type ReminderData = {
 title: string,
