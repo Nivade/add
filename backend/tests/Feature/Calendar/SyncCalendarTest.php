@@ -72,6 +72,22 @@ it('drops an event the calendar stopped reporting', function (): void {
     expect(CalendarEvent::query()->pluck('external_id')->all())->toBe(['abc-1']);
 });
 
+it('keeps the day it already knows when the source answers with nothing', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    calendar(draft('abc-1', '2026-09-19 14:00:00'));
+    SyncCalendar::run($user, $now);
+
+    CalendarEvent::query()->sole()->update(['travel_seconds' => 2700]);
+
+    // An outage reads the same as a cleared day, and one of the two must not delete anything.
+    calendar();
+    SyncCalendar::run($user, $now);
+
+    expect(CalendarEvent::query()->sole()->travel_seconds)->toBe(2700);
+});
+
 it('leaves an event beyond the horizon out of the day it plans', function (): void {
     $user = User::factory()->create();
 
