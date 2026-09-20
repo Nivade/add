@@ -10,6 +10,10 @@ use App\Enums\StuckReason;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Support\Execution\SessionState;
+use App\Support\NextAction\Candidate;
+use App\Support\NextAction\CandidatePool;
+use App\Support\NextAction\ResolutionContext;
+use App\Support\NextAction\SmallestFirst;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Every answer leaves the person with something to start or a clean stop. */
@@ -41,14 +45,16 @@ final class ReportStuck
     {
         SplitStep::dispatch($step);
 
-        $shortest = $session->intention->remainingSteps()
-            ->whereKeyNot($step->id)
-            ->orderBy('estimated_seconds')
-            ->orderBy('position')
-            ->first();
+        $smallest = SmallestFirst::sort(
+            array_values(array_filter(
+                CandidatePool::forIntention($session->intention),
+                fn (Candidate $candidate): bool => $candidate->step->id !== $step->id,
+            )),
+            ResolutionContext::forUser($session->user),
+        )[0] ?? null;
 
-        if ($shortest instanceof Step) {
-            $session->update(['current_step_id' => $shortest->id]);
+        if ($smallest instanceof Candidate) {
+            $session->update(['current_step_id' => $smallest->step->id]);
         }
 
         return $session;

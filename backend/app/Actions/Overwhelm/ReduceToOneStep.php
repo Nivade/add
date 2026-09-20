@@ -11,8 +11,8 @@ use App\Data\StepData;
 use App\Models\User;
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
-use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\ResolutionContext;
+use App\Support\NextAction\SmallestFirst;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** A different question from "what is most useful": the shortest thing that can be finished. */
@@ -28,11 +28,7 @@ final class ReduceToOneStep
             return new OverwhelmedData(null, 0);
         }
 
-        $coolOff = new NotRecentlySkipped;
-
-        usort($candidates, fn (Candidate $a, Candidate $b): int => $coolOff->compare($a, $b, $context)
-            ?: $this->size($a) <=> $this->size($b));
-
+        $candidates = SmallestFirst::sort($candidates, $context);
         $smallest = $candidates[0];
 
         return new OverwhelmedData(
@@ -43,21 +39,6 @@ final class ReduceToOneStep
             ),
             count($candidates) - 1,
         );
-    }
-
-    /**
-     * An unestimated step loses a tie to a timed one of the same assumed cost.
-     *
-     * @return array{int, bool, int, string}
-     */
-    private function size(Candidate $candidate): array
-    {
-        return [
-            $candidate->cost(),
-            $candidate->estimatedSeconds() === null,
-            $candidate->step->position,
-            $candidate->step->id,
-        ];
     }
 
     /** @return list<string> */

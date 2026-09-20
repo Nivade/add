@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\ReportStuck;
+use App\Actions\Steps\SkipStep;
 use App\Actions\Steps\SplitStep;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
@@ -36,6 +37,32 @@ it('moves to the shortest sibling and queues the split when the step is too big'
 
     Queue::assertPushed(JobDecorator::class, fn (JobDecorator $job): bool => $job->getAction() instanceof SplitStep
         && $job->getParameters()[0]->id === $big->id);
+});
+
+it('trades a step too big for the shortest one, not for one nobody estimated', function (): void {
+    Queue::fake();
+
+    $session = started();
+
+    $session->intention->steps()->where('position', 2)->sole()->update(['estimated_seconds' => null]);
+
+    ReportStuck::run($session, StuckReason::TooBig);
+
+    // Position 3 is the shortest of what is left once the unestimated one stops sorting first.
+    expect($session->refresh()->currentStep()->sole()->position)->toBe(3);
+});
+
+it('does not hand back a step that was skipped minutes ago', function (): void {
+    Queue::fake();
+
+    $session = started();
+    $shortest = $session->intention->steps()->where('position', 2)->sole();
+
+    SkipStep::run($shortest);
+
+    ReportStuck::run($session, StuckReason::TooBig);
+
+    expect($session->refresh()->current_step_id)->not->toBe($shortest->id);
 });
 
 it('records the blocker and moves to another step when something is missing', function (): void {
