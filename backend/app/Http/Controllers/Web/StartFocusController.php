@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web;
 
 use App\Actions\Sessions\StartSession;
+use App\Concerns\ResolvesStartableStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
-use App\Models\Step;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 
 final class StartFocusController extends Controller
 {
+    use ResolvesStartableStep;
+
     public function __invoke(StoreSessionRequest $request): RedirectResponse
     {
+        $step = $this->startableStep($request, $request->string('step_id')->toString());
+
+        /** @var User $user */
         $user = $request->user();
-
-        abort_unless($user instanceof User, 401);
-
-        $step = Step::query()->findOrFail($request->string('step_id')->toString());
-
-        abort_unless($step->intention->user_id === $user->id, 404);
 
         StartSession::run($user, $step);
 

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\StopSession;
+use App\Enums\IntentionStatus;
+use App\Enums\StepStatus;
 use App\Enums\StuckReason;
 use App\Models\User;
 
@@ -25,13 +27,32 @@ it('starts a session on a step and returns the state to render', function (): vo
         ->assertJsonPath('progress.0', '0 of 3 steps done.');
 });
 
-it('returns the running session rather than creating a second one', function (): void {
+it('moves the running session to the step they asked for rather than creating a second one', function (): void {
     $session = started();
+    $third = $session->intention->steps()->where('position', 3)->sole();
 
     $this->actingAs($session->user)
-        ->postJson('/api/v1/sessions', ['step_id' => $session->intention->steps()->where('position', 3)->sole()->id])
+        ->postJson('/api/v1/sessions', ['step_id' => $third->id])
         ->assertOk()
-        ->assertJsonPath('session.id', $session->id);
+        ->assertJsonPath('session.id', $session->id)
+        ->assertJsonPath('session.currentStep.id', $third->id);
+});
+
+it('refuses to start on work that is already behind them', function (): void {
+    $intention = kitchen();
+    $step = $intention->steps()->first();
+    $step->update(['status' => StepStatus::Done]);
+
+    $this->actingAs($intention->user)
+        ->postJson('/api/v1/sessions', ['step_id' => $step->id])
+        ->assertNotFound();
+
+    $second = $intention->steps()->where('position', 2)->sole();
+    $intention->update(['status' => IntentionStatus::Done]);
+
+    $this->actingAs($intention->user)
+        ->postJson('/api/v1/sessions', ['step_id' => $second->id])
+        ->assertNotFound();
 });
 
 it('answers 200 for each control that mutates an open session', function (): void {

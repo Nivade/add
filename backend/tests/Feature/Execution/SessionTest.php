@@ -17,15 +17,29 @@ use App\Models\ExecutionSession;
 use App\Support\Execution\Exceptions\InvalidSessionTransition;
 use Carbon\CarbonImmutable;
 
-it('opens one session for a stretch of work and returns the running one after that', function (): void {
+it('keeps one session for a stretch of work and moves it to the step they picked', function (): void {
     $session = started();
     $other = $session->intention->steps()->where('position', 3)->sole();
 
     $again = StartSession::run($session->user, $other);
 
     expect($again->id)->toBe($session->id)
-        ->and($again->current_step_id)->toBe($session->current_step_id)
-        ->and(ExecutionSession::query()->count())->toBe(1);
+        ->and($again->current_step_id)->toBe($other->id)
+        ->and(ExecutionSession::query()->count())->toBe(1)
+        ->and(replay($session))->toBe(['started', 'started']);
+});
+
+it('closes the stretch and opens another when the step belongs elsewhere', function (): void {
+    $session = started();
+    $elsewhere = kitchen()->steps()->first();
+    $elsewhere->intention->update(['user_id' => $session->user_id]);
+
+    $next = StartSession::run($session->user, $elsewhere);
+
+    expect($next->id)->not->toBe($session->id)
+        ->and($next->current_step_id)->toBe($elsewhere->id)
+        ->and($session->refresh()->outcome)->toBe(SessionOutcome::Stopped)
+        ->and($session->ended_at)->not->toBeNull();
 });
 
 it('advances to the next step when one is done', function (): void {
