@@ -21,7 +21,7 @@ inWords: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };
-export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
+export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'step_split' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
 export type ExecutionSessionData = {
 id: string,
 intentionId: string,

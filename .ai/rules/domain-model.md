@@ -50,6 +50,13 @@ leaves the capture alone.
 Skipped steps are kept, not deleted. The skip history is what stops the resolver
 re-offering the same thing and is the eval corpus for decomposition quality.
 
+A split is the one exception, and it pays for itself first: `SplitStep` deletes
+the step it replaced, because leaving it pending would offer the person the thing
+they just said was too big, and no status word describes "superseded" without
+inventing one. What it was — title, skip count, the ids that replaced it — is
+written into the session's replay before the row goes, so the history still reads
+continuously.
+
 ## Keys
 
 Domain tables use ULIDs (`HasUlids`). `users` is Laravel's default bigint from

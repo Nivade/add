@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Steps;
 
+use App\Actions\Sessions\RecordExecutionEvent;
 use App\Contracts\AiProvider;
 use App\Data\Ai\ParsedStepData;
+use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;
 use App\Models\Step;
@@ -55,14 +57,32 @@ final class SplitStep
                 throw new AiResponseInvalid('split_step returned no steps.');
             }
 
-            ExecutionSession::query()
-                ->where('current_step_id', $step->id)
-                ->update(['current_step_id' => $first->id]);
+            $this->recordReplacement($step, $written, $first);
 
             $step->delete();
 
             return new Collection($written);
         });
+    }
+
+    /**
+     * The row goes, so what it was goes into the replay before it does.
+     *
+     * @param  list<Step>  $written
+     */
+    private function recordReplacement(Step $step, array $written, Step $first): void
+    {
+        $sessions = ExecutionSession::query()->where('current_step_id', $step->id)->get();
+
+        foreach ($sessions as $session) {
+            RecordExecutionEvent::run($session, ExecutionEventType::StepSplit, $step->id, [
+                'title' => $step->title,
+                'skip_count' => $step->skip_count,
+                'replaced_by' => array_map(fn (Step $smaller): string => $smaller->id, $written),
+            ]);
+
+            $session->update(['current_step_id' => $first->id]);
+        }
     }
 
     private function makeRoom(Step $step, int $count): void

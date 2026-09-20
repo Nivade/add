@@ -156,3 +156,25 @@ it('does not open a second session while splitting', function (): void {
 
     expect(ExecutionSession::query()->count())->toBe(1);
 });
+
+it('leaves the replaced step in the history the split writes', function (): void {
+    $session = started();
+    $big = $session->currentStep()->sole();
+
+    SkipStep::run($big);
+
+    answeredSplit([
+        ['title' => 'Pick up one thing.', 'estimated_seconds' => 20],
+        ['title' => 'Put it where it belongs.', 'estimated_seconds' => 40],
+    ]);
+
+    SplitStep::run($big->refresh());
+
+    $event = $session->events()->where('type', 'step_split')->sole();
+
+    expect($event->step_id)->toBe($big->id)
+        ->and($event->payload['title'])->toBe('Step 1.')
+        ->and($event->payload['skip_count'])->toBe(1)
+        ->and($event->payload['replaced_by'])->toHaveCount(2)
+        ->and(replay($session))->toBe(['started', 'step_split']);
+});
