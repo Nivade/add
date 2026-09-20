@@ -36,13 +36,16 @@ final class ConvertCaptureToIntention
             return $capture->intention()->firstOrFail();
         }
 
-        $extracted = $this->extractor->extract(
-            $capture->body,
-            CarbonImmutable::now($capture->user()->sole()->timezone)
-        );
+        $timezone = $capture->user()->sole()->timezone;
+        $now = CarbonImmutable::now($timezone);
+
+        $extracted = $this->extractor->extract($capture->body, $now);
 
         $parsed = $this->parser->parse(
-            $this->provider->complete(AiRequest::parseCapture($this->unclaimed($capture->body, $extracted)))->payload
+            $this->provider->complete(AiRequest::parseCapture(
+                $this->describe($this->unclaimed($capture->body, $extracted), $now)
+            ))->payload,
+            $timezone,
         );
 
         // Read in the person's zone, stored as the instant it names.
@@ -66,6 +69,16 @@ final class ConvertCaptureToIntention
         DecomposeIntention::dispatch($intention);
 
         return $intention;
+    }
+
+    /** A model with no date cannot resolve "Saturday", and one with no zone answers on the wrong clock. */
+    private function describe(string $text, CarbonImmutable $now): string
+    {
+        return implode("\n", [
+            'Today is '.$now->format('l j F Y').' in '.$now->getTimezone()->getName().'.',
+            '',
+            $text,
+        ]);
     }
 
     private function unclaimed(string $body, ?ExtractedDeadline $extracted): string

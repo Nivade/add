@@ -105,7 +105,34 @@ it('lets the deadline extractor beat the model when the two disagree', function 
     RecordCapture::run(User::factory()->create(), 'clean the apartment before Saturday');
 
     expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59')
-        ->and($provider->received[0]->user)->toBe('clean the apartment');
+        ->and($provider->received[0]->user)->toContain('clean the apartment')
+        ->and($provider->received[0]->user)->not->toContain('before Saturday');
+});
+
+it('tells the model what day it is and which zone to answer in', function (): void {
+    $provider = answeredAi();
+    $this->travelTo(CarbonImmutable::parse('2026-09-16 23:30:00', 'UTC'));
+
+    RecordCapture::run(
+        User::factory()->create(['timezone' => 'Europe/Amsterdam']),
+        'renew my passport'
+    );
+
+    // Half past midnight in Amsterdam, so the day the model is told is not the server's.
+    expect($provider->received[0]->user)->toContain('Thursday 17 September 2026')
+        ->and($provider->received[0]->user)->toContain('Europe/Amsterdam');
+});
+
+it('reads a deadline only the model found on the person\'s clock', function (): void {
+    answeredAi(['deadline_at' => '2026-10-02T09:00:00']);
+
+    RecordCapture::run(
+        User::factory()->create(['timezone' => 'Europe/Amsterdam']),
+        'renew my passport'
+    );
+
+    // 09:00 in Amsterdam, which is 07:00 UTC, which is what the column holds.
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-10-02 07:00:00');
 });
 
 it('reads "tomorrow morning" in the person\'s zone and stores the instant it names', function (): void {

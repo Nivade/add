@@ -24,7 +24,7 @@ function decomposePayload(array $steps): array
 }
 
 it('turns a decoded capture answer into typed data', function (): void {
-    $parsed = (new ParseCaptureParser)->parse(capturePayload());
+    $parsed = (new ParseCaptureParser)->parse(capturePayload(), 'UTC');
 
     expect($parsed->title)->toBe('Clean the apartment')
         ->and($parsed->why)->toBe('Parents are coming')
@@ -32,12 +32,30 @@ it('turns a decoded capture answer into typed data', function (): void {
         ->and($parsed->needsClarification)->toBeFalse();
 });
 
+it('reads a deadline the model left naive on the clock the person reads', function (): void {
+    $parsed = (new ParseCaptureParser)->parse(
+        capturePayload(['deadline_at' => '2026-09-19T09:00:00']),
+        'Europe/Amsterdam'
+    );
+
+    expect($parsed->deadlineAt?->utc()->toDateTimeString())->toBe('2026-09-19 07:00:00');
+});
+
+it('keeps the offset a model stated rather than reading it again', function (): void {
+    $parsed = (new ParseCaptureParser)->parse(
+        capturePayload(['deadline_at' => '2026-09-19T09:00:00+00:00']),
+        'Europe/Amsterdam'
+    );
+
+    expect($parsed->deadlineAt?->utc()->toDateTimeString())->toBe('2026-09-19 09:00:00');
+});
+
 it('treats an absent deadline as no deadline rather than an error', function (mixed $value): void {
-    expect((new ParseCaptureParser)->parse(capturePayload(['deadline_at' => $value]))->deadlineAt)->toBeNull();
+    expect((new ParseCaptureParser)->parse(capturePayload(['deadline_at' => $value]), 'UTC')->deadlineAt)->toBeNull();
 })->with([null, '', '   ', 'null']);
 
 it('rejects a capture answer the application cannot use', function (array $payload): void {
-    expect(fn () => (new ParseCaptureParser)->parse($payload))->toThrow(AiResponseInvalid::class);
+    expect(fn () => (new ParseCaptureParser)->parse($payload, 'UTC'))->toThrow(AiResponseInvalid::class);
 })->with([
     'no title' => [['why' => null, 'needs_clarification' => false]],
     'empty title' => [['title' => '   ', 'needs_clarification' => false]],

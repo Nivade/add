@@ -13,7 +13,7 @@ use Throwable;
 final class ParseCaptureParser
 {
     /** @param  array<string, mixed>  $payload */
-    public function parse(array $payload): ParsedCaptureData
+    public function parse(array $payload, string $timezone): ParsedCaptureData
     {
         $title = $payload['title'] ?? null;
 
@@ -36,19 +36,20 @@ final class ParseCaptureParser
         return new ParsedCaptureData(
             title: trim($title),
             why: is_string($why) && trim($why) !== '' ? trim($why) : null,
-            deadlineAt: $this->deadline($payload['deadline_at'] ?? null),
+            deadlineAt: $this->deadline($payload['deadline_at'] ?? null, $timezone),
             needsClarification: $needsClarification,
         );
     }
 
-    private function deadline(mixed $value): ?CarbonImmutable
+    /** An answer carrying its own offset keeps it; a naive one means the clock the person reads. */
+    private function deadline(mixed $value, string $timezone): ?CarbonImmutable
     {
         if (! is_string($value) || trim($value) === '' || strtolower(trim($value)) === 'null') {
             return null;
         }
 
         try {
-            return CarbonImmutable::parse(trim($value));
+            return CarbonImmutable::parse(trim($value), $timezone);
         } catch (Throwable $exception) {
             throw new AiResponseInvalid('parse_capture returned an unreadable deadline_at: '.trim($value), previous: $exception);
         }

@@ -7,7 +7,7 @@ namespace App\Support\Ai;
 /** Keep these byte-stable: cached input is an order of magnitude cheaper, and anything varying per call belongs in the user message. */
 final class Prompts
 {
-    public const string PARSE_CAPTURE_VERSION = '1';
+    public const string PARSE_CAPTURE_VERSION = '2';
 
     public const string DECOMPOSE_VERSION = '1';
 
@@ -19,6 +19,7 @@ final class Prompts
         Rules:
         - Keep their words. Do not make the title more formal, more ambitious, or more complete than what they wrote.
         - A deadline exists only when the text names a real date, appointment or legal cutoff. "Soon", "I should really", and "at some point" are not deadlines.
+        - The message opens with their date and zone. Read every relative date against those, and answer deadline_at with the matching UTC offset.
         - needs_clarification is true only when you could not name the outcome at all. Being vague about how is fine; being vague about what is not.
 
         Examples:

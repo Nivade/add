@@ -43,7 +43,8 @@ final class CannedAiProvider implements AiProvider
     /** @return array<string, mixed> */
     private function parseCapture(string $user): array
     {
-        $title = Str::of($user)->trim()->before("\n")->trim()->limit(80)->value();
+        // The message opens with the day and zone, and the person's own words follow the blank line.
+        $title = Str::of($user)->after("\n\n")->trim()->before("\n")->trim()->limit(80)->value();
 
         return [
             'title' => $title === '' ? 'Untitled' : $title,
