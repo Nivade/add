@@ -8,6 +8,8 @@ use App\Enums\ExecutionEventType;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Models\User;
+use App\Support\Execution\RunningSession;
+use Illuminate\Support\Facades\Cache;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** A stretch of focused work is one row, and it points at the step the person asked for. */
@@ -17,13 +19,13 @@ final class StartSession
 
     public function handle(User $user, Step $step): ExecutionSession
     {
-        $running = ExecutionSession::query()->where('user_id', $user->id)->running()->latest('started_at')->first();
+        return Cache::lock(RunningSession::lockKey($user), 10)->block(5, function () use ($user, $step): ExecutionSession {
+            $running = RunningSession::forUser($user);
 
-        if ($running instanceof ExecutionSession) {
-            return $this->retarget($running, $user, $step);
-        }
-
-        return $this->open($user, $step);
+            return $running instanceof ExecutionSession
+                ? $this->retarget($running, $user, $step)
+                : $this->open($user, $step);
+        });
     }
 
     /** Pressing start on something else is an answer to "what now", so the session follows rather than ignoring it. */

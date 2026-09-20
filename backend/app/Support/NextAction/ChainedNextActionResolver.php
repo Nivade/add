@@ -10,6 +10,7 @@ use App\Data\NextActionData;
 use App\Data\StepData;
 use App\Models\ExecutionSession;
 use App\Models\User;
+use App\Support\Execution\RunningSession;
 use App\Support\NextAction\Comparators\DeadlineWithinReach;
 use App\Support\NextAction\Comparators\EarliestPosition;
 use App\Support\NextAction\Comparators\HasDeadline;
@@ -59,14 +60,9 @@ final class ChainedNextActionResolver implements NextActionResolver
     /** @param  list<Candidate>  $candidates */
     private function continuation(User $user, array $candidates): ?Candidate
     {
-        $session = ExecutionSession::query()
-            ->where('user_id', $user->id)
-            ->running()
-            ->whereNotNull('current_step_id')
-            ->latest('started_at')
-            ->first();
+        $session = RunningSession::forUser($user);
 
-        if ($session === null) {
+        if (! $session instanceof ExecutionSession || $session->current_step_id === null) {
             return null;
         }
 

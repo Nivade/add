@@ -10,6 +10,7 @@ use App\Data\PlanRungData;
 use App\Data\RailData;
 use App\Models\ExecutionSession;
 use App\Models\User;
+use App\Support\Execution\RunningSession;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\Time\BackwardsPlan;
 use App\Support\Time\NextAppointment;
@@ -25,7 +26,7 @@ final class BuildRail
     {
         $now = ResolutionContext::forUser($user)->now;
 
-        $session = ExecutionSession::query()->where('user_id', $user->id)->running()->first();
+        $session = RunningSession::forUser($user);
 
         $next = NextAppointment::forUser($user, $now);
         $leave = $this->leaveBy($next, $now);

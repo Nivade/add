@@ -22,7 +22,7 @@ final class CompleteStep
         return DB::transaction(function () use ($session, $step): ExecutionSession {
             $step->update(['status' => StepStatus::Done, 'completed_at' => now()]);
 
-            $session->update(['steps_completed' => $session->steps_completed + 1]);
+            $session->increment('steps_completed');
 
             RecordExecutionEvent::run($session, ExecutionEventType::StepCompleted, $step->id);
 

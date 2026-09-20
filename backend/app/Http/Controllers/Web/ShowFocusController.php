@@ -8,6 +8,7 @@ use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
 use App\Models\User;
+use App\Support\Execution\RunningSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
@@ -20,7 +21,7 @@ final class ShowFocusController extends Controller
 
         abort_unless($user instanceof User, 401);
 
-        $session = ExecutionSession::query()->where('user_id', $user->id)->running()->first();
+        $session = RunningSession::forUser($user);
 
         // Focus without a session is not a screen; home is where the next thing is chosen.
         if (! $session instanceof ExecutionSession) {

@@ -6,7 +6,9 @@ use App\Actions\Sessions\StopSession;
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
 use App\Enums\StuckReason;
+use App\Models\ExecutionSession;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia;
 
 it('answers a null-shaped 200 when no session is open', function (): void {
     $this->actingAs(User::factory()->create())
@@ -144,4 +146,43 @@ it('carries the stuck note through the endpoint', function (): void {
 
     expect($session->events()->where('type', 'stuck')->sole()->payload['note'])
         ->toBe('The drill is at my mother-in-law.');
+});
+
+it('resolves the same running session on every screen when two are open', function (): void {
+    $session = started();
+
+    // A second row can only come from a race, and every reader has to pick the same one anyway.
+    $later = ExecutionSession::factory()
+        ->for($session->user)
+        ->for($session->intention)
+        ->create([
+            'current_step_id' => $session->intention->steps()->where('position', 2)->sole()->id,
+            'started_at' => $session->started_at->addMinutes(5),
+        ]);
+
+    $this->actingAs($session->user)
+        ->getJson('/api/v1/sessions/current')
+        ->assertOk()
+        ->assertJsonPath('session.id', $later->id);
+
+    $this->actingAs($session->user)
+        ->get(route('focus'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('state.session.id', $later->id));
+
+    $this->actingAs($session->user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.session.session.id', $later->id));
+});
+
+it('opens one session when start is pressed twice', function (): void {
+    $intention = kitchen();
+    $step = $intention->steps()->first();
+
+    foreach ([1, 2] as $press) {
+        $this->actingAs($intention->user)->postJson('/api/v1/sessions', ['step_id' => $step->id]);
+    }
+
+    expect(ExecutionSession::query()->where('user_id', $intention->user->id)->count())->toBe(1);
 });
