@@ -39,7 +39,7 @@ final class ReduceToOneStep
             new NextActionData(
                 StepData::from($smallest->step),
                 IntentionData::from($smallest->intention),
-                $this->why($smallest, count($candidates) - 1),
+                $this->why($smallest, count($candidates) - 1, $context),
             ),
             count($candidates) - 1,
         );
@@ -61,13 +61,21 @@ final class ReduceToOneStep
     }
 
     /** @return list<string> */
-    private function why(Candidate $candidate, int $restCount): array
+    private function why(Candidate $candidate, int $restCount, ResolutionContext $context): array
     {
         $estimate = $candidate->estimateInWords();
 
-        return [
+        $why = [
             $estimate === null ? 'Nobody has estimated this one.' : "This takes about {$estimate}.",
             $restCount === 0 ? 'It is the only thing left.' : 'Nothing else left is shorter.',
         ];
+
+        $available = $context->availableInWords();
+
+        if ($available !== null && $context->availableSeconds >= $candidate->cost()) {
+            $why[] = "You have {$available} before you need to leave, so it fits.";
+        }
+
+        return $why;
     }
 }

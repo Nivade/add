@@ -48,7 +48,7 @@ function Control({
 
 export default function Focus({ state }: { state: ExecutionStateData }) {
     const [stuckOpen, setStuckOpen] = useState(false);
-    const { session, intention, progress } = state;
+    const { session, intention, progress, elapsed } = state;
     const step = session.currentStep;
     const estimate = formatEstimate(step?.estimatedSeconds ?? null);
     const paused = session.pausedAt !== null;
@@ -121,13 +121,12 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     </>
                 )}
 
-                {progress.length > 0 && (
-                    <ul className="text-muted-foreground border-border space-y-1 border-t pt-5 font-mono text-[13px]">
-                        {progress.map((line) => (
-                            <li key={line}>{line.toLowerCase()}</li>
-                        ))}
-                    </ul>
-                )}
+                <ul className="text-muted-foreground border-border space-y-1 border-t pt-5 font-mono text-[13px]">
+                    <li>{elapsed.toLowerCase()}</li>
+                    {progress.map((line) => (
+                        <li key={line}>{line.toLowerCase()}</li>
+                    ))}
+                </ul>
             </div>
 
             <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>

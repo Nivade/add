@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Models\ExecutionSession;
+use App\Support\Execution\ElapsedWords;
 use App\Support\Execution\ProgressLines;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\Data;
@@ -20,6 +21,7 @@ class ExecutionStateData extends Data
         public ExecutionSessionData $session,
         public IntentionData $intention,
         public array $progress,
+        public string $elapsed,
     ) {}
 
     public static function of(ExecutionSession $session): self
@@ -28,6 +30,7 @@ class ExecutionStateData extends Data
             ExecutionSessionData::from($session->refresh()->load('currentStep')),
             IntentionData::from($session->intention),
             ProgressLines::for($session),
+            ElapsedWords::for($session),
         );
     }
 

@@ -10,10 +10,12 @@ use App\Data\ComingUpData;
 use App\Data\ExecutionStateData;
 use App\Data\HomeData;
 use App\Data\IntentionData;
+use App\Data\ReminderData;
 use App\Enums\IntentionStatus;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
+use App\Notifications\AppointmentReminder;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\Time\NextAppointment;
 use Illuminate\Database\Eloquent\Builder;
@@ -44,10 +46,34 @@ final class BuildHome
             rightNow: $this->resolver->resolve($user, $context),
             session: $session instanceof ExecutionSession ? ExecutionStateData::of($session) : null,
             comingUp: $this->comingUp($user, $context),
+            reminder: $this->reminder($user),
             needsAttention: array_values($needsAttention
                 ->map(fn (Intention $intention): IntentionData => IntentionData::from($intention))
                 ->all()),
             restCount: $this->open($user)->count() - $needsAttention->count(),
+        );
+    }
+
+    /** Reading it here is what makes it read: the web has no notification tray to leave it sitting in. */
+    private function reminder(User $user): ?ReminderData
+    {
+        $notification = $user->unreadNotifications()
+            ->where('type', AppointmentReminder::class)
+            ->latest()
+            ->first();
+
+        if ($notification === null) {
+            return null;
+        }
+
+        $notification->markAsRead();
+
+        $data = $notification->data;
+        $lines = $data['lines'] ?? [];
+
+        return new ReminderData(
+            is_string($data['title'] ?? null) ? $data['title'] : '',
+            is_array($lines) ? array_values(array_filter($lines, is_string(...))) : [],
         );
     }
 

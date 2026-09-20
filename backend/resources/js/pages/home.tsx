@@ -70,7 +70,7 @@ function RightNow({ rightNow, session }: HomeData) {
 }
 
 export default function Home({ home: data }: { home: HomeData }) {
-    const { rightNow, comingUp, needsAttention, restCount } = data;
+    const { rightNow, comingUp, reminder, needsAttention, restCount } = data;
 
     return (
         <>
@@ -91,6 +91,16 @@ export default function Home({ home: data }: { home: HomeData }) {
                     <Band label="Why this one">
                         <ul className="space-y-1">
                             {rightNow.why.map((line) => (
+                                <li key={line}>{line}</li>
+                            ))}
+                        </ul>
+                    </Band>
+                )}
+
+                {reminder && (
+                    <Band label="Before you go">
+                        <ul className="space-y-1">
+                            {reminder.lines.map((line) => (
                                 <li key={line}>{line}</li>
                             ))}
                         </ul>

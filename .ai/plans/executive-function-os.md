@@ -47,11 +47,17 @@ classes live. "Next action" stays the product word and is what
 | `steps` | intention, title, `estimated_seconds`, position, status | one physical action each |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
+| `calendar_events` | source, external id, title, `starts_at`, plan assumptions | read-only; the source owns it, we never write back |
+| `reminders` | user, appointment kind and id, `sent_at` | one row per appointment, which is what keeps reminders sparse |
 
 Deferred until they earn their place: `Project`, `Task`, `Commitment`,
-`WaitingFor`, `Reminder`, `Context`, `Document`, `CalendarEvent`. The spec lists
-them; building them before the first journey is polished is the premature
-normalisation it warns against.
+`WaitingFor`, `Context`, `Document`. The spec lists them; building them before
+the first journey is polished is the premature normalisation it warns against.
+`CalendarEvent` and `Reminder` earned theirs in slice 6.
+
+An appointment is the `Appointment` contract, not a table: a dated intention and
+a calendar event both answer it, so backwards planning, the rail and reminders
+ask one question rather than branching on which table it came from.
 
 Status enums avoid failure words. Session outcome is
 `continued | completed | stopped`. There is no `abandoned`, no `overdue`, no
@@ -80,6 +86,7 @@ POST   /api/v1/sessions/{session}/distracted
 POST   /api/v1/sessions/{session}/stop
 GET    /api/v1/overwhelmed               collapses the world to one small step
 PATCH  /api/v1/intentions/{id}/plan      states a minute count the plan assumed
+PATCH  /api/v1/calendar-events/{id}/plan the same, for an event off the calendar
 ```
 
 Same Data classes serve Inertia props and JSON, so the wire shape cannot drift
@@ -148,8 +155,8 @@ stays at one line each.
 | 3 | [Next action](slices/03-next-action.md) — `NextActionResolver`, ordered comparators, composed `why` | §9, §26 | done |
 | 4 | [Execution mode](slices/04-execution-mode.md) — one step, six controls, stuck and distracted | §10–§12, §18 | done |
 | 5 | [Home](slices/05-home.md) — four bands, one action, the first complete journey | §5, §29, §39 | done |
-| 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | next |
-| 7 | Mobile — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | paragraph below |
+| 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | done |
+| 7 | Mobile — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | next |
 | 8 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | paragraph below |
 | 9 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
 

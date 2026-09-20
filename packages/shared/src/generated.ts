@@ -35,11 +35,13 @@ export type ExecutionStateData = {
 session: ExecutionSessionData,
 intention: IntentionData,
 progress: string[],
+elapsed: string,
 };
 export type HomeData = {
 rightNow: NextActionData | null,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
+reminder: ReminderData | null,
 needsAttention: IntentionData[],
 restCount: number,
 };
@@ -75,6 +77,10 @@ minuteOfDay: number,
 sessionStartedAt: string | null,
 deadlineAt: string | null,
 deadlineTitle: string | null,
+};
+export type ReminderData = {
+title: string,
+lines: string[],
 };
 export type SessionOutcome = 'continued' | 'completed' | 'stopped';
 export type StepData = {

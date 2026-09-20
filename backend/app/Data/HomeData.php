@@ -16,6 +16,7 @@ class HomeData extends Data
         public ?NextActionData $rightNow,
         public ?ExecutionStateData $session,
         public ?ComingUpData $comingUp,
+        public ?ReminderData $reminder,
         public array $needsAttention,
         public int $restCount,
     ) {}

@@ -48,6 +48,16 @@ chain.
 Enters read-only. An event stops being a row to display and becomes something
 the system reasons about preparation for.
 
+Reading is behind `CalendarSource` with three drivers — `none` by default,
+`fixture` off disk, `fake` for tests. A provider integration is a fourth driver
+and touches nothing else. A sync drops what the source stopped reporting,
+because an event nobody is attending should not shape a day.
+
+Generated preparation is the backwards plan and nothing more. Naming the items
+to bring ("your insurance card") needs somewhere for objects to live, which is
+phase 2, so the override §22 asks for is the minute fields the plan already
+carries.
+
 ## Reminders (§14, §23)
 
 A reminder carries the preparation, the leave-by time and what is still missing.
@@ -55,6 +65,14 @@ A bare "dentist tomorrow" is a bug.
 
 Each notification answers why now, what to do, and what happens if it is
 ignored — or it is not sent.
+
+One reminder per appointment, sent when its first preparation falls due, with
+the `reminders` table holding that down rather than a rate limit. The lines are
+composed by `ReminderLines` and asserted verbatim in a test, since "it answers
+the four questions" is not something a machine can check any other way.
+
+The channel is `database`, and home reads the unread one into a band and marks
+it read — the web has no tray to leave it sitting in. Push waits for slice 7.
 
 ## Done when
 

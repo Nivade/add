@@ -23,6 +23,16 @@ enum PlanRung: string
         };
     }
 
+    /** What a reminder tells the person to do when this rung comes up. */
+    public function startingWords(): string
+    {
+        return match ($this) {
+            self::FindThings => 'Start finding what you need.',
+            self::GetReady => 'Start getting ready.',
+            self::Leave => 'Time to leave.',
+        };
+    }
+
     public function assumedSeconds(): int
     {
         return match ($this) {

@@ -15,15 +15,16 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 6, overwhelm and time.** "I'm overwhelmed" and backwards planning are
-both built: a same-day plan hangs off "Coming up" on home, each rung editable in
-minutes and labelled assumed until it is not. The rest of the slice is not. No
-calendar is read, no reminder is scheduled, nothing says how long the current
-session has been running, and `ResolutionContext` still carries `now` alone —
-the minutes available and the place it was designed to grow are not there yet.
+**Slice 7, mobile.** Nothing of it is built. Slice 6 is finished: the overwhelm
+entry point, backwards planning over both kinds of appointment, a read-only
+calendar behind `CalendarSource`, and one reminder per appointment that answers
+§23's four questions and lands on home as a band.
 
-Next, in the slice plan's order: the calendar, read-only, then contextual
-reminders over it.
+What slice 6 deliberately left unbuilt, so it is not mistaken for a gap: named
+preparation items ("your insurance card"), which need somewhere for objects to
+live, and push, which arrives with the mobile client. Reminders are scheduled
+every minute in `routes/console.php`, so a worker has to be running to see them
+outside a test.
 
 The home slice left one question open: what "Needs attention" offers to resolve
 an intention nobody could name. Nothing on that screen acts on it yet.
