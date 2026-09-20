@@ -114,11 +114,8 @@ that is written down in `ai-layer.md` rather than implied.
 Done when every provider call leaves one structured log line with no payload in
 it, asserted through the fake provider.
 
-**9. Confirm the model id before the first live run.**
-`config/ai.php` defaults to `gpt-5.6-luna`. Nothing has ever called it, since
-`canned` is the default driver. Needs a human to confirm it against the
-provider's model list; a wrong default turns risk 2's eval trigger into a failed
-request. No code change if it is right.
+**9. Confirm the model id before the first live run.** Confirmed as real, so
+`config/ai.php` keeps its default and no code moved.
 
 **10. The chain offers a prerequisite before what follows it.**
 The open entry in [`findings.md`](../findings.md): `StartableNow` sits above
@@ -216,9 +213,20 @@ finds it before shipping push.
 - Every item above is either code or a recorded decision, and
   [`findings.md`](../findings.md) has no open entry left from the audit.
 
+## Found while executing it
+
+The schedule had been naming two commands that did not exist: laravel-actions
+only turns a `commandSignature` into a command once `registerCommands()` runs,
+and nothing called it, so `reminders:dispatch` and `calendar:sync` failed every
+minute while the tests — which call the actions directly — stayed green. Fixed
+with item 14, and a guard now fails when the schedule names a command nothing
+answers.
+
 ## Open
 
 Confirming a generated step's wording needs step editing, which nothing has
-asked for yet. Per-user AI consent needs a column and a screen, and waits for
+asked for yet. Overwhelm mode does not label a suggested step: its `why` lines
+already say what the step costs, and a second label is the noise that screen
+exists to remove. Per-user AI consent needs a column and a screen, and waits for
 the first real user. Encrypting notification payloads waits for ingestion, where
 the threat model is written.

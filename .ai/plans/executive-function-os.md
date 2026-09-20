@@ -156,6 +156,7 @@ stays at one line each.
 | 4 | [Execution mode](slices/04-execution-mode.md) — one step, six controls, stuck and distracted | §10–§12, §18 | done |
 | 5 | [Home](slices/05-home.md) — four bands, one action, the first complete journey | §5, §29, §39 | done |
 | 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | done |
+| — | [Hardening](hardening.md) — where the built slices disagreed with their own decisions | §2.5, §21, §28 | done |
 | 7 | Mobile — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | next |
 | 8 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | paragraph below |
 | 9 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |

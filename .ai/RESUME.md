@@ -20,11 +20,14 @@ entry point, backwards planning over both kinds of appointment, a read-only
 calendar behind `CalendarSource`, and one reminder per appointment that answers
 §23's four questions and lands on home as a band.
 
+The hardening pass over slices 1–6 is finished too — [`hardening.md`](plans/hardening.md)
+carries what it settled and what it deliberately left open.
+
 What slice 6 deliberately left unbuilt, so it is not mistaken for a gap: named
 preparation items ("your insurance card"), which need somewhere for objects to
 live, and push, which arrives with the mobile client. Reminders are scheduled
-every minute in `routes/console.php`, so a worker has to be running to see them
-outside a test.
+every minute in `routes/console.php` and dispatch one job per person, so both a
+scheduler and a queue worker have to be running to see one outside a test.
 
 The home slice left one question open: what "Needs attention" offers to resolve
 an intention nobody could name. Nothing on that screen acts on it yet.
