@@ -68,12 +68,19 @@ between them; later ones never override it. Ordered:
 | 1 | `DeadlineWithinReach` | a `deadline_at` close enough that the remaining steps barely fit |
 | 2 | `HasDeadline` | a real deadline beats no deadline |
 | 3 | `NotRecentlySkipped` | a step skipped in the last stretch sinks below one that was not |
-| 4 | `StartableNow` | shorter `estimated_seconds` wins; starting is the hard part |
-| 5 | `OldestIntention` | the thing that has been waiting longest |
-| 6 | `EarliestPosition` | the decomposer's order, then ULID |
+| 4 | `PrerequisiteFirst` | inside one intention, the decomposer's order holds |
+| 5 | `StartableNow` | shorter `estimated_seconds` wins; starting is the hard part |
+| 6 | `OldestIntention` | the thing that has been waiting longest |
+| 7 | `EarliestPosition` | the decomposer's order, then ULID |
 
-Comparator 6 is a total order, so the chain is deterministic and two runs over
+Comparator 7 is a total order, so the chain is deterministic and two runs over
 the same world return the same step.
+
+Comparator 4 answers two candidates only when they belong to the same intention,
+and that is the whole of its opinion: a sequence that can be taken out of order
+was not a sequence, and offering step three before step one asks the person to
+work out the dependency the decomposition already stated. Across intentions it
+abstains, so "shortest thing wins" still decides which intention to be in.
 
 Each comparator is a seam of its own — an internal one, private to the
 resolver's implementation. The chain's composition is where the product opinion

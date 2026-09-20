@@ -15,6 +15,7 @@ use App\Support\NextAction\Comparators\EarliestPosition;
 use App\Support\NextAction\Comparators\HasDeadline;
 use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\Comparators\OldestIntention;
+use App\Support\NextAction\Comparators\PrerequisiteFirst;
 use App\Support\NextAction\Comparators\StartableNow;
 
 /** No score: a number six inputs went into cannot be explained, and the `why` has to be. */
@@ -29,6 +30,7 @@ final class ChainedNextActionResolver implements NextActionResolver
             new DeadlineWithinReach,
             new HasDeadline,
             new NotRecentlySkipped,
+            new PrerequisiteFirst,
             new StartableNow,
             new OldestIntention,
             new EarliestPosition,

@@ -136,6 +136,43 @@ it('leads with the soonest deadline when several are ahead', function (): void {
     expect(nextAction($user, $now)?->step->title)->toBe('Print the form.');
 });
 
+it('offers a prerequisite before the shorter step that follows it', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->decomposed()->for($user)->create();
+
+    Step::factory()->for($intention)->create([
+        'title' => 'Empty the top shelf.',
+        'position' => 1,
+        'estimated_seconds' => 900,
+    ]);
+    Step::factory()->for($intention)->create([
+        'title' => 'Wipe the shelf.',
+        'position' => 2,
+        'estimated_seconds' => 60,
+    ]);
+
+    $answer = nextAction($user);
+
+    expect($answer?->step->title)->toBe('Empty the top shelf.')
+        ->and($answer?->why)->toBe([
+            'It is the first thing left in this one.',
+            'This takes about 15 minutes.',
+        ]);
+});
+
+it('still prefers the shortest thing across two intentions', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    $long = Intention::factory()->decomposed()->for($user)->create(['created_at' => $now->subDays(2)]);
+    Step::factory()->for($long)->create(['title' => 'Strip the wallpaper.', 'position' => 1, 'estimated_seconds' => 3600]);
+
+    $short = Intention::factory()->decomposed()->for($user)->create(['created_at' => $now->subDay()]);
+    Step::factory()->for($short)->create(['title' => 'Ring the dentist.', 'position' => 1, 'estimated_seconds' => 120]);
+
+    expect(nextAction($user, $now)?->step->title)->toBe('Ring the dentist.');
+});
+
 it('cools a skipped step off and gives it full standing back afterwards', function (): void {
     $user = User::factory()->create();
     $intention = Intention::factory()->decomposed()->for($user)->create();
