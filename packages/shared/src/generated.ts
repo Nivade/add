@@ -82,6 +82,7 @@ leaveByClock: string | null,
 appointmentTitle: string | null,
 };
 export type ReminderData = {
+id: string,
 title: string,
 lines: string[],
 };

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
 import focusRoutes from '@/routes/focus';
 import intentions from '@/routes/intentions';
+import reminders from '@/routes/reminders';
 
 function OneThing({ children }: { children: React.ReactNode }) {
     return (
@@ -106,6 +107,18 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <li key={line}>{line}</li>
                             ))}
                         </ul>
+                        <Form
+                            {...reminders.dismiss.form(reminder.id)}
+                            className="mt-3"
+                        >
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                            >
+                                Got it
+                            </Button>
+                        </Form>
                     </Band>
                 )}
 

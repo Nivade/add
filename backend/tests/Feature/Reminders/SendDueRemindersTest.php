@@ -99,7 +99,7 @@ it('does not remind one person about another person\'s day', function (): void {
     Notification::assertNothingSent();
 });
 
-it('puts the reminder on home once, and not again after it has been read', function (): void {
+it('keeps the reminder on home across a reload, and drops it when dismissed', function (): void {
     CarbonImmutable::setTestNow('2026-09-19 13:02:00');
 
     $user = User::factory()->create();
@@ -110,15 +110,59 @@ it('puts the reminder on home once, and not again after it has been read', funct
 
     SendDueReminders::run($user);
 
+    $reminder = null;
+
+    foreach ([1, 2] as $visit) {
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertInertia(function (AssertableInertia $page) use (&$reminder): void {
+                $page->where('home.reminder.title', 'Dentist')->has('home.reminder.lines', 4);
+
+                $reminder = $page->toArray()['props']['home']['reminder']['id'];
+            });
+    }
+
     $this->actingAs($user)
-        ->get(route('home'))
-        ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->where('home.reminder.title', 'Dentist')
-            ->has('home.reminder.lines', 4)
-        );
+        ->from(route('home'))
+        ->post(route('reminders.dismiss', $reminder))
+        ->assertRedirect(route('home'));
 
     $this->actingAs($user)
         ->get(route('home'))
         ->assertInertia(fn (AssertableInertia $page) => $page->where('home.reminder', null));
+});
+
+it('takes the reminder down once the appointment is behind them', function (): void {
+    CarbonImmutable::setTestNow('2026-09-19 13:02:00');
+
+    $user = User::factory()->create();
+    CalendarEvent::factory()->for($user)->create([
+        'title' => 'Dentist',
+        'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00'),
+    ]);
+
+    SendDueReminders::run($user);
+
+    $this->travelTo(CarbonImmutable::parse('2026-09-19 14:30:00'));
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.reminder', null));
+});
+
+it('hides one person\'s reminder from another person\'s dismissal', function (): void {
+    CarbonImmutable::setTestNow('2026-09-19 13:02:00');
+
+    $user = User::factory()->create();
+    CalendarEvent::factory()->for($user)->create(['starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00')]);
+
+    SendDueReminders::run($user);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('reminders.dismiss', $user->unreadNotifications()->sole()->id))
+        ->assertNotFound();
+
+    expect($user->unreadNotifications()->count())->toBe(1);
 });

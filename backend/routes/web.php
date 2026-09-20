@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Web\AdjustPlanController;
 use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
+use App\Http\Controllers\Web\DismissReminderController;
 use App\Http\Controllers\Web\PauseFocusController;
 use App\Http\Controllers\Web\RecordDistractionController;
 use App\Http\Controllers\Web\ReportStuckController;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');
+    Route::post('reminders/{notification}/dismiss', DismissReminderController::class)->name('reminders.dismiss');
     Route::post('intentions/{appointment}/plan', AdjustPlanController::class)
         ->defaults('appointment_model', Intention::class)
         ->name('intentions.plan');

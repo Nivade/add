@@ -11,6 +11,7 @@ use App\Data\ExecutionStateData;
 use App\Data\HomeData;
 use App\Data\IntentionData;
 use App\Data\ReminderData;
+use App\Enums\AppointmentKind;
 use App\Enums\IntentionStatus;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
@@ -18,6 +19,7 @@ use App\Models\User;
 use App\Notifications\AppointmentReminder;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\Time\NextAppointment;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -46,7 +48,7 @@ final class BuildHome
             rightNow: $this->resolver->resolve($user, $context),
             session: $session instanceof ExecutionSession ? ExecutionStateData::of($session) : null,
             comingUp: $this->comingUp($user, $context),
-            reminder: $this->reminder($user),
+            reminder: $this->reminder($user, $context),
             needsAttention: array_values($needsAttention
                 ->map(fn (Intention $intention): IntentionData => IntentionData::from($intention))
                 ->all()),
@@ -54,8 +56,8 @@ final class BuildHome
         );
     }
 
-    /** Reading it here is what makes it read: the web has no notification tray to leave it sitting in. */
-    private function reminder(User $user): ?ReminderData
+    /** The band stands until the person dismisses it or the appointment it prepared for is behind them. */
+    private function reminder(User $user, ResolutionContext $context): ?ReminderData
     {
         $notification = $user->unreadNotifications()
             ->where('type', AppointmentReminder::class)
@@ -66,15 +68,32 @@ final class BuildHome
             return null;
         }
 
-        $notification->markAsRead();
-
         $data = $notification->data;
         $lines = $data['lines'] ?? [];
 
+        if (! $this->stillAhead($data, $context)) {
+            $notification->markAsRead();
+
+            return null;
+        }
+
         return new ReminderData(
+            $notification->id,
             is_string($data['title'] ?? null) ? $data['title'] : '',
             is_array($lines) ? array_values(array_filter($lines, is_string(...))) : [],
         );
+    }
+
+    /** @param  array<string, mixed>  $data */
+    private function stillAhead(array $data, ResolutionContext $context): bool
+    {
+        $kind = AppointmentKind::tryFrom(is_string($data['kind'] ?? null) ? $data['kind'] : '');
+        $id = is_string($data['appointment_id'] ?? null) ? $data['appointment_id'] : '';
+
+        $appointment = $kind?->find($id);
+        $at = $appointment?->appointmentAt();
+
+        return $at instanceof CarbonImmutable && $at > $context->now;
     }
 
     private function comingUp(User $user, ResolutionContext $context): ?ComingUpData

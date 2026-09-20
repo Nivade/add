@@ -13,6 +13,7 @@ class ReminderData extends Data
 {
     /** @param  list<string>  $lines */
     public function __construct(
+        public string $id,
         public string $title,
         public array $lines,
     ) {}
