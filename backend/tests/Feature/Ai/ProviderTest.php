@@ -123,7 +123,7 @@ it('gives back queued answers in order and then fails loudly', function (): void
 it('logs the shape of every call and none of the text', function (): void {
     Log::spy();
 
-    $answer = (new LoggingAiProvider((new FakeAiProvider)->push(['title' => 'Renew my passport'])))
+    $answer = new LoggingAiProvider((new FakeAiProvider)->push(['title' => 'Renew my passport']))
         ->complete(aiRequest(user: 'renew my passport'));
 
     expect($answer->provider)->toBe('fake');

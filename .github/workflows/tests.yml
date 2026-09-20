@@ -41,3 +41,19 @@ jobs:
 
       - name: Run CI Checks
         run: composer ci:check
+
+      - name: Check the Rector rewrites have landed
+        run: composer refactor:check
+
+      # Both frontends read packages/shared, and ci:check only typechecks backend's own tree.
+      - name: Typecheck every workspace
+        working-directory: .
+        run: |
+          npm install
+          npm run typecheck
+
+      # A stale generated.ts breaks both frontends at once and nothing else notices.
+      - name: Check the generated types match the PHP they come from
+        run: |
+          php artisan typescript:transform
+          git diff --exit-code ../packages/shared/src/generated.ts
