@@ -198,3 +198,15 @@ it('converts a capture once, however many times the job runs', function (): void
     expect($again->id)->toBe($capture->intention_id)
         ->and(Intention::query()->count())->toBe(1);
 });
+
+it('states the deadline to the decomposer on the person\'s clock', function (): void {
+    $provider = answeredAi(['deadline_at' => '2026-10-02T22:30:00+00:00']);
+
+    RecordCapture::run(
+        User::factory()->create(['timezone' => 'Europe/Amsterdam']),
+        'renew my passport'
+    );
+
+    // 22:30 UTC is half past midnight on the 3rd where they are, and that is the day they hear.
+    expect($provider->received[1]->user)->toContain('Saturday 3 October 2026 00:30');
+});

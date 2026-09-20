@@ -83,7 +83,10 @@ final class DecomposeIntention
         }
 
         if ($intention->deadline_at !== null) {
-            $lines[] = 'Deadline: '.$intention->deadline_at;
+            // Their clock, not the column's: a deadline stated in UTC reads as the wrong evening.
+            $lines[] = 'Deadline: '.$intention->deadline_at
+                ->setTimezone($intention->user->timezone)
+                ->format('l j F Y H:i');
         }
 
         return implode("\n", $lines);
