@@ -59,10 +59,20 @@ final readonly class Candidate
         return $seconds === null ? null : CarbonInterval::seconds($seconds)->cascade()->forHumans();
     }
 
+    public function deadlinePassed(CarbonImmutable $now): bool
+    {
+        $deadline = $this->deadlineAt();
+
+        return $deadline instanceof CarbonImmutable && $deadline <= $now;
+    }
+
+    /** A deadline already behind us is not a reach: there is no stretch of day left to fit the work into. */
     public function onlyJustFits(CarbonImmutable $now): bool
     {
         $deadline = $this->deadlineAt();
 
-        return $deadline instanceof CarbonImmutable && $now->addSeconds($this->remainingSeconds * self::FIT_SLACK) >= $deadline;
+        return $deadline instanceof CarbonImmutable
+            && ! $this->deadlinePassed($now)
+            && $now->addSeconds($this->remainingSeconds * self::FIT_SLACK) >= $deadline;
     }
 }

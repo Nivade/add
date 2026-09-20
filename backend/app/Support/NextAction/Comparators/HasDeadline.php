@@ -13,7 +13,14 @@ final class HasDeadline implements StepComparator
 {
     public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
     {
-        return ($b->deadlineAt() instanceof CarbonImmutable) <=> ($a->deadlineAt() instanceof CarbonImmutable);
+        $verdict = ($b->deadlineAt() instanceof CarbonImmutable) <=> ($a->deadlineAt() instanceof CarbonImmutable);
+
+        if ($verdict !== 0 || ! $a->deadlineAt() instanceof CarbonImmutable) {
+            return $verdict;
+        }
+
+        // Both are dated, so the soonest real constraint leads.
+        return $a->deadlineAt() <=> $b->deadlineAt();
     }
 
     public function decides(Candidate $candidate, ResolutionContext $context): ?string
@@ -29,6 +36,9 @@ final class HasDeadline implements StepComparator
             return null;
         }
 
-        return "Your deadline is {$deadline}.";
+        // Past tense, stated flatly: the date moved, which is a fact about the day and not about them.
+        return $candidate->deadlinePassed($context->now)
+            ? "Your deadline was {$deadline}."
+            : "Your deadline is {$deadline}.";
     }
 }

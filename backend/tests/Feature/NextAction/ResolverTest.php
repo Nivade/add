@@ -91,6 +91,51 @@ it('prefers a real deadline over none when both are comfortably far off', functi
         ]);
 });
 
+it('stops treating a deadline that has passed as a reach, and says it flatly', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    $passed = Intention::factory()->decomposed()->for($user)->create([
+        'title' => 'Send the rental form',
+        'deadline_at' => $now->subDays(2),
+    ]);
+    Step::factory()->for($passed)->create(['title' => 'Scan the form.', 'position' => 1, 'estimated_seconds' => 600]);
+
+    $ahead = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addHour()]);
+    foreach ([1, 2] as $position) {
+        Step::factory()->for($ahead)->create([
+            'title' => "Inspection step {$position}.",
+            'position' => $position,
+            'estimated_seconds' => 2400,
+        ]);
+    }
+
+    $answer = nextAction($user, $now);
+
+    // The one still ahead wins on reach; the passed one keeps its place and its plain sentence.
+    expect($answer?->step->title)->toBe('Inspection step 1.');
+
+    $ahead->steps->each->delete();
+
+    expect(nextAction($user, $now)?->why)->toBe([
+        'Your deadline was 2 days ago.',
+        'This takes about 10 minutes.',
+    ]);
+});
+
+it('leads with the soonest deadline when several are ahead', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    $later = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addDays(3)]);
+    Step::factory()->for($later)->create(['title' => 'Book the van.', 'position' => 1, 'estimated_seconds' => 300]);
+
+    $sooner = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addDay()]);
+    Step::factory()->for($sooner)->create(['title' => 'Print the form.', 'position' => 1, 'estimated_seconds' => 300]);
+
+    expect(nextAction($user, $now)?->step->title)->toBe('Print the form.');
+});
+
 it('cools a skipped step off and gives it full standing back afterwards', function (): void {
     $user = User::factory()->create();
     $intention = Intention::factory()->decomposed()->for($user)->create();
