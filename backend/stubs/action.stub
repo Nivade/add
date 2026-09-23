@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Lorisleiva\Actions\Concerns\AsObject;
+
+final class {{ class }}
+{
+    use AsObject;
+
+    public function handle(): void
+    {
+        //
+    }
+}

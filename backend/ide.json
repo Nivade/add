@@ -1,0 +1,74 @@
+{
+    "$schema": "https://laravel-ide.com/schema/laravel-ide-v2.json",
+    "packages": {
+        "inertia": {
+            "ignoreSettingsPaths": true,
+            "pagePaths": [
+                { "path": "resources/js/pages" }
+            ]
+        }
+    },
+    "codeGenerations": [
+        {
+            "id": "add:action",
+            "name": "Create Action (AsObject)",
+            "files": [
+                {
+                    "appNamespace": "Actions",
+                    "template": {
+                        "path": "/stubs/action.stub",
+                        "parameters": {
+                            "{{ namespace }}": "${INPUT_FQN|namespace}",
+                            "{{ class }}": "${INPUT_FQN|className}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": "add:controller-pair",
+            "name": "Create Web + API Controllers",
+            "classSuffix": "Controller",
+            "inputFilter": "className",
+            "files": [
+                {
+                    "appNamespace": "Http\\Controllers\\Web",
+                    "template": {
+                        "path": "/stubs/controller.invokable.stub",
+                        "parameters": {
+                            "{{ namespace }}": "${INPUT_FQN|namespace}",
+                            "{{ class }}": "${INPUT_FQN|className}"
+                        }
+                    }
+                },
+                {
+                    "appNamespace": "Http\\Controllers\\Api\\V1",
+                    "template": {
+                        "path": "/stubs/controller.invokable.stub",
+                        "parameters": {
+                            "{{ namespace }}": "${INPUT_FQN|namespace}",
+                            "{{ class }}": "${INPUT_FQN|className}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": "add:rung",
+            "name": "Create Next-Action Rung",
+            "inputFilter": "className",
+            "files": [
+                {
+                    "appNamespace": "Support\\NextAction\\Comparators",
+                    "template": {
+                        "path": "/stubs/rung.stub",
+                        "parameters": {
+                            "{{ namespace }}": "${INPUT_FQN|namespace}",
+                            "{{ class }}": "${INPUT_FQN|className}"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

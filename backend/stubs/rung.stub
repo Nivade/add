@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use App\Support\NextAction\Candidate;
+use App\Support\NextAction\ResolutionContext;
+use App\Support\NextAction\Rung;
+
+final class {{ class }} extends Rung
+{
+    public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
+    {
+        return 0;
+    }
+}
