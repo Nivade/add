@@ -26,7 +26,7 @@ final class SyncCalendar
     use AsObject;
     use QueuesPerUser;
 
-    private const int COLUMN_WIDTH = 250;
+    private const int TEXT_COLUMN_LIMIT = 250;
 
     public string $commandSignature = 'calendar:sync {user? : the id of one person, or every person when omitted}';
 
@@ -57,8 +57,7 @@ final class SyncCalendar
         // An event the source stopped reporting was moved or cancelled there, and
         // keeping it would have us plan a day around something nobody is attending.
         CalendarEvent::forget(CalendarEvent::query()
-            ->where('user_id', $user->id)
-            ->where('source', $this->source->name())
+            ->ofSource($user, $this->source->name())
             ->whereBetween('starts_at', [$from, $until])
             ->whereNotIn('external_id', array_map(
                 fn (CalendarEventDraftData $draft): string => $draft->externalId,
@@ -97,8 +96,8 @@ final class SyncCalendar
                 'user_id' => $user->id,
                 'source' => $source,
                 'external_id' => $draft->externalId,
-                'title' => Str::limit($draft->title, self::COLUMN_WIDTH),
-                'location' => $draft->location === null ? null : Str::limit($draft->location, self::COLUMN_WIDTH),
+                'title' => Str::limit($draft->title, self::TEXT_COLUMN_LIMIT),
+                'location' => $draft->location === null ? null : Str::limit($draft->location, self::TEXT_COLUMN_LIMIT),
                 'starts_at' => $draft->startsAt,
                 'ends_at' => $draft->endsAt,
             ];
@@ -115,8 +114,7 @@ final class SyncCalendar
         );
 
         $stored = CalendarEvent::query()
-            ->where('user_id', $user->id)
-            ->where('source', $source)
+            ->ofSource($user, $source)
             ->whereIn('external_id', array_keys($rows))
             ->get()
             ->keyBy('external_id');

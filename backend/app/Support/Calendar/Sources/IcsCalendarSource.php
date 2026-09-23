@@ -11,6 +11,7 @@ use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use DateTimeZone;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -59,8 +60,13 @@ final class IcsCalendarSource implements CalendarSource
         return $events;
     }
 
-    /** The key a feed's last answer is kept under, so an unchanged feed is not downloaded again. */
-    public static function cacheKey(string $url): string
+    /** What a feed last answered goes when the feed does. */
+    public static function forget(string $url): void
+    {
+        Cache::forget(self::cacheKey($url));
+    }
+
+    private static function cacheKey(string $url): string
     {
         return 'calendar-feed:'.hash('sha256', $url);
     }
@@ -86,22 +92,21 @@ final class IcsCalendarSource implements CalendarSource
     private function fetch(string $url): string
     {
         $key = self::cacheKey($url);
-        $cached = Cache::get($key);
-        $cachedBody = is_array($cached) && is_string($cached['body'] ?? null) ? $cached['body'] : null;
+        $cached = $this->remembered($key);
 
         try {
             $response = Http::timeout(15)
-                ->withHeaders($cachedBody === null ? [] : array_filter([
-                    'If-None-Match' => $cached['etag'] ?? null,
-                    'If-Modified-Since' => $cached['modified'] ?? null,
+                ->withHeaders($cached === null ? [] : array_filter([
+                    'If-None-Match' => $cached['etag'],
+                    'If-Modified-Since' => $cached['modified'],
                 ], is_string(...)))
                 ->get($url);
         } catch (ConnectionException) {
             throw new CalendarFeedUnreadable('The calendar feed could not be reached.');
         }
 
-        if ($cachedBody !== null && $response->status() === 304) {
-            return $cachedBody;
+        if ($cached !== null && $response->status() === 304) {
+            return $cached['body'];
         }
 
         if (! $response->successful()) {
@@ -112,14 +117,40 @@ final class IcsCalendarSource implements CalendarSource
         $modified = $response->header('Last-Modified');
 
         if ($etag !== '' || $modified !== '') {
-            Cache::put($key, [
+            Cache::put($key, encrypt([
                 'etag' => $etag === '' ? null : $etag,
                 'modified' => $modified === '' ? null : $modified,
                 'body' => $response->body(),
-            ], now()->addDay());
+            ]), now()->addDay());
         }
 
         return $response->body();
+    }
+
+    /**
+     * Kept encrypted, because the body is the person's whole calendar, not only the window a sync reads.
+     *
+     * @return array{etag: ?string, modified: ?string, body: string}|null
+     */
+    private function remembered(string $key): ?array
+    {
+        $stored = Cache::get($key);
+
+        try {
+            $cached = is_string($stored) ? decrypt($stored) : null;
+        } catch (DecryptException) {
+            return null;
+        }
+
+        if (! is_array($cached) || ! is_string($cached['body'] ?? null)) {
+            return null;
+        }
+
+        return [
+            'etag' => is_string($cached['etag'] ?? null) ? $cached['etag'] : null,
+            'modified' => is_string($cached['modified'] ?? null) ? $cached['modified'] : null,
+            'body' => $cached['body'],
+        ];
     }
 
     private function draft(VEvent $event, DateTimeZone $zone): ?CalendarEventDraftData

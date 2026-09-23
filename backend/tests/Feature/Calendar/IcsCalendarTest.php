@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\ConnectCalendarFeed;
 use App\Actions\Calendar\DisconnectCalendarFeed;
 use App\Actions\Calendar\SyncCalendar;
 use App\Actions\Reminders\SendDueReminders;
@@ -89,11 +90,46 @@ it('asks an unchanged feed only whether it changed, and still reads the day from
     Http::assertSentCount(2);
     Http::assertSent(fn (Request $request): bool => $request->hasHeader('If-None-Match', '"v1"'));
     expect($events)->toHaveCount(1)
-        ->and($events[0]->title)->toBe('Dentist');
+        ->and($events[0]->title)->toBe('Dentist')
+        ->and(Cache::get('calendar-feed:'.hash('sha256', FEED_URL)))->toBeString()->not->toContain('Dentist');
 
     DisconnectCalendarFeed::run($user);
+    ConnectCalendarFeed::run($user, FEED_URL);
 
-    expect(Cache::has(IcsCalendarSource::cacheKey(FEED_URL)))->toBeFalse();
+    expect(Http::recorded()->last()[0]->hasHeader('If-None-Match'))->toBeFalse();
+});
+
+it('refuses an address that does not answer with a calendar, and keeps nothing of it', function (): void {
+    Http::preventStrayRequests();
+    Http::fake([FEED_URL => Http::response('<html>Sign in</html>')]);
+
+    $user = feedPerson(null);
+
+    $this->actingAs($user)
+        ->put(route('calendar.update'), ['url' => FEED_URL])
+        ->assertSessionHasErrors(['url' => 'That address did not answer with a calendar.']);
+
+    expect($user->refresh()->calendar_feed_url)->toBeNull();
+});
+
+it('replaces a feed without leaving the old one on home, even when the new one reads empty', function (): void {
+    $replacement = 'https://calendar.example.test/private-def456/basic.ics';
+    Http::preventStrayRequests();
+    Http::fake([
+        FEED_URL => Http::response(icsFeed(
+            'BEGIN:VEVENT', 'UID:dentist-1', 'SUMMARY:Dentist', 'DTSTART;TZID=Europe/Amsterdam:20260919T140000', 'END:VEVENT',
+        )),
+        $replacement => Http::response(icsFeed()),
+    ]);
+    $this->travelTo(CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam'));
+
+    $user = feedPerson();
+    SyncCalendar::run($user);
+
+    ConnectCalendarFeed::run($user, $replacement);
+
+    expect($user->refresh()->calendar_feed_url)->toBe($replacement)
+        ->and(CalendarEvent::query()->count())->toBe(0);
 });
 
 it('fails loudly without repeating the private address when the feed cannot be read', function (mixed $response): void {

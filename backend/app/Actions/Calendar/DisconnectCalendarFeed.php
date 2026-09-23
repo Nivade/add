@@ -7,7 +7,6 @@ namespace App\Actions\Calendar;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Support\Calendar\Sources\IcsCalendarSource;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -19,13 +18,11 @@ final class DisconnectCalendarFeed
     public function handle(User $user): void
     {
         if ($user->calendar_feed_url !== null) {
-            Cache::forget(IcsCalendarSource::cacheKey($user->calendar_feed_url));
+            IcsCalendarSource::forget($user->calendar_feed_url);
         }
 
         DB::transaction(function () use ($user): void {
-            CalendarEvent::forget(CalendarEvent::query()
-                ->where('user_id', $user->id)
-                ->where('source', IcsCalendarSource::NAME));
+            CalendarEvent::forget(CalendarEvent::query()->ofSource($user, IcsCalendarSource::NAME));
 
             $user->calendar_feed_url = null;
             $user->save();

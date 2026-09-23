@@ -1,10 +1,10 @@
 import { Form, Head } from '@inertiajs/react';
-import CalendarController from '@/actions/App/Http/Controllers/Settings/CalendarController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { destroy, update } from '@/routes/calendar';
 
 export default function Calendar({
     connectedHost,
@@ -26,7 +26,7 @@ export default function Calendar({
 
                 {connectedHost !== null && (
                     <Form
-                        {...CalendarController.destroy.form()}
+                        {...destroy.form()}
                         options={{ preserveScroll: true }}
                         className="flex items-center gap-4"
                     >
@@ -49,7 +49,7 @@ export default function Calendar({
                 )}
 
                 <Form
-                    {...CalendarController.update.form()}
+                    {...update.form()}
                     options={{ preserveScroll: true }}
                     resetOnSuccess
                     className="space-y-6"

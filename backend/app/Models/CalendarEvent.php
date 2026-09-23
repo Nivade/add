@@ -10,6 +10,7 @@ use App\Contracts\Appointment;
 use App\Enums\AppointmentKind;
 use Carbon\CarbonImmutable;
 use Database\Factories\CalendarEventFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -74,6 +75,13 @@ class CalendarEvent extends Model implements Appointment
     public function appointmentInferred(): bool
     {
         return false;
+    }
+
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function ofSource(Builder $query, User $user, string $source): void
+    {
+        $query->where('user_id', $user->id)->where('source', $source);
     }
 
     /**

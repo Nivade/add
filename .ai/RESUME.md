@@ -15,8 +15,9 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8, phase 2.** Phase 1 of [`08-mvp-real.md`](plans/slices/08-mvp-real.md)
-is built and has not yet read a real person's feed. Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
+**Slice 8, phase 2** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
+1's done-when asks for a real feed, which only a person holding one can supply.
+Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
 The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
 carries what it settled and what it deliberately left open.
 
