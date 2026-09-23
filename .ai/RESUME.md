@@ -15,8 +15,8 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8, phase 2.** Nothing of it is built and it has no file in
-`.ai/plans/slices/` yet — the paragraph in the plan is all the design there is.
+**Slice 8, phase 2.** Phase 1 of [`08-mvp-real.md`](plans/slices/08-mvp-real.md)
+is built and has not yet read a real person's feed. Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
 The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
 carries what it settled and what it deliberately left open.
 
@@ -36,8 +36,8 @@ are scheduled every minute in `routes/console.php` and dispatch one job per
 person, so both a scheduler and a queue worker have to be running to see one
 outside a test.
 
-The home slice left one question open: what "Needs attention" offers to resolve
-an intention nobody could name. Nothing on that screen acts on it yet.
+The home slice's open question — what "Needs attention" offers to resolve an
+intention nobody could name — is slice 8's phase 2.
 
 ## Learning the state
 

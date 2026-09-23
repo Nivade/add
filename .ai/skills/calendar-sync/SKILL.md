@@ -48,6 +48,9 @@ updates title, location and times, and must not clear it.
 
 ## Testing
 
-Drivers are `none`, plus the fake and fixture sources under `Sources/`. A
-fixture that does not parse throws `CalendarFixtureInvalid` rather than
-returning an empty day, for the same reason a missing AI fixture throws.
+Drivers are `none`, `ics`, plus the fake and fixture sources under `Sources/`.
+A fixture that does not parse throws `CalendarFixtureInvalid`, and a feed that
+cannot be read throws `CalendarFeedUnreadable`, rather than returning an empty
+day, for the same reason a missing AI fixture throws. Tests of the `ics` source
+fake the feed URL with `Http::fake` and `Http::preventStrayRequests()`.
+
