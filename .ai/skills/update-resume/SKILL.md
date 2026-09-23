@@ -6,7 +6,7 @@ argument-hint: "Anything the next session needs that the repo cannot say itself"
 
 Leave the next agent a true starting point. Not a report of this session — `git log` is the report.
 
-Unlike `handoff` and `claude-handoff`, this writes a tracked file that outlives the conversation. Nothing conversational belongs in it.
+Unlike `handoff`, this writes a tracked file that outlives the conversation. Nothing conversational belongs in it.
 
 ## Check the state, do not recall it
 

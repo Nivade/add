@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/skill-gate.py\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/skill-roster.py\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "stripe@claude-plugins-official": false,
+    "desktop-commander@claude-plugins-official": false
+  },
+  "skillOverrides": {
+    "laravel-patterns": "off",
+    "laravel-specialist": "off",
+    "laravel-plugin-discovery": "off",
+    "livewire-development": "off",
+    "improve-codebase-architecture": "off",
+    "grill-me": "off",
+    "tailwind-design-system": "off",
+    "frontend-design": "off",
+    "dataviz": "off",
+    "unslop": "off"
+  }
+}

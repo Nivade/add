@@ -25,11 +25,35 @@ that look wrong without their reason.
 
 ## Everything for an agent lives in `.ai/`
 
-`.claude/` holds settings and whatever a tool insists on generating there;
-nothing in it is authored. Skills are written in `.ai/skills/` and Boost mirrors
-them into `.claude/skills/`, which is gitignored, because that is the only place
-Claude Code discovers project skills. Edit the copy in `.ai/`; the other one is
+`.claude/` holds settings and whatever a tool insists on generating there.
+`settings.json` is the one authored file in it, because the harness reads
+settings from that path and nowhere else; everything it points at lives in
+`.ai/`. Skills are written in `.ai/skills/` and Boost mirrors them into
+`.claude/skills/`, which is gitignored, because that is the only place Claude
+Code discovers project skills. Edit the copy in `.ai/`; the other one is
 overwritten.
+
+## Rule, skill, or hook
+
+The three carry different kinds of knowledge and are not interchangeable.
+
+| Kind | Where | Reaches an agent when |
+| --- | --- | --- |
+| A constraint that is always true | `.ai/rules/` | the path matches |
+| A procedure with steps | `.ai/skills/` | the task starts |
+| The reminder that either exists | `.ai/hooks/` | the harness fires it |
+
+A standing constraint does not become a skill because it keeps getting missed.
+`.ai/hooks/skill-gate.py` names the skills and rules that own a path as that
+path is edited, and prompts before a write to a file a generator owns;
+`.ai/hooks/skill-roster.py` names what a prompt points at before any file is
+open. `.claude/settings.json` wires both, and switches off installed skills
+whose advice contradicts a rule here — `laravel-patterns` recommending API
+Resources is the reason that list exists.
+
+Prose asking an agent to remember something is the weakest of the three. Prefer
+a rule a guard test can fail, then a hook that fires at the moment of the
+mistake, then a skill.
 
 `.ai/guidelines.md` is Boost's output — regenerate it with `boost:update`, never
 hand-edit it. `CLAUDE.md` pulls it in, and stays hand-written itself.

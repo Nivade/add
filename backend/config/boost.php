@@ -79,8 +79,12 @@ return [
     |
     */
 
+    // Nothing is deployed, and this repo's conventions are recorded rather than inferred.
     'skills' => [
-        'exclude' => [],
+        'exclude' => [
+            'deploying-to-cloud',
+            'infer-conventions',
+        ],
     ],
 
     /*
