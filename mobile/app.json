@@ -32,12 +32,10 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash-icon.png",
           "backgroundColor": "#0B0B0F"
         }
       ]
-    ],
-    "extra": {
-      "apiUrl": "https://add.nvade.dev"
-    }
+    ]
   }
 }
