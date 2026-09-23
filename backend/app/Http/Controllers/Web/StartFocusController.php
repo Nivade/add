@@ -8,7 +8,6 @@ use App\Actions\Sessions\StartSession;
 use App\Concerns\ResolvesStartableStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 
 final class StartFocusController extends Controller
@@ -19,8 +18,7 @@ final class StartFocusController extends Controller
     {
         $step = $this->startableStep($request, $request->string('step_id')->toString());
 
-        /** @var User $user */
-        $user = $request->user();
+        $user = $this->user($request);
 
         StartSession::run($user, $step);
 

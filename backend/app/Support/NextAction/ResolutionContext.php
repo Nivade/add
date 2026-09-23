@@ -18,13 +18,17 @@ final readonly class ResolutionContext
     public function __construct(
         public CarbonImmutable $now,
         public ?int $availableSeconds = null,
+        public ?Appointment $appointment = null,
+        public ?BackwardsPlanData $plan = null,
     ) {}
 
     public static function forUser(User $user): self
     {
-        $now = CarbonImmutable::now($user->timezone);
+        $now = $user->now();
+        $appointment = NextAppointment::forUser($user, $now);
+        $plan = $appointment instanceof Appointment ? BackwardsPlan::for($appointment, $now) : null;
 
-        return new self($now, self::untilLeaving($user, $now));
+        return new self($now, self::untilLeaving($plan, $now), $appointment, $plan);
     }
 
     public function availableInWords(): ?string
@@ -38,21 +42,13 @@ final readonly class ResolutionContext
         return $minutes < 1 ? 'less than a minute' : $minutes.' minutes';
     }
 
-    private static function untilLeaving(User $user, CarbonImmutable $now): ?int
+    private static function untilLeaving(?BackwardsPlanData $plan, CarbonImmutable $now): ?int
     {
-        $next = NextAppointment::forUser($user, $now);
-
-        if (! $next instanceof Appointment) {
-            return null;
-        }
-
-        $plan = BackwardsPlan::for($next, $now);
-
         if (! $plan instanceof BackwardsPlanData) {
             return null;
         }
 
-        $leaveAt = CarbonImmutable::parse($plan->rungs[count($plan->rungs) - 1]->at);
+        $leaveAt = $plan->leaveRung()->instant();
 
         return $leaveAt <= $now ? 0 : (int) $now->diffInSeconds($leaveAt, absolute: true);
     }

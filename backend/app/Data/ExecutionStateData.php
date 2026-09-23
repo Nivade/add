@@ -27,7 +27,7 @@ class ExecutionStateData extends Data
     public static function of(ExecutionSession $session): self
     {
         return new self(
-            ExecutionSessionData::from($session->refresh()->load('currentStep')),
+            ExecutionSessionData::from($session->refresh()->load(['currentStep', 'intention.steps', 'user'])),
             IntentionData::from($session->intention),
             ProgressLines::for($session),
             ElapsedWords::for($session),

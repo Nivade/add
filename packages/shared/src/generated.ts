@@ -75,7 +75,6 @@ alreadyPassed: boolean,
 };
 export type RailData = {
 nowMinute: number,
-nowClock: string,
 sessionStartedMinute: number | null,
 leaveByMinute: number | null,
 leaveByClock: string | null,

@@ -17,7 +17,6 @@ it('counts the day in the person\'s zone rather than the server\'s', function ()
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->where('rail.nowMinute', 9 * 60 + 30)
-            ->where('rail.nowClock', '09:30')
             ->where('rail.leaveByMinute', null)
             ->where('rail.appointmentTitle', null)
         );

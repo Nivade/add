@@ -1,8 +1,8 @@
 import type { OverwhelmedData } from '@add/shared';
-import { Form, Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { restCountLine } from '@add/shared';
+import { Head, Link } from '@inertiajs/react';
+import { OneThing, StartStep } from '@/components/one-thing';
 import { home } from '@/routes';
-import focusRoutes from '@/routes/focus';
 
 /** No rail, no nav, no capture: the screen suppresses everything until this one step is done. */
 export default function Overwhelmed({
@@ -20,39 +20,26 @@ export default function Overwhelmed({
                         One thing
                     </p>
 
-                    {smallestStep ? (
-                        <>
-                            <h1 className="border-now text-foreground border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
-                                {smallestStep.step.title}
-                            </h1>
+                    <OneThing>
+                        {smallestStep
+                            ? smallestStep.step.title
+                            : 'Nothing needs you right now.'}
+                    </OneThing>
 
+                    {smallestStep && (
+                        <>
                             <ul className="text-muted-foreground space-y-1 pl-5 font-mono text-[13px]">
                                 {smallestStep.why.map((line) => (
                                     <li key={line}>{line}</li>
                                 ))}
                             </ul>
 
-                            <div className="pl-5">
-                                <Form {...focusRoutes.start.form()}>
-                                    <input
-                                        type="hidden"
-                                        name="step_id"
-                                        value={smallestStep.step.id}
-                                    />
-                                    <Button type="submit">Start</Button>
-                                </Form>
-                            </div>
+                            <StartStep stepId={smallestStep.step.id} />
                         </>
-                    ) : (
-                        <h1 className="border-now text-foreground border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
-                            Nothing needs you right now.
-                        </h1>
                     )}
 
                     <p className="text-muted-foreground border-border border-t pt-5 font-mono text-[13px]">
-                        {restCount === 0
-                            ? 'nothing else is waiting'
-                            : `${restCount} other ${restCount === 1 ? 'thing' : 'things'}, none of which you need to think about`}
+                        {restCountLine(restCount)}
                     </p>
 
                     <Link

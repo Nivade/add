@@ -6,9 +6,9 @@ namespace App\Support\NextAction\Comparators;
 
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\NextAction\StepComparator;
+use App\Support\NextAction\Rung;
 
-final class DeadlineWithinReach implements StepComparator
+final class DeadlineWithinReach extends Rung
 {
     public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
     {
@@ -22,10 +22,5 @@ final class DeadlineWithinReach implements StepComparator
         return $deadline === null
             ? null
             : "Your deadline is {$deadline} and what is left only just fits.";
-    }
-
-    public function qualifies(Candidate $candidate, ResolutionContext $context): ?string
-    {
-        return null;
     }
 }

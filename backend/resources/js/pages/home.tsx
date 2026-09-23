@@ -1,21 +1,13 @@
 import type { HomeData } from '@add/shared';
-import { formatEstimate } from '@add/shared';
+import { restCountLine } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
+import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
-import focusRoutes from '@/routes/focus';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
-
-function OneThing({ children }: { children: React.ReactNode }) {
-    return (
-        <h1 className="border-now text-foreground border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
-            {children}
-        </h1>
-    );
-}
 
 function RightNow({ rightNow, session }: HomeData) {
     if (session) {
@@ -25,9 +17,9 @@ function RightNow({ rightNow, session }: HomeData) {
                     {session.session.currentStep?.title ??
                         session.intention.title}
                 </OneThing>
-                <p className="text-muted-foreground pl-5 font-mono text-[13px]">
+                <Meta>
                     part-way through {session.intention.title.toLowerCase()}
-                </p>
+                </Meta>
                 <div className="pl-5">
                     <Button asChild>
                         <Link href={focus()}>Continue</Link>
@@ -41,33 +33,19 @@ function RightNow({ rightNow, session }: HomeData) {
         return (
             <div className="space-y-6">
                 <OneThing>Nothing needs you right now.</OneThing>
-                <p className="text-muted-foreground pl-5 font-mono text-[13px]">
-                    that is the whole answer
-                </p>
+                <Meta>that is the whole answer</Meta>
             </div>
         );
     }
 
-    const estimate = formatEstimate(rightNow.step.estimatedSeconds);
-
     return (
         <div className="space-y-6">
             <OneThing>{rightNow.step.title}</OneThing>
-            <p className="text-muted-foreground pl-5 font-mono text-[13px]">
-                {estimate ? `~${estimate}` : 'unestimated'} ·{' '}
+            <Meta>
+                {stepMeta(rightNow.step)} ·{' '}
                 {rightNow.intention.title.toLowerCase()}
-                {rightNow.step.generated && ' · suggested'}
-            </p>
-            <div className="pl-5">
-                <Form {...focusRoutes.start.form()}>
-                    <input
-                        type="hidden"
-                        name="step_id"
-                        value={rightNow.step.id}
-                    />
-                    <Button type="submit">Start</Button>
-                </Form>
-            </div>
+            </Meta>
+            <StartStep stepId={rightNow.step.id} />
         </div>
     );
 }
@@ -174,9 +152,7 @@ export default function Home({ home: data }: { home: HomeData }) {
 
                 <div className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-5">
                     <p className="text-muted-foreground font-mono text-[13px]">
-                        {restCount === 0
-                            ? 'nothing else is waiting'
-                            : `${restCount} other ${restCount === 1 ? 'thing' : 'things'}, none of which you need to think about`}
+                        {restCountLine(restCount)}
                     </p>
                     <Link
                         href={overwhelmed()}

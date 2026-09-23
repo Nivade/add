@@ -7,6 +7,7 @@ namespace App\Actions\Sessions;
 use App\Actions\Steps\SplitStep;
 use App\Enums\ExecutionEventType;
 use App\Enums\StuckReason;
+use App\Enums\StuckResolution;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Support\Execution\SessionState;
@@ -30,13 +31,11 @@ final class ReportStuck
             'note' => $note,
         ]);
 
-        return match (true) {
-            $reason->wantsSmallerStep() => $this->makeItSmaller($session, $step),
-            $reason === StuckReason::NeedSomething,
-            $reason === StuckReason::NotEnoughInformation => AdvanceSession::run($session, $step->id),
-            $reason === StuckReason::Tired,
-            $reason === StuckReason::DontWantTo => StopSession::run($session),
-            default => $session,
+        return match ($reason->resolution()) {
+            StuckResolution::Split => $this->makeItSmaller($session, $step),
+            StuckResolution::NextStep => AdvanceSession::run($session, $step->id),
+            StuckResolution::Stop => StopSession::run($session),
+            StuckResolution::StayPut => $session,
         };
     }
 
@@ -45,18 +44,25 @@ final class ReportStuck
     {
         SplitStep::dispatch($step);
 
-        $smallest = SmallestFirst::sort(
-            array_values(array_filter(
-                CandidatePool::forIntention($session->intention),
-                fn (Candidate $candidate): bool => $candidate->step->id !== $step->id,
-            )),
-            ResolutionContext::forUser($session->user),
-        )[0] ?? null;
+        $smallest = $this->shortestSibling($session, $step);
 
-        if ($smallest instanceof Candidate) {
-            $session->update(['current_step_id' => $smallest->step->id]);
+        if (! $smallest instanceof Candidate) {
+            // Nothing shorter to offer, so advance rather than leave them on the step they just refused.
+            return AdvanceSession::run($session, $step->id);
         }
 
+        $session->update(['current_step_id' => $smallest->step->id]);
+
         return $session;
+    }
+
+    private function shortestSibling(ExecutionSession $session, Step $step): ?Candidate
+    {
+        $siblings = array_values(array_filter(
+            CandidatePool::forIntention($session->intention),
+            fn (Candidate $candidate): bool => $candidate->step->id !== $step->id,
+        ));
+
+        return SmallestFirst::sort($siblings, ResolutionContext::forUser($session->user))[0] ?? null;
     }
 }

@@ -178,3 +178,15 @@ it('leaves the replaced step in the history the split writes', function (): void
         ->and($event->payload['replaced_by'])->toHaveCount(2)
         ->and(replay($session))->toBe(['started', 'step_split']);
 });
+
+it('advances rather than leaving them on the step they called too big', function (): void {
+    Queue::fake();
+
+    $session = started(1);
+    $only = $session->currentStep()->sole();
+
+    ReportStuck::run($session, StuckReason::TooBig);
+
+    expect($session->refresh()->current_step_id)->not->toBe($only->id)
+        ->and($session->outcome)->toBe(SessionOutcome::Continued);
+});

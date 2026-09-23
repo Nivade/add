@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Sessions;
 
-use App\Enums\ExecutionEventType;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Models\ExecutionSession;
 use App\Models\Step;
+use App\Support\Execution\SessionState;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -19,6 +19,8 @@ final class AdvanceSession
 
     public function handle(ExecutionSession $session, ?string $exceptStepId = null): ExecutionSession
     {
+        SessionState::assertOpen($session);
+
         $pending = $session->intention->remainingSteps()->orderBy('position')->get();
         $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
         $next = $this->next($offerable, $session);
@@ -44,13 +46,7 @@ final class AdvanceSession
 
     private function end(ExecutionSession $session, SessionOutcome $outcome): ExecutionSession
     {
-        $lastStepId = $session->current_step_id;
-
-        $session->update([
-            'current_step_id' => null,
-            'outcome' => $outcome,
-            'ended_at' => now(),
-        ]);
+        LandSession::run($session, $outcome);
 
         if ($outcome === SessionOutcome::Completed) {
             $session->intention->update([
@@ -58,8 +54,6 @@ final class AdvanceSession
                 'completed_at' => now(),
             ]);
         }
-
-        RecordExecutionEvent::run($session, ExecutionEventType::Stopped, $lastStepId, ['outcome' => $outcome->value]);
 
         return $session;
     }

@@ -12,14 +12,12 @@ use App\Data\HomeData;
 use App\Data\IntentionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
-use App\Enums\IntentionStatus;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
 use App\Support\Execution\RunningSession;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\Time\NextAppointment;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -48,7 +46,7 @@ final class BuildHome
         return new HomeData(
             rightNow: $this->resolver->resolve($user, $context),
             session: $session instanceof ExecutionSession ? ExecutionStateData::of($session) : null,
-            comingUp: $this->comingUp($user, $context),
+            comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
             needsAttention: array_values($needsAttention
                 ->map(fn (Intention $intention): IntentionData => IntentionData::from($intention))
@@ -97,18 +95,16 @@ final class BuildHome
         return $at instanceof CarbonImmutable && $at > $context->now;
     }
 
-    private function comingUp(User $user, ResolutionContext $context): ?ComingUpData
+    private function comingUp(ResolutionContext $context): ?ComingUpData
     {
-        $next = NextAppointment::forUser($user, $context->now);
-
-        return $next instanceof Appointment ? ComingUpData::of($next, $context->now) : null;
+        return $context->appointment instanceof Appointment
+            ? ComingUpData::of($context->appointment, $context->now)
+            : null;
     }
 
     /** @return Builder<Intention> */
     private function open(User $user): Builder
     {
-        return Intention::query()
-            ->where('user_id', $user->id)
-            ->whereIn('status', [IntentionStatus::Captured, IntentionStatus::Active]);
+        return Intention::query()->where('user_id', $user->id)->open();
     }
 }

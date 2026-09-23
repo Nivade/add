@@ -4,14 +4,14 @@ export function formatEstimate(seconds: number | null): string | null {
         return null;
     }
 
-    if (seconds < 90) {
+    if (seconds < 60) {
         return `${Math.round(seconds / 10) * 10} seconds`;
     }
 
     const minutes = Math.round(seconds / 60);
 
     if (minutes < 60) {
-        return `${minutes} minutes`;
+        return minutes === 1 ? '1 minute' : `${minutes} minutes`;
     }
 
     const hours = Math.round(minutes / 30) / 2;

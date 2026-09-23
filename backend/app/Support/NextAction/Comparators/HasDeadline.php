@@ -6,10 +6,10 @@ namespace App\Support\NextAction\Comparators;
 
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\NextAction\StepComparator;
+use App\Support\NextAction\Rung;
 use Carbon\CarbonImmutable;
 
-final class HasDeadline implements StepComparator
+final class HasDeadline extends Rung
 {
     public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
     {

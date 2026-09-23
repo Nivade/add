@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Sessions\RecordDistraction;
-use App\Concerns\ResolvesOwnedSession;
+use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
@@ -13,10 +13,10 @@ use Illuminate\Http\Request;
 
 final class RecordDistractionController extends Controller
 {
-    use ResolvesOwnedSession;
+    use ResolvesOwned;
 
     public function __invoke(Request $request, ExecutionSession $session): ExecutionStateData
     {
-        return ExecutionStateData::of(RecordDistraction::run($this->ownedSession($request, $session)));
+        return ExecutionStateData::of(RecordDistraction::run($this->owned($request, $session)));
     }
 }

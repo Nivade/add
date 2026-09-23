@@ -24,4 +24,11 @@ class ReportStuckRequest extends FormRequest
     {
         return $this->enum('reason', StuckReason::class) ?? StuckReason::SomethingElse;
     }
+
+    public function note(): ?string
+    {
+        $note = $this->string('note')->toString();
+
+        return $note === '' ? null : $note;
+    }
 }

@@ -13,7 +13,6 @@ class RailData extends Data
 {
     public function __construct(
         public int $nowMinute,
-        public string $nowClock,
         public ?int $sessionStartedMinute,
         public ?int $leaveByMinute,
         public ?string $leaveByClock,

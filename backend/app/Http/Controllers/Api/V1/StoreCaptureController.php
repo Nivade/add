@@ -8,15 +8,12 @@ use App\Actions\Captures\RecordCapture;
 use App\Data\CaptureData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCaptureRequest;
-use App\Models\User;
 
 final class StoreCaptureController extends Controller
 {
     public function __invoke(StoreCaptureRequest $request): CaptureData
     {
-        $user = $request->user();
-
-        abort_unless($user instanceof User, 401);
+        $user = $this->user($request);
 
         return CaptureData::from(RecordCapture::run(
             $user,

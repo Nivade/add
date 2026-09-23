@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Actions\Home\BuildRail;
+use App\Data\RailData;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -47,7 +48,8 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
-            'rail' => $user instanceof User ? BuildRail::run($user) : null,
+            // A closure, so a partial reload that does not ask for the rail does not pay for it.
+            'rail' => $user instanceof User ? fn (): RailData => BuildRail::run($user) : null,
         ];
     }
 }

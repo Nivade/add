@@ -17,9 +17,14 @@ enum StuckReason: string
     case DontWantTo = 'dont_want_to';
     case SomethingElse = 'something_else';
 
-    /** Whether the answer is that the step itself should get smaller. */
-    public function wantsSmallerStep(): bool
+    /** Exhaustive on purpose: a reason added without an answer here is a compile-time hole. */
+    public function resolution(): StuckResolution
     {
-        return $this === self::TooBig || $this === self::DontKnowWhatToDo;
+        return match ($this) {
+            self::TooBig, self::DontKnowWhatToDo => StuckResolution::Split,
+            self::NeedSomething, self::NotEnoughInformation => StuckResolution::NextStep,
+            self::Tired, self::DontWantTo => StuckResolution::Stop,
+            self::SomethingElse => StuckResolution::StayPut,
+        };
     }
 }

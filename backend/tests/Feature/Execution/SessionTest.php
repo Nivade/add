@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\AdvanceSession;
 use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\PauseSession;
 use App\Actions\Sessions\RecordDistraction;
@@ -138,6 +139,15 @@ it('refuses a transition the session cannot make', function (): void {
         ->and(fn () => RecordDistraction::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 });
 
+it('refuses to land a session a second time even when advanced directly', function (): void {
+    $session = started();
+
+    StopSession::run($session);
+
+    expect(fn () => AdvanceSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+        ->and(replay($session))->toBe(['started', 'stopped']);
+});
+
 it('records a distraction without ending or scoring anything', function (): void {
     $session = started();
 
@@ -180,5 +190,5 @@ it('counts progress rather than writing it', function (): void {
     CompleteStep::run($session);
 
     expect(ExecutionStateData::of($session->refresh())->progress)
-        ->toBe(['1 of 3 steps done.', '1 thing finished today.']);
+        ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
 });

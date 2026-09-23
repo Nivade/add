@@ -5,38 +5,57 @@ declare(strict_types=1);
 namespace App\Support\Time;
 
 use App\Contracts\Appointment;
-use App\Enums\IntentionStatus;
 use App\Models\CalendarEvent;
 use App\Models\Intention;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 
 /** One question, two tables: the soonest real time constraint, whoever recorded it. */
 final class NextAppointment
 {
     public static function forUser(User $user, CarbonImmutable $now): ?Appointment
     {
-        $intention = Intention::query()
+        return self::sorted($user, $now, null, 1)[0] ?? null;
+    }
+
+    /**
+     * @param  CarbonImmutable  $until  the far edge of the window
+     * @return list<Appointment>
+     */
+    public static function upcomingForUser(User $user, CarbonImmutable $now, CarbonImmutable $until): array
+    {
+        return self::sorted($user, $now, $until, null);
+    }
+
+    /** @return list<Appointment> */
+    private static function sorted(User $user, CarbonImmutable $now, ?CarbonImmutable $until, ?int $limit): array
+    {
+        $intentions = Intention::query()
             ->where('user_id', $user->id)
-            ->whereIn('status', [IntentionStatus::Captured, IntentionStatus::Active])
+            ->open()
             ->whereNotNull('deadline_at')
             ->where('deadline_at', '>=', $now)
+            ->when($until, fn (Builder $query): Builder => $query->where('deadline_at', '<=', $until))
             ->oldest('deadline_at')
-            ->first();
+            ->limit($limit)
+            ->get();
 
-        $event = CalendarEvent::query()
+        $events = CalendarEvent::query()
             ->where('user_id', $user->id)
             ->where('starts_at', '>=', $now)
+            ->when($until, fn (Builder $query): Builder => $query->where('starts_at', '<=', $until))
             ->oldest('starts_at')
-            ->first();
+            ->limit($limit)
+            ->get();
 
-        $candidates = array_values(array_filter([$intention, $event]));
+        $candidates = [...$intentions->all(), ...$events->all()];
 
         usort(
             $candidates,
             fn (Appointment $a, Appointment $b): int => $a->appointmentAt() <=> $b->appointmentAt(),
         );
 
-        return $candidates[0] ?? null;
+        return $candidates;
     }
 }

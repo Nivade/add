@@ -6,7 +6,6 @@ namespace App\Actions\Steps;
 
 use App\Actions\Sessions\RecordExecutionEvent;
 use App\Contracts\AiProvider;
-use App\Data\Ai\ParsedStepData;
 use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;
@@ -48,7 +47,7 @@ final class SplitStep
             $written = [];
 
             foreach ($smaller as $index => $parsed) {
-                $written[] = $this->write($step, $parsed, $step->position + $index);
+                $written[] = Step::generate($step->intention, $parsed, $step->position + $index);
             }
 
             $first = $written[0] ?? null;
@@ -92,17 +91,6 @@ final class SplitStep
                 ->where('position', '>', $step->position)
                 ->increment('position', $count - 1);
         }
-    }
-
-    private function write(Step $step, ParsedStepData $parsed, int $position): Step
-    {
-        return $step->intention->steps()->create([
-            'title' => $parsed->title,
-            'position' => $position,
-            'estimated_seconds' => $parsed->estimatedSeconds,
-            'status' => StepStatus::Pending,
-            'generated' => true,
-        ]);
     }
 
     private function describe(Step $step): string

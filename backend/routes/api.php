@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\AppointmentKind;
 use App\Http\Controllers\Api\V1\AdjustPlanController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
@@ -16,8 +17,6 @@ use App\Http\Controllers\Api\V1\SkipStepController;
 use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
-use App\Models\CalendarEvent;
-use App\Models\Intention;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function (): void {
@@ -25,10 +24,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::get('next-action', ShowNextActionController::class)->name('next-action.show');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed.show');
     Route::patch('intentions/{appointment}/plan', AdjustPlanController::class)
-        ->defaults('appointment_model', Intention::class)
+        ->defaults('appointment_kind', AppointmentKind::Intention)
         ->name('intentions.plan');
     Route::patch('calendar-events/{appointment}/plan', AdjustPlanController::class)
-        ->defaults('appointment_model', CalendarEvent::class)
+        ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
 

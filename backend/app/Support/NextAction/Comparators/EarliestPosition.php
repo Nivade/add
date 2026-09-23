@@ -6,10 +6,10 @@ namespace App\Support\NextAction\Comparators;
 
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\NextAction\StepComparator;
+use App\Support\NextAction\Rung;
 
 /** The last rung is a total order, so two runs over the same world return the same step. */
-final class EarliestPosition implements StepComparator
+final class EarliestPosition extends Rung
 {
     public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
     {
@@ -19,10 +19,5 @@ final class EarliestPosition implements StepComparator
     public function decides(Candidate $candidate, ResolutionContext $context): string
     {
         return 'This is simply what comes next.';
-    }
-
-    public function qualifies(Candidate $candidate, ResolutionContext $context): ?string
-    {
-        return null;
     }
 }

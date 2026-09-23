@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\Ai\ParsedStepData;
 use App\Enums\StepStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\StepFactory;
@@ -44,6 +45,18 @@ class Step extends Model
     public function intention(): BelongsTo
     {
         return $this->belongsTo(Intention::class);
+    }
+
+    /** `position` is the order the model gave, which is a claim about sequence and not about priority. */
+    public static function generate(Intention $intention, ParsedStepData $parsed, int $position): self
+    {
+        return $intention->steps()->create([
+            'title' => $parsed->title,
+            'position' => $position,
+            'estimated_seconds' => $parsed->estimatedSeconds,
+            'status' => StepStatus::Pending,
+            'generated' => true,
+        ]);
     }
 
     /** @param Builder<static> $query */

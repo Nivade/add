@@ -117,19 +117,17 @@ final class ChainedNextActionResolver implements NextActionResolver
     private function separator(array $ranked, ResolutionContext $context): int
     {
         $winner = $ranked[0];
-        $separator = -1;
+        $others = array_slice($ranked, 1);
 
-        foreach (array_slice($ranked, 1) as $other) {
-            foreach ($this->chain as $index => $comparator) {
+        foreach ($this->chain as $index => $comparator) {
+            foreach ($others as $other) {
                 if ($comparator->compare($winner, $other, $context) !== 0) {
-                    $separator = $separator === -1 ? $index : min($separator, $index);
-
-                    break;
+                    return $index;
                 }
             }
         }
 
-        return $separator;
+        return -1;
     }
 
     /** @param  list<string>  $why */

@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
+use App\Concerns\QueuesPerUser;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\CalendarEvent;
 use App\Models\User;
-use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
-use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -23,6 +20,7 @@ final class SyncCalendar
     use AsCommand;
     use AsJob;
     use AsObject;
+    use QueuesPerUser;
 
     public string $commandSignature = 'calendar:sync {user? : the id of one person, or every person when omitted}';
 
@@ -33,7 +31,7 @@ final class SyncCalendar
     /** @return list<CalendarEvent> */
     public function handle(User $user, ?CarbonImmutable $now = null): array
     {
-        $now ??= ResolutionContext::forUser($user)->now;
+        $now ??= $user->now();
         $from = $now->startOfDay();
         $until = $from->addDays((int) config('calendar.horizon_days'))->endOfDay();
 
@@ -63,23 +61,6 @@ final class SyncCalendar
             ->delete();
 
         return $events;
-    }
-
-    /** One person per job: a provider that hangs must not stall the rest of the sync. */
-    public function asCommand(Command $command): void
-    {
-        $queued = 0;
-
-        User::query()
-            ->when($command->argument('user'), fn (Builder $query, array|bool|float|int|string $id) => $query->whereKey($id))
-            ->chunkById(200, function (Collection $users) use (&$queued): void {
-                foreach ($users as $user) {
-                    self::dispatch($user);
-                    $queued++;
-                }
-            });
-
-        $command->info($queued.' queued.');
     }
 
     private function store(User $user, CalendarEventDraftData $draft): CalendarEvent

@@ -37,6 +37,15 @@ Stop is the only control that ends a session by choice. `Completed` is written
 when the last remaining step is done, and `Continued` when the session runs out
 of steps it can offer but the intention is not finished.
 
+`Completed` also finishes the intention itself. An intention whose last step is
+done is done, and leaving it `Active` would have the resolver offer it forever —
+this is the loop closing on its own, not the by-hand control above.
+
+Ending a session is one action, so the guard that refuses a second landing
+cannot hold on one path and be missing from another. Advancing asserts the same
+thing before it moves: a landed session pointed at a fresh step is a resurrected
+one.
+
 Every transition writes one `execution_event`, and a transition that cannot be
 made throws rather than silently no-opping — a landed session cannot be landed
 twice. The events are the replay: `started`, `step_completed`, `step_skipped`,

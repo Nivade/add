@@ -6,10 +6,10 @@ namespace App\Support\NextAction\Comparators;
 
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\ResolutionContext;
-use App\Support\NextAction\StepComparator;
+use App\Support\NextAction\Rung;
 
 /** A cool-off, not a penalty: the step comes back at full standing, and the person is never told. */
-final class NotRecentlySkipped implements StepComparator
+final class NotRecentlySkipped extends Rung
 {
     /** Long enough to stop re-offering the same thing, short enough that it returns the same day. */
     private const int COOL_OFF_HOURS = 4;
@@ -17,16 +17,6 @@ final class NotRecentlySkipped implements StepComparator
     public function compare(Candidate $a, Candidate $b, ResolutionContext $context): int
     {
         return $this->coolingOff($a, $context) <=> $this->coolingOff($b, $context);
-    }
-
-    public function decides(Candidate $candidate, ResolutionContext $context): ?string
-    {
-        return null;
-    }
-
-    public function qualifies(Candidate $candidate, ResolutionContext $context): ?string
-    {
-        return null;
     }
 
     private function coolingOff(Candidate $candidate, ResolutionContext $context): bool

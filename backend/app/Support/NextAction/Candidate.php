@@ -6,9 +6,9 @@ namespace App\Support\NextAction;
 
 use App\Models\Intention;
 use App\Models\Step;
+use App\Support\Time\EstimateWords;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
-use Carbon\CarbonInterval;
 
 final readonly class Candidate
 {
@@ -54,9 +54,7 @@ final readonly class Candidate
 
     public function estimateInWords(): ?string
     {
-        $seconds = $this->estimatedSeconds();
-
-        return $seconds === null ? null : CarbonInterval::seconds($seconds)->cascade()->forHumans();
+        return EstimateWords::for($this->estimatedSeconds());
     }
 
     public function deadlinePassed(CarbonImmutable $now): bool

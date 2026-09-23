@@ -16,7 +16,7 @@ final class ElapsedWords
 
     public static function for(ExecutionSession $session, ?CarbonImmutable $now = null): string
     {
-        $now ??= CarbonImmutable::now($session->user->timezone);
+        $now ??= $session->user->now();
         $until = $session->paused_at ?? $session->ended_at ?? $now;
         $seconds = (int) $session->started_at->diffInSeconds($until, absolute: true);
 
@@ -26,7 +26,7 @@ final class ElapsedWords
 
         $words = CarbonInterval::seconds($seconds)->cascade()->forHumans(short: false, parts: 1);
 
-        return $session->paused_at === null
+        return $session->isRunning() && $session->paused_at === null
             ? "You have been working for {$words}."
             : "You had been working for {$words}.";
     }

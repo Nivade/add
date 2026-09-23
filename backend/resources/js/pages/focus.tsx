@@ -1,7 +1,7 @@
 import type { ExecutionStateData, StuckReason } from '@add/shared';
-import { formatEstimate } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { Meta, OneThing, stepMeta } from '@/components/one-thing';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -25,32 +25,37 @@ const stuckReasons: { value: StuckReason; label: string }[] = [
     { value: 'something_else', label: 'Something else' },
 ];
 
+const CONTROL_CLASS =
+    'h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase';
+
 /** Six controls, one size, one weight: skipping weighs what finishing weighs. */
 function Control({
     label,
     form,
+    onClick,
 }: {
     label: string;
-    form: { action: string; method: 'post' };
+    form?: { action: string; method: 'post' };
+    onClick?: () => void;
 }) {
-    return (
-        <Form {...form}>
-            <Button
-                type="submit"
-                variant="outline"
-                className="h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase"
-            >
-                {label}
-            </Button>
-        </Form>
+    const button = (
+        <Button
+            type={form ? 'submit' : 'button'}
+            variant="outline"
+            className={CONTROL_CLASS}
+            onClick={onClick}
+        >
+            {label}
+        </Button>
     );
+
+    return form ? <Form {...form}>{button}</Form> : button;
 }
 
 export default function Focus({ state }: { state: ExecutionStateData }) {
     const [stuckOpen, setStuckOpen] = useState(false);
     const { session, intention, progress, elapsed } = state;
     const step = session.currentStep;
-    const estimate = formatEstimate(step?.estimatedSeconds ?? null);
     const paused = session.pausedAt !== null;
 
     return (
@@ -64,13 +69,11 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                 {paused ? (
                     <div className="space-y-6">
-                        <h1 className="border-now border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em]">
-                            Welcome back.
-                        </h1>
-                        <p className="text-muted-foreground pl-5 font-mono text-[13px]">
+                        <OneThing>Welcome back.</OneThing>
+                        <Meta>
                             you left off at{' '}
                             {(step?.title ?? intention.title).toLowerCase()}
-                        </p>
+                        </Meta>
                         <div className="pl-5">
                             <Form {...focusRoutes.resume.form(session.id)}>
                                 <Button type="submit">Continue</Button>
@@ -80,13 +83,8 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                 ) : (
                     <>
                         <div className="space-y-4">
-                            <h1 className="border-now border-l-2 pl-5 text-[clamp(1.8rem,4.6vw,2.9rem)] leading-[1.08] font-medium tracking-[-0.02em] text-balance">
-                                {step?.title}
-                            </h1>
-                            <p className="text-muted-foreground pl-5 font-mono text-[13px]">
-                                {estimate ? `~${estimate}` : 'unestimated'}
-                                {step?.generated && ' · suggested'}
-                            </p>
+                            <OneThing>{step?.title}</OneThing>
+                            {step && <Meta>{stepMeta(step)}</Meta>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -102,14 +100,10 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 label="Pause"
                                 form={focusRoutes.pause.form(session.id)}
                             />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase"
+                            <Control
+                                label="I'm stuck"
                                 onClick={() => setStuckOpen(true)}
-                            >
-                                I'm stuck
-                            </Button>
+                            />
                             <Control
                                 label="I got distracted"
                                 form={focusRoutes.distracted.form(session.id)}

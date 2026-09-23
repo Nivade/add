@@ -7,7 +7,6 @@ namespace App\Support\Execution;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Database\Query\Builder;
 
 /** Counted from the rows, never from consecutive days, and stated without praise. */
@@ -18,11 +17,17 @@ final class ProgressLines
     {
         $lines = [];
 
-        $steps = $session->intention->steps()->get();
+        $steps = $session->intention->steps;
         $done = $steps->where('status', StepStatus::Done)->count();
 
         if ($steps->isNotEmpty()) {
             $lines[] = $done.' of '.$steps->count().' steps done.';
+        }
+
+        if ($session->steps_completed > 0) {
+            $lines[] = $session->steps_completed.' '
+                .($session->steps_completed === 1 ? 'step' : 'steps')
+                .' done in this sitting.';
         }
 
         $today = self::doneToday($session);
@@ -36,7 +41,7 @@ final class ProgressLines
 
     private static function doneToday(ExecutionSession $session): int
     {
-        $midnight = CarbonImmutable::now($session->user->timezone)->startOfDay()->utc();
+        $midnight = $session->user->now()->startOfDay()->utc();
 
         return Step::query()
             ->where('status', StepStatus::Done)

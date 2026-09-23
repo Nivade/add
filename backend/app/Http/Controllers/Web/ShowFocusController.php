@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Web;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
-use App\Models\User;
 use App\Support\Execution\RunningSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,9 +16,7 @@ final class ShowFocusController extends Controller
 {
     public function __invoke(Request $request): Response|RedirectResponse
     {
-        $user = $request->user();
-
-        abort_unless($user instanceof User, 401);
+        $user = $this->user($request);
 
         $session = RunningSession::forUser($user);
 

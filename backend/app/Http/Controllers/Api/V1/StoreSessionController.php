@@ -9,7 +9,6 @@ use App\Concerns\ResolvesStartableStep;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
-use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 final class StoreSessionController extends Controller
@@ -20,8 +19,7 @@ final class StoreSessionController extends Controller
     {
         $step = $this->startableStep($request, $request->string('step_id')->toString());
 
-        /** @var User $user */
-        $user = $request->user();
+        $user = $this->user($request);
 
         $session = StartSession::run($user, $step);
 

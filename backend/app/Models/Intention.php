@@ -11,8 +11,10 @@ use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\IntentionFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -101,6 +103,13 @@ class Intention extends Model implements Appointment
     public function remainingSteps(): HasMany
     {
         return $this->steps()->where('status', StepStatus::Pending);
+    }
+
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function open(Builder $query): void
+    {
+        $query->whereIn('status', [IntentionStatus::Captured, IntentionStatus::Active]);
     }
 
     protected function casts(): array

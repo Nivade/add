@@ -14,9 +14,9 @@ final class ReminderLines
     /** @return list<string> */
     public static function for(Appointment $appointment, BackwardsPlanData $plan, CarbonImmutable $now): array
     {
-        $first = $plan->rungs[0];
-        $leave = $plan->rungs[count($plan->rungs) - 1];
-        $minutesToLeave = (int) round($now->diffInMinutes(CarbonImmutable::parse($leave->at), absolute: false));
+        $first = $plan->firstRung();
+        $leave = $plan->leaveRung();
+        $minutesToLeave = (int) round($now->diffInMinutes($leave->instant(), absolute: false));
 
         return [
             $appointment->appointmentTitle().' is at '.$plan->deadlineClock.'.',

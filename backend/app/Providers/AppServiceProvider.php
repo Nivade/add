@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\Appointment;
-use App\Models\Intention;
+use App\Enums\AppointmentKind;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as RoutedRequest;
@@ -16,18 +16,12 @@ use Lorisleiva\Actions\Facades\Actions;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     /** Without this an action's `commandSignature` is never a real command, and the schedule calls a name nothing answers. */
     public function register(): void
     {
         Actions::registerCommands();
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
@@ -38,10 +32,11 @@ class AppServiceProvider extends ServiceProvider
     protected function bindAppointments(): void
     {
         Route::bind('appointment', function (string $value, RoutedRequest $route): Appointment&Model {
-            /** @var class-string<Appointment&Model> $model */
-            $model = $route->defaults['appointment_model'] ?? Intention::class;
+            $kind = $route->defaults['appointment_kind'] ?? null;
 
-            return $model::query()->findOrFail($value);
+            abort_unless($kind instanceof AppointmentKind, 404);
+
+            return $kind->model()::query()->findOrFail($value);
         });
     }
 

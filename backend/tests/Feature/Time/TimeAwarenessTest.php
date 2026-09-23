@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Overwhelm\ReduceToOneStep;
 use App\Actions\Sessions\PauseSession;
 use App\Actions\Sessions\StartSession;
+use App\Actions\Sessions\StopSession;
 use App\Data\ExecutionStateData;
 use App\Models\CalendarEvent;
 use App\Models\Intention;
@@ -40,6 +41,23 @@ it('holds the elapsed count still while the session is paused', function (): voi
 
     CarbonImmutable::setTestNow('2026-09-19 09:12:00');
     PauseSession::run($session);
+
+    CarbonImmutable::setTestNow('2026-09-19 10:30:00');
+
+    expect(ExecutionStateData::of($session->refresh())->elapsed)->toBe('You had been working for 12 minutes.');
+});
+
+it('speaks of an ended session in the past tense', function (): void {
+    CarbonImmutable::setTestNow('2026-09-19 09:00:00');
+
+    $user = User::factory()->create();
+    $intention = Intention::factory()->decomposed()->for($user)->create();
+    $step = Step::factory()->for($intention)->create(['position' => 1]);
+
+    $session = StartSession::run($user, $step);
+
+    CarbonImmutable::setTestNow('2026-09-19 09:12:00');
+    StopSession::run($session);
 
     CarbonImmutable::setTestNow('2026-09-19 10:30:00');
 

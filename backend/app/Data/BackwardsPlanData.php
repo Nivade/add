@@ -19,4 +19,16 @@ class BackwardsPlanData extends Data
         public string $deadlineClock,
         public array $rungs,
     ) {}
+
+    /** The rung the person reaches first, furthest from the appointment. */
+    public function firstRung(): PlanRungData
+    {
+        return $this->rungs[0];
+    }
+
+    /** The last rung before the appointment itself: leaving. */
+    public function leaveRung(): PlanRungData
+    {
+        return $this->rungs[count($this->rungs) - 1];
+    }
 }

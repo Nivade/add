@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\PlanRung;
+use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -20,4 +21,9 @@ class PlanRungData extends Data
         public bool $assumed,
         public bool $alreadyPassed,
     ) {}
+
+    public function instant(): CarbonImmutable
+    {
+        return CarbonImmutable::parse($this->at);
+    }
 }
