@@ -95,6 +95,37 @@ services:
         depends_on:
             redis:
                 condition: service_healthy
+    # Self-hosted error tracking that speaks the Sentry SDK protocol, so the Laravel and
+    # Expo clients stay stock and only the DSN changes.
+    bugsink:
+        image: 'bugsink/bugsink:latest'
+        ports:
+            - '${FORWARD_BUGSINK_PORT:-8031}:8000'
+        environment:
+            SECRET_KEY: '${BUGSINK_SECRET_KEY}'
+            CREATE_SUPERUSER: '${BUGSINK_SUPERUSER:-admin@example.org:admin}'
+            BASE_URL: 'https://bugsink.${DEBUG_DOMAIN}'
+            # Traefik terminates TLS, so Django only sees http without this.
+            BEHIND_HTTPS_PROXY: 'True'
+            # Derived from BASE_URL when unset, which would reject both the in-network
+            # service name the backend posts to and the LAN address a phone posts to.
+            ALLOWED_HOSTS: '${BUGSINK_ALLOWED_HOSTS:-*}'
+            PORT: '8000'
+            DATABASE_PATH: '/data/bugsink.sqlite3'
+        volumes:
+            - 'bugsink-data:/data'
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.docker.network=web'
+            - 'traefik.http.routers.${APP_SLUG}-bugsink.rule=Host(`bugsink.${DEBUG_DOMAIN}`)'
+            - 'traefik.http.routers.${APP_SLUG}-bugsink.priority=100'
+            - 'traefik.http.routers.${APP_SLUG}-bugsink.entrypoints=websecure'
+            - 'traefik.http.routers.${APP_SLUG}-bugsink.tls=true'
+            - 'traefik.http.routers.${APP_SLUG}-bugsink.service=${APP_SLUG}-bugsink'
+            - 'traefik.http.services.${APP_SLUG}-bugsink.loadbalancer.server.port=8000'
+        networks:
+            - sail
+            - web
     redis:
         image: 'redis:alpine'
         ports:
@@ -134,4 +165,6 @@ networks:
         external: true
 volumes:
     sail-redis:
+        driver: local
+    bugsink-data:
         driver: local

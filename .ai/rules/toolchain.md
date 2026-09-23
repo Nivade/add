@@ -124,6 +124,31 @@ Three things about that service are load-bearing:
 Telescope writes on every request, so it gets its own SQLite file via the
 `telescope` connection. Sharing the app's file trades a lock with the app.
 
+## Bugsink is the error tracker, and its DSN host is not the browser's
+
+`bugsink.nvade.debug` serves the UI. The DSN it shows you cannot be pasted into
+`backend/.env` as-is: `.nvade.debug` resolves to `127.0.0.1`, which inside a
+container is that container. The backend addresses it as `http://bugsink:8000`
+over the `sail` network, and a phone uses the published port on the host's LAN
+address — the same split `APP_PORT` already exists for.
+
+It speaks the Sentry SDK protocol, so `sentry/sentry-laravel` and
+`@sentry/react-native` stay stock. It does not accept native crash reports,
+only JS and PHP exceptions.
+
+An error is handed over by its friendly id (`ADD-3`), not by pasting a traceback
+in. `BUGSINK_API_TOKEN` in `backend/.env` reads the issue and renders its latest
+stacktrace, source context and local variables as Markdown:
+
+```bash
+curl -sH "Authorization: Bearer $BUGSINK_API_TOKEN" -H 'Accept: text/markdown' \
+  "$BUGSINK_URL/api/canonical/0/events/<event-id>/stacktrace/"
+```
+
+The token is read-only (`issues:read`, `events:read`) and revocable from
+Bugsink's Tokens page. Local variables ride along in that output, so it carries
+whatever they held.
+
 ## `*.nvade.debug` is a separate fake TLD, not a nested subdomain
 
 A single-level wildcard covers it, so no nested-SAN workaround is needed. It
@@ -136,7 +161,7 @@ wanting this pattern reuses them.
 
 tabellio uses 6380 / 1026 / 8026 / 5174, first-move 6381 / 1027 / 8027 / 5175.
 This repo uses 6382 / 1028 / 8028 / 5176, `COMPOSE_PROJECT_NAME=add`.
-`DEBUG_APP_PORT=8030` continues the block.
+`DEBUG_APP_PORT=8030` and `FORWARD_BUGSINK_PORT=8031` continue the block.
 
 `APP_PORT=8029` publishes the app over plain HTTP alongside Traefik, because a
 simulator or phone has neither the hosts entry for `add.nvade.dev` nor trust in
