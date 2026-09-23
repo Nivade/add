@@ -15,7 +15,8 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 7, mobile.** Nothing of it is built. Slice 6 is finished: the overwhelm
+**Slice 7, mobile.** Designed in [`07-mobile.md`](plans/slices/07-mobile.md),
+nothing of it built. Slice 6 is finished: the overwhelm
 entry point, backwards planning over both kinds of appointment, a read-only
 calendar behind `CalendarSource`, and one reminder per appointment that answers
 §23's four questions and lands on home as a band.
@@ -31,9 +32,6 @@ scheduler and a queue worker have to be running to see one outside a test.
 
 The home slice left one question open: what "Needs attention" offers to resolve
 an intention nobody could name. Nothing on that screen acts on it yet.
-
-Slice 7, mobile, is the point where Expo joins the root workspace list and not
-before.
 
 ## Learning the state
 
