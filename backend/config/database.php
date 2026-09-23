@@ -46,6 +46,18 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
+        // Telescope writes on every request; its own file keeps that traffic off the app's SQLite lock.
+        'telescope' => [
+            'driver' => 'sqlite',
+            'database' => env('TELESCOPE_DB_DATABASE', database_path('telescope.sqlite')),
+            'prefix' => '',
+            'foreign_key_constraints' => false,
+            'busy_timeout' => 5000,
+            'journal_mode' => 'WAL',
+            'synchronous' => 'NORMAL',
+            'transaction_mode' => 'DEFERRED',
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

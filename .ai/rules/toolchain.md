@@ -73,6 +73,17 @@ suite could not see in the container but could on the host.
 sees. Drop the root mount and `types:generate` writes into the container and
 disappears on the next rebuild.
 
+The nesting is why the repo root holds an empty `html/` with a `.gitkeep`. The
+inner mount point has to exist inside the outer mount, and when it does not,
+Docker creates it root-owned on the host at the repo root on every container
+recreate. Committing it keeps the directory yours. Deleting it brings it back.
+
+No guard can hold that down, because the inner mount shadows it: from inside the
+container `/var/www/html` is `backend/`, so the root `html/` is unreachable
+there. That shadowing is also why deleting and recreating the directory on the
+host breaks a running container — the outer mount still points at the old inode,
+and only a container restart re-establishes the inner one.
+
 ## PHP is 8.5 in both places
 
 `compose.yaml` builds `vendor/laravel/sail/runtimes/8.5` as `sail-8.5/app`, and
@@ -88,10 +99,50 @@ that, so we do not run sync. Removing a service means removing its named volume
 **and** that volume's `driver: local` line; orphaning one breaks the YAML in a
 way the error does not point at. Validate with `docker compose config --quiet`.
 
+## The debug tooling is a second container, not a flag on the first
+
+`laravel.test` stays uninstrumented. `laravel.debug` is the same image and the
+same mounts serving `add.nvade.debug`, with xdebug listening and Telescope and
+Debugbar recording. Instrumentation costs a request, not a container, so which
+hostname you open decides what you pay.
+
+Three things about that service are load-bearing:
+
+- `artisan serve` needs `--no-reload`. Without it `ServeCommand` rebuilds the
+  child process environment from a fixed allowlist plus a fresh `.env` read, so
+  every `environment:` override here — `TELESCOPE_ENABLED`, `DEBUGBAR_ENABLED` —
+  is silently replaced by whatever `.env` says. No error, no log.
+- The `command:` bypasses supervisord deliberately. supervisord also starts
+  `queue:work` and `schedule:work`, and a second copy would double-process every
+  job and fire every scheduled command twice against the same database.
+- `TELESCOPE_ENABLED` gates provider registration in `bootstrap/providers.php`,
+  not just recording. Registering the provider is what loads Telescope's
+  migrations, which is why they live in `database/telescope-migrations/` rather
+  than `database/migrations/` — the suite would otherwise build four tables it
+  never reads, in every test.
+
+Telescope writes on every request, so it gets its own SQLite file via the
+`telescope` connection. Sharing the app's file trades a lock with the app.
+
+## `*.nvade.debug` is a separate fake TLD, not a nested subdomain
+
+A single-level wildcard covers it, so no nested-SAN workaround is needed. It
+requires, on the host: `address=/.nvade.debug/127.0.0.1` in `/etc/dnsmasq.conf`,
+and `nvade.debug` plus `*.nvade.debug` in the mkcert SAN list behind
+`../traefik/certs/local.cert.pem`. Both are already there, and any sibling repo
+wanting this pattern reuses them.
+
 ## Ports are offset to coexist with the sibling repos
 
 tabellio uses 6380 / 1026 / 8026 / 5174, first-move 6381 / 1027 / 8027 / 5175.
 This repo uses 6382 / 1028 / 8028 / 5176, `COMPOSE_PROJECT_NAME=add`.
+`DEBUG_APP_PORT=8030` continues the block.
+
+`APP_PORT=8029` publishes the app over plain HTTP alongside Traefik, because a
+simulator or phone has neither the hosts entry for `add.nvade.dev` nor trust in
+its certificate. `mobile/.env.example` carries the two addresses that reach it;
+with `EXPO_PUBLIC_API_URL` unset, the mobile client talks to the deployed
+backend.
 
 ## Sail writes files as uid 1337 unless WWWUSER is pinned
 

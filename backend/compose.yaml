@@ -10,6 +10,8 @@ services:
             - 'host.docker.internal:host-gateway'
         ports:
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            # A device has neither the hosts entry for Traefik's hostname nor trust in its cert.
+            - '${APP_PORT:-8029}:80'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
@@ -45,6 +47,54 @@ services:
                 condition: service_healthy
             mailpit:
                 condition: service_started
+    # The instrumented twin of laravel.test: same image, same mounts, but xdebug is
+    # listening and Telescope/Debugbar record every request. The cost is per request to
+    # this host, not per container, so it comes up with everything else and laravel.test
+    # stays as fast as it was.
+    laravel.debug:
+        image: 'sail-8.5/app'
+        # start-container execs whatever argv it is given, bypassing supervisord, which also
+        # starts queue:work and schedule:work — a second copy would double-process every job
+        # and fire every scheduled command twice against the same database.
+        # --no-reload: without it artisan serve rebuilds the child process env from a fixed
+        # allowlist plus a fresh .env read, silently discarding every override below.
+        command: ['php', '/var/www/html/artisan', 'serve', '--host=0.0.0.0', '--port=80', '--no-reload']
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${DEBUG_APP_PORT:-8030}:80'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            SUPERVISOR_PHP_USER: 'sail'
+            APP_URL: 'https://${APP_SLUG}.${DEBUG_DOMAIN}'
+            XDEBUG_MODE: '${SAIL_XDEBUG_DEBUG_MODE:-debug,develop}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_DEBUG_CONFIG:-client_host=host.docker.internal start_with_request=yes idekey=PHPSTORM}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            TELESCOPE_ENABLED: 'true'
+            DEBUGBAR_ENABLED: 'true'
+            # Debugbar's "open in editor" links rewrite this prefix to the host path.
+            DEBUGBAR_REMOTE_SITES_PATH: '/var/www/html'
+            DEBUGBAR_LOCAL_SITES_PATH: '${PWD}'
+            VITE_PORT: '${VITE_PORT:-5173}'
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.docker.network=web'
+            - 'traefik.http.routers.${APP_SLUG}-debug.rule=Host(`${APP_SLUG}.${DEBUG_DOMAIN}`)'
+            - 'traefik.http.routers.${APP_SLUG}-debug.priority=100'
+            - 'traefik.http.routers.${APP_SLUG}-debug.entrypoints=websecure'
+            - 'traefik.http.routers.${APP_SLUG}-debug.tls=true'
+            - 'traefik.http.routers.${APP_SLUG}-debug.service=${APP_SLUG}-debug'
+            - 'traefik.http.services.${APP_SLUG}-debug.loadbalancer.server.port=80'
+        volumes:
+            - '..:/var/www'
+            - '.:/var/www/html'
+        networks:
+            - sail
+            - web
+        depends_on:
+            redis:
+                condition: service_healthy
     redis:
         image: 'redis:alpine'
         ports:

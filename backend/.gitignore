@@ -7,6 +7,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/debugbar
+/database/telescope.sqlite*
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
