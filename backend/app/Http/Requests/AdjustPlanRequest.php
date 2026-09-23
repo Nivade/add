@@ -8,7 +8,7 @@ use App\Enums\PlanRung;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AdjustPlanRequest extends FormRequest
+final class AdjustPlanRequest extends FormRequest
 {
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array

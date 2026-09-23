@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCaptureRequest extends FormRequest
+final class StoreCaptureRequest extends FormRequest
 {
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array

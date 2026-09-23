@@ -6,6 +6,7 @@ use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 /** @return list<string> */
 function phpSourceFiles(): array
@@ -64,6 +65,11 @@ it('has no API resources', function () {
 // .ai/rules/domain-model.md: the spec's App/Domain tree is deliberately not built.
 it('stays flat rather than growing a domain tree', function () {
     expect(is_dir(app_path('Domain')))->toBeFalse();
+});
+
+// .ai/rules/domain-model.md: a step is reached through the session that offered it.
+it('keeps user_id off steps', function () {
+    expect(Schema::hasColumn('steps', 'user_id'))->toBeFalse();
 });
 
 // .ai/rules/ai-layer.md: one provider seam, not the spec's five named interfaces.

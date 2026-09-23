@@ -129,8 +129,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     <DialogHeader>
                         <DialogTitle>What's blocking you?</DialogTitle>
                         <DialogDescription>
-                            Every answer leads somewhere. None of them is a
-                            failure.
+                            Every answer leads somewhere.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">

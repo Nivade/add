@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Actions\Home\BuildRail;
@@ -22,8 +24,6 @@ class HandleInertiaRequests extends Middleware
     protected $rootView = 'app';
 
     /**
-     * Determines the current asset version.
-     *
      * @see https://inertiajs.com/asset-versioning
      */
     public function version(Request $request): ?string
@@ -32,8 +32,6 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default.
-     *
      * @see https://inertiajs.com/shared-data
      *
      * @return array<string, mixed>

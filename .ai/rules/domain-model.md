@@ -72,11 +72,17 @@ around one step, so pausing and resuming does not open a second session.
 Actions throw on invalid transitions instead of silently no-opping — a landed
 session cannot be landed twice.
 
-## Nothing is denormalised yet
+## `execution_sessions` carries `user_id`; nothing else does
 
-"Current session for a user" joins through `intentions`. At this scale that is
-free. Do not add `user_id` to `steps` or `execution_sessions` until a query plan
-says otherwise.
+Ownership is checked in one place — `ResolvesOwned` reads `user_id` off whatever
+model the route bound — so a session that had to join through `intentions` to
+answer "whose is this" would need a second ownership path for one table.
+`RunningSession` asks the same question on every screen, and the index
+`['user_id', 'ended_at']` is what answers it.
+
+`steps` stays un-denormalised, and a step is reached through the session that
+offered it. Do not add `user_id` to it; `ConventionsTest` fails if the column
+appears.
 
 ## Migrations stay SQLite-compatible
 

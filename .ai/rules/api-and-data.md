@@ -39,8 +39,13 @@ re-enters `from()`.
 ## Status codes and null shapes
 
 `ResponsableData::calculateResponseStatus()` returns 201 for every POST. That is
-right for creating a capture or starting a session, wrong for completing one —
-override to 200 locally in the controller that mutates.
+right for creating a capture, wrong for completing a step — and every session
+control returns `ExecutionStateData`, so the override lives on the Data class
+(`calculateResponseStatus()` returning `HTTP_OK`) rather than in each controller.
+
+A controller overrides locally only when the status depends on what happened:
+`StoreSessionController` answers 201 or 200 on `wasRecentlyCreated`, because
+starting a session that is already running creates nothing.
 
 `GET /api/v1/next-action` and `GET /api/v1/sessions/current` return `null` in a
 200, never a 404. A cold launch reads both, and a 404 there reads as an error to
