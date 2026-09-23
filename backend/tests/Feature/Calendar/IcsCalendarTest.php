@@ -24,11 +24,11 @@ function icsFeed(string ...$events): string
     return implode("\r\n", ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//add//test//EN', ...$events, 'END:VCALENDAR'])."\r\n";
 }
 
-function feedPerson(): User
+function feedPerson(?string $url = FEED_URL): User
 {
     app()->instance(CalendarSource::class, new IcsCalendarSource);
 
-    return User::factory()->create(['timezone' => 'Europe/Amsterdam', 'calendar_feed_url' => FEED_URL]);
+    return User::factory()->create(['timezone' => 'Europe/Amsterdam', 'calendar_feed_url' => $url]);
 }
 
 it('reads recurrences, their overrides and Windows zone names as the calendar means them', function (): void {
@@ -64,13 +64,12 @@ it('reads recurrences, their overrides and Windows zone names as the calendar me
 it('asks nothing of the network for a person who has not connected a feed', function (): void {
     Http::preventStrayRequests();
 
-    $user = feedPerson();
-    $user->forceFill(['calendar_feed_url' => null])->save();
+    $user = feedPerson(null);
 
     expect(SyncCalendar::run($user, CarbonImmutable::parse('2026-09-19 09:00:00')))->toBe([]);
 });
 
-it('fails loudly without repeating the private address when the feed cannot be read', function (Closure $response): void {
+it('fails loudly without repeating the private address when the feed cannot be read', function (mixed $response): void {
     Http::preventStrayRequests();
     Http::fake([FEED_URL => $response]);
 
@@ -78,9 +77,9 @@ it('fails loudly without repeating the private address when the feed cannot be r
         ->toThrow(fn (CalendarFeedUnreadable $exception) => expect($exception->getMessage())->not->toContain('private-abc123')
             ->and($exception->getPrevious())->toBeNull());
 })->with([
-    'gone' => fn () => fn () => Http::response('Not Found', 404),
-    'unreachable' => fn () => fn () => Http::failedConnection('cURL error 6: Could not resolve host for '.FEED_URL),
-    'not a calendar' => fn () => fn () => Http::response('<html>Sign in</html>'),
+    'gone' => fn () => Http::response('Not Found', 404),
+    'unreachable' => fn () => Http::failedConnection('cURL error 6: Could not resolve host for '.FEED_URL),
+    'not a calendar' => fn () => Http::response('<html>Sign in</html>'),
 ]);
 
 it('puts a connected feed on home, reminds from it, and takes it all back on disconnect', function (): void {
@@ -92,8 +91,7 @@ it('puts a connected feed on home, reminds from it, and takes it all back on dis
     Notification::fake();
     $this->travelTo(CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam'));
 
-    $user = feedPerson();
-    $user->forceFill(['calendar_feed_url' => null])->save();
+    $user = feedPerson(null);
 
     $this->actingAs($user)
         ->put(route('calendar.update'), ['url' => 'webcal://calendar.example.test/private-abc123/basic.ics'])

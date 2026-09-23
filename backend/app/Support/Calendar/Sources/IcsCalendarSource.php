@@ -9,11 +9,11 @@ use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\User;
 use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
 use Carbon\CarbonImmutable;
+use DateTimeImmutable;
 use DateTimeZone;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Sabre\VObject\Component\VCalendar;
 use Sabre\VObject\Component\VEvent;
 use Sabre\VObject\Node;
@@ -28,8 +28,6 @@ final class IcsCalendarSource implements CalendarSource
 {
     public const string NAME = 'ics';
 
-    private const int TIMEOUT_SECONDS = 15;
-
     public function name(): string
     {
         return self::NAME;
@@ -37,16 +35,23 @@ final class IcsCalendarSource implements CalendarSource
 
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array
     {
-        if ($user->calendar_feed_url === null) {
+        $url = $user->calendar_feed_url;
+
+        if ($url === null) {
             return [];
         }
 
+        $zone = new DateTimeZone($user->timezone);
         $events = [];
 
-        foreach ($this->read($user->calendar_feed_url, $from, $until, $user->timezone)->select('VEVENT') as $event) {
-            $draft = $event instanceof VEvent ? $this->draft($event, $user->timezone) : null;
+        foreach ($this->read($url, $from, $until, $zone)->select('VEVENT') as $event) {
+            if (! $event instanceof VEvent) {
+                continue;
+            }
 
-            if ($draft instanceof CalendarEventDraftData && $draft->startsAt >= $from && $draft->startsAt <= $until) {
+            $draft = $this->draft($event, $zone);
+
+            if ($draft instanceof CalendarEventDraftData) {
                 $events[] = $draft;
             }
         }
@@ -59,10 +64,10 @@ final class IcsCalendarSource implements CalendarSource
      *
      * @return VCalendar<int, Node>
      */
-    private function read(string $url, CarbonImmutable $from, CarbonImmutable $until, string $timezone): VCalendar
+    private function read(string $url, CarbonImmutable $from, CarbonImmutable $until, DateTimeZone $zone): VCalendar
     {
         try {
-            $body = Http::timeout(self::TIMEOUT_SECONDS)->get($url)->throw()->body();
+            $body = Http::timeout(15)->get($url)->throw()->body();
         } catch (RequestException $exception) {
             throw new CalendarFeedUnreadable("The calendar feed answered {$exception->response->status()}.");
         } catch (ConnectionException) {
@@ -72,40 +77,36 @@ final class IcsCalendarSource implements CalendarSource
         try {
             $calendar = Reader::read($body, Reader::OPTION_FORGIVING);
 
-            if (! $calendar instanceof VCalendar) {
-                throw new CalendarFeedUnreadable('The calendar feed is not iCalendar.');
-            }
-
             // Recurrences, their overrides and every zone are resolved here, to the window a sync asks for.
-            return $calendar->expand($from, $until, new DateTimeZone($timezone));
-        } catch (CalendarFeedUnreadable $exception) {
-            throw $exception;
+            $expanded = $calendar instanceof VCalendar ? $calendar->expand($from, $until, $zone) : null;
         } catch (Throwable) {
-            throw new CalendarFeedUnreadable('The calendar feed is not iCalendar.');
+            $expanded = null;
         }
+
+        return $expanded ?? throw new CalendarFeedUnreadable('The calendar feed is not iCalendar.');
     }
 
     /** @param  VEvent<int, Node>  $event */
-    private function draft(VEvent $event, string $timezone): ?CalendarEventDraftData
+    private function draft(VEvent $event, DateTimeZone $zone): ?CalendarEventDraftData
     {
         $uid = $this->text($event, 'UID');
-        $startsAt = $this->instant($event->__get('DTSTART'), $timezone);
+        $startsAt = $this->instant($event->__get('DTSTART'), $zone);
 
         // An all-day entry has no instant to plan backwards from, and a cancelled one is not happening.
         if ($uid === '' || ! $startsAt instanceof CarbonImmutable || strtoupper($this->text($event, 'STATUS')) === 'CANCELLED') {
             return null;
         }
 
-        $occurrence = $this->instant($event->__get('RECURRENCE-ID'), 'UTC');
+        $occurrence = $this->instant($event->__get('RECURRENCE-ID'), new DateTimeZone('UTC'));
         $title = $this->text($event, 'SUMMARY');
         $location = $this->text($event, 'LOCATION');
 
         return new CalendarEventDraftData(
             externalId: $occurrence instanceof CarbonImmutable ? $uid.'@'.$occurrence->format('Ymd\THis\Z') : $uid,
-            title: $title === '' ? 'Something on your calendar' : Str::limit($title, 250),
+            title: $title === '' ? 'Something on your calendar' : $title,
             startsAt: $startsAt,
-            endsAt: $this->instant($event->__get('DTEND'), $timezone) ?? $this->lasting($event, $startsAt),
-            location: $location === '' ? null : Str::limit($location, 250),
+            endsAt: $this->instant($event->__get('DTEND'), $zone) ?? $this->lasting($event, $startsAt),
+            location: $location === '' ? null : $location,
         );
     }
 
@@ -126,14 +127,14 @@ final class IcsCalendarSource implements CalendarSource
     }
 
     /** @param  Node<int, Node>|null  $property */
-    private function instant(?Node $property, string $timezone): ?CarbonImmutable
+    private function instant(?Node $property, DateTimeZone $zone): ?CarbonImmutable
     {
         if (! $property instanceof DateTime || ! $property->hasTime()) {
             return null;
         }
 
-        $instant = $property->getDateTime(new DateTimeZone($timezone));
+        $instant = $property->getDateTime($zone);
 
-        return $instant instanceof \DateTimeImmutable ? CarbonImmutable::instance($instant)->setTimezone($timezone) : null;
+        return $instant instanceof DateTimeImmutable ? CarbonImmutable::instance($instant) : null;
     }
 }

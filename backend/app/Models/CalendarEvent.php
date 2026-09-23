@@ -11,6 +11,7 @@ use Carbon\CarbonImmutable;
 use Database\Factories\CalendarEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -71,6 +72,21 @@ class CalendarEvent extends Model implements Appointment
     public function appointmentInferred(): bool
     {
         return false;
+    }
+
+    /**
+     * Reminders point at an appointment without a foreign key, so they go in the same breath as the events.
+     *
+     * @param  Builder<self>  $events
+     */
+    public static function forget(Builder $events): void
+    {
+        Reminder::query()
+            ->where('appointment_kind', AppointmentKind::CalendarEvent)
+            ->whereIn('appointment_id', $events->clone()->select('id'))
+            ->delete();
+
+        $events->delete();
     }
 
     protected function casts(): array

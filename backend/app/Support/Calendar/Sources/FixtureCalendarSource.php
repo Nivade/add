@@ -40,11 +40,7 @@ final class FixtureCalendarSource implements CalendarSource
                 throw new CalendarFixtureInvalid("Calendar fixture {$path} holds something that is not an event.");
             }
 
-            $draft = $this->draft($row, $path, $user->timezone);
-
-            if ($draft->startsAt >= $from && $draft->startsAt <= $until) {
-                $events[] = $draft;
-            }
+            $events[] = $this->draft($row, $path, $user->timezone);
         }
 
         return $events;

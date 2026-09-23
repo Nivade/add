@@ -35,7 +35,11 @@ Two rules in `handle()` that look like bugs and are not:
   Reaping on empty would also take the person's stated minutes with it.
 - **An event the source stopped reporting is deleted** within the synced window
   for that source. It was moved or cancelled upstream, and keeping it would have
-  us plan a day around something nobody is attending.
+  us plan a day around something nobody is attending. `CalendarEvent::forget()`
+  takes its reminders with it, since those have no foreign key.
+
+The sync keeps only what starts inside its window, so a source may answer
+loosely around it and need not filter.
 
 Events are matched on `user_id` + `source` + `external_id` and stored in UTC.
 The source owns the row; we never invent one.

@@ -31,9 +31,6 @@ final class FakeCalendarSource implements CalendarSource
 
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array
     {
-        return array_values(array_filter(
-            $this->events,
-            fn (CalendarEventDraftData $event): bool => $event->startsAt >= $from && $event->startsAt <= $until,
-        ));
+        return $this->events;
     }
 }

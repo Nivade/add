@@ -5,9 +5,12 @@ declare(strict_types=1);
 use App\Actions\Calendar\SyncCalendar;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
+use App\Enums\AppointmentKind;
 use App\Models\CalendarEvent;
+use App\Models\Reminder;
 use App\Models\User;
 use App\Support\Calendar\Sources\FakeCalendarSource;
+use App\Support\Calendar\Sources\IcsCalendarSource;
 use App\Support\Calendar\Sources\NullCalendarSource;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
@@ -72,6 +75,20 @@ it('drops an event the calendar stopped reporting', function (): void {
     SyncCalendar::run($user, $now);
 
     expect(CalendarEvent::query()->pluck('external_id')->all())->toBe(['abc-1']);
+});
+
+it('takes the reminder of an event the calendar stopped reporting with it', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    calendar(draft('abc-1', '2026-09-19 14:00:00'), draft('abc-2', '2026-09-19 16:00:00', 'Standup'));
+    [, $standup] = SyncCalendar::run($user, $now);
+    Reminder::factory()->for($user)->create(['appointment_kind' => AppointmentKind::CalendarEvent, 'appointment_id' => $standup->id]);
+
+    calendar(draft('abc-1', '2026-09-19 14:00:00'));
+    SyncCalendar::run($user, $now);
+
+    expect(Reminder::query()->count())->toBe(0);
 });
 
 it('drops a cancelled event early in the day of someone east of UTC', function (): void {
@@ -167,4 +184,16 @@ it('queues the sync per person rather than reading every calendar inline', funct
     $this->artisan('calendar:sync')->assertSuccessful();
 
     Queue::assertPushed(JobDecorator::class, 2);
+});
+
+it('queues a feed sync only for the people who pasted a feed', function (): void {
+    app()->instance(CalendarSource::class, new IcsCalendarSource);
+    Queue::fake();
+
+    User::factory()->create(['calendar_feed_url' => 'https://calendar.example.test/private.ics']);
+    User::factory()->create();
+
+    $this->artisan('calendar:sync')->assertSuccessful();
+
+    Queue::assertPushed(JobDecorator::class, 1);
 });

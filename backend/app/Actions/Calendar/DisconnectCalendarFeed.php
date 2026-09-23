@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Enums\AppointmentKind;
 use App\Models\CalendarEvent;
-use App\Models\Reminder;
 use App\Models\User;
 use App\Support\Calendar\Sources\IcsCalendarSource;
 use Illuminate\Support\Facades\DB;
@@ -20,17 +18,9 @@ final class DisconnectCalendarFeed
     public function handle(User $user): User
     {
         DB::transaction(function () use ($user): void {
-            $events = CalendarEvent::query()
+            CalendarEvent::forget(CalendarEvent::query()
                 ->where('user_id', $user->id)
-                ->where('source', IcsCalendarSource::NAME);
-
-            Reminder::query()
-                ->where('user_id', $user->id)
-                ->where('appointment_kind', AppointmentKind::CalendarEvent)
-                ->whereIn('appointment_id', $events->clone()->select('id'))
-                ->delete();
-
-            $events->delete();
+                ->where('source', IcsCalendarSource::NAME));
 
             $user->calendar_feed_url = null;
             $user->save();

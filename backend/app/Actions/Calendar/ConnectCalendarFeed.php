@@ -18,7 +18,7 @@ final class ConnectCalendarFeed
         $user->calendar_feed_url = Str::replaceStart('webcal://', 'https://', trim($url));
         $user->save();
 
-        SyncCalendar::dispatch($user);
+        SyncCalendar::dispatchAfterResponse($user);
 
         return $user;
     }
