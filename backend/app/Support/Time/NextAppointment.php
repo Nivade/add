@@ -31,10 +31,6 @@ final class NextAppointment
     /** @return list<Appointment> */
     private static function sorted(User $user, CarbonImmutable $now, ?CarbonImmutable $until, ?int $limit): array
     {
-        // Columns hold UTC, and a binding is written as its wall clock, so both ends are converted first.
-        $now = $now->utc();
-        $until = $until?->utc();
-
         $intentions = Intention::query()
             ->where('user_id', $user->id)
             ->open()

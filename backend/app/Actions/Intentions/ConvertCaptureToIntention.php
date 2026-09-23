@@ -48,8 +48,7 @@ final class ConvertCaptureToIntention
             $timezone,
         );
 
-        // Read in the person's zone, stored as the instant it names.
-        $deadlineAt = ($extracted instanceof ExtractedDeadline ? $extracted->at : $parsed->deadlineAt)?->utc();
+        $deadlineAt = $extracted instanceof ExtractedDeadline ? $extracted->at : $parsed->deadlineAt;
 
         $intention = DB::transaction(function () use ($capture, $parsed, $deadlineAt): Intention {
             $intention = Intention::query()->create([

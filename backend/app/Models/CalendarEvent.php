@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\PlansBackwards;
+use App\Concerns\StoresDatesInUtc;
 use App\Contracts\Appointment;
 use App\Enums\AppointmentKind;
 use Carbon\CarbonImmutable;
@@ -41,6 +42,7 @@ class CalendarEvent extends Model implements Appointment
 
     use HasUlids;
     use PlansBackwards;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

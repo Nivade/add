@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\StoresDatesInUtc;
 use App\Data\Ai\ParsedStepData;
 use App\Enums\StepStatus;
 use Carbon\CarbonImmutable;
@@ -40,6 +41,7 @@ class Step extends Model
     use HasFactory;
 
     use HasUlids;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<Intention, $this> */
     public function intention(): BelongsTo

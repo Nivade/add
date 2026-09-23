@@ -41,7 +41,7 @@ final class ProgressLines
 
     private static function doneToday(ExecutionSession $session): int
     {
-        $midnight = $session->user->now()->startOfDay()->utc();
+        $midnight = $session->user->now()->startOfDay();
 
         return Step::query()
             ->where('status', StepStatus::Done)

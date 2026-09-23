@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\StoresDatesInUtc;
 use App\Enums\SessionOutcome;
 use Carbon\CarbonImmutable;
 use Database\Factories\ExecutionSessionFactory;
@@ -38,6 +39,7 @@ class ExecutionSession extends Model
     use HasFactory;
 
     use HasUlids;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
