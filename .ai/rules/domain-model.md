@@ -62,6 +62,23 @@ continuously.
 Domain tables use ULIDs (`HasUlids`). `users` is Laravel's default bigint from
 the starter kit, so every `user_id` is a `foreignId`, not `foreignUlid`.
 
+## Dates are UTC instants, converted below the call site
+
+Columns hold UTC, but the person's clock is where every window starts
+(`User::now()`), and Laravel writes a Carbon into SQL as its wall clock. That
+shifted every comparison by the person's offset, and three call sites had
+already forgotten a hand-written `->utc()`.
+
+So nothing converts by hand. Each driver's connection converts date bindings in
+`prepareBindings` (`app/Support/Database/`, registered in `AppServiceProvider`),
+and every model converts on write through `StoresDatesInUtc`, which
+`ConventionsTest` requires. Supporting a new driver means adding its connection
+there too.
+
+The conversion only sees a date object. A date you format into a string yourself,
+and `whereDate`, which formats before binding, reach SQL as the wall clock. Pass
+the Carbon.
+
 ## The session outlives the step
 
 `execution_sessions.current_step_id` is nullable and changes as the person moves
