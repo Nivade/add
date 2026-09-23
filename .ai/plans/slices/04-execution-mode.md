@@ -1,5 +1,7 @@
 # Slice 4 — execution mode
 
+**State:** done, 2026-09-19 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §10, §11, §12, §18. Rules:
 `product-invariants.md`, `domain-model.md` (the session outlives the step).*
 

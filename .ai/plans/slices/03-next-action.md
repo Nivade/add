@@ -1,5 +1,7 @@
 # Slice 3 — next action
 
+**State:** done, 2026-09-19 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §9, §26. Rules that bind this
 slice: `product-invariants.md` (every recommendation is explainable),
 `testing.md` (the engine gets scenario tests), `ai-layer.md` (nothing here is

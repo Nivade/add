@@ -1,5 +1,7 @@
 # Hardening pass — what the audit found
 
+**State:** done, 2026-09-20 · [the slice table](executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](product-spec.md) §2.5, §9, §13, §21, §22, §28, §31.
 Rules: `product-invariants.md`, `ai-layer.md`, `domain-model.md`.*
 

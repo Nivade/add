@@ -1,5 +1,7 @@
 # Slice 7 — mobile
 
+**State:** done, 2026-09-23 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §3, §30, and §31's large touch
 targets. Rules: `toolchain.md` (the two frontends share types, never components),
 `api-and-data.md`, `product-invariants.md`.*

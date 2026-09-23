@@ -1,5 +1,7 @@
 # Slice 5 — home
 
+**State:** done, 2026-09-19 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §5, §29, §39. Rules:
 `product-invariants.md` (no backlog dumps), `api-and-data.md`.*
 

@@ -1,5 +1,7 @@
 # Slice 6 — overwhelm and time
 
+**State:** done, 2026-09-20 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §13, §14, §16, §22, §23. Rules:
 `product-invariants.md`, `ai-layer.md` (time arithmetic is computed, never
 generated).*

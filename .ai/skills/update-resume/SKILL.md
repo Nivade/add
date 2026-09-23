@@ -33,7 +33,7 @@ Then the next steps, in the order the slice file gives them.
 | This session produced | It goes in |
 | --- | --- |
 | Work finished, files added, bugs fixed | `git log` — nowhere else |
-| A slice changing state | the slice table in `.ai/plans/executive-function-os.md` |
+| A slice changing state | the slice table in `.ai/plans/executive-function-os.md`, and the plan's own `**State:**` header — both, or the guard fails |
 | Design for a slice not yet built | that slice's file in `.ai/plans/slices/` |
 | An invariant or cross-file trap | `.ai/rules/` — only when the user explicitly asks, via `record-rule` |
 | Product intent | nowhere; the spec is verbatim and is not edited |
@@ -46,6 +46,12 @@ A decision made this session and written nowhere is lost. Route it before writin
 - A status sentence a command answers faster: "the suite is green", "nothing is committed".
 - A slice's state, which the plan table owns.
 - A decision and its reasoning, which `.ai/rules/` and the slice files own.
+
+## A plan this session finished
+
+Flip both copies of its state to `done` and the date, then decide whether it leaves `.ai/plans/`. `slice-workflow` carries the vocabulary and the archive checklist; the short version is that archiving means routing the Open items to the files that own them first, and slice files are never archived at all.
+
+A plan finished with items still open stays where it is. That is not a failure to tidy — it is the file still being load-bearing.
 
 ## Before finishing
 

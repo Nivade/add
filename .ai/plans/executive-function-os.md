@@ -154,6 +154,11 @@ Each slice is usable on its own. A slice earns its own file in
 done-when bar and the spec sections it answers. This table is the spine and
 stays at one line each.
 
+The State column is repeated in each plan's own header, because whoever follows
+a link into a plan never sees this table. `DocumentationTest` fails when the two
+disagree, so the copy cannot drift; `slice-workflow` carries the vocabulary and
+what moving a plan to `done` requires.
+
 | # | Slice | Spec | State |
 | --- | --- | --- | --- |
 | 1 | Foundations — enums, migrations, models, Data classes, generated types, guard tests | §25, §37 | done |

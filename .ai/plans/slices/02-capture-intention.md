@@ -1,5 +1,7 @@
 # Slice 2 — capture → intention
 
+**State:** done, 2026-09-19 · [the slice table](../executive-function-os.md#slices)
+
 *Spec: [`product-spec.md`](../product-spec.md) §6 (text only), §7, §8, §27.
 Live state: [`.ai/RESUME.md`](../../RESUME.md). Rules that bind this slice:
 `ai-layer.md`, `domain-model.md`, `product-invariants.md`.*
