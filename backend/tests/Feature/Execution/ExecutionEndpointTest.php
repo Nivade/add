@@ -8,6 +8,7 @@ use App\Enums\StepStatus;
 use App\Enums\StuckReason;
 use App\Models\ExecutionSession;
 use App\Models\User;
+use Illuminate\Support\Facades\Exceptions;
 use Inertia\Testing\AssertableInertia;
 
 it('answers a null-shaped 200 when no session is open', function (): void {
@@ -125,6 +126,7 @@ it('refuses an unauthenticated reader', function (): void {
 });
 
 it('reports an ended session as a conflict rather than a crash', function (): void {
+    Exceptions::fake();
     $session = started();
 
     StopSession::run($session);
@@ -132,6 +134,8 @@ it('reports an ended session as a conflict rather than a crash', function (): vo
     $this->actingAs($session->user)
         ->postJson("/api/v1/sessions/{$session->id}/pause")
         ->assertStatus(409);
+
+    Exceptions::assertNothingReported();
 });
 
 it('carries the stuck note through the endpoint', function (): void {
