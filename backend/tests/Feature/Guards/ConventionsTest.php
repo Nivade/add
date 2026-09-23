@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Concerns\StoresDatesInUtc;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use Illuminate\Console\Scheduling\Schedule;
@@ -54,6 +55,15 @@ it('never adds a due_at or overdue column', function () {
 
         expect($contents)->not->toContain("'due_at'")
             ->and($contents)->not->toContain("'overdue'");
+    }
+});
+
+// A model without it writes a date on the person's clock as that wall clock, and every comparison drifts by their offset.
+it('stores every model\'s dates as UTC instants', function () {
+    foreach (glob(app_path('Models/*.php')) ?: [] as $file) {
+        $model = 'App\\Models\\'.basename($file, '.php');
+
+        expect(class_uses_recursive($model))->toContain(StoresDatesInUtc::class);
     }
 });
 

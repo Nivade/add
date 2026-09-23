@@ -93,7 +93,7 @@ final class SendDueReminders
             'user_id' => $user->id,
             'appointment_kind' => $appointment->appointmentKind(),
             'appointment_id' => $appointment->appointmentId(),
-            'sent_at' => $now->utc(),
+            'sent_at' => $now,
         ]);
     }
 }

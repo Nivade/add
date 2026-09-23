@@ -19,6 +19,7 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "lorisleiva/laravel-actions": "^2.12",
+        "sabre/vobject": "^5.0",
         "sentry/sentry-laravel": "^4.28",
         "spatie/laravel-data": "^4.23"
     },

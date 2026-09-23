@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\StoresDatesInUtc;
 use App\Enums\AppointmentKind;
 use Carbon\CarbonImmutable;
 use Database\Factories\ReminderFactory;
@@ -31,6 +32,7 @@ class Reminder extends Model
     use HasFactory;
 
     use HasUlids;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

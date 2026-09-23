@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\StoresDatesInUtc;
 use App\Enums\DevicePlatform;
 use Database\Factories\DeviceFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
@@ -21,6 +22,7 @@ class Device extends Model
     use HasFactory;
 
     use HasUlids;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

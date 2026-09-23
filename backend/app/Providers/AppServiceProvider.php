@@ -6,7 +6,12 @@ namespace App\Providers;
 
 use App\Contracts\Appointment;
 use App\Enums\AppointmentKind;
+use App\Support\Database\UtcMariaDbConnection;
+use App\Support\Database\UtcMySqlConnection;
+use App\Support\Database\UtcPostgresConnection;
+use App\Support\Database\UtcSQLiteConnection;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as RoutedRequest;
 use Illuminate\Support\Facades\Date;
@@ -22,6 +27,17 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         Actions::registerCommands();
+
+        $this->bindDatesInUtc();
+    }
+
+    /** Every driver the app can run on binds a date as its UTC instant, so no query has to remember to. */
+    protected function bindDatesInUtc(): void
+    {
+        Connection::resolverFor('sqlite', fn (mixed ...$arguments): Connection => new UtcSQLiteConnection(...$arguments));
+        Connection::resolverFor('mysql', fn (mixed ...$arguments): Connection => new UtcMySqlConnection(...$arguments));
+        Connection::resolverFor('mariadb', fn (mixed ...$arguments): Connection => new UtcMariaDbConnection(...$arguments));
+        Connection::resolverFor('pgsql', fn (mixed ...$arguments): Connection => new UtcPostgresConnection(...$arguments));
     }
 
     public function boot(): void

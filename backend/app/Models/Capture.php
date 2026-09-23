@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Concerns\StoresDatesInUtc;
 use App\Enums\CaptureSource;
 use Database\Factories\CaptureFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
@@ -21,6 +22,7 @@ class Capture extends Model
     use HasFactory;
 
     use HasUlids;
+    use StoresDatesInUtc;
 
     public const ?string UPDATED_AT = null;
 

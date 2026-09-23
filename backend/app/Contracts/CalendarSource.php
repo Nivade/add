@@ -16,6 +16,10 @@ interface CalendarSource
 {
     public function name(): string;
 
-    /** @return list<CalendarEventDraftData> */
+    /**
+     * A source may answer loosely around the window; the sync keeps what starts inside it.
+     *
+     * @return list<CalendarEventDraftData>
+     */
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array;
 }

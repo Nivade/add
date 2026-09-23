@@ -19,7 +19,9 @@ trait QueuesPerUser
     {
         $queued = 0;
 
+        // The job carries only the key and loads the person itself, so the chunk needs nothing else.
         User::query()
+            ->select('id')
             ->when($command->argument('user'), fn (Builder $query, array|bool|float|int|string $id) => $query->whereKey($id))
             ->tap(fn (Builder $query) => $this->constrainQueued($query))
             ->chunkById(self::QUEUE_CHUNK, function (Collection $users) use (&$queued): void {

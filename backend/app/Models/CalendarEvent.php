@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Concerns\PlansBackwards;
+use App\Concerns\StoresDatesInUtc;
 use App\Contracts\Appointment;
 use App\Enums\AppointmentKind;
 use Carbon\CarbonImmutable;
 use Database\Factories\CalendarEventFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +43,7 @@ class CalendarEvent extends Model implements Appointment
 
     use HasUlids;
     use PlansBackwards;
+    use StoresDatesInUtc;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
@@ -71,6 +75,28 @@ class CalendarEvent extends Model implements Appointment
     public function appointmentInferred(): bool
     {
         return false;
+    }
+
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function ofSource(Builder $query, User $user, string $source): void
+    {
+        $query->where('user_id', $user->id)->where('source', $source);
+    }
+
+    /**
+     * Reminders point at an appointment without a foreign key, so they go in the same breath as the events.
+     *
+     * @param  Builder<self>  $events
+     */
+    public static function forget(Builder $events): void
+    {
+        Reminder::query()
+            ->where('appointment_kind', AppointmentKind::CalendarEvent)
+            ->whereIn('appointment_id', $events->clone()->select('id'))
+            ->delete();
+
+        $events->delete();
     }
 
     protected function casts(): array
