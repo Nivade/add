@@ -111,7 +111,7 @@ position, open session, skip history, intention age.
 | Not yet | Arrives with |
 | --- | --- |
 | appointments, energy and time budget | slice 6 |
-| dependencies, blocked-ness | slice 8 (waiting-for) |
+| dependencies, blocked-ness | slice 9 (waiting-for) |
 | location, available tools | the deferred `Context` model |
 
 Each one enters as a comparator inserted into the chain, not as a new parameter

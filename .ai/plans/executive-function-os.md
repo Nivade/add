@@ -169,17 +169,18 @@ what moving a plan to `done` requires.
 | 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | done |
 | — | [Hardening](hardening.md) — where the built slices disagreed with their own decisions | §2.5, §21, §28 | done |
 | 7 | [Mobile](slices/07-mobile.md) — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | done |
-| 8 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | next, paragraph below |
-| 9 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
+| 8 | [Make the MVP real](slices/08-mvp-real.md) — real calendar, live model behind consent, a device, the journey under a browser | §18, §22, §28, §32, §39 | building |
+| 9 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | next after 8, paragraph below |
+| 10 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
 
-**Slice 8, phase 2.** Waiting-for with its four responses, commitments with the
+**Slice 9, phase 2.** Waiting-for with its four responses, commitments with the
 three provenance levels kept distinct, email and document ingestion behind a
 modular port with no provider coupling, future-self reminders, recurring steps,
 body doubling starting with solo. Ingestion is last on purpose: it is where the
 privacy surface grows fastest (risk 3), and it is worthless until the core
 journey is polished.
 
-**Slice 9** is recorded so it is not reinvented, not planned.
+**Slice 10** is recorded so it is not reinvented, not planned.
 
 ## Measuring it
 
