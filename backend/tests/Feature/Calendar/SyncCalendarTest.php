@@ -74,6 +74,19 @@ it('drops an event the calendar stopped reporting', function (): void {
     expect(CalendarEvent::query()->pluck('external_id')->all())->toBe(['abc-1']);
 });
 
+it('drops a cancelled event early in the day of someone east of UTC', function (): void {
+    $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam');
+
+    calendar(draft('early', '2026-09-18 22:30:00'), draft('abc-1', '2026-09-19 12:00:00'));
+    SyncCalendar::run($user, $now);
+
+    calendar(draft('abc-1', '2026-09-19 12:00:00'));
+    SyncCalendar::run($user, $now);
+
+    expect(CalendarEvent::query()->pluck('external_id')->all())->toBe(['abc-1']);
+});
+
 it('keeps the day it already knows when the source answers with nothing', function (): void {
     $user = User::factory()->create();
     $now = CarbonImmutable::parse('2026-09-19 09:00:00');

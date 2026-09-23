@@ -53,7 +53,7 @@ final class SyncCalendar
         CalendarEvent::query()
             ->where('user_id', $user->id)
             ->where('source', $this->source->name())
-            ->whereBetween('starts_at', [$from, $until])
+            ->whereBetween('starts_at', [$from->utc(), $until->utc()])
             ->whereNotIn('external_id', array_map(
                 fn (CalendarEventDraftData $draft): string => $draft->externalId,
                 $drafts,
