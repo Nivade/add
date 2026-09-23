@@ -6,5 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     ...config.extra,
     apiUrl: process.env.EXPO_PUBLIC_API_URL ?? 'https://add.nvade.dev',
+    // Unset means no error reporting, which is what a build without a local Bugsink wants.
+    sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN ?? null,
   },
 });

@@ -4,9 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '@/auth/session';
+import { startErrorReporting, withErrorReporting } from '@/errors/reporting';
 import { theme } from '@/theme';
 
-export default function RootLayout() {
+startErrorReporting();
+
+function RootLayout() {
   return (
     <SafeAreaProvider>
       <SessionProvider>
@@ -16,6 +19,8 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+export default withErrorReporting(RootLayout);
 
 function Gate() {
   const { token, loading } = useSession();

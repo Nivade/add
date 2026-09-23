@@ -136,6 +136,16 @@ It speaks the Sentry SDK protocol, so `sentry/sentry-laravel` and
 `@sentry/react-native` stay stock. It does not accept native crash reports,
 only JS and PHP exceptions.
 
+The native client deliberately skips the `@sentry/react-native/expo` config
+plugin. That plugin exists to upload source maps to Sentry's API and to wire
+native crash capture, and Bugsink offers neither — `Sentry.init()` from JS is
+what reports, and Metro already serves readable frames in development. Adding
+the plugin buys nothing and asks for an auth token that does not exist.
+
+`@sentry/react-native` goes in `mobile/package.json` at the version
+`expo install` pins, then `npm install` from the root. Installing it inside
+`mobile/` is what nests a second React and breaks hooks.
+
 An error is handed over by its friendly id (`ADD-3`), not by pasting a traceback
 in. `BUGSINK_API_TOKEN` in `backend/.env` reads the issue and renders its latest
 stacktrace, source context and local variables as Markdown:
