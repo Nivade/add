@@ -7,7 +7,7 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Band, Meta, OneThing, Screen } from '@/components/screen';
+import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { theme } from '@/theme';
 
 export default function Home() {
@@ -16,11 +16,7 @@ export default function Home() {
   const { data, loading, failed, reload } = useResource<HomeData>(load);
 
   if (loading && !data) {
-    return (
-      <Screen>
-        <Meta>one moment</Meta>
-      </Screen>
-    );
+    return <Loading />;
   }
 
   if (failed || !data) {

@@ -1,14 +1,9 @@
-import type { BackwardsPlanData, PlanRung } from '@add/shared';
+import type { BackwardsPlanData } from '@add/shared';
+import { planRungLabels } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import calendarEvents from '@/routes/calendar-events';
 import intentions from '@/routes/intentions';
-
-const rungLabels: Record<PlanRung, string> = {
-    find_things: 'find what you need',
-    get_ready: 'get ready',
-    leave: 'leave',
-};
 
 /** Arithmetic the person can overrule: every number here is either stated or labelled as assumed. */
 export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
@@ -34,11 +29,11 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                         {rung.clock}
                     </span>
                     <span className="text-muted-foreground flex-1">
-                        {rungLabels[rung.rung]}
+                        {planRungLabels[rung.rung]}
                     </span>
                     <label className="text-muted-foreground flex items-baseline gap-2">
                         <span className="sr-only">
-                            Minutes to {rungLabels[rung.rung]}
+                            Minutes to {planRungLabels[rung.rung]}
                         </span>
                         <input
                             type="number"

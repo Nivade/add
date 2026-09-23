@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications\Channels;
 
+use App\Contracts\ExpoPushable;
 use App\Models\Device;
 use App\Models\User;
 use Illuminate\Notifications\Notification;
@@ -17,7 +18,7 @@ final class ExpoPushChannel
 
     public function send(object $notifiable, Notification $notification): void
     {
-        if (! $notifiable instanceof User || ! method_exists($notification, 'toExpo')) {
+        if (! $notifiable instanceof User || ! $notification instanceof ExpoPushable) {
             return;
         }
 
@@ -28,7 +29,6 @@ final class ExpoPushChannel
             return;
         }
 
-        /** @var array{title: string, body: string, data: array<string, mixed>} $message */
         $message = $notification->toExpo($notifiable);
 
         $response = Http::asJson()->post(self::ENDPOINT, array_map(

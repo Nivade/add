@@ -6,7 +6,7 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Meta, OneThing, Screen } from '@/components/screen';
+import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 
 /** No bands, no capture, one way back: this screen exists to remove everything else. */
 export default function Overwhelmed() {
@@ -15,11 +15,7 @@ export default function Overwhelmed() {
   const { data, loading } = useResource<OverwhelmedData>(load);
 
   if (loading && !data) {
-    return (
-      <Screen>
-        <Meta>one moment</Meta>
-      </Screen>
-    );
+    return <Loading />;
   }
 
   const step = data?.smallestStep;

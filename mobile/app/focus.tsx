@@ -1,36 +1,24 @@
-import type { ExecutionStateData, StuckReason } from '@add/shared';
+import type { ExecutionStateData } from '@add/shared';
+import { stuckReasons } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
-import { api } from '@/api/endpoints';
+import { api, type SessionControl } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Meta, OneThing, Screen } from '@/components/screen';
+import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { theme } from '@/theme';
-
-const stuckReasons: { value: StuckReason; label: string }[] = [
-  { value: 'dont_know_what_to_do', label: "I don't know what to do" },
-  { value: 'too_big', label: 'This is too much' },
-  { value: 'need_something', label: 'I need something' },
-  { value: 'not_enough_information', label: "I don't have enough information" },
-  { value: 'tired', label: "I'm tired" },
-  { value: 'dont_want_to', label: "I don't want to do it" },
-  { value: 'something_else', label: 'Something else' },
-];
 
 export default function Focus() {
   const { token } = useSession();
   const load = useCallback(() => api.currentSession(token as string), [token]);
-  const { data, loading, reload } = useResource<ExecutionStateData | null>(load);
+  const { data, loading, replace } =
+    useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
 
   if (loading && !data) {
-    return (
-      <Screen>
-        <Meta>one moment</Meta>
-      </Screen>
-    );
+    return <Loading />;
   }
 
   if (!data) {
@@ -46,19 +34,18 @@ export default function Focus() {
   const step = session.currentStep;
   const paused = session.pausedAt !== null;
 
-  const control = async (
-    name: Parameters<typeof api.control>[2],
-  ): Promise<void> => {
-    const state = await api.control(token as string, session.id, name);
-
+  const take = (state: ExecutionStateData): void => {
     if (state.session.endedAt !== null || state.session.currentStep === null) {
       router.replace('/');
 
       return;
     }
 
-    await reload();
+    replace(state);
   };
+
+  const control = async (name: SessionControl): Promise<void> =>
+    take(await api.control(token as string, session.id, name));
 
   return (
     <Screen>
@@ -122,7 +109,7 @@ export default function Focus() {
                   setStuckOpen(false);
                   void api
                     .stuck(token as string, session.id, reason.value)
-                    .then(reload);
+                    .then(take);
                 }}
               />
             ))}

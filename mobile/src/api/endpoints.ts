@@ -14,6 +14,15 @@ import type {
 } from '@add/shared';
 import { request } from './client';
 
+/** The controls that need no answer from the person, which is every one but "I'm stuck". */
+export type SessionControl =
+  | 'complete-step'
+  | 'skip-step'
+  | 'pause'
+  | 'resume'
+  | 'distracted'
+  | 'stop';
+
 export const api = {
   signIn: (email: string, password: string, deviceName: string, code?: string) =>
     request<AccessTokenData>('/tokens', {
@@ -70,17 +79,7 @@ export const api = {
       body: { step_id: stepId },
     }),
 
-  control: (
-    token: string,
-    sessionId: string,
-    control:
-      | 'complete-step'
-      | 'skip-step'
-      | 'pause'
-      | 'resume'
-      | 'distracted'
-      | 'stop',
-  ) =>
+  control: (token: string, sessionId: string, control: SessionControl) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/${control}`, {
       method: 'POST',
       token,

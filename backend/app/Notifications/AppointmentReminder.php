@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Contracts\Appointment;
+use App\Contracts\ExpoPushable;
 use App\Notifications\Channels\ExpoPushChannel;
 use Illuminate\Notifications\Notification;
 
 /** Carries the preparation and the leave-by time. A bare "dentist tomorrow" is a bug. */
-final class AppointmentReminder extends Notification
+final class AppointmentReminder extends Notification implements ExpoPushable
 {
     /** @param  list<string>  $lines */
     public function __construct(

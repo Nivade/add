@@ -1,4 +1,5 @@
-import type { ExecutionStateData, StuckReason } from '@add/shared';
+import type { ExecutionStateData } from '@add/shared';
+import { stuckReasons } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
@@ -11,19 +12,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import focusRoutes from '@/routes/focus';
-
-const stuckReasons: { value: StuckReason; label: string }[] = [
-    { value: 'dont_know_what_to_do', label: "I don't know what to do" },
-    { value: 'too_big', label: 'This is too much' },
-    { value: 'need_something', label: 'I need something' },
-    {
-        value: 'not_enough_information',
-        label: "I don't have enough information",
-    },
-    { value: 'tired', label: "I'm tired" },
-    { value: 'dont_want_to', label: "I don't want to do it" },
-    { value: 'something_else', label: 'Something else' },
-];
 
 const CONTROL_CLASS =
     'h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase';

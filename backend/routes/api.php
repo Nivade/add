@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 
 // The device has no session to authenticate with yet, so this is the one route outside the guard.
 Route::post('v1/tokens', StoreTokenController::class)
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:login')
     ->name('api.v1.tokens.store');
 
 Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function (): void {

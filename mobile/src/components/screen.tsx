@@ -16,7 +16,16 @@ export function Screen({ children }: { children: ReactNode }) {
   );
 }
 
-export function Label({ children }: { children: ReactNode }) {
+/** What every screen shows while it is asking the server, so none of them phrases the wait differently. */
+export function Loading() {
+  return (
+    <Screen>
+      <Meta>one moment</Meta>
+    </Screen>
+  );
+}
+
+function Label({ children }: { children: ReactNode }) {
   return (
     <Text accessibilityRole="header" style={styles.label}>
       {children}

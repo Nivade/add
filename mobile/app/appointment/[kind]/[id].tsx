@@ -1,4 +1,5 @@
 import type { AppointmentKind, HomeData, PlanRung } from '@add/shared';
+import { planRungLabels } from '@add/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -6,14 +7,8 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Meta, OneThing, Screen } from '@/components/screen';
+import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { TOUCH_TARGET, theme } from '@/theme';
-
-const rungLabels: Record<PlanRung, string> = {
-  find_things: 'find what you need',
-  get_ready: 'get ready',
-  leave: 'leave',
-};
 
 /** Where a reminder lands. Every number here is the person's to overrule. */
 export default function Appointment() {
@@ -25,11 +20,7 @@ export default function Appointment() {
   const [saving, setSaving] = useState(false);
 
   if (loading && !data) {
-    return (
-      <Screen>
-        <Meta>one moment</Meta>
-      </Screen>
-    );
+    return <Loading />;
   }
 
   const appointment =
@@ -76,11 +67,11 @@ export default function Appointment() {
         <View key={rung.rung} style={styles.rung}>
           <Text
             style={[styles.clock, rung.alreadyPassed && styles.passed]}
-            accessibilityLabel={`${rungLabels[rung.rung]} at ${rung.clock}`}
+            accessibilityLabel={`${planRungLabels[rung.rung]} at ${rung.clock}`}
           >
             {rung.clock}
           </Text>
-          <Text style={styles.rungLabel}>{rungLabels[rung.rung]}</Text>
+          <Text style={styles.rungLabel}>{planRungLabels[rung.rung]}</Text>
           <TextInput
             style={styles.minutes}
             defaultValue={String(Math.round(rung.seconds / 60))}
@@ -89,7 +80,7 @@ export default function Appointment() {
             }
             keyboardType="number-pad"
             inputMode="numeric"
-            accessibilityLabel={`Minutes to ${rungLabels[rung.rung]}`}
+            accessibilityLabel={`Minutes to ${planRungLabels[rung.rung]}`}
           />
           <Text style={styles.assumed}>
             {rung.assumed ? 'min, assumed' : 'min, yours'}

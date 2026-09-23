@@ -27,12 +27,15 @@
     "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
+    "@types/react": "^19.2.2",
     "typescript": "~6.0.3"
   },
   "expo": {
     "install": {
-      "exclude": ["react"]
+      "exclude": [
+        "react",
+        "@types/react"
+      ]
     }
   }
 }
