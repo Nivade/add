@@ -25,6 +25,6 @@
     "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update"
   },
   "devDependencies": {
-    "typescript": "^5.9.0"
+    "typescript": "^7.0.2"
   }
 }
