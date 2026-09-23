@@ -1,0 +1,40 @@
+<?php
+
+namespace Sabre\Xml {
+    interface XmlSerializable
+    {
+    }
+}
+
+namespace Sabre\VObject {
+    /**
+     * @implements \IteratorAggregate<int, Node>
+     * @implements \ArrayAccess<string, mixed>
+     */
+    abstract class Node implements \IteratorAggregate, \ArrayAccess, \Countable, \JsonSerializable, \Sabre\Xml\XmlSerializable
+    {
+    }
+
+    class Component extends Node
+    {
+    }
+
+    abstract class Property extends Node implements \Stringable
+    {
+    }
+}
+
+namespace Sabre\VObject\Component {
+    /**
+     * @property-read \Sabre\VObject\Property|null $UID
+     * @property-read \Sabre\VObject\Property|null $SUMMARY
+     * @property-read \Sabre\VObject\Property|null $LOCATION
+     * @property-read \Sabre\VObject\Property|null $STATUS
+     * @property-read \Sabre\VObject\Property|null $DTSTART
+     * @property-read \Sabre\VObject\Property|null $DTEND
+     * @property-read \Sabre\VObject\Property|null $DURATION
+     */
+    class VEvent extends \Sabre\VObject\Component
+    {
+    }
+}

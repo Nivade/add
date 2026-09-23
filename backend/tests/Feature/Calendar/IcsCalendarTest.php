@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Calendar\DisconnectCalendarFeed;
 use App\Actions\Calendar\SyncCalendar;
 use App\Actions\Reminders\SendDueReminders;
 use App\Contracts\CalendarSource;
@@ -12,6 +13,8 @@ use App\Notifications\AppointmentReminder;
 use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
 use App\Support\Calendar\Sources\IcsCalendarSource;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -67,6 +70,30 @@ it('asks nothing of the network for a person who has not connected a feed', func
     $user = feedPerson(null);
 
     expect(SyncCalendar::run($user, CarbonImmutable::parse('2026-09-19 09:00:00')))->toBe([]);
+});
+
+it('asks an unchanged feed only whether it changed, and still reads the day from what it said last', function (): void {
+    Http::preventStrayRequests();
+    Http::fake([FEED_URL => fn (Request $request) => $request->hasHeader('If-None-Match', '"v1"')
+        ? Http::response('', 304)
+        : Http::response(icsFeed(
+            'BEGIN:VEVENT', 'UID:dentist-1', 'SUMMARY:Dentist', 'DTSTART;TZID=Europe/Amsterdam:20260919T140000', 'END:VEVENT',
+        ), 200, ['ETag' => '"v1"'])]);
+
+    $user = feedPerson();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam');
+
+    SyncCalendar::run($user, $now);
+    $events = SyncCalendar::run($user, $now);
+
+    Http::assertSentCount(2);
+    Http::assertSent(fn (Request $request): bool => $request->hasHeader('If-None-Match', '"v1"'));
+    expect($events)->toHaveCount(1)
+        ->and($events[0]->title)->toBe('Dentist');
+
+    DisconnectCalendarFeed::run($user);
+
+    expect(Cache::has(IcsCalendarSource::cacheKey(FEED_URL)))->toBeFalse();
 });
 
 it('fails loudly without repeating the private address when the feed cannot be read', function (mixed $response): void {

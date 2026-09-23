@@ -13,13 +13,11 @@ final class ConnectCalendarFeed
 {
     use AsObject;
 
-    public function handle(User $user, string $url): User
+    public function handle(User $user, string $url): void
     {
         $user->calendar_feed_url = Str::replaceStart('webcal://', 'https://', trim($url));
         $user->save();
 
         SyncCalendar::dispatchAfterResponse($user);
-
-        return $user;
     }
 }
