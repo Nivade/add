@@ -8,6 +8,8 @@
 /storage/*.key
 /storage/pail
 /storage/debugbar
+/storage/phpstan
+/storage/rector
 /database/telescope.sqlite*
 /resources/js/actions
 /resources/js/routes
