@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "add",
+    "slug": "add",
+    "scheme": "add",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.nvade.add",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "So a thought can be spoken instead of typed.",
+        "NSSpeechRecognitionUsageDescription": "So a spoken thought becomes a capture."
+      }
+    },
+    "android": {
+      "package": "dev.nvade.add",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-speech-recognition",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0B0F"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "https://add.nvade.dev"
+    }
+  }
+}

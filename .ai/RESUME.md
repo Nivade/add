@@ -15,20 +15,26 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 7, mobile.** Designed in [`07-mobile.md`](plans/slices/07-mobile.md),
-nothing of it built. Slice 6 is finished: the overwhelm
-entry point, backwards planning over both kinds of appointment, a read-only
-calendar behind `CalendarSource`, and one reminder per appointment that answers
-§23's four questions and lands on home as a band.
-
-The hardening pass over slices 1–6 is finished too — [`hardening.md`](plans/hardening.md)
+**Slice 8, phase 2.** Nothing of it is built and it has no file in
+`.ai/plans/slices/` yet — the paragraph in the plan is all the design there is.
+The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
 carries what it settled and what it deliberately left open.
 
-What slice 6 deliberately left unbuilt, so it is not mistaken for a gap: named
-preparation items ("your insurance card"), which need somewhere for objects to
-live, and push, which arrives with the mobile client. Reminders are scheduled
-every minute in `routes/console.php` and dispatch one job per person, so both a
-scheduler and a queue worker have to be running to see one outside a test.
+The mobile client exists but has never run against a device or a simulator: the
+bundle builds and `expo-doctor` passes, and that is the whole of what has been
+checked. There is no EAS project id in `mobile/app.json`, so
+`getExpoPushTokenAsync` has nothing to ask for a token with, and no push has been
+sent end to end. There are no native folders — `ios/` and `android/` are
+generated, and the speech-recognition and secure-store modules need a dev build
+rather than Expo Go.
+
+What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
+items ("your insurance card"), which need somewhere for objects to live; camera
+capture, which waits for documents; location triggers, which need a consent
+surface; and registration and password reset, which stay on the web. Reminders
+are scheduled every minute in `routes/console.php` and dispatch one job per
+person, so both a scheduler and a queue worker have to be running to see one
+outside a test.
 
 The home slice left one question open: what "Needs attention" offers to resolve
 an intention nobody could name. Nothing on that screen acts on it yet.

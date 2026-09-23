@@ -9,11 +9,11 @@ screen answers is "what do I do right now", and the answer is one thing.
 | Workspace | What it is |
 | --- | --- |
 | `backend/` | Laravel 13 — domain, JSON API, AI layer, Inertia React web |
-| `mobile/` | Expo / React Native (not scaffolded yet) |
+| `mobile/` | Expo / React Native — Sanctum tokens against the JSON API |
 | `packages/shared/` | TypeScript shared by both frontends, generated from PHP |
 
-npm workspaces at root: `backend` and `packages/*`. `mobile` joins the list in
-the change that scaffolds it, not before.
+npm workspaces at root: `backend`, `mobile` and `packages/*`. One lockfile, and
+`npm install` runs at the root and nowhere else.
 
 ## Where to look first
 
@@ -49,6 +49,8 @@ npm run stan                  # phpstan
 npm run types:generate        # PHP Data classes -> packages/shared/src/generated.ts
 npm run boost:update          # .ai/guidelines.md + the .claude/skills mirror
 npm run web                   # vite
+npm run mobile                # expo start, outside sail
+npm run typecheck             # tsc across every workspace
 ```
 
 ## Sibling repos

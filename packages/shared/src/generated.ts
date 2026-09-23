@@ -1,3 +1,7 @@
+export type AccessTokenData = {
+token: string,
+deviceName: string,
+};
 export type AppointmentKind = 'intention' | 'calendar_event';
 export type BackwardsPlanData = {
 kind: AppointmentKind,
@@ -21,6 +25,11 @@ inWords: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };
+export type DeviceData = {
+id: string,
+platform: DevicePlatform,
+};
+export type DevicePlatform = 'ios' | 'android';
 export type ExecutionEventType = 'started' | 'step_completed' | 'step_skipped' | 'step_split' | 'paused' | 'resumed' | 'stuck' | 'distracted' | 'stopped';
 export type ExecutionSessionData = {
 id: string,

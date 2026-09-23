@@ -24,7 +24,7 @@ spec wins and first-move is not consulted.
 | Backend | Laravel 13.32, PHP 8.5, SQLite dev, Redis cache/queue |
 | Auth | Fortify (starter kit, headless) for web; Sanctum tokens for React Native |
 | Web | Inertia 3 + React 19 + TypeScript + Tailwind 4, Wayfinder, vite-plus |
-| Mobile | Expo / React Native (not scaffolded yet — slice 7) |
+| Mobile | Expo SDK 57 / React Native, expo-router, Sanctum tokens |
 | DTO layer | `spatie/laravel-data` + `spatie/laravel-typescript-transformer` |
 | AI | `laravel/ai`, behind our own provider contract, fixture driver by default |
 | Tooling | `nvade/devtools` (Pint, PHPStan/Larastan, Rector, Sail/Traefik, CI) |
@@ -49,6 +49,7 @@ classes live. "Next action" stays the product word and is what
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
 | `calendar_events` | source, external id, title, `starts_at`, plan assumptions | read-only; the source owns it, we never write back |
 | `reminders` | user, appointment kind and id, `sent_at` | one row per appointment, which is what keeps reminders sparse |
+| `devices` | user, Expo push token, platform | the token identifies the device, so registering twice moves it |
 
 Deferred until they earn their place: `Project`, `Task`, `Commitment`,
 `WaitingFor`, `Context`, `Document`. The spec lists them; building them before
@@ -74,6 +75,11 @@ computed in the person's zone is converted before it reaches a column.
 Native, both thin over `app/Actions/**`. No business logic in either adapter.
 
 ```
+POST   /api/v1/tokens                     the one route outside the guard
+DELETE /api/v1/tokens/current             this device signs out, others stay in
+POST   /api/v1/devices                    an Expo push token for this person
+GET    /api/v1/home                       the same HomeData the web page renders
+POST   /api/v1/reminders/{id}/dismiss     the band, ended by the person
 POST   /api/v1/captures                   text in, capture out
 POST   /api/v1/intentions                 from a capture or free text
 GET    /api/v1/next-action                the one recommendation + why
@@ -157,8 +163,8 @@ stays at one line each.
 | 5 | [Home](slices/05-home.md) — four bands, one action, the first complete journey | §5, §29, §39 | done |
 | 6 | [Overwhelm and time](slices/06-overwhelm-time.md) — one small step, backwards planning, contextual reminders | §13, §14, §16, §22, §23 | done |
 | — | [Hardening](hardening.md) — where the built slices disagreed with their own decisions | §2.5, §21, §28 | done |
-| 7 | [Mobile](slices/07-mobile.md) — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | next |
-| 8 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | paragraph below |
+| 7 | [Mobile](slices/07-mobile.md) — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | done |
+| 8 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | next, paragraph below |
 | 9 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
 
 **Slice 8, phase 2.** Waiting-for with its four responses, commitments with the

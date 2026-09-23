@@ -9,10 +9,7 @@ paths:
 ---
 # Toolchain and Monorepo
 
-npm workspaces at the root: `backend` and `packages/*`. `mobile` is deliberately
-absent until it is scaffolded — npm fails the install on a workspace glob that
-matches no `package.json`, so the entry lands in the same change as the app.
-Work from the repo root — `.git`, `.ai/rules` and `.claude` all anchor there, and most changes
+npm workspaces at the root: `backend`, `mobile` and `packages/*`. Work from the repo root — `.git`, `.ai/rules` and `.claude` all anchor there, and most changes
 cross a workspace boundary. Root scripts exist so nothing needs a manual `cd`.
 
 ## One lockfile, installed from the root
@@ -44,6 +41,15 @@ Do not attempt a shared component layer.
 `packages/shared` stays dependency-free and platform-free — no `react`, no
 `react-native`, no Node built-ins, no browser globals. It is imported by both
 frontends.
+
+## One React, hoisted, which Expo has to be told about
+
+Two copies of React in a React Native tree break hooks, so `mobile` takes a
+range rather than the exact version Expo pins and the root hoists a single copy
+for both frontends. `expo-doctor` then reports a minor mismatch against the SDK's
+pinned version; `expo.install.exclude` in `mobile/package.json` is what records
+that this is a decision. Pinning the exact version back is how the nested copy
+returns.
 
 ## Redis only exists inside Compose
 
