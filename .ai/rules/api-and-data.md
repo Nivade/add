@@ -27,6 +27,12 @@ Properties are camelCase, so the JSON is camelCase with no output mapper.
 `#[MapInputName(SnakeCaseMapper::class)]` lets `Data::from($model)` read
 snake_case columns. Never hand-write output keys.
 
+The same mapper makes `XData::from([...])` expect snake_case keys, while
+laravel-data's IDE completion offers the camelCase property names — a picked key
+is silently dropped. Build a Data object from literals with `new XData(...)` and
+named arguments, which PHPStan type-checks; `from()` is for models and requests.
+`ConventionsTest` fails on an array literal passed to `from()` or `optional()`.
+
 ## Trap: every `from*` method is magic
 
 `DataClassFactory` registers **any** static method whose name starts with `from`
