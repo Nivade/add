@@ -20,6 +20,8 @@ return Preset::laravel(__DIR__)
     // A byte change here changes AiRequest::cacheKey(), so every cached answer
     // silently misses and the fixtures stop matching.
     ->withSkipPath(__DIR__.'/app/Support/Ai/Prompts.php')
+    // Keeps partially qualified names like Watchers\CacheWatcher; drop once devtools stops enabling it.
+    ->withImportNames(importNames: false, importDocBlockNames: false, importShortClasses: false, removeUnusedImports: false)
     ->withSets([
         // `.ai/rules/general.md` prefers attributes over class properties; this
         // set is what enforces it instead of leaving it to goodwill.

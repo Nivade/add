@@ -58,7 +58,13 @@ services:
         # and fire every scheduled command twice against the same database.
         # --no-reload: without it artisan serve rebuilds the child process env from a fixed
         # allowlist plus a fresh .env read, silently discarding every override below.
-        command: ['php', '/var/www/html/artisan', 'serve', '--host=0.0.0.0', '--port=80', '--no-reload']
+        command:
+            - 'php'
+            - '/var/www/html/artisan'
+            - 'serve'
+            - '--host=0.0.0.0'
+            - '--port=80'
+            - '--no-reload'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
