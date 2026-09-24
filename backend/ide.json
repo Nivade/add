@@ -3,9 +3,7 @@
     "packages": {
         "inertia": {
             "ignoreSettingsPaths": true,
-            "pagePaths": [
-                { "path": "resources/js/pages" }
-            ]
+            "pagePaths": [{ "path": "resources/js/pages" }]
         }
     },
     "codeGenerations": [
