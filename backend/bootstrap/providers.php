@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Providers\AiServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\CalendarServiceProvider;

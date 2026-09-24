@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Settings\ConnectCalendarController;
 use App\Http\Controllers\Settings\DisconnectCalendarController;
 use App\Http\Controllers\Settings\ProfileController;
