@@ -1,6 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
+    - vendor/nvade/devtools/config/phpstan.neon
 
 parameters:
     paths:
@@ -10,7 +11,8 @@ parameters:
         - database/
         - routes/
 
-    level: 7
-
     stubFiles:
         - stubs/phpstan/vobject.stub
+
+    # Level 8 (devtools default) surfaces ~16 nullable-User/int errors; staying at 7 until that's a separate task.
+    level: 7

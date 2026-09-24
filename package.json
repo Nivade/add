@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "husky",
     "web": "npm run dev --workspace backend",
     "mobile": "npm run start --workspace mobile",
     "shared:build": "npm run build --workspace @add/shared",
@@ -25,6 +26,9 @@
     "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7",
     "typescript": "^5.9.0"
   }
 }

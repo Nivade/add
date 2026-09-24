@@ -1,0 +1,24 @@
+name: branch-name
+
+# The pre-push hook is local and --no-verify skips it; this is the gate.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: sh .husky/check-branch-name "$BRANCH" --ci

@@ -1,0 +1,9 @@
+# This project's extra branch types and allowed names, read by .husky/check-branch-name
+# and the branch-name CI job. One entry per line, # comments allowed.
+#
+# type <name>    adds <name> as a valid type, alongside Conventional Branches' own.
+# allow <glob>   allows a whole branch name outright, in CI and the local hook.
+#
+# type spike
+# allow snyk-*
+# allow [0-9]*-*
