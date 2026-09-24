@@ -1,14 +1,74 @@
-import type { HomeData } from '@add/shared';
+import type { HomeData, IntentionData } from '@add/shared';
 import { formatEstimate, restCountLine } from '@add/shared';
 import { router } from 'expo-router';
-import { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { ApiError } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { theme } from '@/theme';
+import { field, theme } from '@/theme';
+
+function Clarify({
+  intention,
+  onAnswered,
+}: {
+  intention: IntentionData;
+  onAnswered: () => void;
+}) {
+  const { token } = useSession();
+  const [answer, setAnswer] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  const question = intention.clarifyingQuestion ?? '';
+
+  const send = async () => {
+    const text = answer.trim();
+
+    if (text === '') {
+      return;
+    }
+
+    setSaving(true);
+    setProblem(null);
+
+    try {
+      await api.clarify(token as string, intention.id, text);
+      onAnswered();
+    } catch (error) {
+      setProblem(
+        error instanceof ApiError
+          ? error.firstMessage('That did not go through. Try again.')
+          : 'The app could not reach the server.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <View style={styles.clarify}>
+      <Text style={styles.line}>{intention.title}</Text>
+      <Meta>{question}</Meta>
+      <TextInput
+        style={styles.input}
+        value={answer}
+        onChangeText={setAnswer}
+        accessibilityLabel={question}
+        returnKeyType="send"
+        onSubmitEditing={() => void send()}
+      />
+      {problem && <Meta>{problem}</Meta>}
+      <Button
+        label={saving ? 'Saving' : 'Answer'}
+        disabled={saving}
+        onPress={() => void send()}
+      />
+    </View>
+  );
+}
 
 export default function Home() {
   const { token, signOut } = useSession();
@@ -115,9 +175,11 @@ export default function Home() {
       {needsAttention.length > 0 && (
         <Band label="Needs attention">
           {needsAttention.map((intention) => (
-            <Text key={intention.id} style={styles.line}>
-              {intention.title}
-            </Text>
+            <Clarify
+              key={intention.id}
+              intention={intention}
+              onAnswered={() => void reload()}
+            />
           ))}
         </Band>
       )}
@@ -142,5 +204,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
+  clarify: { gap: theme.space(1) },
+  input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
 });

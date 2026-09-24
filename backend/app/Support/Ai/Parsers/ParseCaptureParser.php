@@ -27,17 +27,21 @@ final class ParseCaptureParser
             throw new AiResponseInvalid('parse_capture returned a non-string why.');
         }
 
-        $needsClarification = $payload['needs_clarification'] ?? null;
+        if (! array_key_exists('clarifying_question', $payload)) {
+            throw new AiResponseInvalid('parse_capture returned no clarifying_question.');
+        }
 
-        if (! is_bool($needsClarification)) {
-            throw new AiResponseInvalid('parse_capture returned a non-boolean needs_clarification.');
+        $question = $payload['clarifying_question'];
+
+        if ($question !== null && ! is_string($question)) {
+            throw new AiResponseInvalid('parse_capture returned a non-string clarifying_question.');
         }
 
         return new ParsedCaptureData(
             title: trim($title),
             why: is_string($why) && trim($why) !== '' ? trim($why) : null,
             deadlineAt: $this->deadline($payload['deadline_at'] ?? null, $timezone),
-            needsClarification: $needsClarification,
+            clarifyingQuestion: $question !== null && trim($question) !== '' ? trim($question) : null,
         );
     }
 

@@ -4,7 +4,7 @@ import { ApiError } from '@/api/client';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
-import { TOUCH_TARGET, theme } from '@/theme';
+import { field, theme } from '@/theme';
 
 export default function SignIn() {
   const { signIn } = useSession();
@@ -93,14 +93,5 @@ export default function SignIn() {
 
 const styles = StyleSheet.create({
   fields: { gap: theme.space(1.5) },
-  input: {
-    minHeight: TOUCH_TARGET,
-    paddingHorizontal: theme.space(2),
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.color.border,
-    backgroundColor: theme.color.surface,
-    color: theme.color.text,
-    fontSize: 17,
-  },
+  input: field,
 });

@@ -38,7 +38,7 @@ final class BuildHome
         $session = RunningSession::forUser($user);
 
         $needsAttention = $this->open($user)
-            ->where('needs_clarification', true)
+            ->awaitingClarification()
             ->oldest()
             ->limit(self::NEEDS_ATTENTION_LIMIT)
             ->get();

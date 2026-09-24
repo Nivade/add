@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\Api\V1\AdjustPlanController;
+use App\Http\Controllers\Api\V1\ClarifyIntentionController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
@@ -45,6 +46,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
         ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
+    Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

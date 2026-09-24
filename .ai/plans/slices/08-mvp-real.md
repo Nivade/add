@@ -63,6 +63,8 @@ answer confirms the existing intention rather than recording a fresh capture,
 so where it came from survives, the same shape as confirming a deadline. Once
 answered it becomes eligible for the resolver and decomposition is queued.
 
+The model asks the question while parsing a hedged or unnamed capture, and decomposition waits for the answer.
+
 Both clients get it; the endpoint serves both.
 
 **Done when** "I should probably renew my passport" (§7) can be answered from

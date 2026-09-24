@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\Web\AdjustPlanController;
+use App\Http\Controllers\Web\ClarifyIntentionController;
 use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
 use App\Http\Controllers\Web\DismissReminderController;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::post('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
+    Route::post('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

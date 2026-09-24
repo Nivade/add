@@ -15,7 +15,7 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8, phase 2** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
+**Slice 8, phase 3** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
 1's done-when asks for a real feed, which only a person holding one can supply.
 Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
 The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
@@ -36,9 +36,6 @@ surface; and registration and password reset, which stay on the web. Reminders
 are scheduled every minute in `routes/console.php` and dispatch one job per
 person, so both a scheduler and a queue worker have to be running to see one
 outside a test.
-
-The home slice's open question — what "Needs attention" offers to resolve an
-intention nobody could name — is slice 8's phase 2.
 
 ## Learning the state
 

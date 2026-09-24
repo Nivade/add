@@ -20,7 +20,8 @@ class IntentionFactory extends Factory
             'title' => 'Clean the apartment',
             'why' => null,
             'status' => IntentionStatus::Captured,
-            'needs_clarification' => false,
+            'clarifying_question' => null,
+            'clarification' => null,
             'deadline_at' => null,
             'decomposed_at' => null,
             'completed_at' => null,
@@ -30,6 +31,11 @@ class IntentionFactory extends Factory
     public function active(): self
     {
         return $this->state(['status' => IntentionStatus::Active]);
+    }
+
+    public function unclear(string $question = 'Which thing do you mean?'): self
+    {
+        return $this->state(['clarifying_question' => $question]);
     }
 
     public function decomposed(): self

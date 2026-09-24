@@ -23,7 +23,7 @@ final class CandidatePool
                 ->where('user_id', $user->id)
                 ->where('status', IntentionStatus::Active)
                 ->whereNotNull('decomposed_at')
-                ->where('needs_clarification', false))
+                ->notAwaitingClarification())
             ->with('intention')
             ->get());
     }

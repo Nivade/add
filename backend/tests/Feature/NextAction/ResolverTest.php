@@ -190,10 +190,7 @@ it('cools a skipped step off and gives it full standing back afterwards', functi
 it('holds back an intention the model could not name, even when it is the only work', function (): void {
     $user = User::factory()->create();
 
-    $unclear = Intention::factory()->decomposed()->for($user)->create([
-        'title' => 'Sort the thing out',
-        'needs_clarification' => true,
-    ]);
+    $unclear = Intention::factory()->decomposed()->unclear()->for($user)->create(['title' => 'Sort the thing out']);
     Step::factory()->for($unclear)->create(['position' => 1]);
 
     expect(nextAction($user))->toBeNull();

@@ -57,7 +57,5 @@ screen-reader labelled, focus visible, no colour-only state (§31).
 
 ## Open
 
-The resolver already holds a `needs_clarification` intention back at the
-eligibility stage, so it can never be the right-now action. What is still open
-is the other half: what "Needs attention" offers the person to resolve it with,
-and whether answering there is a confirmation or a fresh capture.
+Answered by [slice 8, phase 2](08-mvp-real.md#phase-2--answering-needs-attention):
+one question, one field, and the answer confirms the existing intention.

@@ -7,34 +7,26 @@ use App\Support\Ai\Parsers\DecomposeParser;
 use App\Support\Ai\Parsers\ParseCaptureParser;
 
 /** @return array<string, mixed> */
-function capturePayload(array $overrides = []): array
-{
-    return array_merge([
-        'title' => 'Clean the apartment',
-        'why' => 'Parents are coming',
-        'deadline_at' => '2026-09-19T23:59:00+00:00',
-        'needs_clarification' => false,
-    ], $overrides);
-}
-
-/** @return array<string, mixed> */
 function decomposePayload(array $steps): array
 {
     return ['steps' => $steps];
 }
 
 it('turns a decoded capture answer into typed data', function (): void {
-    $parsed = (new ParseCaptureParser)->parse(capturePayload(), 'UTC');
+    $parsed = (new ParseCaptureParser)->parse(parsedCapture([
+        'why' => 'Parents are coming',
+        'deadline_at' => '2026-09-19T23:59:00+00:00',
+    ]), 'UTC');
 
     expect($parsed->title)->toBe('Clean the apartment')
         ->and($parsed->why)->toBe('Parents are coming')
         ->and($parsed->deadlineAt?->toDateTimeString())->toBe('2026-09-19 23:59:00')
-        ->and($parsed->needsClarification)->toBeFalse();
+        ->and($parsed->clarifyingQuestion)->toBeNull();
 });
 
 it('reads a deadline the model left naive on the clock the person reads', function (): void {
     $parsed = (new ParseCaptureParser)->parse(
-        capturePayload(['deadline_at' => '2026-09-19T09:00:00']),
+        parsedCapture(['deadline_at' => '2026-09-19T09:00:00']),
         'Europe/Amsterdam'
     );
 
@@ -43,7 +35,7 @@ it('reads a deadline the model left naive on the clock the person reads', functi
 
 it('keeps the offset a model stated rather than reading it again', function (): void {
     $parsed = (new ParseCaptureParser)->parse(
-        capturePayload(['deadline_at' => '2026-09-19T09:00:00+00:00']),
+        parsedCapture(['deadline_at' => '2026-09-19T09:00:00+00:00']),
         'Europe/Amsterdam'
     );
 
@@ -51,17 +43,18 @@ it('keeps the offset a model stated rather than reading it again', function (): 
 });
 
 it('treats an absent deadline as no deadline rather than an error', function (mixed $value): void {
-    expect((new ParseCaptureParser)->parse(capturePayload(['deadline_at' => $value]), 'UTC')->deadlineAt)->toBeNull();
+    expect((new ParseCaptureParser)->parse(parsedCapture(['deadline_at' => $value]), 'UTC')->deadlineAt)->toBeNull();
 })->with([null, '', '   ', 'null']);
 
 it('rejects a capture answer the application cannot use', function (array $payload): void {
     expect(fn () => (new ParseCaptureParser)->parse($payload, 'UTC'))->toThrow(AiResponseInvalid::class);
 })->with([
-    'no title' => [['why' => null, 'needs_clarification' => false]],
-    'empty title' => [['title' => '   ', 'needs_clarification' => false]],
-    'no needs_clarification' => [['title' => 'Clean the apartment']],
-    'non-string why' => [['title' => 'Clean the apartment', 'why' => ['a'], 'needs_clarification' => false]],
-    'unreadable deadline' => [['title' => 'Clean the apartment', 'deadline_at' => 'whenever', 'needs_clarification' => false]],
+    'no title' => [['why' => null, 'clarifying_question' => null]],
+    'empty title' => [['title' => '   ', 'clarifying_question' => null]],
+    'no clarifying_question' => [['title' => 'Clean the apartment']],
+    'non-string clarifying_question' => [['title' => 'Clean the apartment', 'clarifying_question' => true]],
+    'non-string why' => [['title' => 'Clean the apartment', 'why' => ['a'], 'clarifying_question' => null]],
+    'unreadable deadline' => [['title' => 'Clean the apartment', 'deadline_at' => 'whenever', 'clarifying_question' => null]],
 ]);
 
 it('turns a decoded decomposition into ordered typed steps', function (): void {

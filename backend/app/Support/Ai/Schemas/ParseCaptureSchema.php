@@ -9,7 +9,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 
 final class ParseCaptureSchema
 {
-    public const string VERSION = '2';
+    public const string VERSION = '3';
 
     /**
      * Strict mode requires every key, so "optional" is a nullable type, never an absent one.
@@ -30,8 +30,9 @@ final class ParseCaptureSchema
                 ->description('ISO 8601 datetime, only when the text names a real date or appointment. Null otherwise.')
                 ->nullable()
                 ->required(),
-            'needs_clarification' => $schema->boolean()
-                ->description('True when the text is too vague to act on without asking them something.')
+            'clarifying_question' => $schema->string()
+                ->description('One short question to ask them, when the first step depends on their answer. Null otherwise.')
+                ->nullable()
                 ->required(),
         ];
     }

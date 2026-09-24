@@ -7,7 +7,7 @@ namespace App\Support\Ai;
 /** Keep these byte-stable: cached input is an order of magnitude cheaper, and anything varying per call belongs in the user message. */
 final class Prompts
 {
-    public const string PARSE_CAPTURE_VERSION = '2';
+    public const string PARSE_CAPTURE_VERSION = '3';
 
     public const string DECOMPOSE_VERSION = '1';
 
@@ -20,17 +20,18 @@ final class Prompts
         - Keep their words. Do not make the title more formal, more ambitious, or more complete than what they wrote.
         - A deadline exists only when the text names a real date, appointment or legal cutoff. "Soon", "I should really", and "at some point" are not deadlines.
         - The message opens with their date and zone. Read every relative date against those, and answer deadline_at with the matching UTC offset.
-        - needs_clarification is true only when you could not name the outcome at all. Being vague about how is fine; being vague about what is not.
+        - clarifying_question is one short question, asked only when you cannot tell what outcome they want, or when "should probably", "maybe" or "at some point" says they have not decided to do it. Otherwise null. A missing date alone is never a reason to ask.
+        - Ask the question plainly, in under fifteen words, with no judgement and nothing they have already said.
 
         Examples:
         "I need to clean the apartment before Saturday because my parents are coming"
-        -> title "Clean the apartment", why "Parents are coming", deadline the coming Saturday, needs_clarification false.
+        -> title "Clean the apartment", why "Parents are coming", deadline the coming Saturday, clarifying_question null.
 
         "I should probably renew my passport"
-        -> title "Renew my passport", why null, deadline null, needs_clarification false.
+        -> title "Renew my passport", why null, deadline null, clarifying_question "Is there a trip you need it for, and when?"
 
         "sort the thing out"
-        -> title "Sort the thing out", why null, deadline null, needs_clarification true.
+        -> title "Sort the thing out", why null, deadline null, clarifying_question "Which thing do you mean?"
         PROMPT;
 
     public const string DECOMPOSE = <<<'PROMPT'

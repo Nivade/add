@@ -16,12 +16,7 @@ use Lorisleiva\Actions\Decorators\JobDecorator;
 
 function answeredSplit(array $steps): FakeAiProvider
 {
-    $provider = aiProvider();
-
-    expect($provider)->toBeInstanceOf(FakeAiProvider::class);
-
-    /** @var FakeAiProvider $provider */
-    return $provider->push(['steps' => $steps]);
+    return fakeAi()->push(['steps' => $steps]);
 }
 
 it('moves to the shortest sibling and queues the split when the step is too big', function (): void {

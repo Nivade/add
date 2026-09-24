@@ -47,10 +47,7 @@ class DemoSeeder extends Seeder
             ['Photograph the front page.', 120],
         ]);
 
-        Intention::factory()->decomposed()->for($user)->create([
-            'title' => 'Sort the thing out',
-            'needs_clarification' => true,
-        ]);
+        Intention::factory()->unclear()->for($user)->create(['title' => 'Sort the thing out']);
 
         Intention::factory()->count(11)->for($user)->create();
     }

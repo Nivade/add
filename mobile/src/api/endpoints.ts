@@ -7,6 +7,7 @@ import type {
   DevicePlatform,
   ExecutionStateData,
   HomeData,
+  IntentionData,
   NextActionData,
   OverwhelmedData,
   PlanRung,
@@ -65,6 +66,13 @@ export const api = {
       `${kind === 'calendar_event' ? '/calendar-events' : '/intentions'}/${id}/plan`,
       { method: 'PATCH', token, body: minutes },
     ),
+
+  clarify: (token: string, intentionId: string, answer: string) =>
+    request<IntentionData>(`/intentions/${intentionId}/clarification`, {
+      method: 'PATCH',
+      token,
+      body: { answer },
+    }),
 
   dismissReminder: (token: string, id: string) =>
     request<void>(`/reminders/${id}/dismiss`, { method: 'POST', token }),
