@@ -1,0 +1,93 @@
+# Checks a branch name against Conventional Branches (https://conventionalbranch.org),
+# with the commit types added as documented custom types. See .husky/branch-names for
+# a project's own extra types and allowed patterns.
+set -eu
+
+branch=$1
+ci_flag=${2:-}
+
+config_file=".husky/branch-names"
+types="feature feat bugfix fix hotfix release chore refactor docs style perf test build ci revert"
+allows=""
+
+if [ "$ci_flag" = "--ci" ]; then
+    allows="dependabot/* renovate/*"
+fi
+
+if [ -f "$config_file" ]; then
+    while IFS= read -r raw || [ -n "$raw" ]; do
+        line=${raw%%#*}
+        line=$(printf '%s\n' "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+        [ -z "$line" ] && continue
+
+        key=${line%% *}
+        rest=${line#"$key"}
+        rest=$(printf '%s\n' "$rest" | sed -e 's/^[[:space:]]*//')
+
+        [ -z "$rest" ] && continue
+
+        case $key in
+            type)
+                # A bad type name cannot inject into the alternation below.
+                case $rest in
+                    [a-z] | [a-z][a-z0-9-]*) types="$types $rest" ;;
+                esac
+                ;;
+            allow)
+                allows="$allows $rest"
+                ;;
+        esac
+    done < "$config_file"
+fi
+
+fail() {
+    echo "conventional-branches: $1" >&2
+    echo "Allowed types: $(printf '%s' "$types" | tr ' ' '|')" >&2
+    echo "Example: feature/issue-123-new-login" >&2
+    exit 1
+}
+
+case $branch in
+    main | master | develop)
+        exit 0
+        ;;
+    ai/* | claude/* | codex/* | copilot/* | cursor/*)
+        fail "no AI agent source prefixes (ai/, claude/, codex/, copilot/, cursor/): $branch"
+        ;;
+esac
+
+for pattern in $allows; do
+    case $branch in
+        $pattern) exit 0 ;;
+    esac
+done
+
+case $branch in
+    */*) : ;;
+    *) fail "'$branch' needs a type/description, e.g. feature/$branch" ;;
+esac
+
+type=${branch%%/*}
+description=${branch#*/}
+
+case " $types " in
+    *" $type "*) : ;;
+    *) fail "unknown type '$type' in '$branch'" ;;
+esac
+
+if printf '%s' "$description" | grep -Eq '/'; then
+    fail "'$branch' has a nested '/' in its description"
+fi
+
+if [ "$type" = release ]; then
+    pattern='^[a-z0-9]+([.-][a-z0-9]+)*$'
+else
+    pattern='^[a-z0-9]+(-[a-z0-9]+)*$'
+fi
+
+if ! printf '%s' "$description" | grep -Eq "$pattern"; then
+    fail "description '$description' in '$branch' must match $pattern"
+fi
+
+exit 0

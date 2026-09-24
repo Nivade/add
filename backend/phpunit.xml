@@ -20,6 +20,8 @@
     <php>
         <env name="AI_DRIVER" value="fake"/>
         <env name="APP_ENV" value="testing"/>
+        <!-- Pinned: assertions read the English source strings. -->
+        <env name="APP_LOCALE" value="en"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
@@ -34,6 +36,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- An empty DSN switches the Sentry SDK off while keeping it resolvable. -->
         <env name="SENTRY_LARAVEL_DSN" value=""/>
+        <env name="LOG_STACK" value="single"/>
     </php>
 </phpunit>

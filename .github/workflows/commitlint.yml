@@ -1,0 +1,41 @@
+name: commitlint
+
+# The commit-msg hook is local and --no-verify skips it; this is the gate.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+
+    # A first push to main has no previous commit to compare against.
+    if: github.event_name == 'pull_request' || github.event.before != '0000000000000000000000000000000000000000'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install commitlint
+        run: npm ci --ignore-scripts
+
+      - name: Lint commit messages
+        env:
+          FROM: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          TO: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: npx commitlint --from "$FROM" --to "$TO" --verbose
