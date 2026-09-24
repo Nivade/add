@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
-"""PostToolUse on Skill: record that code-review or simplify ran, for merge-gate.py to check.
-
-Records the invocation, not the outcome — that is the honest limit of a hook.
-"""
+"""PostToolUse on Skill: record that code-review or simplify ran, for merge-gate.py to check."""
 
 import json
 import os
-import re
-import subprocess
 import sys
 from datetime import datetime, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from _ledger import git, ledger_path  # noqa: E402
+
 TRACKED = ("code-review", "simplify")
-
-
-def git(root, *args):
-    try:
-        result = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, timeout=10)
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    return result.stdout.strip() if result.returncode == 0 else None
-
-
-def ledger_path(root, branch):
-    common_dir = git(root, "rev-parse", "--git-common-dir")
-    if not common_dir:
-        return None
-    if not os.path.isabs(common_dir):
-        common_dir = os.path.join(root, common_dir)
-    safe_branch = re.sub(r"[^A-Za-z0-9_.-]", "__", branch)
-    return os.path.join(common_dir, "claude-review", safe_branch + ".json")
 
 
 def main():
