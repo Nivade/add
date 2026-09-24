@@ -62,6 +62,7 @@ why: string | null,
 status: IntentionStatus,
 deadlineAt: string | null,
 deadlineInferred: boolean,
+clarifyingQuestion: string | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
 export type NextActionData = {

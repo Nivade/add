@@ -9,6 +9,7 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use App\Support\Ai\Providers\FakeAiProvider;
 use App\Support\Ai\Providers\LoggingAiProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -100,4 +101,29 @@ function aiProvider(): AiProvider
     $provider = app(AiProvider::class);
 
     return $provider instanceof LoggingAiProvider ? $provider->inner : $provider;
+}
+
+function fakeAi(): FakeAiProvider
+{
+    $provider = aiProvider();
+
+    expect($provider)->toBeInstanceOf(FakeAiProvider::class);
+
+    /** @var FakeAiProvider $provider */
+    return $provider;
+}
+
+/**
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function parsedCapture(array $overrides = []): array
+{
+    return [
+        'title' => 'Clean the apartment',
+        'why' => null,
+        'deadline_at' => null,
+        'clarifying_question' => null,
+        ...$overrides,
+    ];
 }

@@ -80,10 +80,7 @@ it('names the next real deadline and nothing else about time', function (): void
 
 it('holds an intention nobody could name in its own band, never as the thing to do', function (): void {
     $user = User::factory()->create();
-    $unclear = Intention::factory()->decomposed()->for($user)->create([
-        'title' => 'Sort the thing out',
-        'needs_clarification' => true,
-    ]);
+    $unclear = Intention::factory()->decomposed()->unclear()->for($user)->create(['title' => 'Sort the thing out']);
     Step::factory()->for($unclear)->create(['position' => 1]);
 
     $this->actingAs($user)

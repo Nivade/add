@@ -23,16 +23,6 @@ function useAiDriver(string $driver): AiProvider
     return aiProvider();
 }
 
-function fakeAi(): FakeAiProvider
-{
-    $provider = useAiDriver('fake');
-
-    expect($provider)->toBeInstanceOf(FakeAiProvider::class);
-
-    /** @var FakeAiProvider $provider */
-    return $provider;
-}
-
 /**
  * @param  array<string, mixed>  $parse
  * @param  array<string, mixed>|null  $decompose
@@ -40,13 +30,7 @@ function fakeAi(): FakeAiProvider
 function answeredAi(array $parse = [], ?array $decompose = null): FakeAiProvider
 {
     return fakeAi()
-        ->push([
-            'title' => 'Clean the apartment',
-            'why' => null,
-            'deadline_at' => null,
-            'needs_clarification' => false,
-            ...$parse,
-        ])
+        ->push(parsedCapture($parse))
         ->push($decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
 }
 
@@ -149,18 +133,15 @@ it('reads "tomorrow morning" in the person\'s zone and stores the instant it nam
 });
 
 it('accepts the model\'s deadline only when the extractor found nothing', function (): void {
-    answeredAi(['deadline_at' => '2026-10-02T09:00:00+00:00', 'needs_clarification' => true]);
+    answeredAi(['deadline_at' => '2026-10-02T09:00:00+00:00']);
 
     RecordCapture::run(User::factory()->create(), 'renew my passport');
 
-    $intention = Intention::query()->sole();
-
-    expect($intention->deadline_at?->toDateTimeString())->toBe('2026-10-02 09:00:00')
-        ->and($intention->needs_clarification)->toBeTrue();
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-10-02 09:00:00');
 });
 
 it('leaves the capture intact and the intention uncreated when the parse throws', function (): void {
-    fakeAi()->push(['title' => '', 'needs_clarification' => false]);
+    fakeAi()->push(['title' => '', 'clarifying_question' => null]);
 
     expect(fn () => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
         ->toThrow(AiResponseInvalid::class);

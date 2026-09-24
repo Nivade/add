@@ -13,6 +13,6 @@ class ParsedCaptureData extends Data
         public string $title,
         public ?string $why,
         public ?CarbonImmutable $deadlineAt,
-        public bool $needsClarification,
+        public ?string $clarifyingQuestion,
     ) {}
 }

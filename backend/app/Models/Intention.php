@@ -29,7 +29,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $title
  * @property string|null $why
  * @property IntentionStatus $status
- * @property bool $needs_clarification
+ * @property string|null $clarifying_question
+ * @property string|null $clarification
+ * @property-read bool $needs_clarification
  * @property CarbonImmutable|null $deadline_at
  * @property CarbonImmutable|null $deadline_confirmed_at
  * @property-read bool $deadline_inferred
@@ -83,6 +85,12 @@ class Intention extends Model implements Appointment
         return Attribute::get(fn (): bool => $this->appointmentInferred());
     }
 
+    /** @return Attribute<bool, never> */
+    protected function needsClarification(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->clarifying_question !== null && $this->clarification === null);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
@@ -114,11 +122,24 @@ class Intention extends Model implements Appointment
         $query->whereIn('status', [IntentionStatus::Captured, IntentionStatus::Active]);
     }
 
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function awaitingClarification(Builder $query): void
+    {
+        $query->whereNotNull('clarifying_question')->whereNull('clarification');
+    }
+
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function notAwaitingClarification(Builder $query): void
+    {
+        $query->whereNot(fn (Builder $query): Builder => $query->awaitingClarification());
+    }
+
     protected function casts(): array
     {
         return [
             'status' => IntentionStatus::class,
-            'needs_clarification' => 'boolean',
             'deadline_at' => 'immutable_datetime',
             'deadline_confirmed_at' => 'immutable_datetime',
             'decomposed_at' => 'immutable_datetime',

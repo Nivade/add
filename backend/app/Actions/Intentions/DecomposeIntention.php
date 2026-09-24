@@ -33,6 +33,10 @@ final class DecomposeIntention
             return $intention->steps()->get();
         }
 
+        if ($intention->needs_clarification) {
+            return new Collection;
+        }
+
         $steps = $this->parser->parse(
             $this->provider->complete(AiRequest::decomposeIntention($this->describe($intention)))->payload
         );
@@ -66,6 +70,11 @@ final class DecomposeIntention
 
         if ($intention->why !== null) {
             $lines[] = 'Why it matters: '.$intention->why;
+        }
+
+        if ($intention->clarification !== null) {
+            $lines[] = 'Asked: '.$intention->clarifying_question;
+            $lines[] = 'They answered: '.$intention->clarification;
         }
 
         if ($intention->deadline_at !== null) {

@@ -50,7 +50,7 @@ final class CannedAiProvider implements AiProvider
             'title' => $title === '' ? 'Untitled' : $title,
             'why' => null,
             'deadline_at' => null,
-            'needs_clarification' => false,
+            'clarifying_question' => null,
         ];
     }
 

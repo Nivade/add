@@ -108,7 +108,7 @@ it('keeps the person\'s own words in the canned capture title', function (): voi
     $payload = (new CannedAiProvider)->complete(aiRequest(user: "renew my passport\nand other noise"))->payload;
 
     expect($payload['title'])->toBe('renew my passport')
-        ->and($payload['needs_clarification'])->toBeFalse();
+        ->and($payload['clarifying_question'])->toBeNull();
 });
 
 it('gives back queued answers in order and then fails loudly', function (): void {

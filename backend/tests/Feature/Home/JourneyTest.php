@@ -10,18 +10,8 @@ use Inertia\Testing\AssertableInertia;
 
 function answeredCapture(): FakeAiProvider
 {
-    $provider = aiProvider();
-
-    expect($provider)->toBeInstanceOf(FakeAiProvider::class);
-
-    /** @var FakeAiProvider $provider */
-    return $provider
-        ->push([
-            'title' => 'Clean the kitchen',
-            'why' => 'Parents are coming',
-            'deadline_at' => null,
-            'needs_clarification' => false,
-        ])
+    return fakeAi()
+        ->push(parsedCapture(['title' => 'Clean the kitchen', 'why' => 'Parents are coming']))
         ->push(['steps' => [
             ['title' => 'Grab a bin bag.', 'estimated_seconds' => 60],
             ['title' => 'Put the obvious rubbish in the bag.', 'estimated_seconds' => 300],

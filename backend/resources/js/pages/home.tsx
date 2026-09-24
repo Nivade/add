@@ -1,13 +1,63 @@
-import type { HomeData } from '@add/shared';
+import type { HomeData, IntentionData } from '@add/shared';
 import { restCountLine } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
+import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
+
+function Clarify({ intention }: { intention: IntentionData }) {
+    const fieldId = `clarify-${intention.id}`;
+
+    return (
+        <Form
+            {...intentions.clarification.form(intention.id)}
+            options={{ preserveScroll: true }}
+            resetOnSuccess
+            className="space-y-2"
+        >
+            {({ errors, processing }) => (
+                <>
+                    <p>{intention.title}</p>
+                    <label
+                        htmlFor={fieldId}
+                        className="text-muted-foreground block"
+                    >
+                        {intention.clarifyingQuestion}
+                    </label>
+                    <div className="flex flex-wrap items-baseline gap-3">
+                        <input
+                            id={fieldId}
+                            name="answer"
+                            autoComplete="off"
+                            aria-invalid={errors.answer ? true : undefined}
+                            aria-describedby={
+                                errors.answer ? `${fieldId}-error` : undefined
+                            }
+                            className="border-border focus-visible:ring-ring min-w-0 flex-1 border-b bg-transparent py-1 focus-visible:ring-1 focus-visible:outline-none"
+                        />
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            disabled={processing}
+                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                        >
+                            Answer
+                        </Button>
+                    </div>
+                    <InputError
+                        id={`${fieldId}-error`}
+                        message={errors.answer}
+                    />
+                </>
+            )}
+        </Form>
+    );
+}
 
 function RightNow({ rightNow, session }: HomeData) {
     if (session) {
@@ -136,14 +186,10 @@ export default function Home({ home: data }: { home: HomeData }) {
 
                 {needsAttention.length > 0 && (
                     <Band label="Needs attention">
-                        <ul className="space-y-2">
+                        <ul className="space-y-6">
                             {needsAttention.map((intention) => (
                                 <li key={intention.id}>
-                                    {intention.title}
-                                    <span className="text-muted-foreground">
-                                        {' '}
-                                        — nobody has said yet what this means.
-                                    </span>
+                                    <Clarify intention={intention} />
                                 </li>
                             ))}
                         </ul>

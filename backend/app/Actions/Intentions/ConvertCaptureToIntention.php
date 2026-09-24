@@ -57,7 +57,7 @@ final class ConvertCaptureToIntention
                 'why' => $parsed->why,
                 'status' => IntentionStatus::Captured,
                 'deadline_at' => $deadlineAt,
-                'needs_clarification' => $parsed->needsClarification,
+                'clarifying_question' => $parsed->clarifyingQuestion,
             ]);
 
             $capture->update(['intention_id' => $intention->id, 'processed_at' => now()]);

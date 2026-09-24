@@ -18,3 +18,14 @@ export const theme = {
     textTransform: 'uppercase',
   },
 } as const;
+
+export const field = {
+  minHeight: TOUCH_TARGET,
+  paddingHorizontal: theme.space(2),
+  borderRadius: theme.radius,
+  borderWidth: 1,
+  borderColor: theme.color.border,
+  backgroundColor: theme.color.surface,
+  color: theme.color.text,
+  fontSize: 17,
+} as const;
