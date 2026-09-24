@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
-"""PreToolUse on Bash: refuse `gh pr merge` until this branch's ledger holds a code-review, then a later simplify, both at the current fork point."""
+"""PreToolUse on Bash: refuse `gh pr merge` until this branch's ledger holds the required skill sequence, at the current fork point."""
 
 import json
 import os
 import re
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import git, ledger_path  # noqa: E402
+from _ledger import current_branch, fork_point, gh, ledger_path, load_entries, ran_in_order  # noqa: E402
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
 PR_NUMBER_RE = re.compile(r"\bgh\s+pr\s+merge\s+(\d+)\b")
-
-
-def gh(root, *args):
-    try:
-        result = subprocess.run(["gh", *args], cwd=root, capture_output=True, text=True, timeout=15)
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    return result.stdout.strip() if result.returncode == 0 else None
 
 
 def allow():
@@ -53,26 +44,14 @@ def main():
     if pr_match:
         branch = gh(root, "pr", "view", pr_match.group(1), "--json", "headRefName", "-q", ".headRefName")
     if not branch:
-        branch = git(root, "rev-parse", "--abbrev-ref", "HEAD")
-    if not branch or branch == "HEAD":
+        branch = current_branch(root)
+    if not branch:
         allow()
 
-    fork = git(root, "merge-base", "origin/main", "HEAD")
+    fork = fork_point(root)
+    entries = load_entries(ledger_path(root, branch))
 
-    path = ledger_path(root, branch)
-    entries = []
-    if path and os.path.exists(path):
-        try:
-            with open(path) as handle:
-                entries = json.load(handle)
-        except (ValueError, OSError):
-            entries = []
-
-    at_fork = [entry for entry in entries if entry.get("fork") == fork]
-    review_ats = [entry["at"] for entry in at_fork if entry.get("skill") == "code-review"]
-    simplify_ats = [entry["at"] for entry in at_fork if entry.get("skill") == "simplify"]
-
-    if review_ats and simplify_ats and max(review_ats) < max(simplify_ats):
+    if ran_in_order(entries, fork):
         allow()
 
     block(

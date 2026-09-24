@@ -7,9 +7,7 @@ import sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import git, ledger_path  # noqa: E402
-
-TRACKED = ("code-review", "simplify")
+from _ledger import REQUIRED_SEQUENCE, append_entry, current_branch, fork_point, git, ledger_path  # noqa: E402
 
 
 def main():
@@ -22,42 +20,29 @@ def main():
         sys.exit(0)
 
     skill = (event.get("tool_input") or {}).get("skill")
-    if skill not in TRACKED:
+    if skill not in REQUIRED_SEQUENCE:
         sys.exit(0)
 
     root = os.environ.get("CLAUDE_PROJECT_DIR", "")
     if not root:
         sys.exit(0)
 
-    branch = git(root, "rev-parse", "--abbrev-ref", "HEAD")
+    branch = current_branch(root)
     head = git(root, "rev-parse", "HEAD")
-    fork = git(root, "merge-base", "origin/main", "HEAD")
-    if not branch or branch == "HEAD" or not head:
+    if not branch or not head:
         sys.exit(0)
 
     path = ledger_path(root, branch)
     if not path:
         sys.exit(0)
 
-    entries = []
-    if os.path.exists(path):
-        try:
-            with open(path) as handle:
-                entries = json.load(handle)
-        except (ValueError, OSError):
-            entries = []
-
-    entries.append({
+    append_entry(path, {
         "skill": skill,
         "args": (event.get("tool_input") or {}).get("args", ""),
         "head": head,
-        "fork": fork,
+        "fork": fork_point(root),
         "at": datetime.now(timezone.utc).isoformat(),
     })
-
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w") as handle:
-        json.dump(entries, handle, indent=2)
 
     sys.exit(0)
 
