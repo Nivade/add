@@ -72,6 +72,23 @@ it('has no API resources', function () {
     expect(is_dir(app_path('Http/Resources')))->toBeFalse();
 });
 
+// .ai/rules/api-and-data.md: an array literal skips the constructor's type checks and meets the input mapper.
+it('builds Data from literals with new, never from an array', function () {
+    $files = phpSourceFiles();
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path('tests')));
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $files[] = $file->getPathname();
+        }
+    }
+
+    foreach ($files as $file) {
+        expect(preg_match('/\b(?:\w+Data|self|static)::(?:from|optional)\(\s*\[/', (string) file_get_contents($file)))
+            ->toBe(0, $file);
+    }
+});
+
 // .ai/rules/domain-model.md: the spec's App/Domain tree is deliberately not built.
 it('stays flat rather than growing a domain tree', function () {
     expect(is_dir(app_path('Domain')))->toBeFalse();
