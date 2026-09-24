@@ -23,7 +23,8 @@
     "lint": "cd backend && ./vendor/bin/sail php vendor/bin/pint --test",
     "stan": "cd backend && ./vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G",
     "types:generate": "cd backend && ./vendor/bin/sail artisan typescript:transform",
-    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update"
+    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update",
+    "skills:restore": "npx skills experimental_install && rm -rf $(node -e \"console.log(Object.keys(require('./skills-lock.json').skills).map(k=>'.ai/skills/'+k).join(' '))\") && mv .agents/skills/* .ai/skills/ && rm -rf .agents"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

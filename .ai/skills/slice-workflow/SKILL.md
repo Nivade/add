@@ -116,7 +116,10 @@ reread.
 
 ## Finishing
 
-Run `npm run test`, `npm run stan` and `npm run lint`, then `composer refactor:check`.
+Finish with the `finish-branch` skill — it runs `code-review`, then `simplify`,
+then the local suite (`npm run test`, `npm run stan`, `npm run lint`,
+`composer refactor:check`), then opens the PR. `merge-gate` refuses `gh pr merge`
+on a branch that skipped it.
 Update `.ai/RESUME.md`, the slice table and the plan's own state header with the
 `update-resume` skill, which also routes the session's decisions to the files
 that own them.

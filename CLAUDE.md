@@ -48,6 +48,7 @@ npm run lint                  # pint --test; `npm run composer -- lint` writes t
 npm run stan                  # phpstan
 npm run types:generate        # PHP Data classes -> packages/shared/src/generated.ts
 npm run boost:update          # .ai/guidelines.md + the .claude/skills mirror
+npm run skills:restore        # after npm install on a fresh clone: the vendored Expo skills, from skills-lock.json
 npm run web                   # vite
 npm run mobile                # expo start, outside sail
 npm run typecheck             # tsc across every workspace
