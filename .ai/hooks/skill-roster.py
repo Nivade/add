@@ -12,7 +12,8 @@ ROSTER = """This repo's own skills, by what they own — invoke before working, 
 sail-and-root-scripts (any command), generated-artifacts (files a generator owns), slice-workflow (what to build),
 next-action-resolver (the ranking engine), ai-layer-changes (anything asking a model), calendar-sync, expo-react-native,
 phpstan-larastan, laravel-actions (app/Actions), laravel-data (app/Data), laravel-attributes, inertia-react-development,
-wayfinder-development, pest-testing and testing-best-practices, note-finding, update-resume.
+wayfinder-development, pest-testing and testing-best-practices, note-finding, update-resume, finish-branch
+(ready to merge — code-review, then simplify, then the PR; merge-gate enforces it).
 Expo's own skills are vendored for the platform mechanics this repo does not author: expo-router (mobile/app),
 expo-data-fetching (mobile/src/api), expo-dev-client, expo-upgrade, eas-workflows. expo-react-native still
 wins on house convention — what belongs in packages/shared, and never reusing an Inertia component.
@@ -40,6 +41,7 @@ KEYWORDS = [
     (r"\b(route|controller|endpoint|api)\b", ["wayfinder-development"]),
     (r"\b(auth|login|register|passkey|two.factor|fortify|sanctum)\b", ["fortify-development", "laravel-security"]),
     (r"\b(migration|model|eloquent|table|column)\b", ["laravel-attributes"]),
+    (r"\b(ready to merge|finish (this|the) branch|open (a |the )?pr\b|open the pull request)\b", ["finish-branch"]),
     (r"\b(commit|pr |pull request|review)\b", ["code-review", "split-to-prs"]),
     (r"\b(wrap up|stopped|resume|end of session)\b", ["update-resume"]),
 ]

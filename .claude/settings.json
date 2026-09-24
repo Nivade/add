@@ -10,6 +10,26 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/skill-gate.py\""
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/merge-gate.py\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/review-ledger.py\""
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [

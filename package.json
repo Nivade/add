@@ -22,7 +22,8 @@
     "lint": "cd backend && ./vendor/bin/sail php vendor/bin/pint --test",
     "stan": "cd backend && ./vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G",
     "types:generate": "cd backend && ./vendor/bin/sail artisan typescript:transform",
-    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update"
+    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update",
+    "skills:restore": "npx skills experimental_install && rm -rf .ai/skills/eas-workflows .ai/skills/expo-data-fetching .ai/skills/expo-dev-client .ai/skills/expo-router .ai/skills/expo-upgrade && mv .agents/skills/* .ai/skills/ && rm -rf .agents"
   },
   "devDependencies": {
     "typescript": "^5.9.0"
