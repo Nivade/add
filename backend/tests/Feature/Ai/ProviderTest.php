@@ -162,7 +162,7 @@ it('refuses to reach a person\'s words off the machine without their consent', f
     $user = User::factory()->create(['ai_consented_at' => null]);
     $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
 
-    expect(fn () => (new ConsentGatedAiProvider($inner))->complete(aiRequest(userId: $user->id)))
+    expect(fn () => new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id)))
         ->toThrow(AiUnavailable::class);
 });
 
@@ -170,7 +170,7 @@ it('reaches the inner driver once consent is on record', function (): void {
     $user = User::factory()->create(['ai_consented_at' => now()]);
     $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
 
-    $answer = (new ConsentGatedAiProvider($inner))->complete(aiRequest(userId: $user->id));
+    $answer = new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id));
 
     expect($answer->payload)->toBe(['title' => 'Renew my passport']);
 });
