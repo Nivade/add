@@ -16,7 +16,6 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
-use App\Support\Execution\RunningSession;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,7 +34,7 @@ final class BuildHome
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $session = RunningSession::forUser($user);
+        $session = $user->runningSession()->getResults();
 
         $needsAttention = $this->open($user)
             ->awaitingClarification()

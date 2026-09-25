@@ -8,7 +8,6 @@ use App\Data\PlanRungData;
 use App\Data\RailData;
 use App\Models\ExecutionSession;
 use App\Models\User;
-use App\Support\Execution\RunningSession;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -23,7 +22,7 @@ final class BuildRail
         $context ??= ResolutionContext::forUser($user);
         $now = $context->now;
 
-        $session = RunningSession::forUser($user);
+        $session = $user->runningSession()->getResults();
         $leave = $context->plan?->leaveRung();
 
         return new RailData(

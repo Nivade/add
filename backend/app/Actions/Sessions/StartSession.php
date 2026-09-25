@@ -8,7 +8,6 @@ use App\Enums\ExecutionEventType;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Models\User;
-use App\Support\Execution\RunningSession;
 use Illuminate\Support\Facades\Cache;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -19,8 +18,8 @@ final class StartSession
 
     public function handle(User $user, Step $step): ExecutionSession
     {
-        return Cache::lock(RunningSession::lockKey($user), 10)->block(5, function () use ($user, $step): ExecutionSession {
-            $running = RunningSession::forUser($user);
+        return Cache::lock($user->sessionLockKey(), 10)->block(5, function () use ($user, $step): ExecutionSession {
+            $running = $user->runningSession()->getResults();
 
             return $running instanceof ExecutionSession
                 ? $this->retarget($running, $user, $step)

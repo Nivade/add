@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Web;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
-use App\Support\Execution\RunningSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Response;
@@ -18,7 +17,7 @@ final class ShowFocusController extends Controller
     {
         $user = $this->user($request);
 
-        $session = RunningSession::forUser($user);
+        $session = $user->runningSession()->getResults();
 
         // Focus without a session is not a screen; home is where the next thing is chosen.
         if (! $session instanceof ExecutionSession) {

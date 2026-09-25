@@ -16,6 +16,7 @@ use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Exceptions\InvalidSessionTransition;
 use App\Models\ExecutionSession;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 
 it('keeps one session for a stretch of work and moves it to the step they picked', function (): void {
@@ -191,4 +192,20 @@ it('counts progress rather than writing it', function (): void {
 
     expect(ExecutionStateData::of($session->refresh())->progress)
         ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
+});
+
+it('picks the newest of two running sessions for one person, breaking a tie on id', function (): void {
+    $user = User::factory()->create();
+    $startedAt = CarbonImmutable::now();
+
+    $older = ExecutionSession::factory()->for($user)->create(['started_at' => $startedAt->subMinute()]);
+    $newer = ExecutionSession::factory()->for($user)->create(['started_at' => $startedAt]);
+
+    expect($user->fresh()->runningSession?->id)->toBe($newer->id);
+
+    $sameInstantEarlierId = ExecutionSession::factory()->for($user)->create(['started_at' => $startedAt]);
+    $sameInstantLaterId = ExecutionSession::factory()->for($user)->create(['started_at' => $startedAt]);
+    expect($sameInstantLaterId->id)->toBeGreaterThan($sameInstantEarlierId->id);
+
+    expect($user->fresh()->runningSession?->id)->toBe($sameInstantLaterId->id);
 });
