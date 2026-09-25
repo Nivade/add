@@ -1,6 +1,6 @@
 # Support and Concerns boundaries
 
-**State:** designed, 2026-09-24 · a refactor pass, not a slice
+**State:** done, 2026-09-25 · a refactor pass, not a slice
 
 *Rules: `domain-model.md`, `api-and-data.md`, `general.md`.*
 
