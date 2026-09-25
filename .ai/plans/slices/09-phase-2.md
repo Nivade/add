@@ -1,6 +1,6 @@
 # Slice 9 — phase 2: waiting-for, commitments, future-self, and the rest
 
-**State:** designed, 2026-09-25 · [the slice table](../executive-function-os.md#slices)
+**State:** done, 2026-09-25 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §15, §17, §19–§21, §33. Rules:
 `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `testing.md`.*
@@ -160,11 +160,9 @@ copied forward; a stale step set is worse than a fresh decomposition pass.
 
 §17 lists four modes; the slice-table paragraph commits to solo only. Solo is
 described as "a guided execution session" — which is what execution mode
-(slice 4) already is. **Deferred, on record:** whether this phase adds
-anything code-shaped, or closes as a doc-only note that execution mode
-already answers §17's solo requirement, is deliberately left open until
-phases 1–3 are seen shipped. Build phases 1–3, 4 and 6 first; revisit phase 5
-before starting it, not now.
+(slice 4) already is. **Closed, no code:** revisited after phases 1–4 and 6
+shipped, per the earlier open question — execution mode answers §17's solo
+requirement as built. Nothing added here.
 
 ## Phase 6 — email and document ingestion
 
@@ -197,5 +195,5 @@ the spine's row and `.ai/RESUME.md` together.
 
 ## Open
 
-Phase 5 carries a deliberately deferred decision — whether solo body doubling
-is new work at all — revisited after phases 1–4 and 6 ship.
+Nothing. All six phases resolved — five built, phase 5 closed as answered by
+existing execution mode.

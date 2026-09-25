@@ -180,7 +180,7 @@ what moving a plan to `done` requires.
 | 8 | [Make the MVP real](slices/08-mvp-real.md) — real calendar, live model behind consent, a device, the journey under a browser | §18, §22, §28, §32, §39 | done |
 | — | [Agent tooling](agent-tooling.md) — code-review then simplify, gated at merge; vendored skills restored from the lock | — | done |
 | — | [Support and Concerns boundaries](archive/support-and-concerns-boundaries.md) — where Support, Concerns and Exceptions decisions land, and the guard tests that hold the line | — | done |
-| 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, an ingestion port | §15, §17, §19–§21, §33 | designed |
+| 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, an ingestion port | §15, §17, §19–§21, §33 | done |
 | 10 | Phase 3 — companion, location awareness, bill/subscription detection, full ingestion (email, documents, receipts, bank/gov correspondence), the `Context` model, Friend body doubling | §4, §9, §17, §19, §34 | recorded only |
 
 **Slice 10** is recorded so it is not reinvented, not planned. §17's Friend mode
