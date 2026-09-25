@@ -150,11 +150,9 @@ than at capture time. A scheduled command creates a fresh intention from the
 template when due, the same `AsCommand` pattern `SendDueReminders` already
 uses.
 
-**Open question, not decided in this doc:** does a recurring intention
-regenerate its steps from the template, or does the person re-decompose each
-time? A grocery run's steps barely change; "call the dentist" might not even
-have steps worth keeping. Needs a decision before this phase is built, not
-guessed at here.
+**Decided:** re-decompose each time the recurrence fires, through the same
+`DecomposeIntention` path a fresh capture uses. No step template is stored or
+copied forward; a stale step set is worse than a fresh decomposition pass.
 
 ## Phase 5 — body doubling, solo
 
@@ -162,12 +160,11 @@ guessed at here.
 
 §17 lists four modes; the slice-table paragraph commits to solo only. Solo is
 described as "a guided execution session" — which is what execution mode
-(slice 4) already is. **Open question:** does this phase add anything code
-shaped, or does it close by writing down that execution mode already answers
-§17's solo requirement, with nothing to build? If something *is* missing —
-ambient pacing, a presence cue, ambient sound — it needs naming before this
-phase gets a done-when; "guided" alone does not distinguish it from what
-exists.
+(slice 4) already is. **Deferred, on record:** whether this phase adds
+anything code-shaped, or closes as a doc-only note that execution mode
+already answers §17's solo requirement, is deliberately left open until
+phases 1–3 are seen shipped. Build phases 1–3, 4 and 6 first; revisit phase 5
+before starting it, not now.
 
 ## Phase 6 — email and document ingestion
 
@@ -200,7 +197,5 @@ the spine's row and `.ai/RESUME.md` together.
 
 ## Open
 
-Phases 4 and 5 each carry a design question this doc does not answer —
-recurrence's regenerate-or-redecompose split, and whether solo body doubling
-is new work at all. Both need a decision before their phase starts, not
-during it.
+Phase 5 carries a deliberately deferred decision — whether solo body doubling
+is new work at all — revisited after phases 1–4 and 6 ship.
