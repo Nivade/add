@@ -38,7 +38,11 @@ export async function registerForPush(token: string): Promise<void> {
 
   const pushToken = await Notifications.getExpoPushTokenAsync(
     projectId ? { projectId } : undefined,
-  );
+  ).catch(() => null);
+
+  if (pushToken === null) {
+    return;
+  }
 
   await api
     .registerDevice(token, pushToken.data, Platform.OS === 'ios' ? 'ios' : 'android')

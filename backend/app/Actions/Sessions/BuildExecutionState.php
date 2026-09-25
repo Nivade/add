@@ -72,7 +72,7 @@ final class BuildExecutionState
         return $lines;
     }
 
-    /** §18: "you started this after avoiding it for 11 days", counted from when the current step was first offered. */
+    /** §18: "you started this after avoiding it for 11 days", counted from the current step's row, the closest thing to when it was first offered. */
     private function avoidedLine(ExecutionSession $session): ?string
     {
         $step = $session->currentStep;

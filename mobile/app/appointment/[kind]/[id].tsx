@@ -23,7 +23,7 @@ export default function Appointment() {
   const [minutes, setMinutes] = useState<Partial<Record<PlanRung, string>>>({});
   const [saving, setSaving] = useState(false);
 
-  if (loading && appointment === null) {
+  if (loading && !appointment) {
     return <Loading />;
   }
 
