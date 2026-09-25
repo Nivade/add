@@ -6,17 +6,24 @@ namespace App\Notifications;
 
 use App\Contracts\Appointment;
 use App\Contracts\ExpoPushable;
+use App\Data\BackwardsPlanData;
 use App\Notifications\Channels\ExpoPushChannel;
+use Carbon\CarbonImmutable;
 use Illuminate\Notifications\Notification;
 
 /** Carries the preparation and the leave-by time. A bare "dentist tomorrow" is a bug. */
 final class AppointmentReminder extends Notification implements ExpoPushable
 {
-    /** @param  list<string>  $lines */
+    /** @var list<string> */
+    private readonly array $lines;
+
     public function __construct(
         private readonly Appointment $appointment,
-        private readonly array $lines,
-    ) {}
+        BackwardsPlanData $plan,
+        CarbonImmutable $now,
+    ) {
+        $this->lines = $this->buildLines($plan, $now);
+    }
 
     /** @return list<string> */
     public function via(object $notifiable): array
@@ -49,6 +56,27 @@ final class AppointmentReminder extends Notification implements ExpoPushable
                 'kind' => $this->appointment->appointmentKind()->value,
                 'appointment_id' => $this->appointment->appointmentId(),
             ],
+        ];
+    }
+
+    /**
+     * §23: a notification answers why it interrupted, what to do, why now, and what happens if it waits.
+     *
+     * @return list<string>
+     */
+    private function buildLines(BackwardsPlanData $plan, CarbonImmutable $now): array
+    {
+        $first = $plan->firstRung();
+        $leave = $plan->leaveRung();
+        $minutesToLeave = (int) round($now->diffInMinutes($leave->instant(), absolute: false));
+
+        return [
+            $this->appointment->appointmentTitle().' is at '.$plan->deadlineClock.'.',
+            $first->rung->startingWords(),
+            $minutesToLeave > 0
+                ? 'Leaving is '.$minutesToLeave.' minutes away.'
+                : 'Leaving is what comes next.',
+            'If this waits, leaving at '.$leave->clock.' waits with it.',
         ];
     }
 }
