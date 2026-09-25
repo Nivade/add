@@ -37,6 +37,7 @@
         "nunomaduro/collision": "^8.9.3",
         "nvade/devtools": "^0",
         "pestphp/pest": "^5.2",
+        "pestphp/pest-plugin-browser": "^5.0",
         "pestphp/pest-plugin-drift": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
         "spatie/laravel-typescript-transformer": "^3.3"
@@ -126,6 +127,9 @@
         ],
         "test:coverage": [
             "@php -d memory_limit=1G vendor/bin/pest --parallel --coverage"
+        ],
+        "test:browser": [
+            "@php vendor/bin/pest tests/Browser"
         ]
     },
     "extra": {

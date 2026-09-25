@@ -44,6 +44,7 @@ npm run test                  # parallel, memory_limit pinned
 npm run test:host             # containers down, SQLite only
 npm run test:serial
 npm run test:impact
+npm run test:browser           # tests/Browser only, real Chromium via pest-plugin-browser
 npm run lint                  # pint --test; `npm run composer -- lint` writes the fixes
 npm run stan                  # phpstan
 npm run types:generate        # PHP Data classes -> packages/shared/src/generated.ts

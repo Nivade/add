@@ -5,6 +5,8 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
+                # pest-plugin-browser talks to its Playwright server over a socket.
+                PHP_EXTENSIONS: 'sockets'
         image: 'sail-8.5/app'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
