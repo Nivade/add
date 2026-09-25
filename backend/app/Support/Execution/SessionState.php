@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Execution;
 
+use App\Exceptions\InvalidSessionTransition;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use App\Support\Execution\Exceptions\InvalidSessionTransition;
 
 /** Invalid transitions throw here rather than no-opping in eight actions. */
 final class SessionState

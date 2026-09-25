@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Sessions;
 
 use App\Enums\ExecutionEventType;
+use App\Exceptions\InvalidSessionTransition;
 use App\Models\ExecutionSession;
-use App\Support\Execution\Exceptions\InvalidSessionTransition;
 use App\Support\Execution\SessionState;
 use Lorisleiva\Actions\Concerns\AsObject;
 

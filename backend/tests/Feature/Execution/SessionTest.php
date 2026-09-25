@@ -14,8 +14,8 @@ use App\Data\ExecutionStateData;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
+use App\Exceptions\InvalidSessionTransition;
 use App\Models\ExecutionSession;
-use App\Support\Execution\Exceptions\InvalidSessionTransition;
 use Carbon\CarbonImmutable;
 
 it('keeps one session for a stretch of work and moves it to the step they picked', function (): void {
