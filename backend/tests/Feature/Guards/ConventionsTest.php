@@ -149,3 +149,22 @@ it('schedules only commands that exist', function () {
         expect($registered)->toContain($matches[1] ?? $event->command);
     }
 });
+
+// .ai/rules/support-and-concerns.md: Support holds adapters and calculation, never a caller of the layers above it.
+arch('Support depends on nothing above it')
+    ->expect('App\Support')
+    ->not->toUse(['App\Actions', 'App\Http']);
+
+// .ai/rules/support-and-concerns.md: a Support class with subclassable state is a seam nobody asked for.
+arch('every Support class is final')
+    ->expect('App\Support')
+    ->classes()
+    ->toBeFinal()
+    ->ignoring(App\Support\NextAction\Rung::class);
+
+// .ai/rules/support-and-concerns.md: every other trait moved to its layer; nothing new lands here.
+it('keeps App\Concerns down to the Fortify validation traits', function () {
+    $files = array_map(basename(...), glob(app_path('Concerns/*.php')) ?: []);
+
+    expect($files)->toBe(['PasswordValidationRules.php', 'ProfileValidationRules.php']);
+});
