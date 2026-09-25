@@ -1,6 +1,6 @@
 ---
 name: finish-branch
-description: Run the fixed sequence that turns a branch into an open PR — code-review, then simplify, then the local suite, then push. Use when the person says a branch is ready to merge, done, or asks to finish the branch or open the PR. Does not merge; that stays the person's call after CI.
+description: Run the fixed sequence that turns a branch into an open PR — code-review, then simplify, then reconcile plan state, then the local suite, then push. Use when the person says a branch is ready to merge, done, or asks to finish the branch or open the PR. Does not merge; that stays the person's call after CI.
 ---
 
 The person's word that a branch is done triggers this, not any commit or file condition. Runs `code-review` then `simplify`, in that order, exactly once each — `merge-gate` (`.ai/hooks/merge-gate.py`) refuses `gh pr merge` on this branch until both are recorded against its current fork point, so skipping a step here only delays it to the merge attempt.
