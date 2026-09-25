@@ -147,9 +147,7 @@
                     "estimated_seconds": 180
                 }
             ],
-            "violations": [
-                "step 1 contains \"and\""
-            ]
+            "violations": ["step 1 contains \"and\""]
         },
         {
             "id": "decline-invite",
