@@ -7,7 +7,6 @@ namespace App\Actions\Sessions;
 use App\Actions\Steps\SkipStep;
 use App\Enums\ExecutionEventType;
 use App\Models\ExecutionSession;
-use App\Support\Execution\SessionState;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -18,7 +17,7 @@ final class SkipCurrentStep
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $step = SessionState::currentStep($session);
+        $step = $session->currentStepOrFail();
 
         return DB::transaction(function () use ($session, $step): ExecutionSession {
             SkipStep::run($step);

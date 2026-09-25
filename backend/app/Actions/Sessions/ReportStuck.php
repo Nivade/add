@@ -10,7 +10,6 @@ use App\Enums\StuckReason;
 use App\Enums\StuckResolution;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use App\Support\Execution\SessionState;
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
 use App\Support\NextAction\ResolutionContext;
@@ -24,7 +23,7 @@ final class ReportStuck
 
     public function handle(ExecutionSession $session, StuckReason $reason, ?string $note = null): ExecutionSession
     {
-        $step = SessionState::currentStep($session);
+        $step = $session->currentStepOrFail();
 
         RecordExecutionEvent::run($session, ExecutionEventType::Stuck, $step->id, [
             'reason' => $reason->value,

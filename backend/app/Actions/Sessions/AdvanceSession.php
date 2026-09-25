@@ -8,7 +8,6 @@ use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use App\Support\Execution\SessionState;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -19,7 +18,7 @@ final class AdvanceSession
 
     public function handle(ExecutionSession $session, ?string $exceptStepId = null): ExecutionSession
     {
-        SessionState::assertOpen($session);
+        $session->assertOpen();
 
         $pending = $session->intention->remainingSteps()->orderBy('position')->get();
         $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
