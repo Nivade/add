@@ -15,24 +15,14 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8, phase 5** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
-1's done-when asks for a real feed, which only a person holding one can supply.
-Phase 4 is done: per-user AI consent (a column, a web settings page, a mobile
-settings screen, the same `ai-consent` endpoint behind both), the two provider
-findings are fixed, and `ai:eval` has scored a first baseline in
-`backend/storage/ai-eval/baseline.json`. Phase 5 needs a person holding a phone
-or running a simulator, which an agent cannot supply either.
-Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
-The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
-carries what it settled and what it deliberately left open.
-
-The mobile client exists but has never run against a device or a simulator: the
-bundle builds and `expo-doctor` passes, and that is the whole of what has been
-checked. There is no EAS project id in `mobile/app.json`, so
-`getExpoPushTokenAsync` has nothing to ask for a token with, and no push has been
-sent end to end. There are no native folders — `ios/` and `android/` are
-generated, and the speech-recognition and secure-store modules need a dev build
-rather than Expo Go.
+**Slice 8 is done** — see [`08-mvp-real.md`](plans/slices/08-mvp-real.md) for
+what each phase built and its one open caveat (phase 1's live-feed round trip,
+which needs a person's real ICS URL). Slice 9 is next: it is still only the
+paragraph in [`executive-function-os.md`](plans/executive-function-os.md#slices)
+(phase 2 — waiting-for, commitments, ingestion, future-self, body doubling) and
+has no slice file of its own yet. The hardening pass over slices 1–6 is
+finished — [`hardening.md`](plans/hardening.md) carries what it settled and
+what it deliberately left open.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera

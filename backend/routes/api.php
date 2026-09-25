@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
 use App\Http\Controllers\Api\V1\ResumeSessionController;
 use App\Http\Controllers\Api\V1\ShowAiConsentController;
+use App\Http\Controllers\Api\V1\ShowAppointmentController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
 use App\Http\Controllers\Api\V1\ShowHomeController;
 use App\Http\Controllers\Api\V1\ShowNextActionController;
@@ -40,6 +41,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::patch('ai-consent', UpdateAiConsentController::class)->name('ai-consent.update');
 
     Route::get('home', ShowHomeController::class)->name('home.show');
+    Route::get('appointments/{kind}/{id}', ShowAppointmentController::class)->name('appointments.show');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::post('reminders/{notification}/dismiss', DismissReminderController::class)->name('reminders.dismiss');
     Route::get('next-action', ShowNextActionController::class)->name('next-action.show');

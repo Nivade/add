@@ -4,6 +4,7 @@ import type {
   AppointmentKind,
   CaptureData,
   CaptureSource,
+  ComingUpData,
   DeviceData,
   DevicePlatform,
   ExecutionStateData,
@@ -43,6 +44,9 @@ export const api = {
     }),
 
   home: (token: string) => request<HomeData>('/home', { token }),
+
+  appointment: (token: string, kind: AppointmentKind, id: string) =>
+    request<ComingUpData | null>(`/appointments/${kind}/${id}`, { token }),
 
   aiConsent: (token: string) =>
     request<AiConsentData>('/ai-consent', { token }),

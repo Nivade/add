@@ -1,4 +1,4 @@
-import type { AppointmentKind, HomeData, PlanRung } from '@add/shared';
+import type { AppointmentKind, ComingUpData, PlanRung } from '@add/shared';
 import { planRungLabels } from '@add/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -10,23 +10,22 @@ import { Button } from '@/components/button';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { TOUCH_TARGET, theme } from '@/theme';
 
-/** Where a reminder lands. Every number here is the person's to overrule. */
+/** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
 export default function Appointment() {
-  const { kind, id } = useLocalSearchParams<{ kind: string; id: string }>();
+  const { kind, id } = useLocalSearchParams<{ kind: AppointmentKind; id: string }>();
   const { token } = useSession();
-  const load = useCallback(() => api.home(token as string), [token]);
-  const { data, loading } = useResource<HomeData>(load);
+  const load = useCallback(
+    () => api.appointment(token as string, kind, id),
+    [token, kind, id],
+  );
+  const { data: appointment, loading } = useResource<ComingUpData | null>(load);
+
   const [minutes, setMinutes] = useState<Partial<Record<PlanRung, string>>>({});
   const [saving, setSaving] = useState(false);
 
-  if (loading && !data) {
+  if (loading && !appointment) {
     return <Loading />;
   }
-
-  const appointment =
-    data?.comingUp && data.comingUp.id === id && data.comingUp.kind === kind
-      ? data.comingUp
-      : null;
 
   if (!appointment) {
     return (
@@ -43,7 +42,7 @@ export default function Appointment() {
     try {
       await api.adjustPlan(
         token as string,
-        appointment.kind as AppointmentKind,
+        appointment.kind,
         appointment.id,
         Object.fromEntries(
           Object.entries(minutes).map(([rung, stated]) => [

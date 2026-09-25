@@ -34,6 +34,9 @@ yarn-error.*
 .env
 .env*.local
 
+# per-account Firebase config, not a secret but not portable across accounts either
+google-services.json
+
 # typescript
 *.tsbuildinfo
 
