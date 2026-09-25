@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
 use App\Http\Controllers\Api\V1\RespondToWaitingForController;
 use App\Http\Controllers\Api\V1\ResumeSessionController;
+use App\Http\Controllers\Api\V1\SetIntentionRecurrenceController;
 use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowAppointmentController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
@@ -64,6 +65,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
     Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
+    Route::post('intentions/{intention}/recurrence', SetIntentionRecurrenceController::class)->name('intentions.recurrence');
     Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
 

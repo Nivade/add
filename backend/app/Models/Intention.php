@@ -40,6 +40,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $gathering_seconds
  * @property CarbonImmutable|null $decomposed_at
  * @property CarbonImmutable|null $completed_at
+ * @property int|null $recurrence_every_days
+ * @property CarbonImmutable|null $recurrence_next_at
+ * @property-read bool $is_recurring
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -91,6 +94,12 @@ class Intention extends Model implements Appointment
         return Attribute::get(fn (): bool => $this->clarifying_question !== null && $this->clarification === null);
     }
 
+    /** @return Attribute<bool, never> */
+    protected function isRecurring(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->recurrence_every_days !== null);
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
@@ -136,6 +145,13 @@ class Intention extends Model implements Appointment
         $query->whereNot(fn (Builder $query): Builder => $query->awaitingClarification());
     }
 
+    /** @param Builder<static> $query */
+    #[Scope]
+    protected function dueForRecurrence(Builder $query, CarbonImmutable $now): void
+    {
+        $query->whereNotNull('recurrence_every_days')->where('recurrence_next_at', '<=', $now);
+    }
+
     protected function casts(): array
     {
         return [
@@ -144,6 +160,7 @@ class Intention extends Model implements Appointment
             'deadline_confirmed_at' => 'immutable_datetime',
             'decomposed_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',
+            'recurrence_next_at' => 'immutable_datetime',
         ];
     }
 }

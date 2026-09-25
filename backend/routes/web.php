@@ -14,6 +14,7 @@ use App\Http\Controllers\Web\RecordDistractionController;
 use App\Http\Controllers\Web\ReportStuckController;
 use App\Http\Controllers\Web\RespondToWaitingForController;
 use App\Http\Controllers\Web\ResumeFocusController;
+use App\Http\Controllers\Web\SetIntentionRecurrenceController;
 use App\Http\Controllers\Web\ShowFocusController;
 use App\Http\Controllers\Web\ShowHomeController;
 use App\Http\Controllers\Web\ShowOverwhelmedController;
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
     Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
+    Route::post('intentions/{intention}/recurrence', SetIntentionRecurrenceController::class)->name('intentions.recurrence');
     Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
 

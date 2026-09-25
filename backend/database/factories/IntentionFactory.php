@@ -45,4 +45,13 @@ class IntentionFactory extends Factory
             'decomposed_at' => now(),
         ]);
     }
+
+    public function done(): self
+    {
+        return $this->state([
+            'status' => IntentionStatus::Done,
+            'decomposed_at' => now(),
+            'completed_at' => now(),
+        ]);
+    }
 }

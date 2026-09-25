@@ -80,6 +80,7 @@ status: IntentionStatus,
 deadlineAt: string | null,
 deadlineInferred: boolean,
 clarifyingQuestion: string | null,
+recurrenceEveryDays: number | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
 export type NeedsAttentionData = {

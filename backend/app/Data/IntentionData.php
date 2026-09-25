@@ -22,5 +22,6 @@ class IntentionData extends Data
         public ?string $deadlineAt,
         public bool $deadlineInferred,
         public ?string $clarifyingQuestion,
+        public ?int $recurrenceEveryDays,
     ) {}
 }
