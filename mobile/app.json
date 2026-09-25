@@ -17,6 +17,7 @@
     },
     "android": {
       "package": "dev.nvade.add",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -36,6 +37,12 @@
           "backgroundColor": "#0B0B0F"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "17e78ffb-401e-45df-9f51-c88d5b8c1088"
+      }
+    },
+    "owner": "nvade.io"
   }
 }
