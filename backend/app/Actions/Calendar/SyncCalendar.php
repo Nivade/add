@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
-use App\Concerns\QueuesPerUser;
+use App\Actions\Concerns\QueuesPerUser;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\CalendarEvent;

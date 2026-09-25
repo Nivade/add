@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\StoresDatesInUtc;
 use App\Enums\AppointmentKind;
+use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\ReminderFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;

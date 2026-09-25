@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\StartSession;
-use App\Concerns\ResolvesStartableStep;
-use App\Data\ExecutionStateData;
+use App\Http\Controllers\Concerns\ResolvesStartableStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,7 @@ final class StoreSessionController extends Controller
 
         $session = StartSession::run($user, $step);
 
-        return ExecutionStateData::of($session)
+        return BuildExecutionState::run($session)
             ->toResponse($request)
             ->setStatusCode($session->wasRecentlyCreated ? 201 : 200);
     }

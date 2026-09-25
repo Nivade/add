@@ -7,7 +7,6 @@ namespace App\Actions\Sessions;
 use App\Enums\ExecutionEventType;
 use App\Enums\SessionOutcome;
 use App\Models\ExecutionSession;
-use App\Support\Execution\SessionState;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -22,7 +21,7 @@ final class LandSession
             // Re-read under a row lock: two taps can both pass an unlocked check and land it twice.
             $locked = ExecutionSession::query()->lockForUpdate()->findOrFail($session->id);
 
-            SessionState::assertOpen($locked);
+            $locked->assertOpen();
 
             $lastStepId = $locked->current_step_id;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Concerns;
+namespace App\Http\Controllers\Concerns;
 
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;

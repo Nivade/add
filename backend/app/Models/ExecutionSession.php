@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\StoresDatesInUtc;
 use App\Enums\SessionOutcome;
+use App\Exceptions\InvalidSessionTransition;
+use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\ExecutionSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -68,6 +69,26 @@ class ExecutionSession extends Model
     public function isRunning(): bool
     {
         return $this->ended_at === null;
+    }
+
+    public function assertOpen(): void
+    {
+        if (! $this->isRunning()) {
+            throw new InvalidSessionTransition("Session {$this->id} has already ended.");
+        }
+    }
+
+    public function currentStepOrFail(): Step
+    {
+        $this->assertOpen();
+
+        $step = $this->currentStep()->getResults();
+
+        if (! $step instanceof Step) {
+            throw new InvalidSessionTransition("Session {$this->id} is not pointing at a step.");
+        }
+
+        return $step;
     }
 
     /** @param Builder<static> $query */

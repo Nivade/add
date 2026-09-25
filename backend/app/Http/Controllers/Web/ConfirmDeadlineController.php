@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web;
 
 use App\Actions\Intentions\ConfirmDeadline;
-use App\Concerns\ResolvesOwned;
+use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Models\Intention;
 use Illuminate\Http\RedirectResponse;

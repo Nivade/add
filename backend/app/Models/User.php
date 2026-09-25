@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\StoresDatesInUtc;
+use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -57,6 +58,19 @@ class User extends Authenticatable implements PasskeyUser
     public function hasConsentedToAi(): bool
     {
         return $this->ai_consented_at !== null;
+    }
+
+    /** @return HasOne<ExecutionSession, $this> */
+    public function runningSession(): HasOne
+    {
+        return $this->hasOne(ExecutionSession::class)
+            ->ofMany(['started_at' => 'max', 'id' => 'max'], fn ($query) => $query->running());
+    }
+
+    /** Held while a session is opened, so two taps on Start cannot both find nothing running. */
+    public function sessionLockKey(): string
+    {
+        return 'execution-session:'.$this->id;
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Concerns;
+namespace App\Actions\Concerns;
 
 use App\Models\User;
 use Illuminate\Console\Command;

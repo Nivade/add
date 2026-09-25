@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Reminders;
 
-use App\Concerns\QueuesPerUser;
+use App\Actions\Concerns\QueuesPerUser;
 use App\Contracts\Appointment;
 use App\Data\BackwardsPlanData;
 use App\Models\Reminder;
@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Notifications\AppointmentReminder;
 use App\Support\Time\BackwardsPlan;
 use App\Support\Time\NextAppointment;
-use App\Support\Time\ReminderLines;
 use Carbon\CarbonImmutable;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsJob;
@@ -87,7 +86,7 @@ final class SendDueReminders
             return null;
         }
 
-        $user->notify(new AppointmentReminder($appointment, ReminderLines::for($appointment, $plan, $now)));
+        $user->notify(new AppointmentReminder($appointment, $plan, $now));
 
         return Reminder::query()->create([
             'user_id' => $user->id,

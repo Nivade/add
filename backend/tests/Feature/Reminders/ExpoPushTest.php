@@ -6,13 +6,21 @@ use App\Models\CalendarEvent;
 use App\Models\Device;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
+use App\Support\Time\BackwardsPlan;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 
-function notifyDevice(User $user, array $lines = ['Dentist is at 14:00.', 'Leaving is 28 minutes away.']): void
+function notifyDevice(User $user): void
 {
-    $event = CalendarEvent::factory()->for($user)->create(['title' => 'Dentist']);
+    $now = CarbonImmutable::parse('2026-09-19 13:02:00', $user->timezone);
+    $event = CalendarEvent::factory()->for($user)->create([
+        'title' => 'Dentist',
+        'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00'),
+    ]);
 
-    $user->notify(new AppointmentReminder($event, $lines));
+    $plan = BackwardsPlan::for($event, $now) ?? throw new RuntimeException('expected a same-day plan');
+
+    $user->notify(new AppointmentReminder($event, $plan, $now));
 }
 
 it('pushes the same lines the band shows, not a bare title', function (): void {
@@ -29,7 +37,7 @@ it('pushes the same lines the band shows, not a bare title', function (): void {
         expect($request->data()[0])->toMatchArray([
             'to' => 'ExponentPushToken[abc]',
             'title' => 'Dentist',
-            'body' => "Dentist is at 14:00.\nLeaving is 28 minutes away.",
+            'body' => "Dentist is at 14:00.\nStart finding what you need.\nLeaving is 28 minutes away.\nIf this waits, leaving at 13:30 waits with it.",
         ]);
 
         return true;

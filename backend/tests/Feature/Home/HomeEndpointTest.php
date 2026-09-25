@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
+use App\Support\Time\BackwardsPlan;
+use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
 it('answers the device with the home the web renders', function (): void {
@@ -31,8 +33,13 @@ it('refuses an unauthenticated reader', function (): void {
 
 it('lets a device dismiss the reminder band', function (): void {
     $user = User::factory()->create();
-    $event = CalendarEvent::factory()->for($user)->create(['title' => 'Dentist']);
-    $user->notify(new AppointmentReminder($event, ['Dentist is at 14:00.']));
+    $now = CarbonImmutable::parse('2026-09-19 13:02:00', $user->timezone);
+    $event = CalendarEvent::factory()->for($user)->create([
+        'title' => 'Dentist',
+        'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00'),
+    ]);
+    $plan = BackwardsPlan::for($event, $now) ?? throw new RuntimeException('expected a same-day plan');
+    $user->notify(new AppointmentReminder($event, $plan, $now));
 
     $notification = $user->unreadNotifications()->sole();
 

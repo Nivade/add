@@ -38,8 +38,9 @@ default. Two frontends read the same action and want different shapes, so the
 web and API adapters stay separate invokable controllers over `AsObject`; an
 action queued off the critical path adds `AsJob` at that point, not before.
 
-`app/Actions/Fortify/**` is exempt — those implement Fortify's contracts and
-Fortify calls them, not us.
+`app/Actions/Fortify/**` and `app/Actions/Concerns/**` are exempt — Fortify's
+contracts call the first, and the second holds traits shared between actions,
+not use-cases themselves.
 
 ## Immutability
 

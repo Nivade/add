@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Execution\Exceptions;
+namespace App\Exceptions;
 
 use Illuminate\Contracts\Debug\ShouldntReport;
 use Illuminate\Http\JsonResponse;

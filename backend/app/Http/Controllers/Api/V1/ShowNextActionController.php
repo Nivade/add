@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Contracts\NextActionResolver;
 use App\Data\NextActionData;
 use App\Http\Controllers\Controller;
-use App\Support\Http\NullAnswer;
+use App\Http\Responses\NullAnswer;
 use App\Support\NextAction\ResolutionContext;
 use Illuminate\Http\Request;
 

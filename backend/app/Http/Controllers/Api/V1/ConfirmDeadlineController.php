@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Intentions\ConfirmDeadline;
-use App\Concerns\ResolvesOwned;
 use App\Data\IntentionData;
+use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Models\Intention;
 use Illuminate\Http\Request;

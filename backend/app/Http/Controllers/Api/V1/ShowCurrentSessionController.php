@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
+use App\Http\Responses\NullAnswer;
 use App\Models\ExecutionSession;
-use App\Support\Execution\RunningSession;
-use App\Support\Http\NullAnswer;
 use Illuminate\Http\Request;
 
 final class ShowCurrentSessionController extends Controller
@@ -17,10 +17,10 @@ final class ShowCurrentSessionController extends Controller
     {
         $user = $this->user($request);
 
-        $session = RunningSession::forUser($user);
+        $session = $user->runningSession()->getResults();
 
         return $session instanceof ExecutionSession
-            ? ExecutionStateData::of($session)
+            ? BuildExecutionState::run($session)
             : new NullAnswer;
     }
 }

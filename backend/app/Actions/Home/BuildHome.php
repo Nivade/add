@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Home;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Contracts\Appointment;
 use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
-use App\Data\ExecutionStateData;
 use App\Data\HomeData;
 use App\Data\IntentionData;
 use App\Data\ReminderData;
@@ -16,7 +16,6 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
-use App\Support\Execution\RunningSession;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,7 +34,7 @@ final class BuildHome
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $session = RunningSession::forUser($user);
+        $session = $user->runningSession()->getResults();
 
         $needsAttention = $this->open($user)
             ->awaitingClarification()
@@ -45,7 +44,7 @@ final class BuildHome
 
         return new HomeData(
             rightNow: $this->resolver->resolve($user, $context),
-            session: $session instanceof ExecutionSession ? ExecutionStateData::of($session) : null,
+            session: $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null,
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
             needsAttention: array_values($needsAttention

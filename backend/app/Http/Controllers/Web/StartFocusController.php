@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web;
 
 use App\Actions\Sessions\StartSession;
-use App\Concerns\ResolvesStartableStep;
+use App\Http\Controllers\Concerns\ResolvesStartableStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
 use Illuminate\Http\RedirectResponse;

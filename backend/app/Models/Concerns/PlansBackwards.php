@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Concerns;
+namespace App\Models\Concerns;
 
 use App\Enums\PlanRung;
 
