@@ -17,6 +17,6 @@ final class UpdateAiConsentController extends Controller
 
         UpdateAiConsent::run($user, $request->boolean('consented'));
 
-        return new AiConsentData(consented: $user->ai_consented_at !== null);
+        return new AiConsentData(consented: $user->hasConsentedToAi());
     }
 }

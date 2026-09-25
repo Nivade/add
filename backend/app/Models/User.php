@@ -54,6 +54,11 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    public function hasConsentedToAi(): bool
+    {
+        return $this->ai_consented_at !== null;
+    }
+
     /**
      * @return array<string, string>
      */

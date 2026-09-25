@@ -47,10 +47,10 @@ final class RunDecompositionEval
         $passed = 0;
 
         foreach ($corpus as $task) {
-            [$row, $result] = $this->score($task);
-            $rows[] = $row;
-            $scored[] = $result;
-            $passed += $result['violations'] === [] ? 1 : 0;
+            $scoredTask = $this->score($task);
+            $rows[] = $scoredTask['row'];
+            $scored[] = $scoredTask['result'];
+            $passed += $scoredTask['result']['violations'] === [] ? 1 : 0;
         }
 
         $command->table(['id', 'steps', 'first step (s)', 'violations'], $rows);
@@ -70,7 +70,7 @@ final class RunDecompositionEval
 
     /**
      * @param  array{id: string, shape: string, task: string}  $task
-     * @return array{0: list<string>, 1: array<string, mixed>}
+     * @return array{row: list<string>, result: array<string, mixed>}
      */
     private function score(array $task): array
     {
@@ -80,16 +80,16 @@ final class RunDecompositionEval
             $steps = $this->parser->parse($this->provider->complete($request)->payload);
         } catch (AiResponseInvalid $exception) {
             return [
-                [$task['id'], '—', '—', 'invalid response: '.$exception->getMessage()],
-                ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$exception->getMessage()]],
+                'row' => [$task['id'], '—', '—', 'invalid response: '.$exception->getMessage()],
+                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$exception->getMessage()]],
             ];
         }
 
         $violations = $this->parser->violations($steps);
 
         return [
-            [$task['id'], (string) count($steps), (string) $steps[0]->estimatedSeconds, implode('; ', $violations) ?: 'clean'],
-            [
+            'row' => [$task['id'], (string) count($steps), (string) $steps[0]->estimatedSeconds, implode('; ', $violations) ?: 'clean'],
+            'result' => [
                 'id' => $task['id'],
                 'shape' => $task['shape'],
                 'steps' => array_map(fn ($step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),

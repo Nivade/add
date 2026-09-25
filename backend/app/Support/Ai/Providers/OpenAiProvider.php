@@ -40,7 +40,7 @@ final class OpenAiProvider implements AiProvider
     {
         throw_unless($this->isAvailable(), AiUnavailable::class, 'OpenAI provider called without ai.openai.api_key configured.');
 
-        $this->guardRateLimit($request);
+        $this->guardRateLimit($request->userId);
 
         $model = (string) config('ai.openai.model');
 
@@ -77,11 +77,11 @@ final class OpenAiProvider implements AiProvider
     }
 
     /** laravel/ai does not throttle itself, so this is the only place a burst is stopped. Keyed per person so one burst cannot lock everyone else out. */
-    private function guardRateLimit(AiRequest $request): void
+    private function guardRateLimit(int $userId): void
     {
         $maxAttempts = (int) config('ai.openai.rate_limit.max_attempts');
         $decaySeconds = (int) config('ai.openai.rate_limit.decay_seconds');
-        $key = self::rateLimitKey($request->userId);
+        $key = self::rateLimitKey($userId);
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             throw new AiRateLimited("OpenAI provider rate limit exceeded ({$maxAttempts} calls per {$decaySeconds}s).");

@@ -14,7 +14,7 @@ final class ShowAiController extends Controller
     public function __invoke(Request $request): Response
     {
         return Inertia::render('settings/ai', [
-            'consented' => $request->user()->ai_consented_at !== null,
+            'consented' => $request->user()->hasConsentedToAi(),
         ]);
     }
 }

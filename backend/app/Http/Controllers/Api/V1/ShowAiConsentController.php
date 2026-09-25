@@ -12,6 +12,6 @@ final class ShowAiConsentController extends Controller
 {
     public function __invoke(Request $request): AiConsentData
     {
-        return new AiConsentData(consented: $this->user($request)->ai_consented_at !== null);
+        return new AiConsentData(consented: $this->user($request)->hasConsentedToAi());
     }
 }
