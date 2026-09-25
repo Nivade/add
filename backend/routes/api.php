@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\Api\V1\AdjustPlanController;
 use App\Http\Controllers\Api\V1\ClarifyIntentionController;
+use App\Http\Controllers\Api\V1\ClassifyPastedTextController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
@@ -68,6 +69,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('intentions/{intention}/recurrence', SetIntentionRecurrenceController::class)->name('intentions.recurrence');
     Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
+    Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

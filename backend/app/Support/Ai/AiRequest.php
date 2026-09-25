@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Ai;
 
 use App\Enums\Ai\AiOperation;
+use App\Support\Ai\Schemas\ClassifyIngestionSchema;
 use App\Support\Ai\Schemas\DecomposeIntentionSchema;
 use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Closure;
@@ -63,6 +64,20 @@ final readonly class AiRequest
             schema: DecomposeIntentionSchema::builder(),
             promptVersion: Prompts::SPLIT_STEP_VERSION,
             schemaVersion: DecomposeIntentionSchema::VERSION,
+            maxOutputTokens: self::maxOutputTokens(),
+            userId: $userId,
+        );
+    }
+
+    public static function classifyIngestion(int $userId, string $user): self
+    {
+        return new self(
+            operation: AiOperation::ClassifyIngestion,
+            system: Prompts::CLASSIFY_INGESTION,
+            user: $user,
+            schema: ClassifyIngestionSchema::builder(),
+            promptVersion: Prompts::CLASSIFY_INGESTION_VERSION,
+            schemaVersion: ClassifyIngestionSchema::VERSION,
             maxOutputTokens: self::maxOutputTokens(),
             userId: $userId,
         );
