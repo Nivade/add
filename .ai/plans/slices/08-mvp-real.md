@@ -123,9 +123,9 @@ prepare it but not finish it.
 **Done when** a push has arrived on a real device and its deep link opened the
 right appointment. Done against an Android emulator, not a physical device —
 no device is available for the foreseeable future, and Expo push behaves the
-same either way. The EAS project, its FCM V1 credentials and
-`mobile/google-services.json` (gitignored, per-account) are all set up; iOS
-stays unverified, no simulator was used.
+same either way. The EAS project, its FCM V1 credentials, and mobile's
+gitignored, per-account `google-services.json` are all set up; iOS stays
+unverified, no simulator was used.
 
 ## Phase 6 — progress that means something
 
