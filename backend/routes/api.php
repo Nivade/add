@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
+use App\Http\Controllers\Api\V1\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
 use App\Http\Controllers\Api\V1\RespondToWaitingForController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Api\V1\ShowOverwhelmedController;
 use App\Http\Controllers\Api\V1\SkipStepController;
 use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
+use App\Http\Controllers\Api\V1\StoreCommitmentController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
@@ -58,6 +60,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
     Route::post('waiting-fors', StoreWaitingForController::class)->name('waiting-fors.store');
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
+    Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
+    Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

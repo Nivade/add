@@ -28,6 +28,13 @@ inWords: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };
+export type CommitmentData = {
+id: string,
+description: string,
+provenance: CommitmentProvenance,
+confirmedAt: string | null,
+};
+export type CommitmentProvenance = 'user_task' | 'user_stated' | 'system_inferred';
 export type DeviceData = {
 id: string,
 platform: DevicePlatform,

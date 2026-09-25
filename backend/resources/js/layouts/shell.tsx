@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { CommitmentCapture } from '@/components/commitment-capture';
 import { QuickCapture } from '@/components/quick-capture';
 import { Rail } from '@/components/rail';
 import { UserMenu } from '@/components/user-menu';
@@ -41,6 +42,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     <div className="ml-auto flex items-center gap-3">
                         <QuickCapture />
                         <WaitingForCapture />
+                        <CommitmentCapture />
                         <UserMenu />
                     </div>
                 </header>

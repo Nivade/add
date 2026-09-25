@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
 use App\Http\Controllers\Web\DismissReminderController;
 use App\Http\Controllers\Web\PauseFocusController;
+use App\Http\Controllers\Web\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Web\RecordDistractionController;
 use App\Http\Controllers\Web\ReportStuckController;
 use App\Http\Controllers\Web\RespondToWaitingForController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Web\SkipStepController;
 use App\Http\Controllers\Web\StartFocusController;
 use App\Http\Controllers\Web\StopFocusController;
 use App\Http\Controllers\Web\StoreCaptureController;
+use App\Http\Controllers\Web\StoreCommitmentController;
 use App\Http\Controllers\Web\StoreWaitingForController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +43,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
     Route::post('waiting-fors', StoreWaitingForController::class)->name('waiting-fors.store');
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
+    Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
+    Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');
