@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
+use App\Http\Controllers\Api\V1\RespondToWaitingForController;
 use App\Http\Controllers\Api\V1\ResumeSessionController;
 use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowAppointmentController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Api\V1\StoreCaptureController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
+use App\Http\Controllers\Api\V1\StoreWaitingForController;
 use App\Http\Controllers\Api\V1\UpdateAiConsentController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +56,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
     Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
+    Route::post('waiting-fors', StoreWaitingForController::class)->name('waiting-fors.store');
+    Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

@@ -1,4 +1,4 @@
-import type { HomeData, IntentionData } from '@add/shared';
+import type { HomeData, NeedsAttentionData } from '@add/shared';
 import { restCountLine } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
@@ -9,25 +9,26 @@ import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
+import waitingFors from '@/routes/waiting-fors';
 
-function Clarify({ intention }: { intention: IntentionData }) {
-    const fieldId = `clarify-${intention.id}`;
+function Clarify({ item }: { item: NeedsAttentionData }) {
+    const fieldId = `clarify-${item.id}`;
 
     return (
         <Form
-            {...intentions.clarification.form(intention.id)}
+            {...intentions.clarification.form(item.id)}
             options={{ preserveScroll: true }}
             resetOnSuccess
             className="space-y-2"
         >
             {({ errors, processing }) => (
                 <>
-                    <p>{intention.title}</p>
+                    <p>{item.title}</p>
                     <label
                         htmlFor={fieldId}
                         className="text-muted-foreground block"
                     >
-                        {intention.clarifyingQuestion}
+                        {item.clarifyingQuestion}
                     </label>
                     <div className="flex flex-wrap items-baseline gap-3">
                         <input
@@ -56,6 +57,47 @@ function Clarify({ intention }: { intention: IntentionData }) {
                 </>
             )}
         </Form>
+    );
+}
+
+const waitingForResponses = [
+    { value: 'wait_longer', label: 'Wait longer' },
+    { value: 'follow_up', label: 'Follow up' },
+    { value: 'receive', label: 'Mark received' },
+    { value: 'cancel', label: 'Cancel' },
+] as const;
+
+function WaitingFor({ item }: { item: NeedsAttentionData }) {
+    return (
+        <div className="space-y-2">
+            <p>
+                {item.title}
+                {item.detail && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        · {item.detail}
+                    </span>
+                )}
+            </p>
+            <div className="flex flex-wrap gap-3">
+                {waitingForResponses.map(({ value, label }) => (
+                    <Form
+                        key={value}
+                        {...waitingFors.respond.form(item.id)}
+                        transform={(data) => ({ ...data, response: value })}
+                        options={{ preserveScroll: true }}
+                    >
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                        >
+                            {label}
+                        </Button>
+                    </Form>
+                ))}
+            </div>
+        </div>
     );
 }
 
@@ -187,9 +229,13 @@ export default function Home({ home: data }: { home: HomeData }) {
                 {needsAttention.length > 0 && (
                     <Band label="Needs attention">
                         <ul className="space-y-6">
-                            {needsAttention.map((intention) => (
-                                <li key={intention.id}>
-                                    <Clarify intention={intention} />
+                            {needsAttention.map((item) => (
+                                <li key={item.id}>
+                                    {item.kind === 'waiting_for' ? (
+                                        <WaitingFor item={item} />
+                                    ) : (
+                                        <Clarify item={item} />
+                                    )}
                                 </li>
                             ))}
                         </ul>

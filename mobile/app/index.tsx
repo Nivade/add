@@ -1,4 +1,4 @@
-import type { HomeData, IntentionData } from '@add/shared';
+import type { HomeData, NeedsAttentionData, WaitingForResponse } from '@add/shared';
 import { formatEstimate, restCountLine } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -12,17 +12,17 @@ import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { field, theme } from '@/theme';
 
 function Clarify({
-  intention,
+  item,
   onAnswered,
 }: {
-  intention: IntentionData;
+  item: NeedsAttentionData;
   onAnswered: () => void;
 }) {
   const { token } = useSession();
   const [answer, setAnswer] = useState('');
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const question = intention.clarifyingQuestion ?? '';
+  const question = item.clarifyingQuestion ?? '';
 
   const send = async () => {
     const text = answer.trim();
@@ -35,7 +35,7 @@ function Clarify({
     setProblem(null);
 
     try {
-      await api.clarify(token as string, intention.id, text);
+      await api.clarify(token as string, item.id, text);
       onAnswered();
     } catch (error) {
       setProblem(
@@ -50,7 +50,7 @@ function Clarify({
 
   return (
     <View style={styles.clarify}>
-      <Text style={styles.line}>{intention.title}</Text>
+      <Text style={styles.line}>{item.title}</Text>
       <Meta>{question}</Meta>
       <TextInput
         style={styles.input}
@@ -66,6 +66,54 @@ function Clarify({
         disabled={saving}
         onPress={() => void send()}
       />
+    </View>
+  );
+}
+
+const waitingForResponses: { value: WaitingForResponse; label: string }[] = [
+  { value: 'wait_longer', label: 'Wait longer' },
+  { value: 'follow_up', label: 'Follow up' },
+  { value: 'receive', label: 'Mark received' },
+  { value: 'cancel', label: 'Cancel' },
+];
+
+function WaitingFor({
+  item,
+  onResponded,
+}: {
+  item: NeedsAttentionData;
+  onResponded: () => void;
+}) {
+  const { token } = useSession();
+  const [saving, setSaving] = useState(false);
+
+  const respond = async (response: WaitingForResponse) => {
+    setSaving(true);
+
+    try {
+      await api.respondToWaitingFor(token as string, item.id, response);
+      onResponded();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <View style={styles.clarify}>
+      <Text style={styles.line}>
+        {item.title}
+        {item.detail ? ` · ${item.detail}` : ''}
+      </Text>
+      <View style={styles.responses}>
+        {waitingForResponses.map(({ value, label }) => (
+          <Button
+            key={value}
+            label={label}
+            disabled={saving}
+            onPress={() => void respond(value)}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -174,13 +222,21 @@ export default function Home() {
 
       {needsAttention.length > 0 && (
         <Band label="Needs attention">
-          {needsAttention.map((intention) => (
-            <Clarify
-              key={intention.id}
-              intention={intention}
-              onAnswered={() => void reload()}
-            />
-          ))}
+          {needsAttention.map((item) =>
+            item.kind === 'waiting_for' ? (
+              <WaitingFor
+                key={item.id}
+                item={item}
+                onResponded={() => void reload()}
+              />
+            ) : (
+              <Clarify
+                key={item.id}
+                item={item}
+                onAnswered={() => void reload()}
+              />
+            ),
+          )}
         </Band>
       )}
 
@@ -191,6 +247,10 @@ export default function Home() {
           label="Capture a thought"
           tone="primary"
           onPress={() => router.push('/capture')}
+        />
+        <Button
+          label="Waiting for"
+          onPress={() => router.push('/waiting-for')}
         />
         <Button
           label="I'm overwhelmed"
@@ -208,4 +268,5 @@ const styles = StyleSheet.create({
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
+  responses: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(1) },
 });

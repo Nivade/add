@@ -55,7 +55,7 @@ rightNow: NextActionData | null,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
 reminder: ReminderData | null,
-needsAttention: IntentionData[],
+needsAttention: NeedsAttentionData[],
 restCount: number,
 };
 export type IntentionData = {
@@ -68,6 +68,14 @@ deadlineInferred: boolean,
 clarifyingQuestion: string | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
+export type NeedsAttentionData = {
+kind: NeedsAttentionKind,
+id: string,
+title: string,
+detail: string | null,
+clarifyingQuestion: string | null,
+};
+export type NeedsAttentionKind = 'intention' | 'waiting_for';
 export type NextActionData = {
 step: StepData,
 intention: IntentionData,
@@ -111,3 +119,11 @@ generated: boolean,
 };
 export type StepStatus = 'pending' | 'done' | 'skipped';
 export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';
+export type WaitingForData = {
+id: string,
+subject: string,
+note: string | null,
+status: WaitingForStatus,
+};
+export type WaitingForResponse = 'wait_longer' | 'follow_up' | 'cancel' | 'receive';
+export type WaitingForStatus = 'waiting' | 'followed_up' | 'cancelled' | 'received';
