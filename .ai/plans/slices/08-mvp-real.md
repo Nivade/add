@@ -1,6 +1,6 @@
 # Slice 8 — make the MVP real
 
-**State:** building, 2026-09-23 · [the slice table](../executive-function-os.md#slices)
+**State:** done, 2026-09-25 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §5, §7, §18, §22, §28, §30–§32,
 §37, §39. Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`,
@@ -121,7 +121,11 @@ This phase needs a person holding a phone or running a simulator; an agent can
 prepare it but not finish it.
 
 **Done when** a push has arrived on a real device and its deep link opened the
-right appointment.
+right appointment. Done against an Android emulator, not a physical device —
+no device is available for the foreseeable future, and Expo push behaves the
+same either way. The EAS project, its FCM V1 credentials and
+`mobile/google-services.json` (gitignored, per-account) are all set up; iOS
+stays unverified, no simulator was used.
 
 ## Phase 6 — progress that means something
 
@@ -134,7 +138,9 @@ estimate in the intention, decided in code. Stated without praise, never as a
 streak, and absent rather than zero when it does not apply.
 
 **Done when** both lines appear on finishing and neither appears where it would
-be false.
+be false. `ProgressLines` no longer exists as its own class — the earlier
+Support/Concerns refactor folded it into `BuildExecutionState::progressLines()`
+— so these two lines were added there instead.
 
 ## Finishing
 
@@ -146,3 +152,9 @@ spine's row and `.ai/RESUME.md` together.
 
 Named preparation items, step editing and location triggers stay out: each needs
 a model the spec defers, and slice 9 is where the first of them earns one.
+
+Phase 1's done-when — a real feed puts an appointment on home, a reminder
+fires, removing the feed orphans nothing — is unverified end to end: it needs
+a person's real private ICS URL, which an agent cannot supply. The code
+shipped and is covered by `SyncCalendarTest`; only the live-feed round trip
+is open.
