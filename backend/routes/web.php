@@ -23,6 +23,8 @@ use App\Http\Controllers\Web\StartFocusController;
 use App\Http\Controllers\Web\StopFocusController;
 use App\Http\Controllers\Web\StoreCaptureController;
 use App\Http\Controllers\Web\StoreCommitmentController;
+use App\Http\Controllers\Web\StoreFutureReminderController;
+use App\Http\Controllers\Web\StoreRelativeFutureReminderController;
 use App\Http\Controllers\Web\StoreWaitingForController;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +47,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
     Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
+    Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
+    Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

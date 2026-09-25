@@ -57,6 +57,13 @@ intention: IntentionData,
 progress: string[],
 elapsed: string,
 };
+export type FutureReminderData = {
+id: string,
+message: string,
+triggerAt: string | null,
+calendarEventId: string | null,
+offsetSeconds: number | null,
+};
 export type HomeData = {
 rightNow: NextActionData | null,
 session: ExecutionStateData | null,

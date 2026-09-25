@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { CommitmentCapture } from '@/components/commitment-capture';
+import { FutureReminderCapture } from '@/components/future-reminder-capture';
 import { QuickCapture } from '@/components/quick-capture';
 import { Rail } from '@/components/rail';
 import { UserMenu } from '@/components/user-menu';
@@ -43,6 +44,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                         <QuickCapture />
                         <WaitingForCapture />
                         <CommitmentCapture />
+                        <FutureReminderCapture />
                         <UserMenu />
                     </div>
                 </header>

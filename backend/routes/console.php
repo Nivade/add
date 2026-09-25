@@ -12,4 +12,5 @@ Artisan::command('inspire', function () {
 
 // Preparation is a minutes-scale thing, so the check is cheap and frequent.
 Schedule::command('reminders:dispatch')->everyMinute()->withoutOverlapping();
+Schedule::command('future-reminders:dispatch')->everyMinute()->withoutOverlapping();
 Schedule::command('calendar:sync')->hourly()->withoutOverlapping();

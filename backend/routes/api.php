@@ -26,6 +26,8 @@ use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
 use App\Http\Controllers\Api\V1\StoreCommitmentController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
+use App\Http\Controllers\Api\V1\StoreFutureReminderController;
+use App\Http\Controllers\Api\V1\StoreRelativeFutureReminderController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
 use App\Http\Controllers\Api\V1\StoreWaitingForController;
@@ -62,6 +64,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
     Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
+    Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
+    Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

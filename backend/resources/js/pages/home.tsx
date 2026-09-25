@@ -7,6 +7,7 @@ import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
+import calendarEvents from '@/routes/calendar-events';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
 import waitingFors from '@/routes/waiting-fors';
@@ -222,6 +223,37 @@ export default function Home({ home: data }: { home: HomeData }) {
                         )}
                         {comingUp.plan && (
                             <BackwardsPlan plan={comingUp.plan} />
+                        )}
+                        {comingUp.kind === 'calendar_event' && (
+                            <Form
+                                {...calendarEvents.futureReminder.form(
+                                    comingUp.id,
+                                )}
+                                options={{ preserveScroll: true }}
+                                resetOnSuccess
+                                className="mt-3 flex flex-wrap items-center gap-3"
+                            >
+                                <input
+                                    name="message"
+                                    placeholder="What should future you hear?"
+                                    aria-label="What should future you hear"
+                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 min-w-0 flex-1 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                />
+                                <input
+                                    type="number"
+                                    name="offset_minutes"
+                                    defaultValue={30}
+                                    aria-label="Minutes after"
+                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-20 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                />
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                >
+                                    Remind me after
+                                </Button>
+                            </Form>
                         )}
                     </Band>
                 )}
