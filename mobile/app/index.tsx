@@ -196,6 +196,7 @@ export default function Home() {
           label="I'm overwhelmed"
           onPress={() => router.push('/overwhelmed')}
         />
+        <Button label="Settings" onPress={() => router.push('/settings')} />
         <Button label="Sign out" onPress={() => void signOut()} />
       </View>
     </Screen>

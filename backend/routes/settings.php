@@ -6,7 +6,9 @@ use App\Http\Controllers\Settings\ConnectCalendarController;
 use App\Http\Controllers\Settings\DisconnectCalendarController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Settings\ShowAiController;
 use App\Http\Controllers\Settings\ShowCalendarController;
+use App\Http\Controllers\Settings\UpdateAiConsentController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('calendar.update');
     Route::delete('settings/calendar', DisconnectCalendarController::class)->name('calendar.destroy');
+
+    Route::get('settings/ai', ShowAiController::class)->name('ai.edit');
+    Route::put('settings/ai', UpdateAiConsentController::class)->name('ai.update');
 });
 
 Route::get('.well-known/passkey-endpoints', fn () => response()->json([

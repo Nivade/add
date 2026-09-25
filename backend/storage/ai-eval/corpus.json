@@ -1,0 +1,47 @@
+[
+    {
+        "id": "passport",
+        "shape": "admin-dread",
+        "task": "Renew my passport before it expires next month."
+    },
+    {
+        "id": "insurance-call",
+        "shape": "admin-dread",
+        "task": "Call the insurance company about the rejected claim."
+    },
+    {
+        "id": "blog-post",
+        "shape": "vague-creative",
+        "task": "Write the blog post I promised about our deploy pipeline."
+    },
+    {
+        "id": "kitchen",
+        "shape": "physical-mess",
+        "task": "Clean the kitchen. There are dishes from two days ago."
+    },
+    {
+        "id": "garage",
+        "shape": "physical-mess",
+        "task": "Clear out the garage so the car fits."
+    },
+    {
+        "id": "decline-invite",
+        "shape": "social-cost",
+        "task": "Tell my colleague I can't take on the side project after all."
+    },
+    {
+        "id": "get-fit",
+        "shape": "long-horizon",
+        "task": "Get back into exercising."
+    },
+    {
+        "id": "stale-branch",
+        "shape": "abandoned",
+        "task": "Finish the half-done refactor branch from last month."
+    },
+    {
+        "id": "vague-work",
+        "shape": "undefined",
+        "task": "Work on the thing."
+    }
+]

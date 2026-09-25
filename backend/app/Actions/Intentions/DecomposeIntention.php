@@ -38,7 +38,7 @@ final class DecomposeIntention
         }
 
         $steps = $this->parser->parse(
-            $this->provider->complete(AiRequest::decomposeIntention($this->describe($intention)))->payload
+            $this->provider->complete(AiRequest::decomposeIntention($intention->user_id, $this->describe($intention)))->payload
         );
 
         foreach ($this->parser->violations($steps) as $violation) {

@@ -27,6 +27,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $password
  * @property string $timezone
  * @property string|null $calendar_feed_url
+ * @property Carbon|null $ai_consented_at
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
@@ -53,6 +54,11 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    public function hasConsentedToAi(): bool
+    {
+        return $this->ai_consented_at !== null;
+    }
+
     /**
      * @return array<string, string>
      */
@@ -63,6 +69,7 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'calendar_feed_url' => 'encrypted',
+            'ai_consented_at' => 'datetime',
         ];
     }
 }

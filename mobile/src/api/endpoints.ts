@@ -1,5 +1,6 @@
 import type {
   AccessTokenData,
+  AiConsentData,
   AppointmentKind,
   CaptureData,
   CaptureSource,
@@ -42,6 +43,16 @@ export const api = {
     }),
 
   home: (token: string) => request<HomeData>('/home', { token }),
+
+  aiConsent: (token: string) =>
+    request<AiConsentData>('/ai-consent', { token }),
+
+  updateAiConsent: (token: string, consented: boolean) =>
+    request<AiConsentData>('/ai-consent', {
+      method: 'PATCH',
+      token,
+      body: { consented },
+    }),
 
   nextAction: (token: string) =>
     request<NextActionData | null>('/next-action', { token }),

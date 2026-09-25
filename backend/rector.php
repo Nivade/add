@@ -6,6 +6,7 @@ use Nvade\Devtools\Rector\Preset;
 use Rector\CodeQuality\Rector\Catch_\ThrowWithPreviousExceptionRector;
 use RectorLaravel\Rector\FuncCall\AppToResolveRector;
 use RectorLaravel\Rector\If_\ThrowIfRector;
+use RectorLaravel\Rector\StaticCall\CarbonToDateFacadeRector;
 use RectorLaravel\Set\LaravelSetList;
 
 return Preset::laravel(__DIR__)
@@ -37,4 +38,8 @@ return Preset::laravel(__DIR__)
         ThrowWithPreviousExceptionRector::class,
         // One container helper. `app()` is already the one in use.
         AppToResolveRector::class,
+        // Larastan types every `datetime` cast as Illuminate\Support\Carbon regardless
+        // of Date::use(CarbonImmutable::class) in AppServiceProvider, so Date::now()
+        // fails stan on assignment where Carbon::now() does not.
+        CarbonToDateFacadeRector::class,
     ]);

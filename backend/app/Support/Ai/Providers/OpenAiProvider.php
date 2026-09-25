@@ -12,7 +12,6 @@ use App\Support\Ai\Exceptions\AiRateLimited;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\StructuredAgent;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use LogicException;
@@ -32,11 +31,16 @@ final class OpenAiProvider implements AiProvider
         return filled(config('ai.openai.api_key'));
     }
 
+    public static function rateLimitKey(int $userId): string
+    {
+        return self::RATE_LIMIT_KEY.'-'.$userId;
+    }
+
     public function complete(AiRequest $request): AiResponseData
     {
         throw_unless($this->isAvailable(), AiUnavailable::class, 'OpenAI provider called without ai.openai.api_key configured.');
 
-        $this->guardRateLimit();
+        $this->guardRateLimit($request->userId);
 
         $model = (string) config('ai.openai.model');
 
@@ -55,7 +59,7 @@ final class OpenAiProvider implements AiProvider
                 timeout: (int) config('ai.openai.timeout'),
             );
         } catch (Throwable $exception) {
-            throw new AiProviderRequestFailed('OpenAI request failed: '.Str::limit($exception->getMessage(), 500), previous: $exception);
+            throw new AiProviderRequestFailed('OpenAI request failed: '.$exception::class, previous: $exception);
         }
 
         if (! $response instanceof StructuredAgentResponse) {
@@ -72,16 +76,17 @@ final class OpenAiProvider implements AiProvider
         );
     }
 
-    /** laravel/ai does not throttle itself, so this is the only place a burst is stopped. */
-    private function guardRateLimit(): void
+    /** laravel/ai does not throttle itself, so this is the only place a burst is stopped. Keyed per person so one burst cannot lock everyone else out. */
+    private function guardRateLimit(int $userId): void
     {
         $maxAttempts = (int) config('ai.openai.rate_limit.max_attempts');
         $decaySeconds = (int) config('ai.openai.rate_limit.decay_seconds');
+        $key = self::rateLimitKey($userId);
 
-        if (RateLimiter::tooManyAttempts(self::RATE_LIMIT_KEY, $maxAttempts)) {
+        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             throw new AiRateLimited("OpenAI provider rate limit exceeded ({$maxAttempts} calls per {$decaySeconds}s).");
         }
 
-        RateLimiter::hit(self::RATE_LIMIT_KEY, $decaySeconds);
+        RateLimiter::hit($key, $decaySeconds);
     }
 }

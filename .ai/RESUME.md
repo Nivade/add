@@ -15,8 +15,13 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8, phase 3** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
+**Slice 8, phase 5** of [`08-mvp-real.md`](plans/slices/08-mvp-real.md). Phase
 1's done-when asks for a real feed, which only a person holding one can supply.
+Phase 4 is done: per-user AI consent (a column, a web settings page, a mobile
+settings screen, the same `ai-consent` endpoint behind both), the two provider
+findings are fixed, and `ai:eval` has scored a first baseline in
+`backend/storage/ai-eval/baseline.json`. Phase 5 needs a person holding a phone
+or running a simulator, which an agent cannot supply either.
 Phase 2 of the product is now slice 9 and stays a paragraph until 8 is done.
 The hardening pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md)
 carries what it settled and what it deliberately left open.
