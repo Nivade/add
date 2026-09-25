@@ -38,7 +38,7 @@ final class SplitStep
         }
 
         $smaller = $this->parser->parse(
-            $this->provider->complete(AiRequest::splitStep($this->describe($step)))->payload
+            $this->provider->complete(AiRequest::splitStep($step->intention->user_id, $this->describe($step)))->payload
         );
 
         return DB::transaction(function () use ($step, $smaller): Collection {

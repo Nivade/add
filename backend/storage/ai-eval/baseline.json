@@ -1,0 +1,267 @@
+{
+    "scored_at": "2026-09-24T13:52:37+00:00",
+    "model": "gpt-5.6-luna",
+    "tasks": [
+        {
+            "id": "passport",
+            "shape": "admin-dread",
+            "steps": [
+                {
+                    "title": "Open the passport renewal website",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Place your passport beside the computer",
+                    "estimated_seconds": 20
+                },
+                {
+                    "title": "Enter your passport expiry date",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Upload one passport photo",
+                    "estimated_seconds": 180
+                },
+                {
+                    "title": "Pay the renewal fee",
+                    "estimated_seconds": 120
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "insurance-call",
+            "shape": "admin-dread",
+            "steps": [
+                {
+                    "title": "Open the phone app",
+                    "estimated_seconds": 10
+                },
+                {
+                    "title": "Tap the insurance company\u2019s saved contact",
+                    "estimated_seconds": 15
+                },
+                {
+                    "title": "Press the call button",
+                    "estimated_seconds": 5
+                },
+                {
+                    "title": "Read the claim number from the rejection message",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Tell the representative the claim was rejected",
+                    "estimated_seconds": 30
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "blog-post",
+            "shape": "vague-creative",
+            "steps": [
+                {
+                    "title": "Open a blank document",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Type the title \u201cHow Our Deploy Pipeline Works\u201d",
+                    "estimated_seconds": 45
+                },
+                {
+                    "title": "Write three bullet points about the pipeline",
+                    "estimated_seconds": 180
+                },
+                {
+                    "title": "Write one sentence beneath the first bullet",
+                    "estimated_seconds": 120
+                },
+                {
+                    "title": "Write one sentence beneath the second bullet",
+                    "estimated_seconds": 120
+                },
+                {
+                    "title": "Write one sentence beneath the third bullet",
+                    "estimated_seconds": 120
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "kitchen",
+            "shape": "physical-mess",
+            "steps": [
+                {
+                    "title": "Stand up from your chair",
+                    "estimated_seconds": 10
+                },
+                {
+                    "title": "Carry one dirty dish to the sink",
+                    "estimated_seconds": 20
+                },
+                {
+                    "title": "Place the remaining dirty dishes beside the sink",
+                    "estimated_seconds": 120
+                },
+                {
+                    "title": "Run hot water into the sink",
+                    "estimated_seconds": 20
+                },
+                {
+                    "title": "Wash one plate",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Wash one cup",
+                    "estimated_seconds": 45
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "garage",
+            "shape": "physical-mess",
+            "steps": [
+                {
+                    "title": "Stand up and walk to the garage door",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Open the garage door",
+                    "estimated_seconds": 20
+                },
+                {
+                    "title": "Carry one loose item out of the car space",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Place that item beside the garage wall",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Carry the next loose item out of the car space",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Move the car into the cleared space",
+                    "estimated_seconds": 180
+                }
+            ],
+            "violations": [
+                "step 1 contains \"and\""
+            ]
+        },
+        {
+            "id": "decline-invite",
+            "shape": "social-cost",
+            "steps": [
+                {
+                    "title": "Open your colleague\u2019s chat or email thread.",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Type \u201cI\u2019m sorry, but I can\u2019t take on the side project after all.\u201d",
+                    "estimated_seconds": 45
+                },
+                {
+                    "title": "Add \u201cThanks for understanding.\u201d",
+                    "estimated_seconds": 15
+                },
+                {
+                    "title": "Send the message.",
+                    "estimated_seconds": 5
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "get-fit",
+            "shape": "long-horizon",
+            "steps": [
+                {
+                    "title": "Put on your exercise shoes",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Stand beside your chair",
+                    "estimated_seconds": 15
+                },
+                {
+                    "title": "Walk to the nearest open space",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "March in place",
+                    "estimated_seconds": 60
+                },
+                {
+                    "title": "Drink one glass of water",
+                    "estimated_seconds": 60
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "stale-branch",
+            "shape": "abandoned",
+            "steps": [
+                {
+                    "title": "Open the repository in your code editor",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Open the version-control panel",
+                    "estimated_seconds": 20
+                },
+                {
+                    "title": "Read the branch name shown in the panel",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Open the first file marked as changed",
+                    "estimated_seconds": 45
+                },
+                {
+                    "title": "Run the project test command from the editor",
+                    "estimated_seconds": 120
+                },
+                {
+                    "title": "Read the first reported failure",
+                    "estimated_seconds": 60
+                }
+            ],
+            "violations": []
+        },
+        {
+            "id": "vague-work",
+            "shape": "undefined",
+            "steps": [
+                {
+                    "title": "Put both feet on the floor",
+                    "estimated_seconds": 10
+                },
+                {
+                    "title": "Pick up your work device",
+                    "estimated_seconds": 10
+                },
+                {
+                    "title": "Open the thing you intend to work on",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Place your hands on the keyboard",
+                    "estimated_seconds": 10
+                },
+                {
+                    "title": "Read the first visible line",
+                    "estimated_seconds": 30
+                },
+                {
+                    "title": "Type one sentence",
+                    "estimated_seconds": 120
+                }
+            ],
+            "violations": []
+        }
+    ]
+}

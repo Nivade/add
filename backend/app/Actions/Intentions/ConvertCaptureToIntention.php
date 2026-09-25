@@ -43,6 +43,7 @@ final class ConvertCaptureToIntention
 
         $parsed = $this->parser->parse(
             $this->provider->complete(AiRequest::parseCapture(
+                $capture->user_id,
                 $this->describe($this->unclaimed($capture->body, $extracted), $now)
             ))->payload,
             $timezone,

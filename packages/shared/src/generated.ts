@@ -2,6 +2,9 @@ export type AccessTokenData = {
 token: string,
 deviceName: string,
 };
+export type AiConsentData = {
+consented: boolean,
+};
 export type AppointmentKind = 'intention' | 'calendar_event';
 export type BackwardsPlanData = {
 kind: AppointmentKind,

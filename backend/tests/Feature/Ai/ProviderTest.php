@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use App\Contracts\AiProvider;
 use App\Enums\Ai\AiOperation;
+use App\Models\User;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiFixtureMissing;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\Prompts;
 use App\Support\Ai\Providers\CannedAiProvider;
+use App\Support\Ai\Providers\ConsentGatedAiProvider;
 use App\Support\Ai\Providers\FakeAiProvider;
 use App\Support\Ai\Providers\FixtureAiProvider;
 use App\Support\Ai\Providers\LoggingAiProvider;
@@ -23,6 +25,7 @@ function aiRequest(
     AiOperation $operation = AiOperation::ParseCapture,
     string $user = 'clean the apartment before Saturday',
     string $promptVersion = Prompts::PARSE_CAPTURE_VERSION,
+    int $userId = 1,
 ): AiRequest {
     return new AiRequest(
         operation: $operation,
@@ -32,6 +35,7 @@ function aiRequest(
         promptVersion: $promptVersion,
         schemaVersion: ParseCaptureSchema::VERSION,
         maxOutputTokens: 900,
+        userId: $userId,
     );
 }
 
@@ -44,10 +48,22 @@ it('resolves the provider named by the driver config', function (string $driver,
     ['canned', CannedAiProvider::class],
     ['fixture', FixtureAiProvider::class],
     ['fake', FakeAiProvider::class],
-    ['openai', OpenAiProvider::class],
+    ['openai', ConsentGatedAiProvider::class],
     ['null', NullAiProvider::class],
     ['nonsense', NullAiProvider::class],
 ]);
+
+it('gates the openai driver on per-user consent, and reaches OpenAI underneath', function (): void {
+    config()->set('ai.driver', 'openai');
+
+    $provider = aiProvider();
+
+    expect($provider)->toBeInstanceOf(ConsentGatedAiProvider::class);
+
+    if ($provider instanceof ConsentGatedAiProvider) {
+        expect($provider->inner)->toBeInstanceOf(OpenAiProvider::class);
+    }
+});
 
 it('refuses to answer when AI is disabled rather than returning an empty payload', function (): void {
     expect(fn () => (new NullAiProvider)->complete(aiRequest()))
@@ -140,6 +156,23 @@ it('logs the shape of every call and none of the text', function (): void {
                 && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'passport');
         })
         ->once();
+});
+
+it('refuses to reach a person\'s words off the machine without their consent', function (): void {
+    $user = User::factory()->create(['ai_consented_at' => null]);
+    $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
+
+    expect(fn () => (new ConsentGatedAiProvider($inner))->complete(aiRequest(userId: $user->id)))
+        ->toThrow(AiUnavailable::class);
+});
+
+it('reaches the inner driver once consent is on record', function (): void {
+    $user = User::factory()->create(['ai_consented_at' => now()]);
+    $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
+
+    $answer = (new ConsentGatedAiProvider($inner))->complete(aiRequest(userId: $user->id));
+
+    expect($answer->payload)->toBe(['title' => 'Renew my passport']);
 });
 
 it('records the failed call and lets the failure through', function (): void {

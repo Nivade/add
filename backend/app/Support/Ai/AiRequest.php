@@ -22,9 +22,10 @@ final readonly class AiRequest
         public string $promptVersion,
         public string $schemaVersion,
         public int $maxOutputTokens,
+        public int $userId,
     ) {}
 
-    public static function parseCapture(string $user): self
+    public static function parseCapture(int $userId, string $user): self
     {
         return new self(
             operation: AiOperation::ParseCapture,
@@ -34,10 +35,11 @@ final readonly class AiRequest
             promptVersion: Prompts::PARSE_CAPTURE_VERSION,
             schemaVersion: ParseCaptureSchema::VERSION,
             maxOutputTokens: self::maxOutputTokens(),
+            userId: $userId,
         );
     }
 
-    public static function decomposeIntention(string $user): self
+    public static function decomposeIntention(int $userId, string $user): self
     {
         return new self(
             operation: AiOperation::DecomposeIntention,
@@ -47,11 +49,12 @@ final readonly class AiRequest
             promptVersion: Prompts::DECOMPOSE_VERSION,
             schemaVersion: DecomposeIntentionSchema::VERSION,
             maxOutputTokens: self::maxOutputTokens(),
+            userId: $userId,
         );
     }
 
     /** The answer has the same shape as a decomposition, so it shares that schema and its parser. */
-    public static function splitStep(string $user): self
+    public static function splitStep(int $userId, string $user): self
     {
         return new self(
             operation: AiOperation::SplitStep,
@@ -61,6 +64,7 @@ final readonly class AiRequest
             promptVersion: Prompts::SPLIT_STEP_VERSION,
             schemaVersion: DecomposeIntentionSchema::VERSION,
             maxOutputTokens: self::maxOutputTokens(),
+            userId: $userId,
         );
     }
 

@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\AiProvider;
 use App\Support\Ai\Providers\CannedAiProvider;
+use App\Support\Ai\Providers\ConsentGatedAiProvider;
 use App\Support\Ai\Providers\FakeAiProvider;
 use App\Support\Ai\Providers\FixtureAiProvider;
 use App\Support\Ai\Providers\LoggingAiProvider;
@@ -19,7 +20,8 @@ final class AiServiceProvider extends ServiceProvider
     {
         // Singleton so a test can push answers into the fake and the action resolves the same one.
         $this->app->singleton(AiProvider::class, fn (): AiProvider => new LoggingAiProvider(match (config('ai.driver')) {
-            'openai' => new OpenAiProvider,
+            // Choosing this driver is the deployment's consent; a person's own consent is still gated per call.
+            'openai' => new ConsentGatedAiProvider(new OpenAiProvider),
             'canned' => new CannedAiProvider,
             'fixture' => new FixtureAiProvider,
             'fake' => new FakeAiProvider,

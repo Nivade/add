@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
+import { edit as editAi } from '@/routes/ai';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit as editCalendar } from '@/routes/calendar';
 import { edit } from '@/routes/profile';
@@ -25,6 +26,11 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Calendar',
         href: editCalendar(),
+        icon: null,
+    },
+    {
+        title: 'AI',
+        href: editAi(),
         icon: null,
     },
     {

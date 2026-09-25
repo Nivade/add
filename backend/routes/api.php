@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\PauseSessionController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
 use App\Http\Controllers\Api\V1\ResumeSessionController;
+use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
 use App\Http\Controllers\Api\V1\ShowHomeController;
 use App\Http\Controllers\Api\V1\ShowNextActionController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Api\V1\StoreCaptureController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
+use App\Http\Controllers\Api\V1\UpdateAiConsentController;
 use Illuminate\Support\Facades\Route;
 
 // The device has no session to authenticate with yet, so this is the one route outside the guard.
@@ -33,6 +35,9 @@ Route::post('v1/tokens', StoreTokenController::class)
 Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function (): void {
     Route::delete('tokens/current', DestroyTokenController::class)->name('tokens.destroy');
     Route::post('devices', StoreDeviceController::class)->name('devices.store');
+
+    Route::get('ai-consent', ShowAiConsentController::class)->name('ai-consent.show');
+    Route::patch('ai-consent', UpdateAiConsentController::class)->name('ai-consent.update');
 
     Route::get('home', ShowHomeController::class)->name('home.show');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
