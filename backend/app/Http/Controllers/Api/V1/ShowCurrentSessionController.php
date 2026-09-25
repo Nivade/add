@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\Actions\Sessions\BuildExecutionState;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
+use App\Http\Responses\NullAnswer;
 use App\Models\ExecutionSession;
-use App\Support\Http\NullAnswer;
 use Illuminate\Http\Request;
 
 final class ShowCurrentSessionController extends Controller

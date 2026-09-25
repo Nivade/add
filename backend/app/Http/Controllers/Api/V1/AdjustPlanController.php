@@ -9,9 +9,9 @@ use App\Concerns\ResolvesOwned;
 use App\Data\BackwardsPlanData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdjustPlanRequest;
+use App\Http\Responses\NullAnswer;
 use App\Models\CalendarEvent;
 use App\Models\Intention;
-use App\Support\Http\NullAnswer;
 use App\Support\Time\BackwardsPlan;
 
 final class AdjustPlanController extends Controller
