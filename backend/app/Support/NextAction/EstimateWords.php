@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Support\Time;
+namespace App\Support\NextAction;
 
 /** Mirrors `formatEstimate` in packages/shared: one estimate must not read two ways on one screen. */
 final class EstimateWords
