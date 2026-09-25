@@ -87,3 +87,7 @@ it read — the web has no tray to leave it sitting in. Push waits for slice 7.
 Travel time is assumed per intention and corrected there. Remembering a
 correction across appointments needs somewhere for "this place" to live, which
 is the calendar half of this slice, so it waits for it.
+
+§23 also asks notifications be "configurable." Nothing here builds that —
+per-user AI consent (slice 8 phase 4) is the only setting that exists.
+Frequency or quiet-hours control is unscheduled.
