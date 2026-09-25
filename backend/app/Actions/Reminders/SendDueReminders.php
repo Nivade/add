@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Reminders;
 
-use App\Concerns\QueuesPerUser;
+use App\Actions\Concerns\QueuesPerUser;
 use App\Contracts\Appointment;
 use App\Data\BackwardsPlanData;
 use App\Models\Reminder;

@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\CompleteStep;
-use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
+use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
 use Illuminate\Http\Request;

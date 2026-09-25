@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\StoresDatesInUtc;
 use App\Enums\ExecutionEventType;
+use App\Models\Concerns\StoresDatesInUtc;
 use Database\Factories\ExecutionEventFactory;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;

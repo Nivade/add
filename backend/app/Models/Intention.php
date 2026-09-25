@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\PlansBackwards;
-use App\Concerns\StoresDatesInUtc;
 use App\Contracts\Appointment;
 use App\Enums\AppointmentKind;
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
+use App\Models\Concerns\PlansBackwards;
+use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\IntentionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;

@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\ReportStuck;
-use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
+use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReportStuckRequest;
 use App\Models\ExecutionSession;

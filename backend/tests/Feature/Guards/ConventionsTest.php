@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Concerns\StoresDatesInUtc;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
+use App\Models\Concerns\StoresDatesInUtc;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;

@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\StartSession;
-use App\Concerns\ResolvesStartableStep;
+use App\Http\Controllers\Concerns\ResolvesStartableStep;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
 use Symfony\Component\HttpFoundation\Response;

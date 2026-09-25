@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Concerns;
+namespace App\Models\Concerns;
 
 /** A date written on the person's clock is stored as the instant it is, not as its wall clock. */
 trait StoresDatesInUtc

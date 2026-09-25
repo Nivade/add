@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Concerns\StoresDatesInUtc;
 use App\Data\Ai\ParsedStepData;
 use App\Enums\StepStatus;
+use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\StepFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
