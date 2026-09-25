@@ -194,6 +194,49 @@ it('counts progress rather than writing it', function (): void {
         ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
 });
 
+it('says it started this after putting it off, counted from when the step was first offered', function (): void {
+    $intention = kitchen(1);
+    $step = $intention->steps()->sole();
+    $step->update(['skip_count' => 1, 'created_at' => CarbonImmutable::now()->subDays(11)]);
+
+    $session = StartSession::run($intention->user, $step->fresh());
+
+    expect(BuildExecutionState::run($session)->progress)
+        ->toContain('You started this after putting it off for 11 days.');
+});
+
+it('never claims a step was avoided when it was never skipped', function (): void {
+    $intention = kitchen(1);
+    $step = $intention->steps()->sole();
+    $step->update(['created_at' => CarbonImmutable::now()->subDays(11)]);
+
+    $session = StartSession::run($intention->user, $step->fresh());
+
+    expect(BuildExecutionState::run($session)->progress)
+        ->not->toContain('You started this after putting it off for 11 days.');
+});
+
+it('says it finished the hardest part once the largest estimate in the intention is done', function (): void {
+    $intention = kitchen(3);
+    $hardest = $intention->steps()->reorder('estimated_seconds', 'desc')->firstOrFail();
+
+    $session = StartSession::run($intention->user, $hardest);
+
+    expect(BuildExecutionState::run($session)->progress)->not->toContain('You finished the hardest part.');
+
+    CompleteStep::run($session);
+
+    expect(BuildExecutionState::run($session->refresh())->progress)->toContain('You finished the hardest part.');
+});
+
+it('never claims the hardest part is finished while it is still pending', function (): void {
+    $session = started();
+
+    CompleteStep::run($session);
+
+    expect(BuildExecutionState::run($session->refresh())->progress)->not->toContain('You finished the hardest part.');
+});
+
 it('picks the newest of two running sessions for one person, breaking a tie on id', function (): void {
     $user = User::factory()->create();
     $startedAt = CarbonImmutable::now();

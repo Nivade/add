@@ -12,6 +12,7 @@ use App\Models\ExecutionSession;
 use App\Models\Step;
 use Carbon\CarbonInterval;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** What execution mode renders: one step, the intention it belongs to, and progress nobody wrote by hand. */
@@ -58,7 +59,55 @@ final class BuildExecutionState
             $lines[] = $today.' '.($today === 1 ? 'thing' : 'things').' finished today.';
         }
 
+        $avoided = $this->avoidedLine($session);
+
+        if ($avoided !== null) {
+            $lines[] = $avoided;
+        }
+
+        if ($this->finishedHardestPart($steps)) {
+            $lines[] = 'You finished the hardest part.';
+        }
+
         return $lines;
+    }
+
+    /** §18: "you started this after avoiding it for 11 days", counted from when the current step was first offered. */
+    private function avoidedLine(ExecutionSession $session): ?string
+    {
+        $step = $session->currentStep;
+
+        if (! $step instanceof Step || $step->skip_count === 0 || $step->created_at === null) {
+            return null;
+        }
+
+        $days = (int) round($step->created_at->diffInDays($session->user->now()));
+
+        if ($days < 1) {
+            return null;
+        }
+
+        return 'You started this after putting it off for '.$days.' '.($days === 1 ? 'day' : 'days').'.';
+    }
+
+    /**
+     * §18: hardest is the largest estimate in the intention; a tie needs every largest step done.
+     *
+     * @param  Collection<int, Step>  $steps
+     */
+    private function finishedHardestPart(Collection $steps): bool
+    {
+        $estimated = $steps->filter(fn (Step $step): bool => $step->estimated_seconds !== null);
+
+        if ($estimated->isEmpty()) {
+            return false;
+        }
+
+        $hardest = $estimated->max('estimated_seconds');
+
+        return $estimated
+            ->where('estimated_seconds', $hardest)
+            ->every(fn (Step $step): bool => $step->status === StepStatus::Done);
     }
 
     private function doneToday(ExecutionSession $session): int
