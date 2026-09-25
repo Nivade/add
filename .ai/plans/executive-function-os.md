@@ -171,6 +171,7 @@ what moving a plan to `done` requires.
 | 7 | [Mobile](slices/07-mobile.md) — Expo joins the workspace, Sanctum, touch-first capture | §3, §30 | done |
 | 8 | [Make the MVP real](slices/08-mvp-real.md) — real calendar, live model behind consent, a device, the journey under a browser | §18, §22, §28, §32, §39 | done |
 | — | [Agent tooling](agent-tooling.md) — code-review then simplify, gated at merge; vendored skills restored from the lock | — | done |
+| — | [Support and Concerns boundaries](archive/support-and-concerns-boundaries.md) — where Support, Concerns and Exceptions decisions land, and the guard tests that hold the line | — | done |
 | 9 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | next after 8, paragraph below |
 | 10 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
 

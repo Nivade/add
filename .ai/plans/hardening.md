@@ -229,6 +229,6 @@ answers.
 Confirming a generated step's wording needs step editing, which nothing has
 asked for yet. Overwhelm mode does not label a suggested step: its `why` lines
 already say what the step costs, and a second label is the noise that screen
-exists to remove. Per-user AI consent needs a column and a screen, and waits for
-the first real user. Encrypting notification payloads waits for ingestion, where
-the threat model is written.
+exists to remove. Per-user AI consent is built — slice 8 phase 4 added the
+column and both a web and mobile settings screen. Encrypting notification
+payloads waits for ingestion, where the threat model is written.

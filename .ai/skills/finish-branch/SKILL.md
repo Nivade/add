@@ -1,6 +1,6 @@
 ---
 name: finish-branch
-description: Run the fixed sequence that turns a branch into an open PR — code-review, then simplify, then the local suite, then push. Use when the person says a branch is ready to merge, done, or asks to finish the branch or open the PR. Does not merge; that stays the person's call after CI.
+description: Run the fixed sequence that turns a branch into an open PR — code-review, then simplify, then reconcile plan state, then the local suite, then push. Use when the person says a branch is ready to merge, done, or asks to finish the branch or open the PR. Does not merge; that stays the person's call after CI.
 ---
 
 The person's word that a branch is done triggers this, not any commit or file condition. Runs `code-review` then `simplify`, in that order, exactly once each — `merge-gate` (`.ai/hooks/merge-gate.py`) refuses `gh pr merge` on this branch until both are recorded against its current fork point, so skipping a step here only delays it to the merge attempt.
@@ -11,8 +11,9 @@ The person's word that a branch is done triggers this, not any commit or file co
 2. **Pin the fork point once.** `git fetch origin main` then `git merge-base origin/main HEAD`. Reuse this value for both sub-skills; recomputing mid-run risks the two skills disagreeing about the diff.
 3. **`code-review`**, with the fork point as the fixed point. Present its findings to the person, apply the ones they accept, and commit the fixes.
 4. **`simplify`**, on `git diff <fork>...HEAD` — the whole branch, not only step 3's commits. Apply and commit.
-5. **The local suite**: `npm run test`, `npm run stan`, `npm run lint`, `composer refactor:check`. Fix or report failures before continuing.
-6. **Push and open the PR** (`gh pr create`, or update the existing one). No attribution lines.
+5. **Reconcile plan state.** Does this branch's diff execute a plan under `.ai/plans/` — a slice file, or a root-level one-off like `hardening.md` or an archived refactor pass? If so, flip its `**State:**` header (and the spine row, for a slice) before opening the PR, not after — `update-resume`'s "A plan this session finished" section and `slice-workflow`'s archive checklist carry how. A plan outside the spine table is the easiest to forget, because nothing else gates it.
+6. **The local suite**: `npm run test`, `npm run stan`, `npm run lint`, `composer refactor:check`. Fix or report failures before continuing.
+7. **Push and open the PR** (`gh pr create`, or update the existing one). No attribution lines.
 
 Stop here. Merging is the person's call, after CI — this skill never runs `gh pr merge`.
 
