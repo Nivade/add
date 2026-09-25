@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web;
 
-use App\Data\ExecutionStateData;
+use App\Actions\Sessions\BuildExecutionState;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
 use Illuminate\Http\RedirectResponse;
@@ -24,6 +24,6 @@ final class ShowFocusController extends Controller
             return to_route('home');
         }
 
-        return inertia('focus', ['state' => ExecutionStateData::of($session)]);
+        return inertia('focus', ['state' => BuildExecutionState::run($session)]);
     }
 }

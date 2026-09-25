@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\SkipCurrentStep;
 use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
@@ -17,6 +18,6 @@ final class SkipStepController extends Controller
 
     public function __invoke(Request $request, ExecutionSession $session): ExecutionStateData
     {
-        return ExecutionStateData::of(SkipCurrentStep::run($this->owned($request, $session)));
+        return BuildExecutionState::run(SkipCurrentStep::run($this->owned($request, $session)));
     }
 }

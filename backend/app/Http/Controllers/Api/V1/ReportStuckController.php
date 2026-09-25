@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\ReportStuck;
 use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
@@ -17,7 +18,7 @@ final class ReportStuckController extends Controller
 
     public function __invoke(ReportStuckRequest $request, ExecutionSession $session): ExecutionStateData
     {
-        return ExecutionStateData::of(ReportStuck::run(
+        return BuildExecutionState::run(ReportStuck::run(
             $this->owned($request, $session),
             $request->reason(),
             $request->note(),

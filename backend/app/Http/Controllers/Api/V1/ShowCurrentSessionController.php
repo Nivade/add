@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Controller;
 use App\Models\ExecutionSession;
@@ -19,7 +20,7 @@ final class ShowCurrentSessionController extends Controller
         $session = $user->runningSession()->getResults();
 
         return $session instanceof ExecutionSession
-            ? ExecutionStateData::of($session)
+            ? BuildExecutionState::run($session)
             : new NullAnswer;
     }
 }

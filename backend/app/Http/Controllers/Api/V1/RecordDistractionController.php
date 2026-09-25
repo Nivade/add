@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\RecordDistraction;
 use App\Concerns\ResolvesOwned;
 use App\Data\ExecutionStateData;
@@ -17,6 +18,6 @@ final class RecordDistractionController extends Controller
 
     public function __invoke(Request $request, ExecutionSession $session): ExecutionStateData
     {
-        return ExecutionStateData::of(RecordDistraction::run($this->owned($request, $session)));
+        return BuildExecutionState::run(RecordDistraction::run($this->owned($request, $session)));
     }
 }

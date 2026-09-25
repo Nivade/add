@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\AdvanceSession;
+use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\PauseSession;
 use App\Actions\Sessions\RecordDistraction;
@@ -10,7 +11,6 @@ use App\Actions\Sessions\ResumeSession;
 use App\Actions\Sessions\SkipCurrentStep;
 use App\Actions\Sessions\StartSession;
 use App\Actions\Sessions\StopSession;
-use App\Data\ExecutionStateData;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
@@ -190,7 +190,7 @@ it('counts progress rather than writing it', function (): void {
 
     CompleteStep::run($session);
 
-    expect(ExecutionStateData::of($session->refresh())->progress)
+    expect(BuildExecutionState::run($session->refresh())->progress)
         ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
 });
 

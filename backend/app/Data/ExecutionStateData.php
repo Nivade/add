@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-use App\Models\ExecutionSession;
-use App\Support\Execution\ElapsedWords;
-use App\Support\Execution\ProgressLines;
 use Illuminate\Http\Request;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
@@ -23,16 +20,6 @@ class ExecutionStateData extends Data
         public array $progress,
         public string $elapsed,
     ) {}
-
-    public static function of(ExecutionSession $session): self
-    {
-        return new self(
-            ExecutionSessionData::from($session->refresh()->load(['currentStep', 'intention.steps', 'user'])),
-            IntentionData::from($session->intention),
-            ProgressLines::for($session),
-            ElapsedWords::for($session),
-        );
-    }
 
     /** Every control but Start mutates something that already exists, so 201 would be a lie. */
     protected function calculateResponseStatus(Request $request): int
