@@ -31,6 +31,11 @@ final class OpenAiProvider implements AiProvider
         return filled(config('ai.openai.api_key'));
     }
 
+    public static function rateLimitKey(int $userId): string
+    {
+        return self::RATE_LIMIT_KEY.'-'.$userId;
+    }
+
     public function complete(AiRequest $request): AiResponseData
     {
         throw_unless($this->isAvailable(), AiUnavailable::class, 'OpenAI provider called without ai.openai.api_key configured.');
@@ -54,7 +59,7 @@ final class OpenAiProvider implements AiProvider
                 timeout: (int) config('ai.openai.timeout'),
             );
         } catch (Throwable $exception) {
-            throw new AiProviderRequestFailed('OpenAI request failed: '.$exception::class);
+            throw new AiProviderRequestFailed('OpenAI request failed: '.$exception::class, previous: $exception);
         }
 
         if (! $response instanceof StructuredAgentResponse) {
@@ -76,7 +81,7 @@ final class OpenAiProvider implements AiProvider
     {
         $maxAttempts = (int) config('ai.openai.rate_limit.max_attempts');
         $decaySeconds = (int) config('ai.openai.rate_limit.decay_seconds');
-        $key = self::RATE_LIMIT_KEY.'-'.$request->userId;
+        $key = self::rateLimitKey($request->userId);
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             throw new AiRateLimited("OpenAI provider rate limit exceeded ({$maxAttempts} calls per {$decaySeconds}s).");

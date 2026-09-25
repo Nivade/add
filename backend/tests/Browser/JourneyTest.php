@@ -12,16 +12,27 @@ beforeEach(function (): void {
     app()->forgetInstance(AiProvider::class);
 });
 
-/** What the browser's own focus is on, read the same way a screen reader would. */
+/**
+ * What the browser's own focus is on, read the same way a screen reader would —
+ * and, per §31, that focus is not just present but rendered: `outline-none` with
+ * no `:focus-visible` ring would pass a check that only reads activeElement.
+ */
 function focusedDescriptor(mixed $page): string
 {
-    return (string) $page->script(<<<'JS'
+    $result = json_decode((string) $page->script(<<<'JS_WRAP'
         (function () {
             var el = document.activeElement;
-            if (!el) { return ''; }
-            return el.getAttribute('aria-label') || (el.textContent || '').trim();
+            if (!el) { return JSON.stringify({label: '', visible: false}); }
+            var style = getComputedStyle(el);
+            var visible = style.boxShadow !== 'none' || style.outlineStyle !== 'none';
+            var label = el.getAttribute('aria-label') || (el.textContent || '').trim();
+            return JSON.stringify({label: label, visible: visible});
         })()
-    JS);
+    JS_WRAP), associative: true, flags: JSON_THROW_ON_ERROR);
+
+    expect($result['visible'])->toBeTrue('Focus landed on "'.$result['label'].'" with no visible indicator.');
+
+    return $result['label'];
 }
 
 it('walks the §39 journey by keyboard, with focus visible at every control', function (): void {

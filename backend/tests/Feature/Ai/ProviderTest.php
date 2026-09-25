@@ -20,6 +20,7 @@ use App\Support\Ai\Providers\OpenAiProvider;
 use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 function aiRequest(
     AiOperation $operation = AiOperation::ParseCapture,
@@ -156,6 +157,14 @@ it('logs the shape of every call and none of the text', function (): void {
                 && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'passport');
         })
         ->once();
+});
+
+it('rate-limits the openai driver per user, so one burst cannot lock another person out', function (): void {
+    config()->set('ai.openai.rate_limit.max_attempts', 1);
+    RateLimiter::hit(OpenAiProvider::rateLimitKey(1), 60);
+
+    expect(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey(1), 1))->toBeTrue()
+        ->and(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey(2), 1))->toBeFalse();
 });
 
 it('refuses to reach a person\'s words off the machine without their consent', function (): void {
