@@ -25,8 +25,9 @@ the step is.
 
 `ResolutionContext` is a value object — `now`, and later the minutes available
 and the place. It is **not** the spec's `Context` model (§4), which stays
-deferred; this is the parameter §26 asks for, carrying only what exists. Naming
-them apart now avoids a rename when the model lands.
+deferred and is recorded, unscheduled, under slice 10; this is the parameter
+§26 asks for, carrying only what exists. Naming them apart now avoids a rename
+if the model ever lands.
 
 `now` carries the person's timezone, the way the capture pipeline already reads
 one. A deadline comparator that plans backwards in UTC for someone who is not in
@@ -110,9 +111,10 @@ position, open session, skip history, intention age.
 
 | Not yet | Arrives with |
 | --- | --- |
-| appointments, energy and time budget | slice 6 |
+| appointment awareness | done, slice 6 — `ResolutionContext.appointment` feeds the backwards plan, not a comparator |
+| energy and time budget | unscheduled — no slice claims this input; slice 6 shipped without it despite an earlier version of this table saying otherwise |
 | dependencies, blocked-ness | slice 9 (waiting-for) |
-| location, available tools | the deferred `Context` model |
+| location, available tools | unscheduled — the `Context` model has no slice; recorded under slice 10 |
 
 Each one enters as a comparator inserted into the chain, not as a new parameter
 on `resolve()`. That is what keeps the interface small while the behaviour grows.

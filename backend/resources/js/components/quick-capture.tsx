@@ -1,13 +1,7 @@
 import { Form } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { captureFieldClassName, CaptureDialog } from '@/components/capture-dialog';
 import { store } from '@/routes/captures';
 
 function isTyping(target: EventTarget | null): boolean {
@@ -42,41 +36,36 @@ export function QuickCapture() {
     }, []);
 
     return (
-        <>
-            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-                Capture
-                <kbd className="text-muted-foreground ml-1 text-xs">c</kbd>
-            </Button>
-
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>What's on your mind?</DialogTitle>
-                        <DialogDescription>
-                            Write it however it comes out. Sorting it out is the
-                            app's job.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <Form
-                        {...store.form()}
-                        options={{ preserveScroll: true }}
-                        onSuccess={() => setOpen(false)}
-                        resetOnSuccess
-                        className="flex flex-col gap-3"
-                    >
-                        <textarea
-                            name="body"
-                            rows={3}
-                            autoFocus
-                            aria-label="What's on your mind?"
-                            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
-                        />
-                        <Button type="submit" className="self-end">
-                            Capture
-                        </Button>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-        </>
+        <CaptureDialog
+            trigger={
+                <>
+                    Capture
+                    <kbd className="text-muted-foreground ml-1 text-xs">c</kbd>
+                </>
+            }
+            title="What's on your mind?"
+            description="Write it however it comes out. Sorting it out is the app's job."
+            open={open}
+            onOpenChange={setOpen}
+        >
+            <Form
+                {...store.form()}
+                options={{ preserveScroll: true }}
+                onSuccess={() => setOpen(false)}
+                resetOnSuccess
+                className="flex flex-col gap-3"
+            >
+                <textarea
+                    name="body"
+                    rows={3}
+                    autoFocus
+                    aria-label="What's on your mind?"
+                    className={captureFieldClassName}
+                />
+                <Button type="submit" className="self-end">
+                    Capture
+                </Button>
+            </Form>
+        </CaptureDialog>
     );
 }

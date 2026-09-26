@@ -33,6 +33,11 @@ spec wins and first-move is not consulted.
 uses laravel-data instead — same reasoning as first-move: one DTO pattern, and
 the TypeScript for both frontends is generated from it rather than hand-kept.
 
+§24 suggests `Domain/{Users,Tasks,Intentions,...}` folders. This repo groups by
+kind instead — `app/{Actions,Data,Contracts,Support,Models}` — because
+`app/Actions/**` is already the unit slice work is organised around; a domain
+layer on top of it would be a second axis this codebase's size does not earn.
+
 ## Domain model (MVP)
 
 Naming deviates from the spec in one place: the spec's **Next Action** is the
@@ -100,6 +105,8 @@ between the two frontends.
 
 ## Deterministic vs AI
 
+*Spec §26, §27.*
+
 Deterministic, always: next-action selection, time arithmetic (deadline
 extraction, leave-by, backwards planning), session state machine, progress
 counting, reminder scheduling, overwhelm reduction. These must be explainable and testable, and the
@@ -139,6 +146,7 @@ breaks one, and each is a review question on the slice's own diff.
 
 | From | Standing requirement |
 | --- | --- |
+| §2.1, §2.2, §2.4 | One thing to think about, never a list; execution mode shows one step; a notification earns its interruption. |
 | §2.3, §35 | No shame copy, no failure words in enums, UI or notifications. |
 | §2.5, §21 | Anything inferred is labelled as inferred and confirmable; nothing consequential happens silently. |
 | §9, §26 | Every recommendation carries a `why` built from its ranking inputs, never a model's prose. |
@@ -172,17 +180,13 @@ what moving a plan to `done` requires.
 | 8 | [Make the MVP real](slices/08-mvp-real.md) — real calendar, live model behind consent, a device, the journey under a browser | §18, §22, §28, §32, §39 | done |
 | — | [Agent tooling](agent-tooling.md) — code-review then simplify, gated at merge; vendored skills restored from the lock | — | done |
 | — | [Support and Concerns boundaries](archive/support-and-concerns-boundaries.md) — where Support, Concerns and Exceptions decisions land, and the guard tests that hold the line | — | done |
-| 9 | Phase 2 — waiting-for, commitments, ingestion, future-self, body doubling | §15, §17, §19–§21, §33 | next after 8, paragraph below |
-| 10 | Phase 3 — companion, location awareness, bill and subscription detection | §34 | recorded only |
+| 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, an ingestion port | §15, §17, §19–§21, §33 | done |
+| 10 | Phase 3 — companion, location awareness, bill/subscription detection, full ingestion (email, documents, receipts, bank/gov correspondence), the `Context` model, Friend body doubling | §4, §9, §17, §19, §34 | recorded only |
 
-**Slice 9, phase 2.** Waiting-for with its four responses, commitments with the
-three provenance levels kept distinct, email and document ingestion behind a
-modular port with no provider coupling, future-self reminders, recurring steps,
-body doubling starting with solo. Ingestion is last on purpose: it is where the
-privacy surface grows fastest (risk 3), and it is worthless until the core
-journey is polished.
-
-**Slice 10** is recorded so it is not reinvented, not planned.
+**Slice 10** is recorded so it is not reinvented, not planned. §17's Friend mode
+and the `Context` model (§4, §9's location/available-tools inputs) have no
+other slice claiming them, so they are recorded here rather than left
+unmentioned; §19's port lands in slice 9, the sources it reads do not.
 
 ## Measuring it
 
@@ -190,3 +194,7 @@ journey is polished.
 captured intentions that get finished, time from capture to first action, share
 of sessions that make real progress, recovery rate after distraction. A person
 using this well should spend less time in it over time.
+
+No slice computes any of this yet. `execution_events`, skip history and session
+outcomes already carry the raw material; the aggregation layer is unscheduled,
+not deferred by decision — recorded here so it is not mistaken for done.

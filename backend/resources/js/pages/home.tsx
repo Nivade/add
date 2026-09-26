@@ -1,5 +1,5 @@
-import type { HomeData, IntentionData } from '@add/shared';
-import { restCountLine } from '@add/shared';
+import type { HomeData, NeedsAttentionData } from '@add/shared';
+import { restCountLine, waitingForResponses } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
@@ -7,27 +7,29 @@ import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
+import calendarEvents from '@/routes/calendar-events';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
+import waitingFors from '@/routes/waiting-fors';
 
-function Clarify({ intention }: { intention: IntentionData }) {
-    const fieldId = `clarify-${intention.id}`;
+function Clarify({ item }: { item: NeedsAttentionData }) {
+    const fieldId = `clarify-${item.id}`;
 
     return (
         <Form
-            {...intentions.clarification.form(intention.id)}
+            {...intentions.clarification.form(item.id)}
             options={{ preserveScroll: true }}
             resetOnSuccess
             className="space-y-2"
         >
             {({ errors, processing }) => (
                 <>
-                    <p>{intention.title}</p>
+                    <p>{item.title}</p>
                     <label
                         htmlFor={fieldId}
                         className="text-muted-foreground block"
                     >
-                        {intention.clarifyingQuestion}
+                        {item.clarifyingQuestion}
                     </label>
                     <div className="flex flex-wrap items-baseline gap-3">
                         <input
@@ -56,6 +58,40 @@ function Clarify({ intention }: { intention: IntentionData }) {
                 </>
             )}
         </Form>
+    );
+}
+
+function WaitingFor({ item }: { item: NeedsAttentionData }) {
+    return (
+        <div className="space-y-2">
+            <p>
+                {item.title}
+                {item.detail && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        · {item.detail}
+                    </span>
+                )}
+            </p>
+            <div className="flex flex-wrap gap-3">
+                {waitingForResponses.map(({ value, label }) => (
+                    <Form
+                        key={value}
+                        {...waitingFors.respond.form(item.id)}
+                        transform={(data) => ({ ...data, response: value })}
+                        options={{ preserveScroll: true }}
+                    >
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                        >
+                            {label}
+                        </Button>
+                    </Form>
+                ))}
+            </div>
+        </div>
     );
 }
 
@@ -181,15 +217,50 @@ export default function Home({ home: data }: { home: HomeData }) {
                         {comingUp.plan && (
                             <BackwardsPlan plan={comingUp.plan} />
                         )}
+                        {comingUp.kind === 'calendar_event' && (
+                            <Form
+                                {...calendarEvents.futureReminder.form(
+                                    comingUp.id,
+                                )}
+                                options={{ preserveScroll: true }}
+                                resetOnSuccess
+                                className="mt-3 flex flex-wrap items-center gap-3"
+                            >
+                                <input
+                                    name="message"
+                                    placeholder="What should future you hear?"
+                                    aria-label="What should future you hear"
+                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 min-w-0 flex-1 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                />
+                                <input
+                                    type="number"
+                                    name="offset_minutes"
+                                    defaultValue={30}
+                                    aria-label="Minutes after"
+                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-20 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                />
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                >
+                                    Remind me after
+                                </Button>
+                            </Form>
+                        )}
                     </Band>
                 )}
 
                 {needsAttention.length > 0 && (
                     <Band label="Needs attention">
                         <ul className="space-y-6">
-                            {needsAttention.map((intention) => (
-                                <li key={intention.id}>
-                                    <Clarify intention={intention} />
+                            {needsAttention.map((item) => (
+                                <li key={item.id}>
+                                    {item.kind === 'waiting_for' ? (
+                                        <WaitingFor item={item} />
+                                    ) : (
+                                        <Clarify item={item} />
+                                    )}
                                 </li>
                             ))}
                         </ul>

@@ -6,6 +6,7 @@ use App\Providers\AiServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\CalendarServiceProvider;
 use App\Providers\FortifyServiceProvider;
+use App\Providers\IngestionServiceProvider;
 use App\Providers\TelescopeServiceProvider;
 use App\Providers\TypeScriptTransformerServiceProvider;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -16,6 +17,7 @@ return array_values(array_filter([
     AppServiceProvider::class,
     CalendarServiceProvider::class,
     FortifyServiceProvider::class,
+    IngestionServiceProvider::class,
     // Extends a require-dev package; absent under `composer install --no-dev`.
     class_exists(TypeScriptTransformerApplicationServiceProvider::class)
         ? TypeScriptTransformerServiceProvider::class

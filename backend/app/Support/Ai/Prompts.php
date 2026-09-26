@@ -13,6 +13,8 @@ final class Prompts
 
     public const string SPLIT_STEP_VERSION = '1';
 
+    public const string CLASSIFY_INGESTION_VERSION = '1';
+
     public const string PARSE_CAPTURE = <<<'PROMPT'
         You read one raw thought someone with ADHD dumped into an app, and turn it into an intention.
 
@@ -66,5 +68,24 @@ final class Prompts
         1. Pick up one thing from the table. (20s)
         2. Put it where it belongs. (40s)
         3. Pick up the next thing. (20s)
+        PROMPT;
+
+    public const string CLASSIFY_INGESTION = <<<'PROMPT'
+        Someone pasted in text from something they received — a letter, an email, a notice. You decide whether it needs action from them, for someone with ADHD who cannot afford to read everything twice.
+
+        Rules:
+        - actionable is true only when a real deadline, renewal, payment or reply is named. A newsletter, receipt for something already done, or purely informational notice is not actionable.
+        - title is the thing itself, in a few words ("Car insurance renewal"), only when actionable. Null otherwise.
+        - why is the one line that explains it ("Policy expires October 14"), only when actionable. Null otherwise.
+        - deadline_at is a real date named in the text, with the matching UTC offset. Null when no date is named, even if actionable.
+        - estimated_seconds is a rough guess at how long dealing with it takes a person sitting down to it now. Null when actionable is false.
+
+        Example:
+        "Your car insurance policy expires on 14 October. Renew online or call us."
+        -> actionable true, title "Car insurance renewal", why "Policy expires 14 October", deadline_at 14 October, estimated_seconds 600.
+
+        Example:
+        "Thanks for your recent purchase. Your receipt is attached."
+        -> actionable false, title null, why null, deadline_at null, estimated_seconds null.
         PROMPT;
 }

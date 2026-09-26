@@ -1,7 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
+import { CommitmentCapture } from '@/components/commitment-capture';
+import { FutureReminderCapture } from '@/components/future-reminder-capture';
 import { QuickCapture } from '@/components/quick-capture';
 import { Rail } from '@/components/rail';
 import { UserMenu } from '@/components/user-menu';
+import { WaitingForCapture } from '@/components/waiting-for-capture';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { focus, home } from '@/routes';
 
@@ -39,6 +42,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
                     <div className="ml-auto flex items-center gap-3">
                         <QuickCapture />
+                        <WaitingForCapture />
+                        <CommitmentCapture />
+                        <FutureReminderCapture />
                         <UserMenu />
                     </div>
                 </header>

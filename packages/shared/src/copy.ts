@@ -1,4 +1,4 @@
-import type { PlanRung, StuckReason } from './generated';
+import type { PlanRung, StuckReason, WaitingForResponse } from './generated';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
@@ -24,4 +24,11 @@ export const stuckReasons: { value: StuckReason; label: string }[] = [
     { value: 'tired', label: "I'm tired" },
     { value: 'dont_want_to', label: "I don't want to do it" },
     { value: 'something_else', label: 'Something else' },
+];
+
+export const waitingForResponses: { value: WaitingForResponse; label: string }[] = [
+    { value: 'wait_longer', label: 'Wait longer' },
+    { value: 'follow_up', label: 'Follow up' },
+    { value: 'receive', label: 'Mark received' },
+    { value: 'cancel', label: 'Cancel' },
 ];

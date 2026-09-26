@@ -11,7 +11,7 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class HomeData extends Data
 {
-    /** @param  list<IntentionData>  $needsAttention */
+    /** @param  list<NeedsAttentionData>  $needsAttention */
     public function __construct(
         public ?NextActionData $rightNow,
         public ?ExecutionStateData $session,

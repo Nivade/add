@@ -14,6 +14,8 @@ import type {
   OverwhelmedData,
   PlanRung,
   StuckReason,
+  WaitingForData,
+  WaitingForResponse,
 } from '@add/shared';
 import { request } from './client';
 
@@ -113,5 +115,23 @@ export const api = {
       method: 'POST',
       token,
       body: { reason },
+    }),
+
+  createWaitingFor: (token: string, subject: string, note: string) =>
+    request<WaitingForData>('/waiting-fors', {
+      method: 'POST',
+      token,
+      body: { subject, note },
+    }),
+
+  respondToWaitingFor: (
+    token: string,
+    waitingForId: string,
+    response: WaitingForResponse,
+  ) =>
+    request<WaitingForData>(`/waiting-fors/${waitingForId}/respond`, {
+      method: 'POST',
+      token,
+      body: { response },
     }),
 };
