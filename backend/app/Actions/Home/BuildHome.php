@@ -20,6 +20,7 @@ use App\Notifications\AppointmentReminder;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Home asks one question per band and answers each with one thing, or a count. */
@@ -46,45 +47,40 @@ final class BuildHome
             ->limit(self::NEEDS_ATTENTION_LIMIT)
             ->get();
 
-        $staleWaitingFor = $this->staleWaitingFor($user, $context->now);
+        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderBy('updated_at')->get();
+        $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $context->now);
+        $waitingForsShown = $staleWaitingFor instanceof WaitingFor ? 1 : 0;
 
-        $needsAttention = $clarifications
-            ->map(fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention))
-            ->all();
+        $needsAttention = $clarifications->map(
+            fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention)
+        );
 
         if ($staleWaitingFor instanceof WaitingFor) {
-            $needsAttention[] = NeedsAttentionData::forWaitingFor($staleWaitingFor);
+            $needsAttention = $needsAttention->push(NeedsAttentionData::forWaitingFor($staleWaitingFor));
         }
-
-        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->count();
 
         return new HomeData(
             rightNow: $this->resolver->resolve($user, $context),
             session: $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null,
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
-            needsAttention: array_values($needsAttention),
-            restCount: $this->restCount($user, $clarifications->count(), $openWaitingFors, $staleWaitingFor),
+            needsAttention: array_values($needsAttention->all()),
+            restCount: ($this->open($user)->count() - $clarifications->count())
+                + ($openWaitingFors->count() - $waitingForsShown),
         );
     }
 
-    /** Everything open, minus whatever the needsAttention band already shows. */
-    private function restCount(User $user, int $clarificationsShown, int $openWaitingFors, ?WaitingFor $staleWaitingFor): int
+    /**
+     * At most one, the same one-thing-at-a-time rule the clarifying-question slot already follows.
+     * `updated_at` is the last time it was touched, by creation or by a response — the one clock this needs.
+     *
+     * @param  Collection<int, WaitingFor>  $openWaitingFors
+     */
+    private function staleWaitingFor(Collection $openWaitingFors, CarbonImmutable $now): ?WaitingFor
     {
-        $waitingForsShown = $staleWaitingFor instanceof WaitingFor ? 1 : 0;
+        $threshold = $now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS);
 
-        return ($this->open($user)->count() - $clarificationsShown)
-            + ($openWaitingFors - $waitingForsShown);
-    }
-
-    /** At most one, the same one-thing-at-a-time rule the clarifying-question slot already follows. */
-    private function staleWaitingFor(User $user, CarbonImmutable $now): ?WaitingFor
-    {
-        return WaitingFor::query()
-            ->where('user_id', $user->id)
-            ->stale($now, self::WAITING_FOR_STALE_AFTER_DAYS)
-            ->oldest('updated_at')
-            ->first();
+        return $openWaitingFors->first(fn (WaitingFor $waitingFor): bool => $waitingFor->updated_at !== null && $waitingFor->updated_at->lte($threshold));
     }
 
     /** The band stands until the person dismisses it or the appointment it prepared for is behind them. */

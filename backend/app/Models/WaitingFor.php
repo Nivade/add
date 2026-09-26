@@ -59,16 +59,4 @@ class WaitingFor extends Model
     {
         $query->whereIn('status', [WaitingForStatus::Waiting, WaitingForStatus::FollowedUp]);
     }
-
-    /**
-     * `updated_at` is the last time this was touched, by creation or by a response — the one clock this needs.
-     *
-     * @param  Builder<static>  $query
-     */
-    #[Scope]
-    protected function stale(Builder $query, CarbonImmutable $now, int $days): void
-    {
-        $query->whereIn('status', [WaitingForStatus::Waiting, WaitingForStatus::FollowedUp])
-            ->where('updated_at', '<=', $now->subDays($days));
-    }
 }

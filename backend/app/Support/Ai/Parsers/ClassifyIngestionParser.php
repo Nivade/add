@@ -6,12 +6,13 @@ namespace App\Support\Ai\Parsers;
 
 use App\Data\Ai\IngestionClassificationData;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
-use Carbon\CarbonImmutable;
-use Throwable;
+use App\Support\Ai\Parsers\Concerns\ParsesAiDeadline;
 
 /** The parser is the validator: the provider hands over decoded JSON and forms no opinion about it. */
 final class ClassifyIngestionParser
 {
+    use ParsesAiDeadline;
+
     /** @param  array<string, mixed>  $payload */
     public function parse(array $payload, string $timezone): IngestionClassificationData
     {
@@ -47,22 +48,8 @@ final class ClassifyIngestionParser
             actionable: $actionable,
             title: is_string($title) && trim($title) !== '' ? trim($title) : null,
             why: is_string($why) && trim($why) !== '' ? trim($why) : null,
-            deadlineAt: $this->deadline($payload['deadline_at'] ?? null, $timezone),
+            deadlineAt: $this->deadline($payload['deadline_at'] ?? null, $timezone, 'classify_ingestion'),
             estimatedSeconds: $estimatedSeconds,
         );
-    }
-
-    /** An answer carrying its own offset keeps it; a naive one means the clock the person reads. */
-    private function deadline(mixed $value, string $timezone): ?CarbonImmutable
-    {
-        if (! is_string($value) || trim($value) === '' || strtolower(trim($value)) === 'null') {
-            return null;
-        }
-
-        try {
-            return CarbonImmutable::parse(trim($value), $timezone);
-        } catch (Throwable $exception) {
-            throw new AiResponseInvalid('classify_ingestion returned an unreadable deadline_at: '.trim($value), previous: $exception);
-        }
     }
 }
