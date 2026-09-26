@@ -15,7 +15,5 @@ use App\Models\User;
  */
 interface IngestionSource
 {
-    public function name(): string;
-
     public function classify(User $user, string $text): IngestionClassificationData;
 }

@@ -127,6 +127,22 @@ it('sends a due reminder once and not on every dispatch after', function (): voi
     Notification::assertSentToTimes($user, FutureReminderDue::class, 1);
 });
 
+it('refuses a row with both or neither trigger set, even bypassing the action', function (): void {
+    $user = User::factory()->create();
+    $event = CalendarEvent::factory()->for($user)->create();
+
+    expect(fn () => FutureReminder::factory()->for($user)->create([
+        'trigger_at' => CarbonImmutable::now(),
+        'calendar_event_id' => $event->id,
+        'offset_seconds' => 1800,
+    ]))->toThrow(Illuminate\Database\QueryException::class);
+
+    expect(fn () => FutureReminder::factory()->for($user)->create([
+        'trigger_at' => null,
+        'calendar_event_id' => null,
+    ]))->toThrow(Illuminate\Database\QueryException::class);
+});
+
 it('answers over the API too', function (): void {
     $user = User::factory()->create();
 

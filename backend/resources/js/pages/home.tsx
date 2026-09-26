@@ -1,5 +1,5 @@
 import type { HomeData, NeedsAttentionData } from '@add/shared';
-import { restCountLine } from '@add/shared';
+import { restCountLine, waitingForResponses } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
@@ -60,13 +60,6 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
         </Form>
     );
 }
-
-const waitingForResponses = [
-    { value: 'wait_longer', label: 'Wait longer' },
-    { value: 'follow_up', label: 'Follow up' },
-    { value: 'receive', label: 'Mark received' },
-    { value: 'cancel', label: 'Cancel' },
-] as const;
 
 function WaitingFor({ item }: { item: NeedsAttentionData }) {
     return (

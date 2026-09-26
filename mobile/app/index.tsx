@@ -1,5 +1,5 @@
 import type { HomeData, NeedsAttentionData, WaitingForResponse } from '@add/shared';
-import { formatEstimate, restCountLine } from '@add/shared';
+import { formatEstimate, restCountLine, waitingForResponses } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -69,13 +69,6 @@ function Clarify({
     </View>
   );
 }
-
-const waitingForResponses: { value: WaitingForResponse; label: string }[] = [
-  { value: 'wait_longer', label: 'Wait longer' },
-  { value: 'follow_up', label: 'Follow up' },
-  { value: 'receive', label: 'Mark received' },
-  { value: 'cancel', label: 'Cancel' },
-];
 
 function WaitingFor({
   item,

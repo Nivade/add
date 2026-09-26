@@ -19,11 +19,6 @@ final class ManualIngestionSource implements IngestionSource
         private readonly ClassifyIngestionParser $parser,
     ) {}
 
-    public function name(): string
-    {
-        return 'manual';
-    }
-
     public function classify(User $user, string $text): IngestionClassificationData
     {
         return $this->parser->parse(

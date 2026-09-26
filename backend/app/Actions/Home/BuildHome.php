@@ -64,9 +64,17 @@ final class BuildHome
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
             needsAttention: array_values($needsAttention),
-            restCount: $this->open($user)->count() - $clarifications->count()
-                + $openWaitingFors - ($staleWaitingFor instanceof WaitingFor ? 1 : 0),
+            restCount: $this->restCount($user, $clarifications->count(), $openWaitingFors, $staleWaitingFor),
         );
+    }
+
+    /** Everything open, minus whatever the needsAttention band already shows. */
+    private function restCount(User $user, int $clarificationsShown, int $openWaitingFors, ?WaitingFor $staleWaitingFor): int
+    {
+        $waitingForsShown = $staleWaitingFor instanceof WaitingFor ? 1 : 0;
+
+        return ($this->open($user)->count() - $clarificationsShown)
+            + ($openWaitingFors - $waitingForsShown);
     }
 
     /** At most one, the same one-thing-at-a-time rule the clarifying-question slot already follows. */
