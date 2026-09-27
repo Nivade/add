@@ -1,5 +1,18 @@
-import type { HomeData, NeedsAttentionData, WaitingForResponse } from '@add/shared';
-import { formatEstimate, restCountLine, waitingForResponses } from '@add/shared';
+import type {
+  CommitmentResponse,
+  HomeData,
+  JustFinishedData,
+  NeedsAttentionData,
+  WaitingForResponse,
+} from '@add/shared';
+import {
+  commitmentProvenanceLabels,
+  commitmentResponses,
+  formatEstimate,
+  recurrenceLine,
+  restCountLine,
+  waitingForResponses,
+} from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -111,6 +124,107 @@ function WaitingFor({
   );
 }
 
+function Commitment({
+  item,
+  onResponded,
+}: {
+  item: NeedsAttentionData;
+  onResponded: () => void;
+}) {
+  const { token } = useSession();
+  const [saving, setSaving] = useState(false);
+
+  const respond = async (response: CommitmentResponse) => {
+    setSaving(true);
+
+    try {
+      await api.respondToCommitment(token as string, item.id, response);
+      onResponded();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <View style={styles.clarify}>
+      <Text style={styles.line}>{item.title}</Text>
+      {item.inferred && <Meta>{commitmentProvenanceLabels.system_inferred}</Meta>}
+      <View style={styles.responses}>
+        {commitmentResponses(item.inferred).map(({ value, label }) => (
+          <Button
+            key={value}
+            label={label}
+            disabled={saving}
+            onPress={() => void respond(value)}
+          />
+        ))}
+      </View>
+      <Button
+        label="Everything you said you'd do"
+        onPress={() => router.push('/commitments')}
+      />
+    </View>
+  );
+}
+
+function JustFinished({
+  finished,
+  onRepeated,
+}: {
+  finished: JustFinishedData;
+  onRepeated: () => void;
+}) {
+  const { token } = useSession();
+  const [everyDays, setEveryDays] = useState('7');
+  const [saving, setSaving] = useState(false);
+
+  const repeat = async () => {
+    const days = Number(everyDays);
+
+    if (!Number.isInteger(days) || days < 1) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await api.repeatIntention(token as string, finished.id, days);
+      onRepeated();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Band label="Just finished">
+      <Text style={styles.line}>{finished.title}</Text>
+      {finished.recurrenceEveryDays ? (
+        <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
+      ) : (
+        <>
+          <View style={styles.repeat}>
+            <Meta>Repeat every</Meta>
+            <TextInput
+              style={[styles.input, styles.days]}
+              value={everyDays}
+              onChangeText={setEveryDays}
+              keyboardType="number-pad"
+              inputMode="numeric"
+              accessibilityLabel="Repeat every how many days"
+            />
+            <Meta>days</Meta>
+          </View>
+          <Button
+            label={saving ? 'Saving' : 'Repeat'}
+            disabled={saving}
+            onPress={() => void repeat()}
+          />
+        </>
+      )}
+    </Band>
+  );
+}
+
 export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
@@ -129,8 +243,23 @@ export default function Home() {
     );
   }
 
-  const { rightNow, session, comingUp, reminder, needsAttention, restCount } =
-    data;
+  const {
+    rightNow,
+    rightNowIsCommitment,
+    session,
+    comingUp,
+    reminder,
+    justFinished,
+    needsAttention,
+    restCount,
+  } = data;
+
+  const promote = async () => {
+    if (rightNow) {
+      await api.promoteToCommitment(token as string, rightNow.intention.id);
+      await reload();
+    }
+  };
 
   const start = async () => {
     if (!rightNow) {
@@ -170,6 +299,14 @@ export default function Home() {
                   {line}
                 </Text>
               ))}
+              {rightNowIsCommitment ? (
+                <Meta>you said you'd do this</Meta>
+              ) : (
+                <Button
+                  label="I said I'd do this"
+                  onPress={() => void promote()}
+                />
+              )}
             </Band>
           )}
         </>
@@ -178,6 +315,10 @@ export default function Home() {
           <OneThing>Nothing needs you right now.</OneThing>
           <Meta>that is the whole answer</Meta>
         </>
+      )}
+
+      {justFinished && (
+        <JustFinished finished={justFinished} onRepeated={() => void reload()} />
       )}
 
       {reminder && (
@@ -215,21 +356,34 @@ export default function Home() {
 
       {needsAttention.length > 0 && (
         <Band label="Needs attention">
-          {needsAttention.map((item) =>
-            item.kind === 'waiting_for' ? (
-              <WaitingFor
-                key={item.id}
-                item={item}
-                onResponded={() => void reload()}
-              />
-            ) : (
-              <Clarify
-                key={item.id}
-                item={item}
-                onAnswered={() => void reload()}
-              />
-            ),
-          )}
+          {needsAttention.map((item) => {
+            switch (item.kind) {
+              case 'waiting_for':
+                return (
+                  <WaitingFor
+                    key={item.id}
+                    item={item}
+                    onResponded={() => void reload()}
+                  />
+                );
+              case 'commitment':
+                return (
+                  <Commitment
+                    key={item.id}
+                    item={item}
+                    onResponded={() => void reload()}
+                  />
+                );
+              case 'intention':
+                return (
+                  <Clarify
+                    key={item.id}
+                    item={item}
+                    onAnswered={() => void reload()}
+                  />
+                );
+            }
+          })}
         </Band>
       )}
 
@@ -242,8 +396,8 @@ export default function Home() {
           onPress={() => router.push('/capture')}
         />
         <Button
-          label="Waiting for"
-          onPress={() => router.push('/waiting-for')}
+          label="Something else"
+          onPress={() => router.push('/add')}
         />
         <Button
           label="I'm overwhelmed"
@@ -262,4 +416,6 @@ const styles = StyleSheet.create({
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
   responses: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(1) },
+  repeat: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1) },
+  days: { width: 72, textAlign: 'right' },
 });
