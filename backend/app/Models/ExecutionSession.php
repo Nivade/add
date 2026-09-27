@@ -71,7 +71,17 @@ class ExecutionSession extends Model
         return $this->ended_at === null;
     }
 
-    public function assertOpen(): void
+    /** Call inside a transaction: re-reads this row under a lock, so two taps cannot both pass the open check. */
+    public function lockOpen(): void
+    {
+        $locked = self::query()->lockForUpdate()->findOrFail($this->id);
+
+        $this->setRawAttributes($locked->getAttributes(), sync: true);
+        $this->setRelations([]);
+        $this->assertOpen();
+    }
+
+    private function assertOpen(): void
     {
         if (! $this->isRunning()) {
             throw new InvalidSessionTransition("Session {$this->id} has already ended.");

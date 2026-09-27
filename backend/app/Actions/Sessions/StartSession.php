@@ -9,6 +9,7 @@ use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** A stretch of focused work is one row, and it points at the step the person asked for. */
@@ -41,11 +42,15 @@ final class StartSession
             return $this->open($user, $step);
         }
 
-        $running->update(['current_step_id' => $step->id]);
+        return DB::transaction(function () use ($running, $step): ExecutionSession {
+            $running->lockOpen();
 
-        RecordExecutionEvent::run($running, ExecutionEventType::Started, $step->id);
+            $running->update(['current_step_id' => $step->id]);
 
-        return $running;
+            RecordExecutionEvent::run($running, ExecutionEventType::Started, $step->id);
+
+            return $running;
+        });
     }
 
     private function open(User $user, Step $step): ExecutionSession

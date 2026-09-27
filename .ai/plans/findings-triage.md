@@ -27,22 +27,22 @@ Wider than the finding says. `PauseSession`, `ResumeSession` and `RecordDistract
 stop writes `paused_at` and a `Paused` event on an ended session.
 
 - Lift `LandSession`'s re-read into one model method, `ExecutionSession::lockOpen()`: re-reads
-  its own row under `lockForUpdate()`, asserts open, returns the locked instance. Only valid
-  inside a transaction — it throws a `LogicException` when `DB::transactionLevel()` is 0.
-- Every session action opens `DB::transaction`, calls `lockOpen()` first, and does all its
-  checks and writes on the locked instance: `paused_at`, `current_step_id` and the current step
-  are read from it, never from the caller's copy. Nested calls (`CompleteStep` into
-  `AdvanceSession` into `LandSession`) re-lock the same row inside the same transaction, which
-  is free.
-- `assertOpen()` becomes private to the model; a guard in `ConventionsTest` fails on any
-  `->assertOpen()` or `->currentStepOrFail()` call from `app/Actions/Sessions`, so a new
-  transition cannot skip the lock.
+  its own row under `lockForUpdate()` into the same instance, then asserts open. Refreshing in
+  place rather than returning a copy keeps every caller's object current. A check that it runs
+  inside a transaction was dropped: `RefreshDatabase` always holds one, so it could never fail.
+- Every session transition, `StartSession`'s retarget included, opens `DB::transaction` and
+  calls `lockOpen()` first, so `paused_at`, `current_step_id` and the current step are read from
+  the locked row. Nested calls (`CompleteStep` into `AdvanceSession` into `LandSession`) re-lock
+  the same row inside the same transaction, which is free. `ReportStuck` dispatches its split
+  after commit.
+- `assertOpen()` becomes private to the model, and a guard in `ConventionsTest` fails when a
+  class in `app/Actions/Sessions` that is not a known helper never calls `lockOpen()`.
 
 **Tests.** SQLite ignores `lockForUpdate`, so the race itself is not reproducible in the suite.
 The deterministic proxy is the stale copy: load a session, end or pause it through a second
 instance, then run each action on the first copy — it throws `InvalidSessionTransition` and
-writes no `execution_events` row. One dataset over the seven actions, plus the double-complete
-case asserting `steps_completed` moved once.
+writes no `execution_events` row. One dataset over the transitions, a second pause from a stale
+copy, and a double complete whose `steps_completed` still equals the steps actually done.
 
 **Done when** no session action reads open/paused/current-step state off an unlocked model, and
 the guard proves it.

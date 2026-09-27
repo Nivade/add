@@ -18,12 +18,9 @@ final class LandSession
     public function handle(ExecutionSession $session, SessionOutcome $outcome): ExecutionSession
     {
         return DB::transaction(function () use ($session, $outcome): ExecutionSession {
-            // Re-read under a row lock: two taps can both pass an unlocked check and land it twice.
-            $locked = ExecutionSession::query()->lockForUpdate()->findOrFail($session->id);
+            $session->lockOpen();
 
-            $locked->assertOpen();
-
-            $lastStepId = $locked->current_step_id;
+            $lastStepId = $session->current_step_id;
 
             $session->update([
                 'current_step_id' => null,

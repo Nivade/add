@@ -18,9 +18,11 @@ final class CompleteStep
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $step = $session->currentStepOrFail();
+        return DB::transaction(function () use ($session): ExecutionSession {
+            $session->lockOpen();
 
-        return DB::transaction(function () use ($session, $step): ExecutionSession {
+            $step = $session->currentStepOrFail();
+
             $step->update(['status' => StepStatus::Done, 'completed_at' => now()]);
 
             Commitment::query()->open()->forStep($step->id)->update(['status' => CommitmentStatus::Kept]);

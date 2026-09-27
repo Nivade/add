@@ -11,6 +11,7 @@ use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Points the session at the next step it can offer, and ends it when there is none. */
@@ -20,19 +21,21 @@ final class AdvanceSession
 
     public function handle(ExecutionSession $session, ?string $exceptStepId = null): ExecutionSession
     {
-        $session->assertOpen();
+        return DB::transaction(function () use ($session, $exceptStepId): ExecutionSession {
+            $session->lockOpen();
 
-        $pending = $session->intention->remainingSteps()->orderBy('position')->get();
-        $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
-        $next = $this->next($offerable, $session);
+            $pending = $session->intention->remainingSteps()->orderBy('position')->get();
+            $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
+            $next = $this->next($offerable, $session);
 
-        if (! $next instanceof Step) {
-            return $this->end($session, $pending->isEmpty() ? SessionOutcome::Completed : SessionOutcome::Continued);
-        }
+            if (! $next instanceof Step) {
+                return $this->end($session, $pending->isEmpty() ? SessionOutcome::Completed : SessionOutcome::Continued);
+            }
 
-        $session->update(['current_step_id' => $next->id]);
+            $session->update(['current_step_id' => $next->id]);
 
-        return $session;
+            return $session;
+        });
     }
 
     /** @param  Collection<int, Step>  $offerable */

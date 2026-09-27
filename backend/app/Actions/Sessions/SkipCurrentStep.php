@@ -17,9 +17,11 @@ final class SkipCurrentStep
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $step = $session->currentStepOrFail();
+        return DB::transaction(function () use ($session): ExecutionSession {
+            $session->lockOpen();
 
-        return DB::transaction(function () use ($session, $step): ExecutionSession {
+            $step = $session->currentStepOrFail();
+
             SkipStep::run($step);
 
             RecordExecutionEvent::run($session, ExecutionEventType::StepSkipped, $step->id);
