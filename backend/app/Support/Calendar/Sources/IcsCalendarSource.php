@@ -8,11 +8,15 @@ use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\User;
 use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
+use App\Support\Calendar\PublicFeedHost;
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use DateTimeZone;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Sabre\VObject\Component\VCalendar;
@@ -28,6 +32,10 @@ use Throwable;
 final class IcsCalendarSource implements CalendarSource
 {
     public const string NAME = 'ics';
+
+    private const int MAX_REDIRECTS = 3;
+
+    public function __construct(private readonly PublicFeedHost $publicHost) {}
 
     public function name(): string
     {
@@ -100,16 +108,10 @@ final class IcsCalendarSource implements CalendarSource
         $key = self::cacheKey($url);
         $cached = $this->remembered($key);
 
-        try {
-            $response = Http::timeout(15)
-                ->withHeaders($cached === null ? [] : array_filter([
-                    'If-None-Match' => $cached['etag'],
-                    'If-Modified-Since' => $cached['modified'],
-                ], is_string(...)))
-                ->get($url);
-        } catch (ConnectionException) {
-            throw new CalendarFeedUnreadable('The calendar feed could not be reached.');
-        }
+        $response = $this->follow($url, $cached === null ? [] : array_filter([
+            'If-None-Match' => $cached['etag'],
+            'If-Modified-Since' => $cached['modified'],
+        ], is_string(...)));
 
         if ($cached !== null && $response->status() === 304) {
             return $cached['body'];
@@ -131,6 +133,50 @@ final class IcsCalendarSource implements CalendarSource
         }
 
         return $response->body();
+    }
+
+    /**
+     * Redirects are followed here rather than by the client, so every hop is checked for a public address.
+     *
+     * @param  array<string, string>  $headers
+     */
+    private function follow(string $url, array $headers): Response
+    {
+        for ($hop = 0; $hop <= self::MAX_REDIRECTS; ++$hop) {
+            $response = $this->request($url, $headers);
+            $location = $response->header('Location');
+
+            if (! in_array($response->status(), [301, 302, 303, 307, 308], true) || $location === '') {
+                return $response;
+            }
+
+            $url = (string) UriResolver::resolve(new Uri($url), new Uri($location));
+        }
+
+        throw new CalendarFeedUnreadable('The calendar feed redirected too many times.');
+    }
+
+    /** @param  array<string, string>  $headers */
+    private function request(string $url, array $headers): Response
+    {
+        if (parse_url($url, PHP_URL_SCHEME) !== 'https') {
+            throw new CalendarFeedUnreadable('The calendar feed left https.');
+        }
+
+        $address = $this->publicHost->address($url);
+        $host = trim((string) parse_url($url, PHP_URL_HOST), '[]');
+        $port = parse_url($url, PHP_URL_PORT) ?? 443;
+        $pinned = str_contains($address, ':') ? "[{$address}]" : $address;
+
+        try {
+            return Http::timeout(15)
+                ->withoutRedirecting()
+                ->withOptions(['curl' => [CURLOPT_RESOLVE => ["{$host}:{$port}:{$pinned}"]]])
+                ->withHeaders($headers)
+                ->get($url);
+        } catch (ConnectionException) {
+            throw new CalendarFeedUnreadable('The calendar feed could not be reached.');
+        }
     }
 
     /**

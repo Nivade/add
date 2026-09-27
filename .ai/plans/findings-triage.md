@@ -58,11 +58,11 @@ network from the queue worker. An allowlist of calendar providers was considered
 self-hosted calendars (Nextcloud, Fastmail) are legitimate feeds, and the risk is the address
 class, not the provider.
 
-- A `PublicFeedHost` class in `app/Support/Calendar/`: resolves the host's A and AAAA records
-  and refuses when there are none or any of them is private, reserved, loopback, link-local or
-  an IPv4-mapped form of those (`FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE`, plus
-  explicit checks for `::ffff:` and `fc00::/7`). IP-literal hosts go through the same test.
-  Resolution sits behind a `HostResolver` bound in the container, the seam tests swap.
+- A `PublicFeedHost` class in `app/Support/Calendar/`: takes the host's A and AAAA records, or
+  the literal address, and refuses when there are none or any of them fails
+  `FILTER_FLAG_GLOBAL_RANGE`. That flag already covers private, reserved, loopback, link-local,
+  CGNAT, documentation, unique-local and IPv4-mapped addresses; NAT64 (`64:ff9b::/96`) passes it
+  and gets its own check. Resolution sits behind the `HostResolver` contract, the seam tests swap.
 - `fetch()` stops letting the client redirect. It follows up to three redirects itself, checking
   each hop with `PublicFeedHost`, and pins every request to the address it checked with
   `CURLOPT_RESOLVE`, so a DNS answer that changes between the check and the connect (rebinding)
@@ -77,7 +77,8 @@ class, not the provider.
 fetches; private, loopback, metadata, IPv6 ULA and mapped addresses refuse; a redirect from a
 public host to a private one refuses at the hop and sends no request to it; more than three
 hops refuse; the thrown message contains neither the URL nor the address; the form request
-rejects a private host with the message above.
+rejects a private host with the message above. The `CURLOPT_RESOLVE` pin is invisible to
+`Http::fake`, so it is held by review rather than a test.
 
 **Done when** no feed request leaves for an address outside public unicast space, at connect or
 at sync.

@@ -7,6 +7,7 @@ use App\Actions\Calendar\DisconnectCalendarFeed;
 use App\Actions\Calendar\SyncCalendar;
 use App\Actions\Reminders\SendDueReminders;
 use App\Contracts\CalendarSource;
+use App\Contracts\HostResolver;
 use App\Models\CalendarEvent;
 use App\Models\Reminder;
 use App\Models\User;
@@ -28,9 +29,26 @@ function icsFeed(string ...$events): string
     return implode("\r\n", ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//add//test//EN', ...$events, 'END:VCALENDAR'])."\r\n";
 }
 
+/** @param  array<string, list<string>>  $hosts */
+function resolving(array $hosts): void
+{
+    app()->instance(HostResolver::class, new readonly class($hosts) implements HostResolver
+    {
+        /** @param  array<string, list<string>>  $hosts */
+        public function __construct(private array $hosts) {}
+
+        public function addresses(string $host): array
+        {
+            return $this->hosts[$host] ?? [];
+        }
+    });
+}
+
+beforeEach(fn () => resolving(['calendar.example.test' => ['93.184.215.14']]));
+
 function feedPerson(?string $url = FEED_URL): User
 {
-    app()->instance(CalendarSource::class, new IcsCalendarSource);
+    app()->instance(CalendarSource::class, app(IcsCalendarSource::class));
 
     return User::factory()->create(['timezone' => 'Europe/Amsterdam', 'calendar_feed_url' => $url]);
 }
@@ -231,6 +249,76 @@ it('takes only an address a calendar publishes over https or webcal', function (
     'a file' => 'file:///etc/passwd',
     'not an address' => 'my calendar',
 ]);
+
+it('reads no feed whose address is inside the network, and says so without the address', function (string $url, array $addresses): void {
+    Http::fake();
+    resolving(['calendar.example.test' => $addresses]);
+
+    expect(fn (): mixed => SyncCalendar::run(feedPerson($url), CarbonImmutable::parse('2026-09-19 09:00:00')))
+        ->toThrow(fn (CalendarFeedUnreadable $exception) => expect($exception->getMessage())
+            ->not->toContain('private-abc123')
+            ->not->toContain('calendar.example.test')
+            ->not->toContain('10.0.0.5'));
+
+    Http::assertNothingSent();
+})->with([
+    'private' => [FEED_URL, ['10.0.0.5']],
+    'loopback' => [FEED_URL, ['127.0.0.1']],
+    'one public, one private' => [FEED_URL, ['93.184.215.14', '10.0.0.5']],
+    'unique local' => [FEED_URL, ['fd00::1']],
+    'mapped private' => [FEED_URL, ['::ffff:10.0.0.5']],
+    'NAT64 wrapping a private one' => [FEED_URL, ['64:ff9b::a00:5']],
+    'no address at all' => [FEED_URL, []],
+    'cloud metadata literal' => ['https://169.254.169.254/latest/meta-data', []],
+    'loopback literal' => ['https://[::1]/basic.ics', []],
+]);
+
+it('follows a redirect to another public host, relative or absolute', function (string $location): void {
+    Http::preventStrayRequests();
+    resolving(['calendar.example.test' => ['93.184.215.14'], 'cdn.example.test' => ['93.184.215.15']]);
+    Http::fake([
+        FEED_URL => Http::response('', 302, ['Location' => $location]),
+        '*' => Http::response(icsFeed(
+            'BEGIN:VEVENT', 'UID:dentist-1', 'SUMMARY:Dentist', 'DTSTART;TZID=Europe/Amsterdam:20260919T140000', 'END:VEVENT',
+        )),
+    ]);
+
+    $events = SyncCalendar::run(feedPerson(), CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam'));
+
+    expect($events)->toHaveCount(1);
+    Http::assertSentCount(2);
+})->with([
+    'another host' => 'https://cdn.example.test/moved.ics',
+    'same host' => '/moved.ics',
+]);
+
+it('stops at a redirect that leaves for the network, https, or never ends', function (string $location, int $sent): void {
+    resolving(['calendar.example.test' => ['93.184.215.14'], 'intranet.example.test' => ['10.0.0.5']]);
+    Http::fake(['*' => Http::response('', 302, ['Location' => $location])]);
+
+    expect(fn (): mixed => SyncCalendar::run(feedPerson(), CarbonImmutable::parse('2026-09-19 09:00:00')))
+        ->toThrow(CalendarFeedUnreadable::class);
+
+    Http::assertSentCount($sent);
+    Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), 'intranet'));
+})->with([
+    'into the network' => ['https://intranet.example.test/basic.ics', 1],
+    'down to http' => ['http://calendar.example.test/basic.ics', 1],
+    'in a loop' => [FEED_URL, 4],
+]);
+
+it('refuses to connect an address inside the network before reading it', function (): void {
+    Http::fake();
+    resolving(['intranet.example.test' => ['10.0.0.5']]);
+    $user = feedPerson(null);
+
+    $this->actingAs($user)
+        ->put(route('calendar.update'), ['url' => 'https://intranet.example.test/basic.ics'])
+        ->assertSessionHasErrors(['url' => 'That address is not a public calendar feed.']);
+
+    Http::assertNothingSent();
+    expect($user->refresh()->calendar_feed_url)->toBeNull();
+});
 
 it('sends a guest to sign in', function (): void {
     $this->get(route('calendar.edit'))->assertRedirect(route('login'));
