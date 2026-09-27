@@ -37,7 +37,7 @@ final class SendDueRecurringIntentions
         $created = [];
 
         foreach ($due as $template) {
-            $created[] = CreateRecurringIntention::run($template);
+            $created[] = CreateRecurringIntention::run($template, $now);
         }
 
         return $created;

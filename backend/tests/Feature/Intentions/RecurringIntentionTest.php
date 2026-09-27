@@ -74,6 +74,23 @@ it('creates a fresh intention from a due template and queues it for re-decomposi
     Queue::assertPushed(JobDecorator::class, fn (JobDecorator $job): bool => $job->getAction() instanceof DecomposeIntention);
 });
 
+it('creates one intention for a template overdue by several periods, and schedules the next in the future', function (): void {
+    Queue::fake();
+
+    $now = CarbonImmutable::parse('2026-10-02 09:00:00', 'Europe/Amsterdam');
+    $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
+    $template = Intention::factory()->for($user)->done()->create([
+        'recurrence_every_days' => 7,
+        'recurrence_next_at' => $now->subDays(30),
+    ]);
+
+    SendDueRecurringIntentions::run($user, $now);
+    SendDueRecurringIntentions::run($user, $now->addHour());
+
+    expect(Intention::query()->count())->toBe(2)
+        ->and($template->refresh()->recurrence_next_at?->equalTo($now->subDays(30)->addDays(35)))->toBeTrue();
+});
+
 it('leaves a template alone before it is due', function (): void {
     $now = CarbonImmutable::parse('2026-10-02 09:00:00', 'Europe/Amsterdam');
     $user = User::factory()->create();
