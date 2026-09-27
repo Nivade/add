@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Actions\Concerns\ScoresAgainstACorpus;
 use App\Contracts\AiProvider;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
@@ -13,7 +14,6 @@ use App\Support\Ai\Providers\LoggingAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -22,6 +22,7 @@ final class RunCaptureEval
 {
     use AsCommand;
     use AsObject;
+    use ScoresAgainstACorpus;
 
     public string $commandSignature = 'ai:eval:capture';
 
@@ -39,11 +40,7 @@ final class RunCaptureEval
     {
         $scored = array_map($this->score(...), $this->corpus());
 
-        File::put(storage_path('ai-eval/capture-baseline.json'), json_encode([
-            'scored_at' => now()->toIso8601String(),
-            'model' => config('ai.openai.model'),
-            'captures' => $scored,
-        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
+        $this->writeBaseline('capture-baseline.json', 'captures', $scored);
 
         return $scored;
     }
@@ -59,7 +56,7 @@ final class RunCaptureEval
         $command->table(['id', 'expected a question', 'asked', 'copied from the prompt'], array_map(fn (array $result): array => [
             $result['id'],
             $result['expects_question'] ? 'yes' : 'no',
-            $result['question'] ?? '—',
+            $result['invalid'] !== null ? 'invalid response: '.$result['invalid'] : $result['question'] ?? '—',
             $result['copied'] ? 'yes' : 'no',
         ], $this->handle()));
 
@@ -70,7 +67,7 @@ final class RunCaptureEval
     private function corpus(): array
     {
         /** @var list<array{id: string, capture: string, expects_question: bool}> */
-        return json_decode(File::get(storage_path('ai-eval/capture-corpus.json')), true, flags: JSON_THROW_ON_ERROR);
+        return $this->readCorpus('capture-corpus.json');
     }
 
     /**

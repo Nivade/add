@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Actions\Concerns\ScoresAgainstACorpus;
 use App\Contracts\AiProvider;
 use App\Data\Ai\ParsedStepData;
 use App\Support\Ai\AiRequest;
@@ -12,7 +13,6 @@ use App\Support\Ai\Parsers\DecomposeParser;
 use App\Support\Ai\Providers\LoggingAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -21,6 +21,7 @@ final class RunDecompositionEval
 {
     use AsCommand;
     use AsObject;
+    use ScoresAgainstACorpus;
 
     public string $commandSignature = 'ai:eval';
 
@@ -38,11 +39,7 @@ final class RunDecompositionEval
     {
         $scored = array_map($this->score(...), $this->corpus());
 
-        File::put(storage_path('ai-eval/baseline.json'), json_encode([
-            'scored_at' => now()->toIso8601String(),
-            'model' => config('ai.openai.model'),
-            'tasks' => $scored,
-        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
+        $this->writeBaseline('baseline.json', 'tasks', $scored);
 
         return $scored;
     }
@@ -74,7 +71,7 @@ final class RunDecompositionEval
     private function corpus(): array
     {
         /** @var list<array{id: string, shape: string, task: string}> */
-        return json_decode(File::get(storage_path('ai-eval/corpus.json')), true, flags: JSON_THROW_ON_ERROR);
+        return $this->readCorpus('corpus.json');
     }
 
     /**
