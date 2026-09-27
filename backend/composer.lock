@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fba588ad83d98b32099997d21b505b74",
+    "content-hash": "c6e88f74d1afbc5fab99c4c09ef25263",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -12522,16 +12522,16 @@
         },
         {
             "name": "nvade/devtools",
-            "version": "v0.13.1",
+            "version": "v0.13.5",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/nvade-packages/devtools.git",
-                "reference": "20cdd7ffe78b38e870411b4381521860dca06062"
+                "reference": "3eb76b6c0191302e776f9e83d04e1f0bb0016600"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=20cdd7ffe78b38e870411b4381521860dca06062",
-                "reference": "20cdd7ffe78b38e870411b4381521860dca06062",
+                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=3eb76b6c0191302e776f9e83d04e1f0bb0016600",
+                "reference": "3eb76b6c0191302e776f9e83d04e1f0bb0016600",
                 "shasum": ""
             },
             "require": {
@@ -12620,9 +12620,9 @@
             ],
             "description": "Shared Pint, PHPStan, Rector and Sail/Traefik configuration for Laravel projects.",
             "support": {
-                "source": "https://gitlab.com/nvade-packages/devtools/-/tree/v0.13.1"
+                "source": "https://gitlab.com/nvade-packages/devtools/-/tree/v0.13.5"
             },
-            "time": "2026-09-27T11:07:20+00:00"
+            "time": "2026-09-27T12:17:20+00:00"
         },
         {
             "name": "pestphp/pest",

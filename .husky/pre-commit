@@ -34,13 +34,20 @@ case ${GIT_INDEX_FILE:-} in
 esac
 
 # With the Blade rule on, Pint refuses to run at all, PHP files included, until node and its prettier packages are there.
+# Resolved the way Pint does, so packages hoisted to a workspace root count.
 if grep -q '"Pint/laravel_blade": *true' pint.json 2>/dev/null; then
-    for package in prettier prettier-plugin-blade prettier-plugin-tailwindcss; do
-        if [ -z "$node" ] || [ ! -d "node_modules/$package" ]; then
-            echo "pre-commit: pint.json formats Blade, which needs node and $package. Run npm install; skipping Pint." >&2
-            exit 0
-        fi
-    done
+    resolve='for (const p of process.argv.slice(1)) { try { require.resolve(p, { paths: [process.cwd()] }) } catch { console.log(p); process.exit(1) } }'
+
+    case $node in
+        "") check=false ;;
+        container) check="vendor/bin/sail node" ;;
+        *) check=$node ;;
+    esac
+
+    if ! missing=$($check -e "$resolve" prettier prettier-plugin-blade prettier-plugin-tailwindcss 2>/dev/null); then
+        echo "pre-commit: pint.json formats Blade, which needs node and ${missing:-prettier}. Run npm install; skipping Pint." >&2
+        exit 0
+    fi
 fi
 
 # Pint formats a copy of the staged content in one run: pint.json excludes apply and unstaged edits stay out.
