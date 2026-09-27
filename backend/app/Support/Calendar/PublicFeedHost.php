@@ -10,7 +10,9 @@ use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
 /** A feed is fetched from the queue worker, so an address inside the network it runs on is never one to read. */
 final readonly class PublicFeedHost
 {
-    private const string NAT64_PREFIX = "\x00\x64\xff\x9b\x00\x00\x00\x00\x00\x00\x00\x00";
+    private const string NAT64_WELL_KNOWN_PREFIX = "\x00\x64\xff\x9b\x00\x00\x00\x00\x00\x00\x00\x00";
+
+    private const string NAT64_LOCAL_USE_PREFIX = "\x00\x64\xff\x9b\x00\x01";
 
     public function __construct(private HostResolver $resolver) {}
 
@@ -50,7 +52,9 @@ final readonly class PublicFeedHost
             return false;
         }
 
+        $packed = (string) inet_pton($address);
+
         // NAT64 passes the global-range filter, and the IPv4 address it wraps can be anything.
-        return ! str_starts_with((string) inet_pton($address), self::NAT64_PREFIX);
+        return ! str_starts_with($packed, self::NAT64_WELL_KNOWN_PREFIX) && ! str_starts_with($packed, self::NAT64_LOCAL_USE_PREFIX);
     }
 }

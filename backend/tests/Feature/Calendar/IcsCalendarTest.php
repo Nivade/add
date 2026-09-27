@@ -268,6 +268,7 @@ it('reads no feed whose address is inside the network, and says so without the a
     'unique local' => [FEED_URL, ['fd00::1']],
     'mapped private' => [FEED_URL, ['::ffff:10.0.0.5']],
     'NAT64 wrapping a private one' => [FEED_URL, ['64:ff9b::a00:5']],
+    'local-use NAT64 wrapping a private one' => [FEED_URL, ['64:ff9b:1::a00:5']],
     'no address at all' => [FEED_URL, []],
     'cloud metadata literal' => ['https://169.254.169.254/latest/meta-data', []],
     'loopback literal' => ['https://[::1]/basic.ics', []],
