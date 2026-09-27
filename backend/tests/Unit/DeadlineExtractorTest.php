@@ -39,6 +39,8 @@ it('reads every phrase a regex can read with certainty', function (string $text,
     'by a month' => ['renew it by October', '2026-10-01 00:00:00'],
     'the end of a month' => ['sort it by the end of February', '2027-02-28 23:59:59'],
     'the end of the month it already is' => ['send it end of September', '2026-09-30 23:59:59'],
+    'a month with its year' => ['Lisbon in March 2028', '2028-03-01 00:00:00'],
+    'may as the month' => ['the wedding is in May, so book it', '2027-05-01 00:00:00'],
 ]);
 
 it('refuses a date that does not exist rather than rolling it forward', function (): void {
@@ -56,6 +58,8 @@ it('claims nothing when the text only sounds urgent', function (string $text): v
     'look at 2 flats',
     'in the month it already is, whose start has gone' => 'Lisbon in September',
     'a month that is only a name' => 'ask May about it',
+    'may as a verb' => 'the form in may be the wrong one',
+    'a month whose stated year has gone' => 'Lisbon in March 2025',
 ]);
 
 it("reads a relative phrase against the zone it was given, not the server's", function (): void {

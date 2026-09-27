@@ -64,7 +64,7 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
             '/\b(\d{4})-(\d{2})-(\d{2})(?:[t ](\d{1,2}):(\d{2}))?\b/' => $this->isoDate(...),
             '/\bin (\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten) (minute|hour|day|week|month)s?\b/' => $this->relativeOffset(...),
             '/\b(?:before|by|on|due) the (\d{1,2})(?:st|nd|rd|th)\b/' => $this->dayOfMonth(...),
-            '/\b(in|by|before|end of) ('.implode('|', self::MONTHS).')\b/' => $this->namedMonth(...),
+            '/\b(in|by|before|end of) ('.implode('|', self::MONTHS).')\b(?:,?\s+(\d{4})\b)?(?!(?<=may)\s+[a-z])/' => $this->namedMonth(...),
             '/\b(?:(?:next|this|on|by|before|coming)\s+)?('.self::WEEKDAYS.')'.self::TIME_SUFFIX.'/' => $this->weekday(...),
             '/\b(today|tonight|tomorrow)'.self::TIME_SUFFIX.'/' => $this->namedDay(...),
             '/\bnext (week|month)\b/' => $this->nextPeriod(...),
@@ -119,22 +119,19 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
     }
 
     /**
-     * The first day is the one safe reading of a month something is needed in. The month it already
-     * is has no safe start left, so only "end of" reads it.
+     * A month already begun has no safe first day left, so only "end of" reads it.
      *
      * @param  array<int, array{0: string, 1: int}>  $matches
      */
     private function namedMonth(array $matches, CarbonImmutable $now): ?CarbonImmutable
     {
         $month = (int) array_search($this->group($matches, 2), self::MONTHS, true) + 1;
-        $year = $month < $now->month ? $now->year + 1 : $now->year;
+        $statedYear = $this->group($matches, 3);
+        $year = $statedYear !== null ? (int) $statedYear : ($month < $now->month ? $now->year + 1 : $now->year);
         $start = $now->setDate($year, $month, 1)->startOfDay();
+        $at = $this->group($matches, 1) === 'end of' ? $start->endOfMonth() : $start;
 
-        if ($this->group($matches, 1) === 'end of') {
-            return $start->endOfMonth();
-        }
-
-        return $month === $now->month ? null : $start;
+        return $at->lessThanOrEqualTo($now) ? null : $at;
     }
 
     /**
