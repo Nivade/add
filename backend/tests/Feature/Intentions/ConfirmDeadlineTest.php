@@ -28,7 +28,7 @@ it('says a deadline it read is inferred, and stops saying it once confirmed', fu
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.comingUp.inferred', true));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.comingUp.inferred', true));
 
     $this->actingAs($user)
         ->from(route('home'))
@@ -38,7 +38,7 @@ it('says a deadline it read is inferred, and stops saying it once confirmed', fu
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.comingUp.inferred', false));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.comingUp.inferred', false));
 });
 
 it('never calls a time the calendar stated inferred', function (): void {
@@ -52,7 +52,7 @@ it('never calls a time the calendar stated inferred', function (): void {
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.kind', 'calendar_event')
             ->where('home.comingUp.inferred', false)
         );
@@ -67,7 +67,7 @@ it('confirms a deadline over the API too', function (): void {
         ->assertJsonPath('deadlineInferred', false);
 });
 
-it('does not let one person confirm another person\'s deadline', function (): void {
+it("does not let one person confirm another person's deadline", function (): void {
     $intention = dated(User::factory()->create());
 
     $this->actingAs(User::factory()->create())
@@ -77,7 +77,7 @@ it('does not let one person confirm another person\'s deadline', function (): vo
     expect($intention->refresh()->deadline_confirmed_at)->toBeNull();
 });
 
-it('marks a step the model wrote as suggested rather than as the person\'s own words', function (): void {
+it("marks a step the model wrote as suggested rather than as the person's own words", function (): void {
     $user = User::factory()->create();
     $intention = dated($user);
 
@@ -86,7 +86,7 @@ it('marks a step the model wrote as suggested rather than as the person\'s own w
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow.step.title', 'Find the old passport.')
             ->where('home.rightNow.step.generated', true)
         );

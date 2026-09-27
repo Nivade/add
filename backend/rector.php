@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 use Nvade\Devtools\Rector\Preset;
 use Rector\CodeQuality\Rector\Catch_\ThrowWithPreviousExceptionRector;
+use Rector\PHPUnit\CodeQuality\Rector\MethodCall\AssertEmptyNullableObjectToAssertInstanceofRector;
+use Rector\Privatization\Rector\MethodCall\PrivatizeLocalGetterToPropertyRector;
 use RectorLaravel\Rector\FuncCall\AppToResolveRector;
 use RectorLaravel\Rector\If_\ThrowIfRector;
 use RectorLaravel\Rector\StaticCall\CarbonToDateFacadeRector;
-use RectorLaravel\Set\LaravelSetList;
 
 return Preset::laravel(__DIR__)
     ->withPaths([
@@ -18,28 +19,36 @@ return Preset::laravel(__DIR__)
         __DIR__.'/routes',
         __DIR__.'/tests',
     ])
-    // A byte change here changes AiRequest::cacheKey(), so every cached answer
-    // silently misses and the fixtures stop matching.
+    // A byte change here changes AiRequest::cacheKey(), so every cached answer misses and the fixtures stop matching.
     ->withSkipPath(__DIR__.'/app/Support/Ai/Prompts.php')
     // Keeps partially qualified names like Watchers\CacheWatcher; drop once devtools stops enabling it.
     ->withImportNames(importNames: false, importDocBlockNames: false, importShortClasses: false, removeUnusedImports: false)
-    ->withSets([
-        // `.ai/rules/general.md` prefers attributes over class properties; this
-        // set is what enforces it instead of leaving it to goodwill.
-        LaravelSetList::LARAVEL_130,
-    ])
+    // Rector's cache survives config and version changes, so key it on both.
+    ->withCache(cacheDirectory: __DIR__.'/storage/rector/'.hash('xxh3', hash_file('xxh3', __FILE__).hash_file('xxh3', __DIR__.'/composer.lock')))
     ->withSkip([
-        // Collapses guard clauses into throw_if()/throw_unless(), which build the
-        // exception whether or not it throws, and the preset already skips the
-        // rule that would normalise the result because it drops `previous:`.
+        // throw_if() builds the exception whether or not it throws.
         ThrowIfRector::class,
-        // Passes the caught exception's code as the new exception's code on calls
-        // that already forward `previous:`.
+        // Passes the caught exception's code on calls that already forward `previous:`.
         ThrowWithPreviousExceptionRector::class,
-        // One container helper. `app()` is already the one in use.
+        // `app()` is the one container helper in use.
         AppToResolveRector::class,
-        // Larastan types every `datetime` cast as Illuminate\Support\Carbon regardless
-        // of Date::use(CarbonImmutable::class) in AppServiceProvider, so Date::now()
-        // fails stan on assignment where Carbon::now() does not.
+        // Larastan types `datetime` casts as Illuminate\Support\Carbon, so Date::now() fails stan on assignment.
         CarbonToDateFacadeRector::class,
-    ]);
+        // Same Larastan gap: asserts Illuminate\Support\Carbon where the value is a CarbonImmutable.
+        AssertEmptyNullableObjectToAssertInstanceofRector::class,
+        // Getters on Candidate hide the model's shape from its own methods too.
+        PrivatizeLocalGetterToPropertyRector::class,
+    ])
+    // Naming and namedArgs stay off: they rename deliberate domain vocabulary and name every framework argument.
+    ->withPreparedSets(
+        codingStyle: true,
+        typeDeclarations: true,
+        typeDeclarationDocblocks: true,
+        privatization: true,
+        instanceOf: true,
+        if: true,
+        carbon: true,
+        rectorPreset: true,
+        phpunitCodeQuality: true,
+    )
+    ->withAttributesSets();

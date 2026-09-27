@@ -51,7 +51,7 @@ it('claims nothing when the text only sounds urgent', function (string $text): v
     'look at 2 flats',
 ]);
 
-it('reads a relative phrase against the zone it was given, not the server\'s', function (): void {
+it("reads a relative phrase against the zone it was given, not the server's", function (): void {
     $extracted = (new PhraseDeadlineExtractor)->extract(
         'call the dentist tomorrow morning',
         CarbonImmutable::parse('2026-09-16 10:00:00', 'Europe/Amsterdam')

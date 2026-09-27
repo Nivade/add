@@ -27,7 +27,7 @@ trait QueuesPerUser
             ->chunkById(self::QUEUE_CHUNK, function (Collection $users) use (&$queued): void {
                 foreach ($users as $user) {
                     self::dispatch($user);
-                    $queued++;
+                    ++$queued;
                 }
             });
 

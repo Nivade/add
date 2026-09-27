@@ -25,7 +25,7 @@ it('holds an undecided thought in needs attention until it is answered, then off
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow', null)
             ->where('home.needsAttention.0.clarifyingQuestion', 'Is there a trip you need it for, and when?')
         );
@@ -43,7 +43,7 @@ it('holds an undecided thought in needs attention until it is answered, then off
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow.step.title', 'Find the old passport.')
             ->has('home.needsAttention', 0)
         );

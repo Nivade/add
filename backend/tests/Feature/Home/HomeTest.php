@@ -13,7 +13,7 @@ use Inertia\Testing\AssertableInertia;
 it('pitches the product to a guest and sends a signed-in person to their answer', function (): void {
     $this->get(route('welcome'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->component('welcome'));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->component('welcome'));
 
     $this->actingAs(User::factory()->create())
         ->get(route('welcome'))
@@ -30,7 +30,7 @@ it('answers with one thing and says why it is that one', function (): void {
     $this->actingAs($intention->user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('home')
             ->where('home.rightNow.step.title', 'Step 1.')
             ->where('home.rightNow.intention.title', 'Clean the kitchen')
@@ -48,7 +48,7 @@ it('offers the open session instead of choosing again', function (): void {
     $this->actingAs($session->user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.session.session.id', $session->id)
             ->where('home.session.intention.title', 'Clean the kitchen')
         );
@@ -72,7 +72,7 @@ it('names the next real deadline and nothing else about time', function (): void
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.title', 'Renew the passport')
             ->where('home.comingUp.inWords', '2 days from now')
         );
@@ -86,7 +86,7 @@ it('holds an intention nobody could name in its own band, never as the thing to 
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow', null)
             ->has('home.needsAttention', 1)
             ->where('home.needsAttention.0.title', 'Sort the thing out')
@@ -101,7 +101,7 @@ it('counts everything else without listing it', function (): void {
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.restCount', 6)
             ->has('home.needsAttention', 0)
         );
@@ -119,7 +119,7 @@ it('renders the step, its intention and the progress in focus', function (): voi
     $this->actingAs($session->user)
         ->get(route('focus'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('focus')
             ->where('state.session.currentStep.title', 'Step 1.')
             ->where('state.intention.title', 'Clean the kitchen')
@@ -147,7 +147,7 @@ it('refuses to start on a step belonging to somebody else', function (): void {
         ->assertNotFound();
 });
 
-it('hides another person\'s session behind the web controls too', function (): void {
+it("hides another person's session behind the web controls too", function (): void {
     $session = started();
 
     $this->actingAs(User::factory()->create())
@@ -186,5 +186,5 @@ it('starts a session from the API and finds it on home', function (): void {
 
     $this->actingAs($session->user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.session.session.id', $session->id));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.session.session.id', $session->id));
 });

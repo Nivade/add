@@ -78,10 +78,10 @@ final class RunDecompositionEval
 
         try {
             $steps = $this->parser->parse($this->provider->complete($request)->payload);
-        } catch (AiResponseInvalid $exception) {
+        } catch (AiResponseInvalid $aiResponseInvalid) {
             return [
-                'row' => [$task['id'], '—', '—', 'invalid response: '.$exception->getMessage()],
-                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$exception->getMessage()]],
+                'row' => [$task['id'], '—', '—', 'invalid response: '.$aiResponseInvalid->getMessage()],
+                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$aiResponseInvalid->getMessage()]],
             ];
         }
 
@@ -92,7 +92,7 @@ final class RunDecompositionEval
             'result' => [
                 'id' => $task['id'],
                 'shape' => $task['shape'],
-                'steps' => array_map(fn ($step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
+                'steps' => array_map(fn (\App\Data\Ai\ParsedStepData $step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
                 'violations' => $violations,
             ],
         ];

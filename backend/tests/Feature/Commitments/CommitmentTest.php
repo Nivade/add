@@ -38,7 +38,7 @@ it('promotes an existing intention to a commitment, confirmed immediately', func
         ->and($commitment->confirmed_at)->not->toBeNull();
 });
 
-it('does not let one person promote another person\'s intention', function (): void {
+it("does not let one person promote another person's intention", function (): void {
     $intention = Intention::factory()->create();
 
     $this->actingAs(User::factory()->create())

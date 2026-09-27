@@ -58,7 +58,7 @@ it('creates a calendar-relative reminder from the picked event and offset', func
         ->and($reminder->trigger_at)->toBeNull();
 });
 
-it('does not let one person attach a reminder to another person\'s calendar event', function (): void {
+it("does not let one person attach a reminder to another person's calendar event", function (): void {
     $event = CalendarEvent::factory()->create();
 
     $this->actingAs(User::factory()->create())
@@ -94,7 +94,7 @@ it('fires a time-triggered reminder at the right instant for a non-UTC user', fu
     expect($reminder->refresh()->sent_at)->not->toBeNull();
 });
 
-it('fires a calendar-relative reminder off the event\'s start, not the reminder\'s own clock', function (): void {
+it("fires a calendar-relative reminder off the event's start, not the reminder's own clock", function (): void {
     Notification::fake();
 
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);

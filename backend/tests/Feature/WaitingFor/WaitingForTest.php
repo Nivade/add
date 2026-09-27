@@ -28,7 +28,7 @@ it('does not surface a fresh waiting-for on home', function (): void {
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('home.needsAttention', 0));
 });
 
@@ -38,7 +38,7 @@ it('surfaces a stale waiting-for on home with all four responses reachable', fun
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.needsAttention.0.kind', 'waiting_for')
             ->where('home.needsAttention.0.id', $waitingFor->id)
             ->where('home.needsAttention.0.title', 'John'));
@@ -52,7 +52,7 @@ it('surfaces a stale waiting-for on home with all four responses reachable', fun
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('home.needsAttention', 0));
 });
 
@@ -71,7 +71,7 @@ it('retires a waiting-for marked received or cancelled', function (): void {
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->has('home.needsAttention', 0));
 });
 

@@ -35,13 +35,13 @@ final class LoggingAiProvider implements AiProvider
 
         try {
             $response = $this->inner->complete($request);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             Log::warning('AI call failed.', [
                 ...$this->context($request, $startedAt),
-                'exception' => $exception::class,
+                'exception' => $throwable::class,
             ]);
 
-            throw $exception;
+            throw $throwable;
         }
 
         Log::info('AI call completed.', [

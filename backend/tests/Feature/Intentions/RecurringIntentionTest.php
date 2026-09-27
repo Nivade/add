@@ -39,7 +39,7 @@ it('refuses to set recurrence on an intention that is not done', function (): vo
     expect($intention->refresh()->recurrence_every_days)->toBeNull();
 });
 
-it('does not let one person set recurrence on another person\'s intention', function (): void {
+it("does not let one person set recurrence on another person's intention", function (): void {
     $intention = Intention::factory()->done()->create();
 
     $this->actingAs(User::factory()->create())

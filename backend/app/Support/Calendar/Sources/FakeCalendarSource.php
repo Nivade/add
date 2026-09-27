@@ -29,6 +29,9 @@ final class FakeCalendarSource implements CalendarSource
         return 'fake';
     }
 
+    /**
+     * @return list<CalendarEventDraftData>
+     */
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array
     {
         return $this->events;

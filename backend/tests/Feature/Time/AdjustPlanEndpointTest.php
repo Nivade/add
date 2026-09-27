@@ -56,7 +56,7 @@ it('shows the plan on home and takes an edit from there', function (): void {
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.plan.deadlineClock', '14:00')
             ->where('home.comingUp.plan.rungs.2.clock', '13:30')
             ->where('home.comingUp.plan.rungs.2.assumed', true)
@@ -69,7 +69,7 @@ it('shows the plan on home and takes an edit from there', function (): void {
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.plan.rungs.2.clock', '13:15')
             ->where('home.comingUp.plan.rungs.2.assumed', false)
         );

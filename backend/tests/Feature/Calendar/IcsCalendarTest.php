@@ -151,7 +151,7 @@ it('fails loudly without repeating the private address when the feed cannot be r
     Http::preventStrayRequests();
     Http::fake([FEED_URL => $response]);
 
-    expect(fn () => SyncCalendar::run(feedPerson(), CarbonImmutable::parse('2026-09-19 09:00:00')))
+    expect(fn (): mixed => SyncCalendar::run(feedPerson(), CarbonImmutable::parse('2026-09-19 09:00:00')))
         ->toThrow(fn (CalendarFeedUnreadable $exception) => expect($exception->getMessage())->not->toContain('private-abc123')
             ->and($exception->getPrevious())->toBeNull());
 })->with([
@@ -181,7 +181,7 @@ it('puts a connected feed on home, reminds from it, and takes it all back on dis
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.title', 'Dentist')
             ->where('home.comingUp.plan.rungs.2.clock', '13:30')
         );
@@ -198,7 +198,7 @@ it('puts a connected feed on home, reminds from it, and takes it all back on dis
         ->and(Reminder::query()->count())->toBe(0);
 });
 
-it('leaves another source\'s events alone on disconnect', function (): void {
+it("leaves another source's events alone on disconnect", function (): void {
     $user = feedPerson();
     CalendarEvent::factory()->for($user)->create(['source' => 'fixture']);
 
@@ -212,7 +212,7 @@ it('names the host it reads from and never hands the private address back', func
         ->get(route('calendar.edit'))
         ->assertOk()
         ->assertDontSee('private-abc123')
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('settings/calendar')
             ->where('connectedHost', 'calendar.example.test')
         );

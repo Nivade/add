@@ -19,8 +19,8 @@ trait ParsesAiDeadline
 
         try {
             return CarbonImmutable::parse(trim($value), $timezone);
-        } catch (Throwable $exception) {
-            throw new AiResponseInvalid("{$operation} returned an unreadable deadline_at: ".trim($value), previous: $exception);
+        } catch (Throwable $throwable) {
+            throw new AiResponseInvalid("{$operation} returned an unreadable deadline_at: ".trim($value), previous: $throwable);
         }
     }
 }

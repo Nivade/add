@@ -113,7 +113,7 @@ it('hides a session that belongs to somebody else', function (): void {
         ->assertNotFound();
 });
 
-it('refuses to start a session on somebody else\'s step', function (): void {
+it("refuses to start a session on somebody else's step", function (): void {
     $intention = kitchen();
 
     $this->actingAs(User::factory()->create())
@@ -172,12 +172,12 @@ it('resolves the same running session on every screen when two are open', functi
     $this->actingAs($session->user)
         ->get(route('focus'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('state.session.id', $later->id));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.session.id', $later->id));
 
     $this->actingAs($session->user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.session.session.id', $later->id));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.session.session.id', $later->id));
 });
 
 it('opens one session when start is pressed twice', function (): void {

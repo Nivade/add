@@ -46,10 +46,12 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     // Capture, via the global shortcut rather than a click.
     $page->keys('nav[aria-label="Main"]', 'c');
     $page->assertSee("What's on your mind?");
+
     expect(focusedDescriptor($page))->toBe("What's on your mind?");
 
     $page->type('[aria-label="What\'s on your mind?"]', 'clean the kitchen before my parents arrive');
     $page->keys('Capture', 'Enter');
+
     expect(focusedDescriptor($page))->toBe('Capture');
 
     // One action.
@@ -57,6 +59,7 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
 
     // Start.
     $page->keys('Start', 'Enter');
+
     expect(focusedDescriptor($page))->toBe('Start');
     $page->assertPathIs('/focus')
         ->assertSee('Put the thing you need on the desk.');
@@ -75,11 +78,13 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     $page->assertSee('Open it.');
 
     $page->keys('Pause', 'Enter');
+
     expect(focusedDescriptor($page))->toBe('Pause');
     $page->assertSee('Welcome back.');
 
     // Welcome back.
     $page->keys('Continue', 'Enter');
+
     expect(focusedDescriptor($page))->toBe('Continue');
     $page->assertSee('Open it.');
 

@@ -12,7 +12,8 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
-    use PasswordValidationRules, ProfileValidationRules;
+    use PasswordValidationRules;
+    use ProfileValidationRules;
 
     /**
      * @param  array<string, string>  $input

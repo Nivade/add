@@ -8,14 +8,14 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
-it('counts the day in the person\'s zone rather than the server\'s', function (): void {
+it("counts the day in the person's zone rather than the server's", function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-09-21 07:30:00', 'UTC'));
 
     // 09:30 in Amsterdam, which is the clock the rail has to draw.
     $this->actingAs(User::factory()->create(['timezone' => 'Europe/Amsterdam']))
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('rail.nowMinute', 9 * 60 + 30)
             ->where('rail.leaveByMinute', null)
             ->where('rail.appointmentTitle', null)
@@ -38,7 +38,7 @@ it('marks when to leave, not when the thing starts', function (): void {
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('rail.leaveByMinute', 13 * 60 + 30)
             ->where('rail.leaveByClock', '13:30')
             ->where('rail.appointmentTitle', 'Dentist')
@@ -58,7 +58,7 @@ it('leaves the mark off when the appointment is another day', function (): void 
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('rail.leaveByMinute', null)
             ->where('rail.leaveByClock', null)
             ->where('rail.appointmentTitle', null)
