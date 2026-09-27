@@ -27,10 +27,6 @@ export default function Commitments({
                 ) : (
                     <ul className="divide-border border-border divide-y border-t">
                         {open.map((commitment) => {
-                            const inferred =
-                                commitment.provenance === 'system_inferred' &&
-                                commitment.confirmedAt === null;
-
                             return (
                                 <li
                                     key={commitment.id}
@@ -49,7 +45,7 @@ export default function Commitments({
                                             commitment.id,
                                         )}
                                         responses={commitmentResponses(
-                                            inferred,
+                                            commitment.awaitingConfirmation,
                                         )}
                                     />
                                 </li>

@@ -151,7 +151,9 @@ function Classification({
                 <Button type="button" variant="outline" onClick={onDone}>
                     Leave it
                 </Button>
-                <Button type="submit">Add it</Button>
+                <Button type="submit" variant="outline">
+                    Add it
+                </Button>
             </div>
         </Form>
     );

@@ -1,12 +1,13 @@
-import type { CommitmentData, CommitmentListData, CommitmentResponse } from '@add/shared';
+import type { CommitmentData, CommitmentListData } from '@add/shared';
 import { commitmentProvenanceLabels, commitmentResponses } from '@add/shared';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { Responses } from '@/components/responses';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { theme } from '@/theme';
 
@@ -18,35 +19,18 @@ function Row({
   onResponded: () => void;
 }) {
   const { token } = useSession();
-  const [saving, setSaving] = useState(false);
-  const inferred =
-    commitment.provenance === 'system_inferred' && commitment.confirmedAt === null;
-
-  const respond = async (response: CommitmentResponse) => {
-    setSaving(true);
-
-    try {
-      await api.respondToCommitment(token as string, commitment.id, response);
-      onResponded();
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <View style={styles.row}>
       <Text style={styles.line}>{commitment.description}</Text>
       <Meta>{commitmentProvenanceLabels[commitment.provenance]}</Meta>
-      <View style={styles.responses}>
-        {commitmentResponses(inferred).map(({ value, label }) => (
-          <Button
-            key={value}
-            label={label}
-            disabled={saving}
-            onPress={() => void respond(value)}
-          />
-        ))}
-      </View>
+      <Responses
+        responses={commitmentResponses(commitment.awaitingConfirmation)}
+        onRespond={async (response) => {
+          await api.respondToCommitment(token as string, commitment.id, response);
+          onResponded();
+        }}
+      />
     </View>
   );
 }
@@ -89,5 +73,4 @@ const styles = StyleSheet.create({
     borderTopColor: theme.color.border,
   },
   line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
-  responses: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(1) },
 });

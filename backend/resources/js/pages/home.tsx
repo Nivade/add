@@ -12,11 +12,14 @@ import {
 } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
+import { captureFieldClassName } from '@/components/capture-dialog';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { quietButtonClassName, Responses } from '@/components/responses';
+import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { focus, overwhelmed } from '@/routes';
 import calendarEvents from '@/routes/calendar-events';
 import commitments from '@/routes/commitments';
@@ -98,23 +101,17 @@ function Commitment({ item }: { item: NeedsAttentionData }) {
         <div className="space-y-2">
             <p>
                 {item.title}
-                {item.inferred && (
+                {item.provenance && (
                     <span className="text-muted-foreground font-mono text-[13px]">
                         {' '}
-                        · {commitmentProvenanceLabels.system_inferred}
+                        · {commitmentProvenanceLabels[item.provenance]}
                     </span>
                 )}
             </p>
             <Responses
                 action={commitments.respond.form(item.id)}
-                responses={commitmentResponses(item.inferred)}
+                responses={commitmentResponses(item.awaitingConfirmation)}
             />
-            <Link
-                href={commitments.index()}
-                className="text-muted-foreground hover:text-foreground inline-block font-mono text-[13px] underline-offset-4 hover:underline"
-            >
-                Everything you said you'd do
-            </Link>
         </div>
     );
 }
@@ -148,7 +145,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 min={1}
                                 max={365}
                                 defaultValue={7}
-                                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-20 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                className={cn(captureFieldClassName, 'w-20')}
                             />
                             <span className="text-muted-foreground font-mono text-[13px]">
                                 days
@@ -217,6 +214,7 @@ export default function Home({ home: data }: { home: HomeData }) {
     const {
         rightNow,
         rightNowIsCommitment,
+        hasOpenCommitments,
         comingUp,
         reminder,
         justFinished,
@@ -245,26 +243,15 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {rightNow.why.map((line) => (
                                 <li key={line}>{line}</li>
                             ))}
-                            {rightNowIsCommitment && (
-                                <li>You said you'd do this.</li>
-                            )}
                         </ul>
-                        {!rightNowIsCommitment && (
-                            <Form
-                                {...intentions.commitment.form(
+                        <div className="mt-3">
+                            <SaidIdDoThis
+                                promised={rightNowIsCommitment}
+                                form={intentions.commitment.form(
                                     rightNow.intention.id,
                                 )}
-                                options={{ preserveScroll: true }}
-                                className="mt-3"
-                            >
-                                <button
-                                    type="submit"
-                                    className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
-                                >
-                                    I said I'd do this
-                                </button>
-                            </Form>
-                        )}
+                            />
+                        </div>
                     </Band>
                 )}
 
@@ -336,14 +323,20 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     name="message"
                                     placeholder="What should future you hear?"
                                     aria-label="What should future you hear"
-                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 min-w-0 flex-1 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                    className={cn(
+                                        captureFieldClassName,
+                                        'w-auto min-w-0 flex-1',
+                                    )}
                                 />
                                 <input
                                     type="number"
                                     name="offset_minutes"
                                     defaultValue={30}
                                     aria-label="Minutes after"
-                                    className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-20 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                                    className={cn(
+                                        captureFieldClassName,
+                                        'w-20',
+                                    )}
                                 />
                                 <Button
                                     type="submit"
@@ -381,6 +374,14 @@ export default function Home({ home: data }: { home: HomeData }) {
                     <p className="text-muted-foreground font-mono text-[13px]">
                         {restCountLine(restCount)}
                     </p>
+                    {hasOpenCommitments && (
+                        <Link
+                            href={commitments.index()}
+                            className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
+                        >
+                            Everything you said you&apos;d do
+                        </Link>
+                    )}
                     <Link
                         href={overwhelmed()}
                         className="text-muted-foreground hover:text-foreground ml-auto font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"

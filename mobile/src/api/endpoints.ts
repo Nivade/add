@@ -156,6 +156,12 @@ export const api = {
       token,
     }),
 
+  promoteCurrentStep: (token: string, sessionId: string) =>
+    request<CommitmentData>(`/sessions/${sessionId}/commitment`, {
+      method: 'POST',
+      token,
+    }),
+
   respondToCommitment: (
     token: string,
     commitmentId: string,

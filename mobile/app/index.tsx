@@ -1,9 +1,7 @@
 import type {
-  CommitmentResponse,
   HomeData,
   JustFinishedData,
   NeedsAttentionData,
-  WaitingForResponse,
 } from '@add/shared';
 import {
   commitmentProvenanceLabels,
@@ -21,6 +19,8 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { QuietAction } from '@/components/quiet-action';
+import { Responses } from '@/components/responses';
 import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { field, theme } from '@/theme';
 
@@ -91,18 +91,6 @@ function WaitingFor({
   onResponded: () => void;
 }) {
   const { token } = useSession();
-  const [saving, setSaving] = useState(false);
-
-  const respond = async (response: WaitingForResponse) => {
-    setSaving(true);
-
-    try {
-      await api.respondToWaitingFor(token as string, item.id, response);
-      onResponded();
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <View style={styles.clarify}>
@@ -110,16 +98,13 @@ function WaitingFor({
         {item.title}
         {item.detail ? ` · ${item.detail}` : ''}
       </Text>
-      <View style={styles.responses}>
-        {waitingForResponses.map(({ value, label }) => (
-          <Button
-            key={value}
-            label={label}
-            disabled={saving}
-            onPress={() => void respond(value)}
-          />
-        ))}
-      </View>
+      <Responses
+        responses={waitingForResponses}
+        onRespond={async (response) => {
+          await api.respondToWaitingFor(token as string, item.id, response);
+          onResponded();
+        }}
+      />
     </View>
   );
 }
@@ -132,36 +117,17 @@ function Commitment({
   onResponded: () => void;
 }) {
   const { token } = useSession();
-  const [saving, setSaving] = useState(false);
-
-  const respond = async (response: CommitmentResponse) => {
-    setSaving(true);
-
-    try {
-      await api.respondToCommitment(token as string, item.id, response);
-      onResponded();
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <View style={styles.clarify}>
       <Text style={styles.line}>{item.title}</Text>
-      {item.inferred && <Meta>{commitmentProvenanceLabels.system_inferred}</Meta>}
-      <View style={styles.responses}>
-        {commitmentResponses(item.inferred).map(({ value, label }) => (
-          <Button
-            key={value}
-            label={label}
-            disabled={saving}
-            onPress={() => void respond(value)}
-          />
-        ))}
-      </View>
-      <Button
-        label="Everything you said you'd do"
-        onPress={() => router.push('/commitments')}
+      {item.provenance && <Meta>{commitmentProvenanceLabels[item.provenance]}</Meta>}
+      <Responses
+        responses={commitmentResponses(item.awaitingConfirmation)}
+        onRespond={async (response) => {
+          await api.respondToCommitment(token as string, item.id, response);
+          onResponded();
+        }}
       />
     </View>
   );
@@ -246,6 +212,7 @@ export default function Home() {
   const {
     rightNow,
     rightNowIsCommitment,
+    hasOpenCommitments,
     session,
     comingUp,
     reminder,
@@ -302,7 +269,7 @@ export default function Home() {
               {rightNowIsCommitment ? (
                 <Text style={styles.line}>You said you'd do this.</Text>
               ) : (
-                <Button
+                <QuietAction
                   label="I said I'd do this"
                   onPress={() => void promote()}
                 />
@@ -388,6 +355,12 @@ export default function Home() {
       )}
 
       <Meta>{restCountLine(restCount)}</Meta>
+      {hasOpenCommitments && (
+        <QuietAction
+          label="Everything you said you'd do"
+          onPress={() => router.push('/commitments')}
+        />
+      )}
 
       <View style={styles.thumbReach}>
         <Button
@@ -415,7 +388,6 @@ const styles = StyleSheet.create({
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
-  responses: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(1) },
   repeat: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1) },
   days: { width: 72, textAlign: 'right' },
 });

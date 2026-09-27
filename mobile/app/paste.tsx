@@ -70,7 +70,6 @@ export default function Paste() {
       <Meta>add it and the app works out the first step</Meta>
       <Button
         label={saving ? 'Adding' : 'Add it'}
-        tone="primary"
         disabled={saving}
         onPress={() => void add()}
       />
