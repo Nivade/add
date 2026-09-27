@@ -126,9 +126,12 @@ A `future_reminders` table: `user_id`, `message`, `trigger_at` nullable,
 `calendar_event_id` nullable with an `offset_seconds` when set, `sent_at`
 nullable. Exactly one of `trigger_at` / `calendar_event_id` is set — a
 database constraint, not just a validation rule, so a bad row cannot exist
-even from a future bug. SQLite cannot add a CHECK after `CREATE TABLE` and
-MySQL refuses one on a cascading foreign key, so those two enforce it with
-triggers and Postgres with a CHECK. Dispatch is a new scheduled command alongside
+even from a future bug.
+
+**Revised, 2026-09-27:** every reminder stores `trigger_at`, which is `NOT NULL`.
+A calendar-relative one also keeps `calendar_event_id` and `offset_seconds`, and
+`SyncCalendar` moves its `trigger_at` when the event moves. The instant is then
+one indexed column, and no driver needs its own constraint. Dispatch is a new scheduled command alongside
 `reminders:dispatch`, not a branch inside it — appointments and future-self
 notes are different shapes answering different questions, and
 `SendDueReminders` is already at the size that earned `BuildExecutionState`

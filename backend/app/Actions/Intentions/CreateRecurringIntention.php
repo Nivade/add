@@ -18,8 +18,12 @@ final class CreateRecurringIntention
 
     public function handle(Intention $template, CarbonImmutable $now): Intention
     {
-        $everyDays = $template->recurrence_every_days ?? throw new LogicException("Intention {$template->id} has no recurrence.");
-        $nextAt = $template->recurrence_next_at ?? throw new LogicException("Intention {$template->id} has no recurrence.");
+        $everyDays = $template->recurrence_every_days;
+        $nextAt = $template->recurrence_next_at;
+
+        if ($everyDays === null || ! $nextAt instanceof CarbonImmutable) {
+            throw new LogicException("Intention {$template->id} has no recurrence.");
+        }
 
         $fresh = DB::transaction(function () use ($template, $everyDays, $nextAt, $now): Intention {
             $template->update(['recurrence_next_at' => $this->nextAfter($nextAt, $everyDays, $now)]);

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\FutureReminders\CreateRelativeFutureReminder;
 use App\Actions\FutureReminders\SendDueFutureReminders;
 use App\Models\CalendarEvent;
 use App\Models\FutureReminder;
@@ -40,7 +41,7 @@ it('rejects a reminder with no time anywhere in it', function (): void {
 
 it('creates a calendar-relative reminder from the picked event and offset', function (): void {
     $user = User::factory()->create();
-    $event = CalendarEvent::factory()->for($user)->create(['title' => 'Dentist']);
+    $event = CalendarEvent::factory()->for($user)->create(['title' => 'Dentist', 'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00')]);
 
     $this->actingAs($user)
         ->from(route('home'))
@@ -55,7 +56,7 @@ it('creates a calendar-relative reminder from the picked event and offset', func
     expect($reminder->message)->toBe('call the pharmacy')
         ->and($reminder->calendar_event_id)->toBe($event->id)
         ->and($reminder->offset_seconds)->toBe(1800)
-        ->and($reminder->trigger_at)->toBeNull();
+        ->and($reminder->trigger_at->equalTo(CarbonImmutable::parse('2026-09-19 14:30:00')))->toBeTrue();
 });
 
 it("does not let one person attach a reminder to another person's calendar event", function (): void {
@@ -101,12 +102,7 @@ it("fires a calendar-relative reminder off the event's start, not the reminder's
     $event = CalendarEvent::factory()->for($user)->create([
         'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00'),
     ]);
-    FutureReminder::factory()->for($user)->create([
-        'message' => 'call the pharmacy',
-        'trigger_at' => null,
-        'calendar_event_id' => $event->id,
-        'offset_seconds' => 1800,
-    ]);
+    CreateRelativeFutureReminder::run($user, $event, 1800, 'call the pharmacy');
 
     SendDueFutureReminders::run($user, CarbonImmutable::parse('2026-09-19 14:29:00'));
     Notification::assertNothingSent();
@@ -127,20 +123,9 @@ it('sends a due reminder once and not on every dispatch after', function (): voi
     Notification::assertSentToTimes($user, FutureReminderDue::class, 1);
 });
 
-it('refuses a row with both or neither trigger set, even bypassing the action', function (): void {
-    $user = User::factory()->create();
-    $event = CalendarEvent::factory()->for($user)->create();
-
-    expect(fn () => FutureReminder::factory()->for($user)->create([
-        'trigger_at' => CarbonImmutable::now(),
-        'calendar_event_id' => $event->id,
-        'offset_seconds' => 1800,
-    ]))->toThrow(Illuminate\Database\QueryException::class);
-
-    expect(fn () => FutureReminder::factory()->for($user)->create([
-        'trigger_at' => null,
-        'calendar_event_id' => null,
-    ]))->toThrow(Illuminate\Database\QueryException::class);
+it('refuses a row with no instant to fire at, even bypassing the action', function (): void {
+    expect(fn () => FutureReminder::factory()->for(User::factory())->create(['trigger_at' => null]))
+        ->toThrow(Illuminate\Database\QueryException::class);
 });
 
 it('answers over the API too', function (): void {

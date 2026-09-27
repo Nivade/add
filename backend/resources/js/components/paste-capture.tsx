@@ -1,4 +1,5 @@
 import type { IngestionClassificationData } from '@add/shared';
+import { entryCopy } from '@add/shared';
 import { Form, useHttp } from '@inertiajs/react';
 import { useState } from 'react';
 import {
@@ -75,8 +76,8 @@ export function PasteCapture() {
     return (
         <CaptureDialog
             trigger="Paste"
-            title="Paste something that arrived"
-            description="An email, a letter, a message. The app reads it and says whether it needs you."
+            title={entryCopy.paste.question}
+            description={entryCopy.paste.meta}
             open={open}
             onOpenChange={close}
         >
@@ -90,7 +91,8 @@ export function PasteCapture() {
                         onChange={(event) =>
                             http.setData('text', event.target.value)
                         }
-                        aria-label="What arrived"
+                        placeholder={entryCopy.paste.placeholder}
+                        aria-label={entryCopy.paste.label}
                         className={captureFieldClassName}
                     />
                     <InputError

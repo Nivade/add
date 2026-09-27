@@ -9,6 +9,7 @@ use App\Models\FutureReminder;
 use App\Models\User;
 use App\Notifications\FutureReminderDue;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -29,26 +30,25 @@ final class SendDueFutureReminders
     public function handle(User $user, ?CarbonImmutable $now = null): array
     {
         $now ??= $user->now();
-        $sent = [];
 
-        $reminders = FutureReminder::query()
-            ->where('user_id', $user->id)
-            ->unsent()
-            ->with('calendarEvent')
-            ->get();
+        $due = FutureReminder::query()->where('user_id', $user->id)->due($now)->get();
 
-        foreach ($reminders as $reminder) {
-            $firesAt = $reminder->firesAt();
-
-            if (! $firesAt instanceof CarbonImmutable || $firesAt > $now) {
-                continue;
-            }
-
+        foreach ($due as $reminder) {
             $user->notify(new FutureReminderDue($reminder));
-            $reminder->update(['sent_at' => $now]);
-            $sent[] = $reminder;
         }
 
-        return $sent;
+        FutureReminder::query()->whereKey($due->modelKeys())->update(['sent_at' => $now]);
+
+        return array_values($due->all());
+    }
+
+    /**
+     * Only someone with a reminder already due is worth a job.
+     *
+     * @param  Builder<User>  $query
+     */
+    protected function constrainQueued(Builder $query): void
+    {
+        $query->whereIn('id', FutureReminder::query()->select('user_id')->due(CarbonImmutable::now()));
     }
 }

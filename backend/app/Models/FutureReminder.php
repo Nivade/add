@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $id
  * @property int $user_id
  * @property string $message
- * @property CarbonImmutable|null $trigger_at
+ * @property CarbonImmutable $trigger_at
  * @property string|null $calendar_event_id
  * @property int|null $offset_seconds
  * @property CarbonImmutable|null $sent_at
@@ -49,20 +49,11 @@ class FutureReminder extends Model
         return $this->belongsTo(CalendarEvent::class);
     }
 
-    /** The instant this fires: the timestamp itself, or the calendar event's start plus its offset. */
-    public function firesAt(): ?CarbonImmutable
+    /** @param  Builder<static>  $query */
+    #[Scope]
+    protected function due(Builder $query, CarbonImmutable $now): void
     {
-        if ($this->trigger_at instanceof CarbonImmutable) {
-            return $this->trigger_at;
-        }
-
-        $event = $this->calendarEvent;
-
-        if (! $event instanceof CalendarEvent) {
-            return null;
-        }
-
-        return $event->starts_at->addSeconds($this->offset_seconds ?? 0);
+        $query->whereNull('sent_at')->where('trigger_at', '<=', $now);
     }
 
     /** @param  Builder<static>  $query */

@@ -25,14 +25,15 @@ final class BuildNeedsAttention
     /** How long a waiting-for goes untouched before it is worth a nudge. */
     private const int WAITING_FOR_STALE_AFTER_DAYS = 4;
 
-    public function handle(User $user, CarbonImmutable $now): NeedsAttentionBand
+    /** @param  Collection<int, Commitment>  $standaloneCommitments  open, most pressing first */
+    public function handle(User $user, CarbonImmutable $now, Collection $standaloneCommitments): NeedsAttentionBand
     {
-        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderByRaw('coalesce(last_answered_at, created_at)')->get();
-        $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->whereNull('intention_id')->mostPressingFirst()->get();
-
-        $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $now);
-        // One tied to an intention settles when the intention finishes, so home already shows it as that intention.
-        $commitment = $openCommitments->first();
+        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open();
+        $staleWaitingFor = (clone $openWaitingFors)
+            ->whereRaw('coalesce(last_answered_at, created_at) <= ?', [$now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS)])
+            ->orderByRaw('coalesce(last_answered_at, created_at)')
+            ->first();
+        $commitment = $standaloneCommitments->first();
 
         return new NeedsAttentionBand(
             items: [
@@ -40,7 +41,7 @@ final class BuildNeedsAttention
                 ...($staleWaitingFor instanceof WaitingFor ? [NeedsAttentionData::forWaitingFor($staleWaitingFor)] : []),
                 ...($commitment instanceof Commitment ? [NeedsAttentionData::forCommitment($commitment)] : []),
             ],
-            openBesidesIntentions: $openWaitingFors->count() + $openCommitments->count(),
+            openBesidesIntentions: $openWaitingFors->count() + $standaloneCommitments->count(),
         );
     }
 
@@ -56,14 +57,5 @@ final class BuildNeedsAttention
             ->get()
             ->map(fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention))
             ->all());
-    }
-
-    /** @param  Collection<int, WaitingFor>  $openWaitingFors
-     */
-    private function staleWaitingFor(Collection $openWaitingFors, CarbonImmutable $now): ?WaitingFor
-    {
-        $threshold = $now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS);
-
-        return $openWaitingFors->first(fn (WaitingFor $waitingFor): bool => $waitingFor->quietSince()->lte($threshold));
     }
 }

@@ -19,6 +19,7 @@ final class CreateRelativeFutureReminder
         return FutureReminder::query()->create([
             'user_id' => $user->id,
             'message' => trim($message),
+            'trigger_at' => $event->starts_at->addSeconds($offsetSeconds),
             'calendar_event_id' => $event->id,
             'offset_seconds' => $offsetSeconds,
         ]);

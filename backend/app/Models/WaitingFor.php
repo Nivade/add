@@ -51,12 +51,6 @@ class WaitingFor extends Model
         ];
     }
 
-    /** Staleness counts from creation or the last answer, never from an unrelated edit. */
-    public function quietSince(): CarbonImmutable
-    {
-        return $this->last_answered_at ?? $this->created_at ?? CarbonImmutable::now();
-    }
-
     /**
      * Cancelled and received are retired; only these two still ask for attention.
      *

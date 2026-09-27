@@ -63,3 +63,41 @@ export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = 
 export function recurrenceLine(everyDays: number): string {
     return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
 }
+
+/** One question per way in, worded the same on both clients. */
+export const entryCopy = {
+    waitingFor: {
+        question: 'Who or what are you waiting on?',
+        meta: 'Nothing to do until they get back to you. This keeps it from being forgotten.',
+        placeholder: 'John',
+        label: 'Who or what',
+        notePlaceholder: 'the contract',
+        noteLabel: 'What for',
+    },
+    commitment: {
+        question: 'What did you say you would do?',
+        meta: 'Said out loud or typed, it counts the same either way.',
+        placeholder: "I'll call Sarah Friday",
+        label: 'What you said you would do',
+    },
+    futureReminder: {
+        question: 'What should future you hear, and when?',
+        meta: 'Say when in the same sentence.',
+        placeholder: 'Tomorrow at 5, buy dishwasher tablets',
+        label: 'What and when',
+    },
+    paste: {
+        question: 'Paste something that arrived',
+        meta: 'An email, a letter, a message. The app says whether it needs you.',
+        placeholder: 'Your car insurance expires on 14 October.',
+        label: 'What arrived',
+    },
+} as const;
+
+export const commitmentCopy = {
+    promise: "I said I'd do this",
+    promised: "You said you'd do this.",
+    list: "Everything you said you'd do",
+    listTitle: "What you said you'd do",
+    listEmpty: "Nothing is open. Anything you say you'll do lands here.",
+} as const;

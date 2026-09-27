@@ -1,3 +1,4 @@
+import { commitmentCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import type { RouteFormDefinition } from '@/wayfinder';
 
@@ -11,9 +12,7 @@ export function SaidIdDoThis({
 }) {
     if (promised) {
         return (
-            <p className="text-muted-foreground">
-                You said you&apos;d do this.
-            </p>
+            <p className="text-muted-foreground">{commitmentCopy.promised}</p>
         );
     }
 
@@ -23,7 +22,7 @@ export function SaidIdDoThis({
                 type="submit"
                 className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
             >
-                I said I&apos;d do this
+                {commitmentCopy.promise}
             </button>
         </Form>
     );

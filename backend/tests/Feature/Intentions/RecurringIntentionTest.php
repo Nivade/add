@@ -25,7 +25,6 @@ it('sets recurrence on a done intention from the web', function (): void {
     $intention->refresh();
 
     expect($intention->recurrence_every_days)->toBe(7)
-        ->and($intention->is_recurring)->toBeTrue()
         ->and($intention->recurrence_next_at?->equalTo(CarbonImmutable::now()->addDays(7)))->toBeTrue();
 });
 

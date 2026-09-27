@@ -8,6 +8,7 @@ use App\Actions\Concerns\QueuesPerUser;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\CalendarEvent;
+use App\Models\FutureReminder;
 use App\Models\User;
 use App\Support\Calendar\Sources\IcsCalendarSource;
 use Carbon\CarbonImmutable;
@@ -47,6 +48,7 @@ final class SyncCalendar
         ));
 
         $events = $this->store($user, $drafts);
+        $this->followMovedEvents($events);
 
         // An empty read cannot be told from an outage, and reaping would take stated minutes with it.
         if ($drafts === []) {
@@ -75,6 +77,24 @@ final class SyncCalendar
         if ($this->source->name() === IcsCalendarSource::NAME) {
             $query->whereNotNull('calendar_feed_url');
         }
+    }
+
+    /**
+     * A reminder tied to an event fires relative to it, so a moved event moves the reminder too.
+     *
+     * @param  list<CalendarEvent>  $events
+     */
+    private function followMovedEvents(array $events): void
+    {
+        $startsAt = collect($events)->mapWithKeys(fn (CalendarEvent $event): array => [$event->id => $event->starts_at]);
+
+        FutureReminder::query()
+            ->unsent()
+            ->whereIn('calendar_event_id', $startsAt->keys())
+            ->get()
+            ->each(fn (FutureReminder $reminder) => $reminder->update([
+                'trigger_at' => $startsAt[$reminder->calendar_event_id]->addSeconds($reminder->offset_seconds ?? 0),
+            ]));
     }
 
     /**

@@ -38,25 +38,21 @@ final class BuildHome
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $needsAttention = BuildNeedsAttention::run($user, $context->now);
+        $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
+        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->whereNull('intention_id')->whereNull('step_id')->values());
         $rightNow = $this->resolver->resolve($user, $context);
 
         return new HomeData(
             rightNow: $rightNow,
-            rightNowIsCommitment: $rightNow instanceof NextActionData && $this->isCommitment($rightNow->intention->id),
+            rightNowIsCommitment: $rightNow instanceof NextActionData && $openCommitments->contains('intention_id', $rightNow->intention->id),
             session: $this->session($user),
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
             justFinished: $this->justFinished($user, $context->now),
             needsAttention: $needsAttention->items,
             restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
-            hasOpenCommitments: Commitment::query()->where('user_id', $user->id)->open()->exists(),
+            hasOpenCommitments: $openCommitments->isNotEmpty(),
         );
-    }
-
-    private function isCommitment(string $intentionId): bool
-    {
-        return Commitment::query()->open()->forIntention($intentionId)->exists();
     }
 
     private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData
@@ -66,6 +62,7 @@ final class BuildHome
             ->where('status', IntentionStatus::Done)
             ->where('completed_at', '>=', $now->subMinutes(self::JUST_FINISHED_WITHIN_MINUTES))
             ->latest('completed_at')
+            ->with('recurrenceTemplate')
             ->first();
 
         return $intention instanceof Intention ? new JustFinishedData($intention->id, $intention->title, $intention->repeatsEveryDays()) : null;

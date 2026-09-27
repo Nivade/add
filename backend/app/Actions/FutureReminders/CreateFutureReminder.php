@@ -8,7 +8,6 @@ use App\Contracts\DeadlineExtractor;
 use App\Models\FutureReminder;
 use App\Models\User;
 use App\Support\Time\ExtractedDeadline;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -34,16 +33,8 @@ final class CreateFutureReminder
 
         return FutureReminder::query()->create([
             'user_id' => $user->id,
-            'message' => $this->unclaimed($text, $extracted),
+            'message' => $extracted->remainderOf($text, ',.-'),
             'trigger_at' => $extracted->at,
         ]);
-    }
-
-    private function unclaimed(string $text, ExtractedDeadline $extracted): string
-    {
-        $remainder = Str::squish(str_replace($extracted->phrase, ' ', $text));
-        $remainder = trim($remainder, " \t\n\r\0\x0B,.-");
-
-        return $remainder === '' ? $text : $remainder;
     }
 }

@@ -44,7 +44,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property CarbonImmutable|null $recurrence_next_at
  * @property string|null $recurrence_template_id
  * @property-read Intention|null $recurrenceTemplate
- * @property-read bool $is_recurring
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -94,12 +93,6 @@ class Intention extends Model implements Appointment
     protected function needsClarification(): Attribute
     {
         return Attribute::get(fn (): bool => $this->clarifying_question !== null && $this->clarification === null);
-    }
-
-    /** @return Attribute<bool, never> */
-    protected function isRecurring(): Attribute
-    {
-        return Attribute::get(fn (): bool => $this->recurrence_every_days !== null);
     }
 
     /** @return BelongsTo<Intention, $this> */

@@ -29,8 +29,7 @@ final class ConsentGatedAiProvider implements AiProvider
     {
         throw_unless(
             User::query()->whereKey($request->userId)->value('ai_consented_at') !== null,
-            AiUnavailable::class,
-            'AI is disabled; no consent is on record for '.$request->operation->value.'.'
+            AiUnavailable::withoutConsent('AI is disabled; no consent is on record for '.$request->operation->value.'.'),
         );
 
         return $this->inner->complete($request);

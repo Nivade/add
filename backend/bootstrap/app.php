@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Support\Ai\Exceptions\AiUnavailable;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Sentry\Laravel\Integration;
-use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -40,8 +37,4 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );
-
-        $exceptions->render(fn (AiUnavailable $exception, Request $request): ?JsonResponse => $request->expectsJson()
-            ? new JsonResponse(['message' => 'Reading this needs AI, which is off. It can be turned on in settings.'], Response::HTTP_SERVICE_UNAVAILABLE)
-            : null);
     })->create();

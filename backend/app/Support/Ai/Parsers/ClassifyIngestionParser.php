@@ -6,12 +6,12 @@ namespace App\Support\Ai\Parsers;
 
 use App\Data\Ai\IngestionClassificationData;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
-use App\Support\Ai\Parsers\Concerns\ParsesAiDeadline;
+use App\Support\Ai\Parsers\Concerns\ParsesAiFields;
 
 /** The parser is the validator: the provider hands over decoded JSON and forms no opinion about it. */
 final class ClassifyIngestionParser
 {
-    use ParsesAiDeadline;
+    use ParsesAiFields;
 
     /** @param  array<string, mixed>  $payload */
     public function parse(array $payload, string $timezone): IngestionClassificationData
@@ -22,20 +22,10 @@ final class ClassifyIngestionParser
             throw new AiResponseInvalid('classify_ingestion returned a non-boolean actionable.');
         }
 
-        $title = $payload['title'] ?? null;
+        $title = $this->optionalText($payload['title'] ?? null, 'title', 'classify_ingestion');
 
-        if ($title !== null && ! is_string($title)) {
-            throw new AiResponseInvalid('classify_ingestion returned a non-string title.');
-        }
-
-        if ($actionable && (! is_string($title) || trim($title) === '')) {
+        if ($actionable && $title === null) {
             throw new AiResponseInvalid('classify_ingestion marked actionable with no title.');
-        }
-
-        $why = $payload['why'] ?? null;
-
-        if ($why !== null && ! is_string($why)) {
-            throw new AiResponseInvalid('classify_ingestion returned a non-string why.');
         }
 
         $estimatedSeconds = $payload['estimated_seconds'] ?? null;
@@ -46,8 +36,8 @@ final class ClassifyIngestionParser
 
         return new IngestionClassificationData(
             actionable: $actionable,
-            title: is_string($title) && trim($title) !== '' ? trim($title) : null,
-            why: is_string($why) && trim($why) !== '' ? trim($why) : null,
+            title: $title,
+            why: $this->optionalText($payload['why'] ?? null, 'why', 'classify_ingestion'),
             deadlineAt: $this->deadline($payload['deadline_at'] ?? null, $timezone, 'classify_ingestion'),
             estimatedSeconds: $estimatedSeconds,
         );

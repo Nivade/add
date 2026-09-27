@@ -1,4 +1,6 @@
+import { Form } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,6 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type { RouteFormDefinition } from '@/wayfinder';
 
 /** Shared by every text input across the capture dialogs, so they stay visually identical. */
 export const captureFieldClassName =
@@ -48,5 +51,53 @@ export function CaptureDialog({
                 </DialogContent>
             </Dialog>
         </>
+    );
+}
+
+/** A capture dialog whose whole body is one form: it closes and clears itself once the save lands. */
+export function CaptureFormDialog({
+    trigger,
+    title,
+    description,
+    form,
+    children,
+}: {
+    trigger: ReactNode;
+    title: string;
+    description: string;
+    form: RouteFormDefinition<'post'>;
+    children: (errors: Record<string, string | undefined>) => ReactNode;
+}) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <CaptureDialog
+            trigger={trigger}
+            title={title}
+            description={description}
+            open={open}
+            onOpenChange={setOpen}
+        >
+            <Form
+                {...form}
+                options={{ preserveScroll: true }}
+                onSuccess={() => setOpen(false)}
+                resetOnSuccess
+                className="flex flex-col gap-3"
+            >
+                {({ errors, processing }) => (
+                    <>
+                        {children(errors)}
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="self-end"
+                        >
+                            Save
+                        </Button>
+                    </>
+                )}
+            </Form>
+        </CaptureDialog>
     );
 }

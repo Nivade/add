@@ -8,6 +8,7 @@ use App\Actions\Concerns\QueuesPerUser;
 use App\Models\Intention;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -41,5 +42,15 @@ final class SendDueRecurringIntentions
         }
 
         return $created;
+    }
+
+    /**
+     * Only someone with a template already due is worth a job.
+     *
+     * @param  Builder<User>  $query
+     */
+    protected function constrainQueued(Builder $query): void
+    {
+        $query->whereIn('id', Intention::query()->select('user_id')->dueForRecurrence(CarbonImmutable::now()));
     }
 }

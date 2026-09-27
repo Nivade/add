@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Calendar\SyncCalendar;
+use App\Actions\FutureReminders\CreateRelativeFutureReminder;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Enums\AppointmentKind;
@@ -196,4 +197,18 @@ it('queues a feed sync only for the people who pasted a feed', function (): void
     $this->artisan('calendar:sync')->assertSuccessful();
 
     Queue::assertPushed(JobDecorator::class, 1);
+});
+
+it('moves a reminder tied to an event when the event moves', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    calendar(draft('abc-1', '2026-09-19 14:00:00'));
+    [$event] = SyncCalendar::run($user, $now);
+    $reminder = CreateRelativeFutureReminder::run($user, $event, 1800, 'call the pharmacy');
+
+    calendar(draft('abc-1', '2026-09-19 16:00:00'));
+    SyncCalendar::run($user, $now);
+
+    expect($reminder->refresh()->trigger_at->equalTo(CarbonImmutable::parse('2026-09-19 16:30:00')))->toBeTrue();
 });

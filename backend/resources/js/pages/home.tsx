@@ -4,8 +4,7 @@ import type {
     NeedsAttentionData,
 } from '@add/shared';
 import {
-    commitmentProvenanceLabels,
-    commitmentResponses,
+    commitmentCopy,
     recurrenceLine,
     restCountLine,
     waitingForResponses,
@@ -13,6 +12,7 @@ import {
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { captureFieldClassName } from '@/components/capture-dialog';
+import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
@@ -91,26 +91,6 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
             <Responses
                 action={waitingFors.respond.form(item.id)}
                 responses={waitingForResponses}
-            />
-        </div>
-    );
-}
-
-function Commitment({ item }: { item: NeedsAttentionData }) {
-    return (
-        <div className="space-y-2">
-            <p>
-                {item.title}
-                {item.provenance && (
-                    <span className="text-muted-foreground font-mono text-[13px]">
-                        {' '}
-                        · {commitmentProvenanceLabels[item.provenance]}
-                    </span>
-                )}
-            </p>
-            <Responses
-                action={commitments.respond.form(item.id)}
-                responses={commitmentResponses(item.awaitingConfirmation)}
             />
         </div>
     );
@@ -359,7 +339,14 @@ export default function Home({ home: data }: { home: HomeData }) {
                                         <WaitingFor item={item} />
                                     )}
                                     {item.kind === 'commitment' && (
-                                        <Commitment item={item} />
+                                        <CommitmentRow
+                                            id={item.id}
+                                            description={item.title}
+                                            provenance={item.provenance}
+                                            awaitingConfirmation={
+                                                item.awaitingConfirmation
+                                            }
+                                        />
                                     )}
                                     {item.kind === 'intention' && (
                                         <Clarify item={item} />
@@ -379,7 +366,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                             href={commitments.index()}
                             className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
                         >
-                            Everything you said you&apos;d do
+                            {commitmentCopy.list}
                         </Link>
                     )}
                     <Link
