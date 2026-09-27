@@ -30,6 +30,9 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
         'july', 'august', 'september', 'october', 'november', 'december',
     ];
 
+    /** Month names that are also everyday words, so they read as a month only when no word follows. */
+    private const array AMBIGUOUS_MONTHS = ['may'];
+
     private const string TIME_SUFFIX = '(?:\s+(morning|afternoon|evening|night)|\s+at\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?)?';
 
     public function extract(string $text, CarbonImmutable $now): ?ExtractedDeadline
@@ -64,7 +67,7 @@ final class PhraseDeadlineExtractor implements DeadlineExtractor
             '/\b(\d{4})-(\d{2})-(\d{2})(?:[t ](\d{1,2}):(\d{2}))?\b/' => $this->isoDate(...),
             '/\bin (\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten) (minute|hour|day|week|month)s?\b/' => $this->relativeOffset(...),
             '/\b(?:before|by|on|due) the (\d{1,2})(?:st|nd|rd|th)\b/' => $this->dayOfMonth(...),
-            '/\b(in|by|before|end of) ('.implode('|', self::MONTHS).')\b(?:,?\s+(\d{4})\b)?(?!(?<=may)\s+[a-z])/' => $this->namedMonth(...),
+            '/\b(in|by|before|end of) ('.implode('|', self::MONTHS).')\b(?:,?\s+(\d{4})\b)?(?!(?<=\b(?:'.implode('|', self::AMBIGUOUS_MONTHS).'))\s+[a-z])/' => $this->namedMonth(...),
             '/\b(?:(?:next|this|on|by|before|coming)\s+)?('.self::WEEKDAYS.')'.self::TIME_SUFFIX.'/' => $this->weekday(...),
             '/\b(today|tonight|tomorrow)'.self::TIME_SUFFIX.'/' => $this->namedDay(...),
             '/\bnext (week|month)\b/' => $this->nextPeriod(...),
