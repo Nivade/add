@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Actions\Ai\RunCaptureEval;
+use App\Support\Ai\ParseCaptureExamples;
 use App\Support\Ai\Prompts;
 use Illuminate\Support\Facades\File;
 
 it('counts a question as copied when only case and punctuation differ from a prompt example', function (?string $question, bool $copied): void {
-    expect(RunCaptureEval::copiesPrompt($question))->toBe($copied);
+    expect(ParseCaptureExamples::isCopiedQuestion($question))->toBe($copied);
 })->with([
     'verbatim' => ['Is there a trip you need it for, and when?', true],
     'recased and repunctuated' => ['is there a trip you need it for and when', true],

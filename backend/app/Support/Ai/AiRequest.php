@@ -8,6 +8,7 @@ use App\Enums\Ai\AiOperation;
 use App\Support\Ai\Schemas\ClassifyIngestionSchema;
 use App\Support\Ai\Schemas\DecomposeIntentionSchema;
 use App\Support\Ai\Schemas\ParseCaptureSchema;
+use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 
@@ -26,12 +27,13 @@ final readonly class AiRequest
         public int $userId,
     ) {}
 
-    public static function parseCapture(int $userId, string $user): self
+    /** A model with no date cannot resolve "Saturday", and one with no zone answers on the wrong clock. */
+    public static function parseCapture(int $userId, string $capture, CarbonImmutable $now): self
     {
         return new self(
             operation: AiOperation::ParseCapture,
             system: Prompts::PARSE_CAPTURE,
-            user: $user,
+            user: implode("\n", ['Today is '.$now->format('l j F Y').' in '.$now->getTimezone()->getName().'.', '', $capture]),
             schema: ParseCaptureSchema::builder(),
             promptVersion: Prompts::PARSE_CAPTURE_VERSION,
             schemaVersion: ParseCaptureSchema::VERSION,
