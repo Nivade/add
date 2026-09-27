@@ -1,6 +1,6 @@
 # Findings triage — clearing `.ai/findings.md`
 
-**State:** designed, 2026-09-27 · [the slice table](executive-function-os.md#slices)
+**State:** building, 2026-09-27 · [the slice table](executive-function-os.md#slices)
 
 *Rules: `domain-model.md`, `support-and-concerns.md`, `api-and-data.md`, `ai-layer.md`,
 `product-invariants.md`, `toolchain.md`, `testing.md`, `general.md`.
@@ -11,8 +11,8 @@ Skills: `note-finding` (triage), `laravel-actions`, `calendar-sync`, `laravel-se
 
 Every entry in [`findings.md`](../findings.md) was re-checked against the code on the date above
 and still holds. Each phase below clears one entry: the change that fixes it deletes its line,
-as `note-finding`'s triage asks. Phases are independent, one branch and one PR each, in the
-order listed — risk to data first, then the traps a person can hit, then measurement, then local
+as `note-finding`'s triage asks. Phases are independent, one commit each on a single branch
+(`fix/findings-triage`), so the per-phase branch names below were not used, in the order listed — risk to data first, then the traps a person can hit, then measurement, then local
 tooling.
 
 ## Phase 1 — session transitions take the row lock
