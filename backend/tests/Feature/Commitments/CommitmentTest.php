@@ -136,7 +136,9 @@ it('promotes an intention once, and keeps the commitment when the intention is f
 
     $this->actingAs($intention->user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.rightNowIsCommitment', true));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.rightNowIsCommitment', true)
+            ->has('home.needsAttention', 0));
 
     CompleteStep::run($session);
 

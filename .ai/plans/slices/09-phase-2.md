@@ -1,6 +1,6 @@
 # Slice 9 — phase 2: waiting-for, commitments, future-self, and the rest
 
-**State:** done, 2026-09-25 · [the slice table](../executive-function-os.md#slices)
+**State:** done, 2026-09-27 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §15, §17, §19–§21, §33. Rules:
 `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `testing.md`.*
@@ -92,17 +92,20 @@ timestamps. Two provenance levels are reachable this slice:
 - `user_stated` — typed directly ("I'll call Sarah Friday"), same immediate
   `confirmed_at`, since the person just said it themselves.
 
-`system_inferred` rows need `confirmed_at` nullable and a confirm/dismiss
-action per product-invariants' "no silent commitments" — but nothing produces
-one this slice, so that action is not built yet either. Building a confirm
-flow for a state nothing can reach is exactly the speculative generality
-`domain-model.md`'s flat-architecture reasoning already warns against; it
-waits for the phase-3 detector that actually creates one.
+`system_inferred` rows need `confirmed_at` nullable and a confirm action per
+product-invariants' "no silent commitments". Nothing produces one yet, but the
+answers are built anyway: a commitment nothing displays is not tracked at all.
+
+**Revised, 2026-09-27:** a commitment carries `status` (`open | kept | released`)
+and an optional `intention_id`. Home's needs-attention band shows the one most
+pressing open commitment — an unconfirmed inference first — with confirm, keep
+and release; the full list is `/commitments`, reached only from that row.
+Promoting an intention is idempotent, and finishing the intention keeps it.
 
 **Done when** a commitment can be created from either reachable provenance,
 carries the right label, and an inferred one — created directly in a test,
-since nothing creates one in the product yet — renders as inferred and
-unconfirmed rather than as fact.
+since nothing creates one in the product yet — renders on home as inferred and
+unconfirmed rather than as fact, and can be confirmed, kept or released.
 
 ## Phase 3 — future-self reminders
 
@@ -120,7 +123,9 @@ A `future_reminders` table: `user_id`, `message`, `trigger_at` nullable,
 `calendar_event_id` nullable with an `offset_seconds` when set, `sent_at`
 nullable. Exactly one of `trigger_at` / `calendar_event_id` is set — a
 database constraint, not just a validation rule, so a bad row cannot exist
-even from a future bug. Dispatch is a new scheduled command alongside
+even from a future bug. SQLite cannot add a CHECK after `CREATE TABLE` and
+MySQL refuses one on a cascading foreign key, so those two enforce it with
+triggers and Postgres with a CHECK. Dispatch is a new scheduled command alongside
 `reminders:dispatch`, not a branch inside it — appointments and future-self
 notes are different shapes answering different questions, and
 `SendDueReminders` is already at the size that earned `BuildExecutionState`
@@ -153,6 +158,10 @@ uses.
 **Decided:** re-decompose each time the recurrence fires, through the same
 `DecomposeIntention` path a fresh capture uses. No step template is stored or
 copied forward; a stale step set is worse than a fresh decomposition pass.
+Missed runs collapse into one fresh intention and the schedule keeps its
+original rhythm, so a stalled scheduler never produces a backlog of copies.
+"Repeat this" lives in home's just-finished band, shown for an hour after the
+session that finished the intention.
 
 ## Phase 5 — body doubling, solo
 
@@ -180,7 +189,9 @@ real caller without touching a mailbox.
 
 **Done when** the contract exists, one adapter implements it, and nothing in
 this phase reads external data without the same explicit-consent gate slice 8
-built for the AI path generally.
+built for the AI path generally. The web paste dialog and the native paste screen
+are its callers; an actionable result becomes an ordinary capture of the pasted
+text, so deadlines and clarification go through the capture path unchanged.
 
 §19's actual sources — email, documents, receipts, bank and government
 correspondence — are not this phase. They are recorded under slice 10 with

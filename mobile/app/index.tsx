@@ -300,7 +300,7 @@ export default function Home() {
                 </Text>
               ))}
               {rightNowIsCommitment ? (
-                <Meta>you said you'd do this</Meta>
+                <Text style={styles.line}>You said you'd do this.</Text>
               ) : (
                 <Button
                   label="I said I'd do this"

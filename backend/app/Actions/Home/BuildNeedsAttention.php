@@ -28,9 +28,10 @@ final class BuildNeedsAttention
     public function handle(User $user, CarbonImmutable $now): array
     {
         $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderBy('updated_at')->get();
-        $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
+        $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->whereNull('intention_id')->mostPressingFirst()->get();
 
         $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $now);
+        // One tied to an intention settles when the intention finishes, so home already shows it as that intention.
         $commitment = $openCommitments->first();
 
         return [

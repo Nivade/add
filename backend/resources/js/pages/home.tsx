@@ -246,10 +246,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <li key={line}>{line}</li>
                             ))}
                             {rightNowIsCommitment && (
-                                <li>
-                                    {commitmentProvenanceLabels.user_task}, and
-                                    you said you'd do it
-                                </li>
+                                <li>You said you'd do this.</li>
                             )}
                         </ul>
                         {!rightNowIsCommitment && (
