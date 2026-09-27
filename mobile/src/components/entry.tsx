@@ -13,6 +13,7 @@ export function Entry({
   placeholder,
   label,
   multiline = false,
+  second,
   onSave,
 }: {
   question: string;
@@ -20,9 +21,11 @@ export function Entry({
   placeholder: string;
   label: string;
   multiline?: boolean;
-  onSave: (text: string) => Promise<void>;
+  second?: { placeholder: string; label: string };
+  onSave: (text: string, secondText: string) => Promise<void>;
 }) {
   const [text, setText] = useState('');
+  const [secondText, setSecondText] = useState('');
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -39,7 +42,7 @@ export function Entry({
     setProblem(null);
 
     try {
-      await onSave(trimmed);
+      await onSave(trimmed, secondText.trim());
     } catch (error) {
       setProblem(
         error instanceof ApiError
@@ -66,6 +69,16 @@ export function Entry({
         autoFocus
         accessibilityLabel={label}
       />
+      {second && (
+        <TextInput
+          style={styles.input}
+          value={secondText}
+          onChangeText={setSecondText}
+          placeholder={second.placeholder}
+          placeholderTextColor={theme.color.muted}
+          accessibilityLabel={second.label}
+        />
+      )}
       {problem && <Meta>{problem}</Meta>}
 
       <Button

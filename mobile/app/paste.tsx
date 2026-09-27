@@ -1,4 +1,5 @@
 import type { IngestionClassificationData } from '@add/shared';
+import { entryCopy } from '@add/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
@@ -8,7 +9,7 @@ import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Entry } from '@/components/entry';
 import { Meta, OneThing, Screen } from '@/components/screen';
-import { theme } from '@/theme';
+import { line } from '@/theme';
 
 /** Nothing is fetched from anywhere: only what the person pastes here is read. */
 export default function Paste() {
@@ -20,10 +21,10 @@ export default function Paste() {
   if (result === null) {
     return (
       <Entry
-        question="Paste something that arrived"
-        meta="an email, a letter, a message; the app says whether it needs you"
-        placeholder="Your car insurance expires October 14."
-        label="What arrived"
+        question={entryCopy.paste.question}
+        meta={entryCopy.paste.meta}
+        placeholder={entryCopy.paste.placeholder}
+        label={entryCopy.paste.label}
         multiline
         onSave={async (text) => {
           try {
@@ -79,5 +80,5 @@ export default function Paste() {
 }
 
 const styles = StyleSheet.create({
-  line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
+  line,
 });

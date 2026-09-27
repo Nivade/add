@@ -8,7 +8,7 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { TOUCH_TARGET, theme } from '@/theme';
+import { field, TOUCH_TARGET, theme } from '@/theme';
 
 /** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
 export default function Appointment() {
@@ -153,16 +153,7 @@ export default function Appointment() {
 const styles = StyleSheet.create({
   after: { gap: theme.space(1), marginTop: theme.space(2) },
   afterLabel: { color: theme.color.muted, fontSize: 13, flex: 1 },
-  message: {
-    minHeight: TOUCH_TARGET,
-    paddingHorizontal: theme.space(2),
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.color.border,
-    backgroundColor: theme.color.surface,
-    color: theme.color.text,
-    fontSize: 17,
-  },
+  message: field,
   rung: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1.5) },
   clock: { color: theme.color.text, fontSize: 16, width: 56 },
   passed: { color: theme.color.muted, textDecorationLine: 'line-through' },

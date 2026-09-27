@@ -1,41 +1,17 @@
-import type { CommitmentData, CommitmentListData } from '@add/shared';
-import { commitmentProvenanceLabels, commitmentResponses } from '@add/shared';
+import type { CommitmentListData } from '@add/shared';
+import { commitmentCopy } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Responses } from '@/components/responses';
+import { CommitmentRow } from '@/components/commitment-row';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { theme } from '@/theme';
 
-function Row({
-  commitment,
-  onResponded,
-}: {
-  commitment: CommitmentData;
-  onResponded: () => void;
-}) {
-  const { token } = useSession();
-
-  return (
-    <View style={styles.row}>
-      <Text style={styles.line}>{commitment.description}</Text>
-      <Meta>{commitmentProvenanceLabels[commitment.provenance]}</Meta>
-      <Responses
-        responses={commitmentResponses(commitment.awaitingConfirmation)}
-        onRespond={async (response) => {
-          await api.respondToCommitment(token as string, commitment.id, response);
-          onResponded();
-        }}
-      />
-    </View>
-  );
-}
-
-/** Reached only from home's one commitment; home stays the place things are chosen from. */
+/** Reached only from home; home stays the place things are chosen from. */
 export default function Commitments() {
   const { token } = useSession();
   const load = useCallback(() => api.commitments(token as string), [token]);
@@ -49,16 +25,20 @@ export default function Commitments() {
 
   return (
     <Screen>
-      <OneThing>What you said you'd do</OneThing>
+      <OneThing>{commitmentCopy.listTitle}</OneThing>
       {open.length === 0 && (
-        <Meta>nothing is open; anything you say you'll do lands here</Meta>
+        <Meta>{commitmentCopy.listEmpty}</Meta>
       )}
       {open.map((commitment) => (
-        <Row
-          key={commitment.id}
-          commitment={commitment}
-          onResponded={() => void reload()}
-        />
+        <View key={commitment.id} style={styles.divided}>
+          <CommitmentRow
+            id={commitment.id}
+            description={commitment.description}
+            provenance={commitment.provenance}
+            awaitingConfirmation={commitment.awaitingConfirmation}
+            onResponded={() => void reload()}
+          />
+        </View>
       ))}
       <Button label="Back" onPress={() => router.back()} />
     </Screen>
@@ -66,11 +46,9 @@ export default function Commitments() {
 }
 
 const styles = StyleSheet.create({
-  row: {
-    gap: theme.space(1),
+  divided: {
     paddingTop: theme.space(2),
     borderTopWidth: 1,
     borderTopColor: theme.color.border,
   },
-  line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
 });

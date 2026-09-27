@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasons } from '@add/shared';
+import { commitmentCopy, stuckReasons } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -73,9 +73,9 @@ export default function Focus() {
         <>
           <OneThing>{step?.title ?? intention.title}</OneThing>
           {data.currentStepIsCommitment ? (
-            <Meta>you said you'd do this</Meta>
+            <Meta>{commitmentCopy.promised}</Meta>
           ) : (
-            <QuietAction label="I said I'd do this" onPress={() => void promise()} />
+            <QuietAction label={commitmentCopy.promise} onPress={() => void promise()} />
           )}
 
           <View style={styles.controls}>

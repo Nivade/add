@@ -4,8 +4,7 @@ import type {
   NeedsAttentionData,
 } from '@add/shared';
 import {
-  commitmentProvenanceLabels,
-  commitmentResponses,
+  commitmentCopy,
   formatEstimate,
   recurrenceLine,
   restCountLine,
@@ -19,10 +18,11 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { CommitmentRow } from '@/components/commitment-row';
 import { QuietAction } from '@/components/quiet-action';
 import { Responses } from '@/components/responses';
 import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { field, theme } from '@/theme';
+import { field, line, theme } from '@/theme';
 
 function Clarify({
   item,
@@ -102,30 +102,6 @@ function WaitingFor({
         responses={waitingForResponses}
         onRespond={async (response) => {
           await api.respondToWaitingFor(token as string, item.id, response);
-          onResponded();
-        }}
-      />
-    </View>
-  );
-}
-
-function Commitment({
-  item,
-  onResponded,
-}: {
-  item: NeedsAttentionData;
-  onResponded: () => void;
-}) {
-  const { token } = useSession();
-
-  return (
-    <View style={styles.clarify}>
-      <Text style={styles.line}>{item.title}</Text>
-      {item.provenance && <Meta>{commitmentProvenanceLabels[item.provenance]}</Meta>}
-      <Responses
-        responses={commitmentResponses(item.awaitingConfirmation)}
-        onRespond={async (response) => {
-          await api.respondToCommitment(token as string, item.id, response);
           onResponded();
         }}
       />
@@ -267,10 +243,10 @@ export default function Home() {
                 </Text>
               ))}
               {rightNowIsCommitment ? (
-                <Text style={styles.line}>You said you'd do this.</Text>
+                <Text style={styles.line}>{commitmentCopy.promised}</Text>
               ) : (
                 <QuietAction
-                  label="I said I'd do this"
+                  label={commitmentCopy.promise}
                   onPress={() => void promote()}
                 />
               )}
@@ -335,9 +311,12 @@ export default function Home() {
                 );
               case 'commitment':
                 return (
-                  <Commitment
+                  <CommitmentRow
                     key={item.id}
-                    item={item}
+                    id={item.id}
+                    description={item.title}
+                    provenance={item.provenance}
+                    awaitingConfirmation={item.awaitingConfirmation}
                     onResponded={() => void reload()}
                   />
                 );
@@ -357,7 +336,7 @@ export default function Home() {
       <Meta>{restCountLine(restCount)}</Meta>
       {hasOpenCommitments && (
         <QuietAction
-          label="Everything you said you'd do"
+          label={commitmentCopy.list}
           onPress={() => router.push('/commitments')}
         />
       )}
@@ -384,7 +363,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
+  line,
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
