@@ -106,8 +106,9 @@ fails forever. The home screen is where it was seen; `focus`, `overwhelmed`, `se
   says so and offers the retry. No failure words from `product-invariants.md`.
 
 **Verification.** The mobile workspace has no test runner, and adding one is a dependency change
-this plan does not take. `npm run typecheck`, then by hand on the emulator: sign in, revoke the
-token from web settings, bring the app forward — it lands on sign-in with no dead end.
+this plan does not take. `npm run typecheck`, then by hand on the emulator. No web screen revokes
+a device token, so the token row was deleted, which is what the server sees for a revoked one.
+A write refused that way and a cold launch whose home load was refused both landed on sign-in.
 
 **Done when** a revoked or expired token returns the phone to sign-in from any screen.
 
