@@ -176,7 +176,7 @@ export default function Home() {
     return <Loading />;
   }
 
-  if (problem || !data) {
+  if (!data) {
     return (
       <Screen>
         <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
