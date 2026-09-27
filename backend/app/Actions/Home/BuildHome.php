@@ -8,6 +8,7 @@ use App\Actions\Sessions\BuildExecutionState;
 use App\Contracts\Appointment;
 use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
+use App\Data\ExecutionStateData;
 use App\Data\HomeData;
 use App\Data\NeedsAttentionData;
 use App\Data\ReminderData;
@@ -39,35 +40,47 @@ final class BuildHome
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $session = $user->runningSession()->getResults();
-
-        $clarifications = $this->open($user)
-            ->awaitingClarification()
-            ->oldest()
-            ->limit(self::NEEDS_ATTENTION_LIMIT)
-            ->get();
-
         $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderBy('updated_at')->get();
-        $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $context->now);
-        $waitingForsShown = $staleWaitingFor instanceof WaitingFor ? 1 : 0;
-
-        $needsAttention = $clarifications->map(
-            fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention)
-        );
-
-        if ($staleWaitingFor instanceof WaitingFor) {
-            $needsAttention = $needsAttention->push(NeedsAttentionData::forWaitingFor($staleWaitingFor));
-        }
+        $needsAttention = $this->needsAttention($user, $openWaitingFors, $context->now);
 
         return new HomeData(
             rightNow: $this->resolver->resolve($user, $context),
-            session: $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null,
+            session: $this->session($user),
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
-            needsAttention: array_values($needsAttention->all()),
-            restCount: ($this->open($user)->count() - $clarifications->count())
-                + ($openWaitingFors->count() - $waitingForsShown),
+            needsAttention: $needsAttention,
+            restCount: $this->open($user)->count() + $openWaitingFors->count() - count($needsAttention),
         );
+    }
+
+    /**
+     * @param  Collection<int, WaitingFor>  $openWaitingFors
+     * @return list<NeedsAttentionData>
+     */
+    private function needsAttention(User $user, Collection $openWaitingFors, CarbonImmutable $now): array
+    {
+        $needsAttention = array_values($this->open($user)
+            ->awaitingClarification()
+            ->oldest()
+            ->limit(self::NEEDS_ATTENTION_LIMIT)
+            ->get()
+            ->map(fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention))
+            ->all());
+
+        $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $now);
+
+        if ($staleWaitingFor instanceof WaitingFor) {
+            $needsAttention[] = NeedsAttentionData::forWaitingFor($staleWaitingFor);
+        }
+
+        return $needsAttention;
+    }
+
+    private function session(User $user): ?ExecutionStateData
+    {
+        $session = $user->runningSession()->getResults();
+
+        return $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null;
     }
 
     /**

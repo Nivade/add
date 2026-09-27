@@ -21,7 +21,7 @@ use App\Support\NextAction\Comparators\StartableNow;
 /** No score: a number six inputs went into cannot be explained, and the `why` has to be. */
 final class ChainedNextActionResolver implements NextActionResolver
 {
-    /** @var list<StepComparator> */
+    /** @var list<Rung> */
     private array $chain;
 
     public function __construct()

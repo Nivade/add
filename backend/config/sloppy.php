@@ -6,6 +6,5 @@ declare(strict_types=1);
 return [
     'paths' => ['app'],
     'fail_on' => 'high',
-    'baseline' => '.sloppy-baseline.json',
     'rules' => [],
 ];

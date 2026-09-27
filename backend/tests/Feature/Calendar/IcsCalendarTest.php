@@ -99,6 +99,21 @@ it('asks an unchanged feed only whether it changed, and still reads the day from
     expect(Http::recorded()->last()[0]->hasHeader('If-None-Match'))->toBeFalse();
 });
 
+it('drops a remembered feed it can no longer decrypt, and reads the feed afresh', function (): void {
+    Http::preventStrayRequests();
+    Http::fake([FEED_URL => Http::response(icsFeed(
+        'BEGIN:VEVENT', 'UID:dentist-1', 'SUMMARY:Dentist', 'DTSTART;TZID=Europe/Amsterdam:20260919T140000', 'END:VEVENT',
+    ))]);
+    $key = 'calendar-feed:'.hash('sha256', FEED_URL);
+    Cache::put($key, 'written-under-another-app-key');
+
+    $events = SyncCalendar::run(feedPerson(), CarbonImmutable::parse('2026-09-19 09:00:00', 'Europe/Amsterdam'));
+
+    expect($events)->toHaveCount(1)
+        ->and(Cache::has($key))->toBeFalse();
+    Http::assertSent(fn (Request $request): bool => ! $request->hasHeader('If-None-Match'));
+});
+
 it('refuses an address that does not answer with a calendar, and keeps nothing of it', function (): void {
     Http::preventStrayRequests();
     Http::fake([FEED_URL => Http::response('<html>Sign in</html>')]);
