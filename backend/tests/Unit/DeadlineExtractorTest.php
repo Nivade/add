@@ -34,6 +34,11 @@ it('reads every phrase a regex can read with certainty', function (string $text,
     'today counts as this weekday' => ['send it on Wednesday at 4pm', '2026-09-16 16:00:00'],
     'a weekday whose time has gone waits a week' => ['send it on Wednesday at 9am', '2026-09-23 09:00:00'],
     'the day of the month it already is' => ['file it before the 16th', '2026-09-16 23:59:59'],
+    'a month later this year' => ['Lisbon in November', '2026-11-01 00:00:00'],
+    'a month already gone this year' => ['Lisbon in March', '2027-03-01 00:00:00'],
+    'by a month' => ['renew it by October', '2026-10-01 00:00:00'],
+    'the end of a month' => ['sort it by the end of February', '2027-02-28 23:59:59'],
+    'the end of the month it already is' => ['send it end of September', '2026-09-30 23:59:59'],
 ]);
 
 it('refuses a date that does not exist rather than rolling it forward', function (): void {
@@ -49,6 +54,8 @@ it('claims nothing when the text only sounds urgent', function (string $text): v
     'I need to sort this out at some point',
     'buy 3 bags of coffee',
     'look at 2 flats',
+    'in the month it already is, whose start has gone' => 'Lisbon in September',
+    'a month that is only a name' => 'ask May about it',
 ]);
 
 it("reads a relative phrase against the zone it was given, not the server's", function (): void {

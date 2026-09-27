@@ -128,7 +128,8 @@ the AI layer, and `PhraseDeadlineExtractor` already reads dates out of capture t
 - The extractor does not read month names today, so "in March" extracts nothing. Add
   `in|by|before <month>` — resolved to the start of that month's next occurrence, because the
   date is when the thing is needed by, and the first day is the only safe reading of a month.
-  "end of <month>" resolves to its last day. This also applies to captures, which is wanted.
+  The month it already is has no safe start left, so it reads nothing; "end of <month>"
+  resolves to its last day, this month included. This also applies to captures, which is wanted.
 - Order stays as is: the deadline is written before `DecomposeIntention` is dispatched, so the
   decomposition prompt already sees it.
 
