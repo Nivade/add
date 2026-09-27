@@ -8,6 +8,7 @@ use App\Enums\SessionOutcome;
 use App\Exceptions\InvalidSessionTransition;
 use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
+use Closure;
 use Database\Factories\ExecutionSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property string $id
@@ -41,6 +43,8 @@ class ExecutionSession extends Model
 
     use HasUlids;
     use StoresDatesInUtc;
+
+    private bool $locked = false;
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
@@ -71,14 +75,36 @@ class ExecutionSession extends Model
         return $this->ended_at === null;
     }
 
-    /** Call inside a transaction: re-reads this row under a lock, so two taps cannot both pass the open check. */
-    public function lockOpen(): void
+    /**
+     * Runs $work on this row re-read under a lock, so two taps cannot both pass the open check. A nested call reuses the lock.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $work
+     * @return T
+     */
+    public function transition(Closure $work): mixed
     {
-        $locked = self::query()->lockForUpdate()->findOrFail($this->id);
+        if ($this->locked) {
+            $this->assertOpen();
 
-        $this->setRawAttributes($locked->getAttributes(), sync: true);
-        $this->setRelations([]);
-        $this->assertOpen();
+            return $work();
+        }
+
+        return DB::transaction(function () use ($work): mixed {
+            $locked = self::query()->lockForUpdate()->findOrFail($this->id);
+
+            $this->setRawAttributes($locked->getAttributes(), sync: true);
+            $this->setRelations([]);
+            $this->assertOpen();
+            $this->locked = true;
+
+            try {
+                return $work();
+            } finally {
+                $this->locked = false;
+            }
+        });
     }
 
     private function assertOpen(): void

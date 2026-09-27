@@ -9,7 +9,6 @@ use App\Models\ExecutionSession;
 use App\Models\Step;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** A stretch of focused work is one row, and it points at the step the person asked for. */
@@ -31,9 +30,7 @@ final class StartSession
     /** Pressing start on something else is an answer to "what now", so the session follows rather than ignoring it. */
     private function retarget(ExecutionSession $running, User $user, Step $step): ExecutionSession
     {
-        return DB::transaction(function () use ($running, $user, $step): ExecutionSession {
-            $running->lockOpen();
-
+        return $running->transition(function () use ($running, $user, $step): ExecutionSession {
             if ($running->current_step_id === $step->id) {
                 return $running;
             }

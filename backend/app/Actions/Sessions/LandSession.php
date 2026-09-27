@@ -7,7 +7,6 @@ namespace App\Actions\Sessions;
 use App\Enums\ExecutionEventType;
 use App\Enums\SessionOutcome;
 use App\Models\ExecutionSession;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** The one place a session ends, so the guard cannot hold on one path and not the other. */
@@ -17,9 +16,7 @@ final class LandSession
 
     public function handle(ExecutionSession $session, SessionOutcome $outcome): ExecutionSession
     {
-        return DB::transaction(function () use ($session, $outcome): ExecutionSession {
-            $session->lockOpen();
-
+        return $session->transition(function () use ($session, $outcome): ExecutionSession {
             $lastStepId = $session->current_step_id;
 
             $session->update([

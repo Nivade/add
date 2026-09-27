@@ -14,7 +14,6 @@ use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\NextAction\SmallestFirst;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Every answer leaves the person with something to start or a clean stop. */
@@ -24,9 +23,7 @@ final class ReportStuck
 
     public function handle(ExecutionSession $session, StuckReason $reason, ?string $note = null): ExecutionSession
     {
-        return DB::transaction(function () use ($session, $reason, $note): ExecutionSession {
-            $session->lockOpen();
-
+        return $session->transition(function () use ($session, $reason, $note): ExecutionSession {
             $step = $session->currentStepOrFail();
 
             RecordExecutionEvent::run($session, ExecutionEventType::Stuck, $step->id, [

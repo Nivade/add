@@ -149,16 +149,11 @@ it('locks the session before any transition reads it', function (): void {
         }
 
         $source = (string) file_get_contents($file);
-        $firstLock = strpos($source, '->lockOpen();');
-        preg_match_all('/DB::transaction\(function \([^)]*\)[^{]*\{\s*(\S+)/', $source, $transactions);
+        $transition = strpos($source, '->transition(function');
 
-        expect($firstLock)->not->toBeFalse($file)
-            ->and($transactions[1])->not->toBeEmpty($file)
-            ->and(preg_match('/->(paused_at|current_step_id|ended_at|intention_id)\b|currentStep(OrFail)?\(/', substr($source, 0, (int) $firstLock)))->toBe(0, $file);
-
-        foreach ($transactions[1] as $firstStatement) {
-            expect($firstStatement)->toMatch('/^\$\w+->lockOpen\(\);$/', $file);
-        }
+        expect($transition)->not->toBeFalse($file)
+            ->and($source)->not->toContain('DB::transaction')
+            ->and(preg_match('/->(paused_at|current_step_id|ended_at|intention_id)\b|currentStep(OrFail)?\(/', substr($source, 0, (int) $transition)))->toBe(0, $file);
     }
 });
 
