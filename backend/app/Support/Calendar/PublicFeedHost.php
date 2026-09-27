@@ -6,31 +6,39 @@ namespace App\Support\Calendar;
 
 use App\Contracts\HostResolver;
 use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 /** A feed is fetched from the queue worker, so an address inside the network it runs on is never one to read. */
 final readonly class PublicFeedHost
 {
-    private const string NAT64_WELL_KNOWN_PREFIX = "\x00\x64\xff\x9b\x00\x00\x00\x00\x00\x00\x00\x00";
-
-    private const string NAT64_LOCAL_USE_PREFIX = "\x00\x64\xff\x9b\x00\x01";
+    /** NAT64 passes the global-range filter, and the IPv4 address it wraps can be anything. */
+    private const array NAT64_RANGES = ['64:ff9b::/96', '64:ff9b:1::/48'];
 
     public function __construct(private HostResolver $resolver) {}
 
     public function allows(string $url): bool
     {
-        return $this->publicAddresses($url) !== [];
+        return $this->publicAddresses(self::host($url)) !== [];
     }
 
-    /** The address the request is pinned to, so the answer checked here is the one connected to. */
-    public function address(string $url): string
+    /** A `CURLOPT_RESOLVE` entry, so the address checked here is the one connected to. */
+    public function pin(string $url): string
     {
-        return $this->publicAddresses($url)[0] ?? throw new CalendarFeedUnreadable('The calendar feed is not on a public address.');
+        $host = self::host($url);
+        $address = $this->publicAddresses($host)[0] ?? throw new CalendarFeedUnreadable('The calendar feed is not on a public address.');
+        $port = parse_url($url, PHP_URL_PORT) ?? 443;
+
+        return $host.':'.$port.':'.(str_contains($address, ':') ? "[{$address}]" : $address);
+    }
+
+    private static function host(string $url): string
+    {
+        return trim((string) parse_url($url, PHP_URL_HOST), '[]');
     }
 
     /** @return list<string> empty when any address the host answers with is not public */
-    private function publicAddresses(string $url): array
+    private function publicAddresses(string $host): array
     {
-        $host = trim((string) parse_url($url, PHP_URL_HOST), '[]');
         $addresses = match (true) {
             $host === '' => [],
             filter_var($host, FILTER_VALIDATE_IP) !== false => [$host],
@@ -48,13 +56,7 @@ final readonly class PublicFeedHost
 
     private function isPublic(string $address): bool
     {
-        if (filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) === false) {
-            return false;
-        }
-
-        $packed = (string) inet_pton($address);
-
-        // NAT64 passes the global-range filter, and the IPv4 address it wraps can be anything.
-        return ! str_starts_with($packed, self::NAT64_WELL_KNOWN_PREFIX) && ! str_starts_with($packed, self::NAT64_LOCAL_USE_PREFIX);
+        return filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) !== false
+            && ! IpUtils::checkIp($address, self::NAT64_RANGES);
     }
 }

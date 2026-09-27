@@ -163,15 +163,10 @@ final class IcsCalendarSource implements CalendarSource
             throw new CalendarFeedUnreadable('The calendar feed left https.');
         }
 
-        $address = $this->publicHost->address($url);
-        $host = trim((string) parse_url($url, PHP_URL_HOST), '[]');
-        $port = parse_url($url, PHP_URL_PORT) ?? 443;
-        $pinned = str_contains($address, ':') ? "[{$address}]" : $address;
-
         try {
             return Http::timeout(15)
                 ->withoutRedirecting()
-                ->withOptions(['curl' => [CURLOPT_RESOLVE => ["{$host}:{$port}:{$pinned}"]]])
+                ->withOptions(['curl' => [CURLOPT_RESOLVE => [$this->publicHost->pin($url)]]])
                 ->withHeaders($headers)
                 ->get($url);
         } catch (ConnectionException) {

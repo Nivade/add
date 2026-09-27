@@ -10,9 +10,8 @@ final class DnsHostResolver implements HostResolver
 {
     public function addresses(string $host): array
     {
-        $v4 = gethostbynamel($host) ?: [];
-        $v6 = array_column(@dns_get_record($host, DNS_AAAA) ?: [], 'ipv6');
+        $records = @dns_get_record($host, DNS_A | DNS_AAAA) ?: [];
 
-        return array_values(array_filter([...$v4, ...$v6], is_string(...)));
+        return array_values(array_filter(array_map(fn (array $record): mixed => $record['ip'] ?? $record['ipv6'] ?? null, $records), is_string(...)));
     }
 }
