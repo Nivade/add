@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Sessions;
 
+use App\Enums\CommitmentStatus;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
+use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,6 +54,8 @@ final class AdvanceSession
                 'status' => IntentionStatus::Done,
                 'completed_at' => now(),
             ]);
+
+            Commitment::query()->open()->forIntention($session->intention_id)->update(['status' => CommitmentStatus::Kept]);
         }
 
         return $session;

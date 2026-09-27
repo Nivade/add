@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Calendar\SyncCalendar;
+use App\Actions\FutureReminders\CreateRelativeFutureReminder;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Enums\AppointmentKind;
@@ -134,7 +135,7 @@ it('answers an empty day when no calendar is connected', function (): void {
     expect(SyncCalendar::run(User::factory()->create(), CarbonImmutable::parse('2026-09-19 09:00:00')))->toBe([]);
 });
 
-it('keeps one person\'s calendar out of another person\'s day', function (): void {
+it("keeps one person's calendar out of another person's day", function (): void {
     $stranger = User::factory()->create();
     calendar(draft('abc-1', '2026-09-19 14:00:00'));
     SyncCalendar::run($stranger, CarbonImmutable::parse('2026-09-19 09:00:00'));
@@ -154,7 +155,7 @@ it('shows the event as what is coming up, with a plan that can be corrected', fu
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.kind', 'calendar_event')
             ->where('home.comingUp.title', 'Dentist')
             ->where('home.comingUp.plan.rungs.2.clock', '13:30')
@@ -168,7 +169,7 @@ it('shows the event as what is coming up, with a plan that can be corrected', fu
         ->assertJsonPath('rungs.2.assumed', false);
 });
 
-it('does not let one person retime another person\'s appointment', function (): void {
+it("does not let one person retime another person's appointment", function (): void {
     $event = CalendarEvent::factory()->create();
 
     $this->actingAs(User::factory()->create())
@@ -196,4 +197,18 @@ it('queues a feed sync only for the people who pasted a feed', function (): void
     $this->artisan('calendar:sync')->assertSuccessful();
 
     Queue::assertPushed(JobDecorator::class, 1);
+});
+
+it('moves a reminder tied to an event when the event moves', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    calendar(draft('abc-1', '2026-09-19 14:00:00'));
+    [$event] = SyncCalendar::run($user, $now);
+    $reminder = CreateRelativeFutureReminder::run($user, $event, 1800, 'call the pharmacy');
+
+    calendar(draft('abc-1', '2026-09-19 16:00:00'));
+    SyncCalendar::run($user, $now);
+
+    expect($reminder->refresh()->trigger_at->equalTo(CarbonImmutable::parse('2026-09-19 16:30:00')))->toBeTrue();
 });

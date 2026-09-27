@@ -58,8 +58,8 @@ final class OpenAiProvider implements AiProvider
                 model: $model,
                 timeout: (int) config('ai.openai.timeout'),
             );
-        } catch (Throwable $exception) {
-            throw new AiProviderRequestFailed('OpenAI request failed: '.$exception::class, previous: $exception);
+        } catch (Throwable $throwable) {
+            throw new AiProviderRequestFailed('OpenAI request failed: '.$throwable::class, previous: $throwable);
         }
 
         if (! $response instanceof StructuredAgentResponse) {

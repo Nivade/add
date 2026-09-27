@@ -12,7 +12,7 @@ it('reads off by default', function (): void {
     $this->actingAs(User::factory()->create())
         ->get(route('ai.edit'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('settings/ai')
             ->where('consented', false)
         );
@@ -63,5 +63,5 @@ it('never reaches a live model for a person who has not consented, even when the
     $user = User::factory()->create(['ai_consented_at' => null]);
     $capture = Capture::factory()->for($user)->create();
 
-    expect(fn () => ConvertCaptureToIntention::run($capture))->toThrow(AiUnavailable::class);
+    expect(fn (): mixed => ConvertCaptureToIntention::run($capture))->toThrow(AiUnavailable::class);
 });

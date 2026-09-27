@@ -1,4 +1,10 @@
-import type { PlanRung, StuckReason } from './generated';
+import type {
+    CommitmentProvenance,
+    CommitmentResponse,
+    PlanRung,
+    StuckReason,
+    WaitingForResponse,
+} from './generated';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
@@ -25,3 +31,73 @@ export const stuckReasons: { value: StuckReason; label: string }[] = [
     { value: 'dont_want_to', label: "I don't want to do it" },
     { value: 'something_else', label: 'Something else' },
 ];
+
+export const waitingForResponses: { value: WaitingForResponse; label: string }[] = [
+    { value: 'wait_longer', label: 'Wait longer' },
+    { value: 'follow_up', label: 'Follow up' },
+    { value: 'receive', label: 'Mark received' },
+    { value: 'cancel', label: 'Cancel' },
+];
+
+/** An inferred commitment is asked about before it is treated as the person's own. */
+export function commitmentResponses(
+    inferred: boolean,
+): { value: CommitmentResponse; label: string }[] {
+    return inferred
+        ? [
+              { value: 'confirm', label: "That's mine" },
+              { value: 'release', label: 'Not mine' },
+          ]
+        : [
+              { value: 'keep', label: 'Done' },
+              { value: 'release', label: 'Let it go' },
+          ];
+}
+
+export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = {
+    user_task: 'from something you were doing',
+    user_stated: 'you said this',
+    system_inferred: 'read from what you wrote',
+};
+
+export function recurrenceLine(everyDays: number): string {
+    return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
+}
+
+/** One question per way in, worded the same on both clients. */
+export const entryCopy = {
+    waitingFor: {
+        question: 'Who or what are you waiting on?',
+        meta: 'Nothing to do until they get back to you. This keeps it from being forgotten.',
+        placeholder: 'John',
+        label: 'Who or what',
+        notePlaceholder: 'the contract',
+        noteLabel: 'What for',
+    },
+    commitment: {
+        question: 'What did you say you would do?',
+        meta: 'Said out loud or typed, it counts the same either way.',
+        placeholder: "I'll call Sarah Friday",
+        label: 'What you said you would do',
+    },
+    futureReminder: {
+        question: 'What should future you hear, and when?',
+        meta: 'Say when in the same sentence.',
+        placeholder: 'Tomorrow at 5, buy dishwasher tablets',
+        label: 'What and when',
+    },
+    paste: {
+        question: 'Paste something that arrived',
+        meta: 'An email, a letter, a message. The app says whether it needs you.',
+        placeholder: 'Your car insurance expires on 14 October.',
+        label: 'What arrived',
+    },
+} as const;
+
+export const commitmentCopy = {
+    promise: "I said I'd do this",
+    promised: "You said you'd do this.",
+    list: "Everything you said you'd do",
+    listTitle: "What you said you'd do",
+    listEmpty: "Nothing is open. Anything you say you'll do lands here.",
+} as const;

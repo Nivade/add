@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -37,11 +38,19 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $updated_at
  */
 #[Fillable(['name', 'email', 'password'])]
+#[UseFactory(UserFactory::class)]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'calendar_feed_url'])]
 class User extends Authenticatable implements PasskeyUser
 {
+    use HasApiTokens;
+
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, StoresDatesInUtc, TwoFactorAuthenticatable;
+    use HasFactory;
+
+    use Notifiable;
+    use PasskeyAuthenticatable;
+    use StoresDatesInUtc;
+    use TwoFactorAuthenticatable;
 
     /** Every deadline, rung and reminder is read on their clock, never the server's. */
     public function now(): CarbonImmutable

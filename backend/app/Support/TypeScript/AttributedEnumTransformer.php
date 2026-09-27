@@ -11,10 +11,7 @@ use Spatie\TypeScriptTransformer\Transformed\Transformed;
 use Spatie\TypeScriptTransformer\Transformed\Untransformable;
 use Spatie\TypeScriptTransformer\Transformers\EnumTransformer;
 
-/**
- * EnumTransformer publishes every enum it is handed, which made the wire surface
- * opt-out. This makes #[TypeScript] the single mechanism for enums and classes alike.
- */
+/** Enums reach TypeScript only through #[TypeScript], the same opt-in classes use. */
 final class AttributedEnumTransformer extends EnumTransformer
 {
     public function transform(PhpClassNode $phpClassNode, TransformationContext $context): Transformed|Untransformable

@@ -8,10 +8,14 @@ use App\Actions\Sessions\BuildExecutionState;
 use App\Contracts\Appointment;
 use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
+use App\Data\ExecutionStateData;
 use App\Data\HomeData;
-use App\Data\IntentionData;
+use App\Data\JustFinishedData;
+use App\Data\NextActionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
+use App\Enums\IntentionStatus;
+use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
@@ -26,32 +30,49 @@ final class BuildHome
 {
     use AsObject;
 
-    /** Enough to act on, few enough that the band is not a list to work through. */
-    private const int NEEDS_ATTENTION_LIMIT = 3;
+    /** Long enough to come back from a break and still see what you finished. */
+    private const int JUST_FINISHED_WITHIN_MINUTES = 60;
 
     public function __construct(private readonly NextActionResolver $resolver) {}
 
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $session = $user->runningSession()->getResults();
-
-        $needsAttention = $this->open($user)
-            ->awaitingClarification()
-            ->oldest()
-            ->limit(self::NEEDS_ATTENTION_LIMIT)
-            ->get();
+        $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
+        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->whereNull('intention_id')->whereNull('step_id')->values());
+        $rightNow = $this->resolver->resolve($user, $context);
 
         return new HomeData(
-            rightNow: $this->resolver->resolve($user, $context),
-            session: $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null,
+            rightNow: $rightNow,
+            rightNowIsCommitment: $rightNow instanceof NextActionData && $openCommitments->contains('intention_id', $rightNow->intention->id),
+            session: $this->session($user),
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
-            needsAttention: array_values($needsAttention
-                ->map(fn (Intention $intention): IntentionData => IntentionData::from($intention))
-                ->all()),
-            restCount: $this->open($user)->count() - $needsAttention->count(),
+            justFinished: $this->justFinished($user, $context->now),
+            needsAttention: $needsAttention->items,
+            restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
+            hasOpenCommitments: $openCommitments->isNotEmpty(),
         );
+    }
+
+    private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData
+    {
+        $intention = Intention::query()
+            ->where('user_id', $user->id)
+            ->where('status', IntentionStatus::Done)
+            ->where('completed_at', '>=', $now->subMinutes(self::JUST_FINISHED_WITHIN_MINUTES))
+            ->latest('completed_at')
+            ->with('recurrenceTemplate')
+            ->first();
+
+        return $intention instanceof Intention ? new JustFinishedData($intention->id, $intention->title, $intention->repeatsEveryDays()) : null;
+    }
+
+    private function session(User $user): ?ExecutionStateData
+    {
+        $session = $user->runningSession()->getResults();
+
+        return $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null;
     }
 
     /** The band stands until the person dismisses it or the appointment it prepared for is behind them. */

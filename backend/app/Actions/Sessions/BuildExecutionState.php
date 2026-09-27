@@ -8,6 +8,7 @@ use App\Data\ExecutionSessionData;
 use App\Data\ExecutionStateData;
 use App\Data\IntentionData;
 use App\Enums\StepStatus;
+use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use Carbon\CarbonInterval;
@@ -32,6 +33,7 @@ final class BuildExecutionState
             IntentionData::from($session->intention),
             $this->progressLines($session),
             $this->elapsedWords($session),
+            $session->current_step_id !== null && Commitment::query()->open()->forStep($session->current_step_id)->exists(),
         );
     }
 

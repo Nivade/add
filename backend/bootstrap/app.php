@@ -35,6 +35,6 @@ return Application::configure(basePath: dirname(__DIR__))
         Integration::handles($exceptions);
 
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();

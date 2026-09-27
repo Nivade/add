@@ -92,7 +92,7 @@ it('says nothing about an appointment that is not today', function (): void {
     Notification::assertNothingSent();
 });
 
-it('does not remind one person about another person\'s day', function (): void {
+it("does not remind one person about another person's day", function (): void {
     Notification::fake();
 
     CalendarEvent::factory()->create(['starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00')]);
@@ -132,7 +132,7 @@ it('keeps the reminder on home across a reload, and drops it when dismissed', fu
 
     $this->actingAs($user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.reminder', null));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.reminder', null));
 });
 
 it('takes the reminder down once the appointment is behind them', function (): void {
@@ -151,10 +151,10 @@ it('takes the reminder down once the appointment is behind them', function (): v
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.reminder', null));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.reminder', null));
 });
 
-it('hides one person\'s reminder from another person\'s dismissal', function (): void {
+it("hides one person's reminder from another person's dismissal", function (): void {
     CarbonImmutable::setTestNow('2026-09-19 13:02:00');
 
     $user = User::factory()->create();

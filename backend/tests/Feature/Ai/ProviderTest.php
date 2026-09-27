@@ -67,7 +67,7 @@ it('gates the openai driver on per-user consent, and reaches OpenAI underneath',
 });
 
 it('refuses to answer when AI is disabled rather than returning an empty payload', function (): void {
-    expect(fn () => (new NullAiProvider)->complete(aiRequest()))
+    expect(fn (): App\Data\Ai\AiResponseData => (new NullAiProvider)->complete(aiRequest()))
         ->toThrow(AiUnavailable::class)
         ->and((new NullAiProvider)->isAvailable())->toBeFalse();
 });
@@ -75,7 +75,7 @@ it('refuses to answer when AI is disabled rather than returning an empty payload
 it('throws on a missing fixture instead of inventing an answer', function (): void {
     config()->set('ai.fixture_path', storage_path('framework/testing/ai-fixtures'));
 
-    expect(fn () => (new FixtureAiProvider)->complete(aiRequest()))
+    expect(fn (): App\Data\Ai\AiResponseData => (new FixtureAiProvider)->complete(aiRequest()))
         ->toThrow(AiFixtureMissing::class);
 });
 
@@ -103,7 +103,7 @@ it('rejects a fixture that is not a JSON object', function (): void {
     File::ensureDirectoryExists($directory);
     File::put(FixtureAiProvider::path($request), 'not json');
 
-    $complete = fn () => (new FixtureAiProvider)->complete($request);
+    $complete = fn (): App\Data\Ai\AiResponseData => (new FixtureAiProvider)->complete($request);
 
     expect($complete)->toThrow(AiResponseInvalid::class);
 
@@ -121,7 +121,7 @@ it('answers every operation from the canned driver so the UI is clickable withou
     expect($payload)->not->toBeEmpty();
 })->with(AiOperation::cases());
 
-it('keeps the person\'s own words in the canned capture title', function (): void {
+it("keeps the person's own words in the canned capture title", function (): void {
     $payload = (new CannedAiProvider)->complete(aiRequest(user: "renew my passport\nand other noise"))->payload;
 
     expect($payload['title'])->toBe('renew my passport')
@@ -134,7 +134,7 @@ it('gives back queued answers in order and then fails loudly', function (): void
 
     expect($provider->complete(aiRequest())->payload)->toBe(['title' => 'first'])
         ->and($provider->complete(aiRequest())->payload)->toBe(['title' => 'second'])
-        ->and(fn () => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
+        ->and(fn (): App\Data\Ai\AiResponseData => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
 });
 
 it('logs the shape of every call and none of the text', function (): void {
@@ -167,11 +167,11 @@ it('rate-limits the openai driver per user, so one burst cannot lock another per
         ->and(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey(2), 1))->toBeFalse();
 });
 
-it('refuses to reach a person\'s words off the machine without their consent', function (): void {
+it("refuses to reach a person's words off the machine without their consent", function (): void {
     $user = User::factory()->create(['ai_consented_at' => null]);
     $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
 
-    expect(fn () => new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id)))
+    expect(fn (): App\Data\Ai\AiResponseData => new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id)))
         ->toThrow(AiUnavailable::class);
 });
 
@@ -189,7 +189,7 @@ it('records the failed call and lets the failure through', function (): void {
 
     $provider = new LoggingAiProvider(new FakeAiProvider);
 
-    expect(fn () => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
+    expect(fn (): App\Data\Ai\AiResponseData => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
 
     Log::shouldHaveReceived('warning')
         ->withArgs(fn (string $message, array $context): bool => $context['exception'] === AiUnavailable::class)

@@ -29,3 +29,10 @@ export const field = {
   color: theme.color.text,
   fontSize: 17,
 } as const;
+
+/** Body text: a line someone reads, as opposed to a label or a control. */
+export const line = {
+  color: theme.color.text,
+  fontSize: 16,
+  lineHeight: 24,
+} as const;

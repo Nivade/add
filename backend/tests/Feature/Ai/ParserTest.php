@@ -47,7 +47,7 @@ it('treats an absent deadline as no deadline rather than an error', function (mi
 })->with([null, '', '   ', 'null']);
 
 it('rejects a capture answer the application cannot use', function (array $payload): void {
-    expect(fn () => (new ParseCaptureParser)->parse($payload, 'UTC'))->toThrow(AiResponseInvalid::class);
+    expect(fn (): App\Data\Ai\ParsedCaptureData => (new ParseCaptureParser)->parse($payload, 'UTC'))->toThrow(AiResponseInvalid::class);
 })->with([
     'no title' => [['why' => null, 'clarifying_question' => null]],
     'empty title' => [['title' => '   ', 'clarifying_question' => null]],
@@ -69,7 +69,7 @@ it('turns a decoded decomposition into ordered typed steps', function (): void {
 });
 
 it('rejects a decomposition with no usable structure', function (array $payload): void {
-    expect(fn () => (new DecomposeParser)->parse($payload))->toThrow(AiResponseInvalid::class);
+    expect(fn (): array => (new DecomposeParser)->parse($payload))->toThrow(AiResponseInvalid::class);
 })->with([
     'no steps key' => [[]],
     'empty steps' => [['steps' => []]],

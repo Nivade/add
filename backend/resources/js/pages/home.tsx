@@ -1,33 +1,50 @@
-import type { HomeData, IntentionData } from '@add/shared';
-import { restCountLine } from '@add/shared';
+import type {
+    HomeData,
+    JustFinishedData,
+    NeedsAttentionData,
+} from '@add/shared';
+import {
+    commitmentCopy,
+    recurrenceLine,
+    restCountLine,
+    waitingForResponses,
+} from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
+import { captureFieldClassName } from '@/components/capture-dialog';
+import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
+import { quietButtonClassName, Responses } from '@/components/responses';
+import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { focus, overwhelmed } from '@/routes';
+import calendarEvents from '@/routes/calendar-events';
+import commitments from '@/routes/commitments';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
+import waitingFors from '@/routes/waiting-fors';
 
-function Clarify({ intention }: { intention: IntentionData }) {
-    const fieldId = `clarify-${intention.id}`;
+function Clarify({ item }: { item: NeedsAttentionData }) {
+    const fieldId = `clarify-${item.id}`;
 
     return (
         <Form
-            {...intentions.clarification.form(intention.id)}
+            {...intentions.clarification.form(item.id)}
             options={{ preserveScroll: true }}
             resetOnSuccess
             className="space-y-2"
         >
             {({ errors, processing }) => (
                 <>
-                    <p>{intention.title}</p>
+                    <p>{item.title}</p>
                     <label
                         htmlFor={fieldId}
                         className="text-muted-foreground block"
                     >
-                        {intention.clarifyingQuestion}
+                        {item.clarifyingQuestion}
                     </label>
                     <div className="flex flex-wrap items-baseline gap-3">
                         <input
@@ -44,7 +61,7 @@ function Clarify({ intention }: { intention: IntentionData }) {
                             type="submit"
                             variant="outline"
                             disabled={processing}
-                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                            className={quietButtonClassName}
                         >
                             Answer
                         </Button>
@@ -56,6 +73,79 @@ function Clarify({ intention }: { intention: IntentionData }) {
                 </>
             )}
         </Form>
+    );
+}
+
+function WaitingFor({ item }: { item: NeedsAttentionData }) {
+    return (
+        <div className="space-y-2">
+            <p>
+                {item.title}
+                {item.detail && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        · {item.detail}
+                    </span>
+                )}
+            </p>
+            <Responses
+                action={waitingFors.respond.form(item.id)}
+                responses={waitingForResponses}
+            />
+        </div>
+    );
+}
+
+function JustFinished({ finished }: { finished: JustFinishedData }) {
+    return (
+        <Band label="Just finished">
+            <p>{finished.title}</p>
+            {finished.recurrenceEveryDays ? (
+                <p className="text-muted-foreground mt-2 font-mono text-[13px]">
+                    {recurrenceLine(finished.recurrenceEveryDays)}
+                </p>
+            ) : (
+                <Form
+                    {...intentions.recurrence.form(finished.id)}
+                    options={{ preserveScroll: true }}
+                    className="mt-3 flex flex-wrap items-center gap-3"
+                >
+                    {({ errors }) => (
+                        <>
+                            <label
+                                htmlFor="repeat-every-days"
+                                className="text-muted-foreground font-mono text-[13px]"
+                            >
+                                Repeat every
+                            </label>
+                            <input
+                                id="repeat-every-days"
+                                type="number"
+                                name="every_days"
+                                min={1}
+                                max={365}
+                                defaultValue={7}
+                                className={cn(captureFieldClassName, 'w-20')}
+                            />
+                            <span className="text-muted-foreground font-mono text-[13px]">
+                                days
+                            </span>
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className={quietButtonClassName}
+                            >
+                                Repeat
+                            </Button>
+                            <InputError
+                                message={errors.every_days}
+                                className="basis-full"
+                            />
+                        </>
+                    )}
+                </Form>
+            )}
+        </Band>
     );
 }
 
@@ -101,7 +191,16 @@ function RightNow({ rightNow, session }: HomeData) {
 }
 
 export default function Home({ home: data }: { home: HomeData }) {
-    const { rightNow, comingUp, reminder, needsAttention, restCount } = data;
+    const {
+        rightNow,
+        rightNowIsCommitment,
+        hasOpenCommitments,
+        comingUp,
+        reminder,
+        justFinished,
+        needsAttention,
+        restCount,
+    } = data;
 
     return (
         <>
@@ -125,8 +224,18 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <li key={line}>{line}</li>
                             ))}
                         </ul>
+                        <div className="mt-3">
+                            <SaidIdDoThis
+                                promised={rightNowIsCommitment}
+                                form={intentions.commitment.form(
+                                    rightNow.intention.id,
+                                )}
+                            />
+                        </div>
                     </Band>
                 )}
+
+                {justFinished && <JustFinished finished={justFinished} />}
 
                 {reminder && (
                     <Band label="Before you go">
@@ -142,7 +251,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                             <Button
                                 type="submit"
                                 variant="outline"
-                                className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                className={quietButtonClassName}
                             >
                                 Got it
                             </Button>
@@ -172,7 +281,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <Button
                                     type="submit"
                                     variant="outline"
-                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                    className={quietButtonClassName}
                                 >
                                     That{"'"}s right
                                 </Button>
@@ -181,15 +290,67 @@ export default function Home({ home: data }: { home: HomeData }) {
                         {comingUp.plan && (
                             <BackwardsPlan plan={comingUp.plan} />
                         )}
+                        {comingUp.kind === 'calendar_event' && (
+                            <Form
+                                {...calendarEvents.futureReminder.form(
+                                    comingUp.id,
+                                )}
+                                options={{ preserveScroll: true }}
+                                resetOnSuccess
+                                className="mt-3 flex flex-wrap items-center gap-3"
+                            >
+                                <input
+                                    name="message"
+                                    placeholder="What should future you hear?"
+                                    aria-label="What should future you hear"
+                                    className={cn(
+                                        captureFieldClassName,
+                                        'w-auto min-w-0 flex-1',
+                                    )}
+                                />
+                                <input
+                                    type="number"
+                                    name="offset_minutes"
+                                    defaultValue={30}
+                                    aria-label="Minutes after"
+                                    className={cn(
+                                        captureFieldClassName,
+                                        'w-20',
+                                    )}
+                                />
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    className={quietButtonClassName}
+                                >
+                                    Remind me after
+                                </Button>
+                            </Form>
+                        )}
                     </Band>
                 )}
 
                 {needsAttention.length > 0 && (
                     <Band label="Needs attention">
                         <ul className="space-y-6">
-                            {needsAttention.map((intention) => (
-                                <li key={intention.id}>
-                                    <Clarify intention={intention} />
+                            {needsAttention.map((item) => (
+                                <li key={item.id}>
+                                    {item.kind === 'waiting_for' && (
+                                        <WaitingFor item={item} />
+                                    )}
+                                    {item.kind === 'commitment' && (
+                                        <CommitmentRow
+                                            id={item.id}
+                                            description={item.title}
+                                            provenance={item.provenance}
+                                            awaitingConfirmation={
+                                                item.awaitingConfirmation
+                                            }
+                                        />
+                                    )}
+                                    {item.kind === 'intention' && (
+                                        <Clarify item={item} />
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -200,6 +361,14 @@ export default function Home({ home: data }: { home: HomeData }) {
                     <p className="text-muted-foreground font-mono text-[13px]">
                         {restCountLine(restCount)}
                     </p>
+                    {hasOpenCommitments && (
+                        <Link
+                            href={commitments.index()}
+                            className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
+                        >
+                            {commitmentCopy.list}
+                        </Link>
+                    )}
                     <Link
                         href={overwhelmed()}
                         className="text-muted-foreground hover:text-foreground ml-auto font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"

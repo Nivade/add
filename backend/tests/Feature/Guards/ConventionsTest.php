@@ -30,7 +30,7 @@ function phpSourceFiles(): array
 }
 
 // .ai/rules/product-invariants.md: no failure words in the domain vocabulary.
-it('keeps failure words out of the enums', function () {
+it('keeps failure words out of the enums', function (): void {
     $words = ['failed', 'abandoned', 'overdue', 'missed'];
 
     foreach (glob(app_path('Enums/*.php')) ?: [] as $file) {
@@ -49,7 +49,7 @@ it('keeps failure words out of the enums', function () {
 });
 
 // .ai/rules/product-invariants.md: an invented deadline is not modelled at all.
-it('never adds a due_at or overdue column', function () {
+it('never adds a due_at or overdue column', function (): void {
     foreach (glob(database_path('migrations/*.php')) ?: [] as $file) {
         $contents = (string) file_get_contents($file);
 
@@ -59,7 +59,7 @@ it('never adds a due_at or overdue column', function () {
 });
 
 // A model without it writes a date on the person's clock as that wall clock, and every comparison drifts by their offset.
-it('stores every model\'s dates as UTC instants', function () {
+it("stores every model's dates as UTC instants", function (): void {
     foreach (glob(app_path('Models/*.php')) ?: [] as $file) {
         $model = 'App\\Models\\'.basename($file, '.php');
 
@@ -68,12 +68,12 @@ it('stores every model\'s dates as UTC instants', function () {
 });
 
 // .ai/rules/api-and-data.md: laravel-data replaces API Resources.
-it('has no API resources', function () {
+it('has no API resources', function (): void {
     expect(is_dir(app_path('Http/Resources')))->toBeFalse();
 });
 
 // .ai/rules/api-and-data.md: an array literal skips the constructor's type checks and meets the input mapper.
-it('builds Data from literals with new, never from an array', function () {
+it('builds Data from literals with new, never from an array', function (): void {
     $files = phpSourceFiles();
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path('tests')));
 
@@ -90,23 +90,23 @@ it('builds Data from literals with new, never from an array', function () {
 });
 
 // .ai/rules/domain-model.md: the spec's App/Domain tree is deliberately not built.
-it('stays flat rather than growing a domain tree', function () {
+it('stays flat rather than growing a domain tree', function (): void {
     expect(is_dir(app_path('Domain')))->toBeFalse();
 });
 
 // .ai/rules/domain-model.md: a step is reached through the session that offered it.
-it('keeps user_id off steps', function () {
+it('keeps user_id off steps', function (): void {
     expect(Schema::hasColumn('steps', 'user_id'))->toBeFalse();
 });
 
 // .ai/rules/ai-layer.md: one provider seam, not the spec's five named interfaces.
-it('keeps the AI layer behind one contract', function () {
+it('keeps the AI layer behind one contract', function (): void {
     foreach (['IntentParser', 'TaskDecomposer', 'CommitmentDetector', 'DocumentInterpreter', 'EmailInterpreter'] as $interface) {
         expect(file_exists(app_path("Contracts/{$interface}.php")))->toBeFalse($interface);
     }
 });
 
-it('gives every rule file paths frontmatter so the index can be regenerated', function () {
+it('gives every rule file paths frontmatter so the index can be regenerated', function (): void {
     foreach (glob(repoPath('.ai/rules/*.md')) ?: [] as $file) {
         if (in_array(basename($file), ['overview.md', 'index.md'], true)) {
             continue;
@@ -117,7 +117,7 @@ it('gives every rule file paths frontmatter so the index can be regenerated', fu
 });
 
 // .ai/rules/general.md: a source comment must not cite a document the reader cannot see.
-it('keeps rule-file citations out of source comments', function () {
+it('keeps rule-file citations out of source comments', function (): void {
     foreach (phpSourceFiles() as $file) {
         $contents = (string) file_get_contents($file);
 
@@ -126,7 +126,7 @@ it('keeps rule-file citations out of source comments', function () {
 });
 
 // .ai/rules/testing.md: a non-compound use statement crashes a paratest worker.
-it('never imports a global class in a Pest file', function () {
+it('never imports a global class in a Pest file', function (): void {
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path('tests')));
 
     foreach ($iterator as $file) {
@@ -140,7 +140,7 @@ it('never imports a global class in a Pest file', function () {
 });
 
 // A scheduled name that nothing answers fails every minute in silence, so the schedule is checked here.
-it('schedules only commands that exist', function () {
+it('schedules only commands that exist', function (): void {
     $registered = array_keys(Artisan::all());
 
     foreach (app(Schedule::class)->events() as $event) {
@@ -163,7 +163,7 @@ arch('every Support class is final')
     ->ignoring(App\Support\NextAction\Rung::class);
 
 // .ai/rules/support-and-concerns.md: every other trait moved to its layer; nothing new lands here.
-it('keeps App\Concerns down to the Fortify validation traits', function () {
+it('keeps App\Concerns down to the Fortify validation traits', function (): void {
     $files = array_map(basename(...), glob(app_path('Concerns/*.php')) ?: []);
 
     expect($files)->toBe(['PasswordValidationRules.php', 'ProfileValidationRules.php']);

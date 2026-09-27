@@ -62,7 +62,7 @@ function documentViolations(callable $violationsIn): array
 }
 
 // .ai/rules/general.md: a document naming a file the build renamed is worse than no document.
-it('resolves every relative link in an agent document', function () {
+it('resolves every relative link in an agent document', function (): void {
     $violations = documentViolations(function (string $contents, string $file): array {
         preg_match_all('/\]\(([^)]+)\)/', $contents, $matches);
 
@@ -85,9 +85,21 @@ it('resolves every relative link in an agent document', function () {
 });
 
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
-it('names only paths that exist', function () {
+it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
-    $planned = [];
+    $planned = [
+        'backend/app/Data/Attributes/OneThing.php',
+        'backend/app/Exceptions/Attributes/RespondsWith.php',
+        'backend/app/Actions/Attributes/FailOn.php',
+        'backend/app/Actions/Concerns/ConfiguresJobByAttribute.php',
+        'backend/app/Enums/Cadence.php',
+        'backend/app/Actions/Attributes/PerUserCommand.php',
+        'backend/app/Actions/Concerns/ReadsCommandAttributes.php',
+        'backend/app/Support/Attributes/Driver.php',
+        'backend/app/Support/Concerns/NamedByDriver.php',
+        'backend/app/Notifications/Attributes/NotificationKind.php',
+        'backend/app/Notifications/Concerns/PushesToDevices.php',
+    ];
 
     foreach ($planned as $path) {
         expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');
@@ -116,7 +128,7 @@ it('names only paths that exist', function () {
 });
 
 // .ai/rules/toolchain.md: root scripts are the documented way in, so a rename has to reach the documents.
-it('names only root scripts that exist', function () {
+it('names only root scripts that exist', function (): void {
     $scripts = array_keys(json_decode((string) file_get_contents(repoPath('package.json')), true)['scripts']);
 
     $violations = documentViolations(function (string $contents) use ($scripts): array {
@@ -131,7 +143,7 @@ it('names only root scripts that exist', function () {
     expect($violations)->toBe([]);
 });
 
-it('names only composer scripts that exist', function () {
+it('names only composer scripts that exist', function (): void {
     $builtIn = ['install', 'update', 'require', 'remove', 'show', 'run', 'outdated', 'audit', 'dump-autoload', 'create-project'];
     $scripts = array_keys(json_decode((string) file_get_contents(base_path('composer.json')), true)['scripts']);
 
@@ -151,7 +163,7 @@ it('names only composer scripts that exist', function () {
 });
 
 // .ai/rules/overview.md: index.md is hand-maintained, so nothing else notices a rule file it forgot.
-it('indexes every rule file', function () {
+it('indexes every rule file', function (): void {
     $index = (string) file_get_contents(repoPath('.ai/rules/index.md'));
 
     foreach (glob(repoPath('.ai/rules/*.md')) ?: [] as $file) {
@@ -192,7 +204,7 @@ function planState(string $file): ?string
 }
 
 // .ai/skills/slice-workflow: whoever follows a link into a plan never sees the spine, so the plan says its own state.
-it('opens every plan with a state the vocabulary allows', function () {
+it('opens every plan with a state the vocabulary allows', function (): void {
     $violations = [];
 
     foreach (planFiles() as $file) {
@@ -216,7 +228,7 @@ it('opens every plan with a state the vocabulary allows', function () {
 });
 
 // The state is deliberately in two places; this is what keeps the copy from drifting.
-it('agrees with the spine about every plan it links', function () {
+it('agrees with the spine about every plan it links', function (): void {
     $spine = (string) file_get_contents(repoPath('.ai/plans/executive-function-os.md'));
 
     preg_match_all('/^\|[^|]*\|\s*\[[^\]]*\]\(([^)]+)\)[^|]*\|[^|]*\|\s*([a-z]+)/m', $spine, $rows, PREG_SET_ORDER);
@@ -237,7 +249,7 @@ it('agrees with the spine about every plan it links', function () {
 });
 
 // Archiving is routing the open items out first; an Open heading down here means one was buried.
-it('archives no plan that still has something open', function () {
+it('archives no plan that still has something open', function (): void {
     $violations = [];
 
     foreach (glob(repoPath('.ai/plans/archive/*.md')) ?: [] as $file) {

@@ -10,11 +10,7 @@ use App\Enums\Ai\AiOperation;
 use App\Support\Ai\AiRequest;
 use Illuminate\Support\Str;
 
-/**
- * Deterministic placeholder answers for clicking through the UI. Unlike the
- * fixture driver it accepts any input, because free text typed into a browser
- * has no pre-written answer and a hard error there is useless.
- */
+/** Placeholder answers for any input, for clicking through the UI; never scored. */
 final class CannedAiProvider implements AiProvider
 {
     public function name(): string
@@ -34,6 +30,7 @@ final class CannedAiProvider implements AiProvider
                 AiOperation::ParseCapture => $this->parseCapture($request->user),
                 AiOperation::DecomposeIntention => $this->decompose(),
                 AiOperation::SplitStep => $this->split(),
+                AiOperation::ClassifyIngestion => $this->classifyIngestion(),
             },
             provider: $this->name(),
             model: $this->name(),
@@ -78,6 +75,18 @@ final class CannedAiProvider implements AiProvider
                 ['title' => 'Pick up one thing.', 'estimated_seconds' => 20],
                 ['title' => 'Put it where it belongs.', 'estimated_seconds' => 40],
             ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function classifyIngestion(): array
+    {
+        return [
+            'actionable' => false,
+            'title' => null,
+            'why' => null,
+            'deadline_at' => null,
+            'estimated_seconds' => null,
         ];
     }
 }

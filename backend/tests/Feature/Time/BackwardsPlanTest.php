@@ -67,7 +67,7 @@ it('says a rung has gone past rather than scoring it', function (): void {
     expect(array_map(fn ($rung): bool => $rung->alreadyPassed, $plan?->rungs ?? []))->toBe([true, false, false]);
 });
 
-it('counts backwards in the person\'s zone, not the column\'s', function (): void {
+it("counts backwards in the person's zone, not the column's", function (): void {
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
     $intention = Intention::factory()->for($user)->create([
         'deadline_at' => CarbonImmutable::parse('2026-09-19 12:00:00', 'UTC'),

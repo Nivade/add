@@ -9,4 +9,5 @@ enum AiOperation: string
     case ParseCapture = 'parse_capture';
     case DecomposeIntention = 'decompose_intention';
     case SplitStep = 'split_step';
+    case ClassifyIngestion = 'classify_ingestion';
 }

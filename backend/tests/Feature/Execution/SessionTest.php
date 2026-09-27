@@ -126,18 +126,18 @@ it('refuses a transition the session cannot make', function (): void {
 
     PauseSession::run($session);
 
-    expect(fn () => PauseSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
+    expect(fn (): mixed => PauseSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 
     ResumeSession::run($session->refresh());
 
-    expect(fn () => ResumeSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
+    expect(fn (): mixed => ResumeSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 
     StopSession::run($session->refresh());
 
-    expect(fn () => StopSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
-        ->and(fn () => CompleteStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
-        ->and(fn () => SkipCurrentStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
-        ->and(fn () => RecordDistraction::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
+    expect(fn (): mixed => StopSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => CompleteStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => SkipCurrentStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => RecordDistraction::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 });
 
 it('refuses to land a session a second time even when advanced directly', function (): void {
@@ -145,7 +145,7 @@ it('refuses to land a session a second time even when advanced directly', functi
 
     StopSession::run($session);
 
-    expect(fn () => AdvanceSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+    expect(fn (): mixed => AdvanceSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
         ->and(replay($session))->toBe(['started', 'stopped']);
 });
 

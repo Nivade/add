@@ -8,7 +8,7 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { TOUCH_TARGET, theme } from '@/theme';
+import { field, TOUCH_TARGET, theme } from '@/theme';
 
 /** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
 export default function Appointment() {
@@ -22,6 +22,9 @@ export default function Appointment() {
 
   const [minutes, setMinutes] = useState<Partial<Record<PlanRung, string>>>({});
   const [saving, setSaving] = useState(false);
+  const [afterMessage, setAfterMessage] = useState('');
+  const [afterMinutes, setAfterMinutes] = useState('30');
+  const [remindSaved, setRemindSaved] = useState(false);
 
   if (loading && !appointment) {
     return <Loading />;
@@ -55,6 +58,23 @@ export default function Appointment() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const remindAfter = async () => {
+    const message = afterMessage.trim();
+
+    if (message === '') {
+      return;
+    }
+
+    await api.remindAfterEvent(
+      token as string,
+      appointment.id,
+      message,
+      Number(afterMinutes) || 0,
+    );
+    setAfterMessage('');
+    setRemindSaved(true);
   };
 
   return (
@@ -96,12 +116,44 @@ export default function Appointment() {
         />
       )}
 
+      {appointment.kind === 'calendar_event' && (
+        <View style={styles.after}>
+          <TextInput
+            style={styles.message}
+            value={afterMessage}
+            onChangeText={(text) => {
+              setAfterMessage(text);
+              setRemindSaved(false);
+            }}
+            placeholder="What should future you hear?"
+            placeholderTextColor={theme.color.muted}
+            accessibilityLabel="What should future you hear"
+          />
+          <View style={styles.rung}>
+            <TextInput
+              style={styles.minutes}
+              value={afterMinutes}
+              onChangeText={setAfterMinutes}
+              keyboardType="number-pad"
+              inputMode="numeric"
+              accessibilityLabel="Minutes after it starts"
+            />
+            <Text style={styles.afterLabel}>min after it starts</Text>
+          </View>
+          {remindSaved && <Meta>future you will hear it then</Meta>}
+          <Button label="Remind me after" onPress={() => void remindAfter()} />
+        </View>
+      )}
+
       <Button label="Back" onPress={() => router.replace('/')} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  after: { gap: theme.space(1), marginTop: theme.space(2) },
+  afterLabel: { color: theme.color.muted, fontSize: 13, flex: 1 },
+  message: field,
   rung: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1.5) },
   clock: { color: theme.color.text, fontSize: 16, width: 56 },
   passed: { color: theme.color.muted, textDecorationLine: 'line-through' },

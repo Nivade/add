@@ -11,10 +11,7 @@ use App\Support\Ai\Exceptions\AiFixtureMissing;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use Illuminate\Support\Facades\File;
 
-/**
- * Answers from a file instead of an API, so the whole pipeline runs end to end
- * with no credentials and the real parser still judges the answer.
- */
+/** Answers from a file, so the pipeline runs without credentials and the real parser still judges. */
 final class FixtureAiProvider implements AiProvider
 {
     public function name(): string
@@ -38,8 +35,7 @@ final class FixtureAiProvider implements AiProvider
     {
         $path = self::path($request);
 
-        // A missing fixture is an error, never an empty answer: inventing "nothing
-        // found" would poison the eval corpus with answers nobody gave.
+        // An empty answer here would enter the eval corpus as something nobody said.
         if (! File::exists($path)) {
             throw new AiFixtureMissing("No fixture for {$request->operation->value} at {$path}.");
         }

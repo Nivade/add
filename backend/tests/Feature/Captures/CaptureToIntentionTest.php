@@ -107,7 +107,7 @@ it('tells the model what day it is and which zone to answer in', function (): vo
         ->and($provider->received[0]->user)->toContain('Europe/Amsterdam');
 });
 
-it('reads a deadline only the model found on the person\'s clock', function (): void {
+it("reads a deadline only the model found on the person's clock", function (): void {
     answeredAi(['deadline_at' => '2026-10-02T09:00:00']);
 
     RecordCapture::run(
@@ -132,7 +132,7 @@ it('reads "tomorrow morning" in the person\'s zone and stores the instant it nam
     expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-17 07:00:00');
 });
 
-it('accepts the model\'s deadline only when the extractor found nothing', function (): void {
+it("accepts the model's deadline only when the extractor found nothing", function (): void {
     answeredAi(['deadline_at' => '2026-10-02T09:00:00+00:00']);
 
     RecordCapture::run(User::factory()->create(), 'renew my passport');
@@ -143,7 +143,7 @@ it('accepts the model\'s deadline only when the extractor found nothing', functi
 it('leaves the capture intact and the intention uncreated when the parse throws', function (): void {
     fakeAi()->push(['title' => '', 'clarifying_question' => null]);
 
-    expect(fn () => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
+    expect(fn (): mixed => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
         ->toThrow(AiResponseInvalid::class);
 
     $capture = Capture::query()->sole();
@@ -180,7 +180,7 @@ it('converts a capture once, however many times the job runs', function (): void
         ->and(Intention::query()->count())->toBe(1);
 });
 
-it('states the deadline to the decomposer on the person\'s clock', function (): void {
+it("states the deadline to the decomposer on the person's clock", function (): void {
     $provider = answeredAi(['deadline_at' => '2026-10-02T22:30:00+00:00']);
 
     RecordCapture::run(

@@ -15,22 +15,24 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 8 is done** — see [`08-mvp-real.md`](plans/slices/08-mvp-real.md) for
-what each phase built and its one open caveat (phase 1's live-feed round trip,
-which needs a person's real ICS URL). Slice 9 is next: it is still only the
-paragraph in [`executive-function-os.md`](plans/executive-function-os.md#slices)
-(phase 2 — waiting-for, commitments, ingestion, future-self, body doubling) and
-has no slice file of its own yet. The hardening pass over slices 1–6 is
-finished — [`hardening.md`](plans/hardening.md) carries what it settled and
-what it deliberately left open.
+**Slice 9 is done** — see [`09-phase-2.md`](plans/slices/09-phase-2.md) for
+what each phase built. Phase 5 (solo body doubling) closed with no code:
+execution mode (slice 4) already answers §17's solo requirement. Slice 10
+(Phase 3) is recorded only, not planned — it carries §17's Friend mode, the
+`Context` model, and §19's real ingestion sources (email, documents, receipts,
+bank/gov correspondence), none of which any built slice claims. The hardening
+pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md) carries
+what it settled and what it deliberately left open.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera
 capture, which waits for documents; location triggers, which need a consent
-surface; and registration and password reset, which stay on the web. Reminders
-are scheduled every minute in `routes/console.php` and dispatch one job per
+surface; registration and password reset, which stay on the web; and §36's
+success metrics, which have no instrumentation anywhere yet. Reminders are
+scheduled every minute in `routes/console.php` and dispatch one job per
 person, so both a scheduler and a queue worker have to be running to see one
-outside a test.
+outside a test. The same is now true of `future-reminders:dispatch` and
+`intentions:recur`.
 
 ## Learning the state
 

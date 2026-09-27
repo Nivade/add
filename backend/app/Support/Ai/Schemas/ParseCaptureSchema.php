@@ -20,7 +20,7 @@ final class ParseCaptureSchema
     {
         return fn (JsonSchema $schema): array => [
             'title' => $schema->string()
-                ->description('The intention, in the person\'s own words, as a short phrase.')
+                ->description("The intention, in the person's own words, as a short phrase.")
                 ->required(),
             'why' => $schema->string()
                 ->description('The reason they gave, if they gave one. Null otherwise.')

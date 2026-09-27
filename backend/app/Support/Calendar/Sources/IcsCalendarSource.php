@@ -82,10 +82,16 @@ final class IcsCalendarSource implements CalendarSource
             // Recurrences, their overrides and every zone are resolved here, to the window a sync asks for.
             $expanded = $calendar instanceof VCalendar ? $calendar->expand($from, $until, $zone) : null;
         } catch (Throwable) {
-            $expanded = null;
+            throw $this->notICalendar();
         }
 
-        return $expanded ?? throw new CalendarFeedUnreadable('The calendar feed is not iCalendar.');
+        return $expanded ?? throw $this->notICalendar();
+    }
+
+    /** No previous exception: the parser's message can quote the feed, and the feed is the person's calendar. */
+    private function notICalendar(): CalendarFeedUnreadable
+    {
+        return new CalendarFeedUnreadable('The calendar feed is not iCalendar.');
     }
 
     /** An unchanged feed answers 304, and the window still moves daily, so the last body is kept to expand again. */
@@ -139,6 +145,9 @@ final class IcsCalendarSource implements CalendarSource
         try {
             $cached = is_string($stored) ? decrypt($stored) : null;
         } catch (DecryptException) {
+            // Written under an earlier APP_KEY: it will never decrypt again, so the next fetch starts clean.
+            Cache::forget($key);
+
             return null;
         }
 

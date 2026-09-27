@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasons } from '@add/shared';
+import { commitmentCopy, stuckReasons } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -7,13 +7,14 @@ import { api, type SessionControl } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { QuietAction } from '@/components/quiet-action';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 import { theme } from '@/theme';
 
 export default function Focus() {
   const { token } = useSession();
   const load = useCallback(() => api.currentSession(token as string), [token]);
-  const { data, loading, replace } =
+  const { data, loading, replace, reload } =
     useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
 
@@ -44,6 +45,11 @@ export default function Focus() {
     replace(state);
   };
 
+  const promise = async (): Promise<void> => {
+    await api.promoteCurrentStep(token as string, session.id);
+    await reload();
+  };
+
   const control = async (name: SessionControl): Promise<void> =>
     take(await api.control(token as string, session.id, name));
 
@@ -66,6 +72,11 @@ export default function Focus() {
       ) : (
         <>
           <OneThing>{step?.title ?? intention.title}</OneThing>
+          {data.currentStepIsCommitment ? (
+            <Meta>{commitmentCopy.promised}</Meta>
+          ) : (
+            <QuietAction label={commitmentCopy.promise} onPress={() => void promise()} />
+          )}
 
           <View style={styles.controls}>
             <Button label="Done" onPress={() => void control('complete-step')} />

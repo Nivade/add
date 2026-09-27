@@ -3,6 +3,7 @@ import { stuckReasons } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
+import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -73,6 +74,16 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         <div className="space-y-4">
                             <OneThing>{step?.title}</OneThing>
                             {step && <Meta>{stepMeta(step)}</Meta>}
+                            {step && (
+                                <div className="pl-5">
+                                    <SaidIdDoThis
+                                        promised={state.currentStepIsCommitment}
+                                        form={focusRoutes.commitment.form(
+                                            session.id,
+                                        )}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

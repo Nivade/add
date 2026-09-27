@@ -42,7 +42,7 @@ it('shows the web screen one step and never a second', function (): void {
     $this->actingAs($user)
         ->get(route('overwhelmed'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('overwhelmed')
             ->where('overwhelmed.smallestStep.step.title', 'Empty the first shelf.')
             ->where('overwhelmed.restCount', 1)

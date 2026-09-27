@@ -14,7 +14,6 @@ use App\Support\Ai\Parsers\ParseCaptureParser;
 use App\Support\Time\ExtractedDeadline;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -44,7 +43,7 @@ final class ConvertCaptureToIntention
         $parsed = $this->parser->parse(
             $this->provider->complete(AiRequest::parseCapture(
                 $capture->user_id,
-                $this->describe($this->unclaimed($capture->body, $extracted), $now)
+                $this->describe($extracted?->remainderOf($capture->body) ?? $capture->body, $now)
             ))->payload,
             $timezone,
         );
@@ -79,16 +78,5 @@ final class ConvertCaptureToIntention
             '',
             $text,
         ]);
-    }
-
-    private function unclaimed(string $body, ?ExtractedDeadline $extracted): string
-    {
-        if (! $extracted instanceof ExtractedDeadline) {
-            return $body;
-        }
-
-        $remainder = Str::squish(str_replace($extracted->phrase, ' ', $body));
-
-        return $remainder === '' ? $body : $remainder;
     }
 }

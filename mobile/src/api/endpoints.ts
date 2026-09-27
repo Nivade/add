@@ -5,15 +5,22 @@ import type {
   CaptureData,
   CaptureSource,
   ComingUpData,
+  CommitmentData,
+  CommitmentListData,
+  CommitmentResponse,
   DeviceData,
   DevicePlatform,
   ExecutionStateData,
+  FutureReminderData,
   HomeData,
+  IngestionClassificationData,
   IntentionData,
   NextActionData,
   OverwhelmedData,
   PlanRung,
   StuckReason,
+  WaitingForData,
+  WaitingForResponse,
 } from '@add/shared';
 import { request } from './client';
 
@@ -113,5 +120,92 @@ export const api = {
       method: 'POST',
       token,
       body: { reason },
+    }),
+
+  createWaitingFor: (token: string, subject: string, note: string) =>
+    request<WaitingForData>('/waiting-fors', {
+      method: 'POST',
+      token,
+      body: { subject, note },
+    }),
+
+  respondToWaitingFor: (
+    token: string,
+    waitingForId: string,
+    response: WaitingForResponse,
+  ) =>
+    request<WaitingForData>(`/waiting-fors/${waitingForId}/respond`, {
+      method: 'POST',
+      token,
+      body: { response },
+    }),
+
+  createCommitment: (token: string, description: string) =>
+    request<CommitmentData>('/commitments', {
+      method: 'POST',
+      token,
+      body: { description },
+    }),
+
+  commitments: (token: string) =>
+    request<CommitmentListData>('/commitments', { token }),
+
+  promoteToCommitment: (token: string, intentionId: string) =>
+    request<CommitmentData>(`/intentions/${intentionId}/commitment`, {
+      method: 'POST',
+      token,
+    }),
+
+  promoteCurrentStep: (token: string, sessionId: string) =>
+    request<CommitmentData>(`/sessions/${sessionId}/commitment`, {
+      method: 'POST',
+      token,
+    }),
+
+  respondToCommitment: (
+    token: string,
+    commitmentId: string,
+    response: CommitmentResponse,
+  ) =>
+    request<CommitmentData>(`/commitments/${commitmentId}/respond`, {
+      method: 'POST',
+      token,
+      body: { response },
+    }),
+
+  repeatIntention: (token: string, intentionId: string, everyDays: number) =>
+    request<IntentionData>(`/intentions/${intentionId}/recurrence`, {
+      method: 'POST',
+      token,
+      body: { every_days: everyDays },
+    }),
+
+  remindFutureSelf: (token: string, text: string) =>
+    request<FutureReminderData>('/future-reminders', {
+      method: 'POST',
+      token,
+      body: { text },
+    }),
+
+  remindAfterEvent: (
+    token: string,
+    calendarEventId: string,
+    message: string,
+    offsetMinutes: number,
+  ) =>
+    request<FutureReminderData>(
+      `/calendar-events/${calendarEventId}/future-reminder`,
+      {
+        method: 'POST',
+        token,
+        body: { message, offset_minutes: offsetMinutes },
+      },
+    ),
+
+  classifyPasted: (token: string, text: string) =>
+    request<IngestionClassificationData>('/ingestion/classify', {
+      method: 'POST',
+      token,
+      body: { text },
     }),
 };

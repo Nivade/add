@@ -10,11 +10,17 @@ use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
+use App\Http\Controllers\Api\V1\PromoteCurrentStepToCommitmentController;
+use App\Http\Controllers\Api\V1\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
+use App\Http\Controllers\Api\V1\RespondToCommitmentController;
+use App\Http\Controllers\Api\V1\RespondToWaitingForController;
 use App\Http\Controllers\Api\V1\ResumeSessionController;
+use App\Http\Controllers\Api\V1\SetIntentionRecurrenceController;
 use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowAppointmentController;
+use App\Http\Controllers\Api\V1\ShowCommitmentsController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
 use App\Http\Controllers\Api\V1\ShowHomeController;
 use App\Http\Controllers\Api\V1\ShowNextActionController;
@@ -22,10 +28,15 @@ use App\Http\Controllers\Api\V1\ShowOverwhelmedController;
 use App\Http\Controllers\Api\V1\SkipStepController;
 use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
+use App\Http\Controllers\Api\V1\StoreCommitmentController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
+use App\Http\Controllers\Api\V1\StoreFutureReminderController;
+use App\Http\Controllers\Api\V1\StoreRelativeFutureReminderController;
 use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
+use App\Http\Controllers\Api\V1\StoreWaitingForController;
 use App\Http\Controllers\Api\V1\UpdateAiConsentController;
+use App\Http\Controllers\ClassifyPastedTextController;
 use Illuminate\Support\Facades\Route;
 
 // The device has no session to authenticate with yet, so this is the one route outside the guard.
@@ -54,6 +65,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
     Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
+    Route::post('waiting-fors', StoreWaitingForController::class)->name('waiting-fors.store');
+    Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
+    Route::get('commitments', ShowCommitmentsController::class)->name('commitments.index');
+    Route::post('commitments', StoreCommitmentController::class)->name('commitments.store');
+    Route::post('commitments/{commitment}/respond', RespondToCommitmentController::class)->name('commitments.respond');
+    Route::post('intentions/{intention}/commitment', PromoteIntentionToCommitmentController::class)->name('intentions.commitment');
+    Route::post('intentions/{intention}/recurrence', SetIntentionRecurrenceController::class)->name('intentions.recurrence');
+    Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
+    Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
+    Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');
@@ -66,5 +87,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
         Route::post('stuck', ReportStuckController::class)->name('stuck');
         Route::post('distracted', RecordDistractionController::class)->name('distracted');
         Route::post('stop', StopSessionController::class)->name('stop');
+        Route::post('commitment', PromoteCurrentStepToCommitmentController::class)->name('commitment');
     });
 });

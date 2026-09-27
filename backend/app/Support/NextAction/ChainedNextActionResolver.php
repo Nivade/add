@@ -21,7 +21,7 @@ use App\Support\NextAction\Comparators\StartableNow;
 /** No score: a number six inputs went into cannot be explained, and the `why` has to be. */
 final class ChainedNextActionResolver implements NextActionResolver
 {
-    /** @var list<StepComparator> */
+    /** @var list<Rung> */
     private array $chain;
 
     public function __construct()
@@ -108,8 +108,7 @@ final class ChainedNextActionResolver implements NextActionResolver
     }
 
     /**
-     * The highest rung that put anything below the winner. A sibling of the same
-     * intention ties all the way down, so the runner-up alone would hide the reason.
+     * The highest rung that put anything below the winner, since a sibling step ties all the way down.
      *
      * @param  list<Candidate>  $ranked
      */

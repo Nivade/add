@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\StartSession;
+use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
@@ -13,7 +14,7 @@ use Inertia\Testing\AssertableInertia;
 it('pitches the product to a guest and sends a signed-in person to their answer', function (): void {
     $this->get(route('welcome'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->component('welcome'));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->component('welcome'));
 
     $this->actingAs(User::factory()->create())
         ->get(route('welcome'))
@@ -30,7 +31,7 @@ it('answers with one thing and says why it is that one', function (): void {
     $this->actingAs($intention->user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('home')
             ->where('home.rightNow.step.title', 'Step 1.')
             ->where('home.rightNow.intention.title', 'Clean the kitchen')
@@ -48,7 +49,7 @@ it('offers the open session instead of choosing again', function (): void {
     $this->actingAs($session->user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.session.session.id', $session->id)
             ->where('home.session.intention.title', 'Clean the kitchen')
         );
@@ -72,7 +73,7 @@ it('names the next real deadline and nothing else about time', function (): void
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.comingUp.title', 'Renew the passport')
             ->where('home.comingUp.inWords', '2 days from now')
         );
@@ -86,7 +87,7 @@ it('holds an intention nobody could name in its own band, never as the thing to 
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow', null)
             ->has('home.needsAttention', 1)
             ->where('home.needsAttention.0.title', 'Sort the thing out')
@@ -101,10 +102,45 @@ it('counts everything else without listing it', function (): void {
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.restCount', 6)
             ->has('home.needsAttention', 0)
         );
+});
+
+it('counts open commitments beyond the one on show', function (): void {
+    $user = User::factory()->create();
+    Commitment::factory()->count(3)->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.needsAttention', 1)
+            ->where('home.restCount', 2));
+});
+
+it('offers what was just finished so it can be set to repeat, and lets it go after an hour', function (): void {
+    $user = User::factory()->create();
+    $finished = Intention::factory()->for($user)->done()->create(['title' => 'Water the plants', 'completed_at' => now()->subMinutes(20)]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.justFinished.id', $finished->id)
+            ->where('home.justFinished.recurrenceEveryDays', null));
+
+    $this->actingAs($user)->post(route('intentions.recurrence', $finished), ['every_days' => 7]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.justFinished.recurrenceEveryDays', 7));
+
+    $this->travel(2)->hours();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.justFinished', null));
 });
 
 it('sends focus back home when no session is open', function (): void {
@@ -119,7 +155,7 @@ it('renders the step, its intention and the progress in focus', function (): voi
     $this->actingAs($session->user)
         ->get(route('focus'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->component('focus')
             ->where('state.session.currentStep.title', 'Step 1.')
             ->where('state.intention.title', 'Clean the kitchen')
@@ -147,7 +183,7 @@ it('refuses to start on a step belonging to somebody else', function (): void {
         ->assertNotFound();
 });
 
-it('hides another person\'s session behind the web controls too', function (): void {
+it("hides another person's session behind the web controls too", function (): void {
     $session = started();
 
     $this->actingAs(User::factory()->create())
@@ -186,5 +222,5 @@ it('starts a session from the API and finds it on home', function (): void {
 
     $this->actingAs($session->user)
         ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('home.session.session.id', $session->id));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.session.session.id', $session->id));
 });

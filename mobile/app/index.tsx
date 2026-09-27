@@ -1,5 +1,15 @@
-import type { HomeData, IntentionData } from '@add/shared';
-import { formatEstimate, restCountLine } from '@add/shared';
+import type {
+  HomeData,
+  JustFinishedData,
+  NeedsAttentionData,
+} from '@add/shared';
+import {
+  commitmentCopy,
+  formatEstimate,
+  recurrenceLine,
+  restCountLine,
+  waitingForResponses,
+} from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -8,21 +18,24 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { CommitmentRow } from '@/components/commitment-row';
+import { QuietAction } from '@/components/quiet-action';
+import { Responses } from '@/components/responses';
 import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { field, theme } from '@/theme';
+import { field, line, theme } from '@/theme';
 
 function Clarify({
-  intention,
+  item,
   onAnswered,
 }: {
-  intention: IntentionData;
+  item: NeedsAttentionData;
   onAnswered: () => void;
 }) {
   const { token } = useSession();
   const [answer, setAnswer] = useState('');
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const question = intention.clarifyingQuestion ?? '';
+  const question = item.clarifyingQuestion ?? '';
 
   const send = async () => {
     const text = answer.trim();
@@ -35,7 +48,7 @@ function Clarify({
     setProblem(null);
 
     try {
-      await api.clarify(token as string, intention.id, text);
+      await api.clarify(token as string, item.id, text);
       onAnswered();
     } catch (error) {
       setProblem(
@@ -50,7 +63,7 @@ function Clarify({
 
   return (
     <View style={styles.clarify}>
-      <Text style={styles.line}>{intention.title}</Text>
+      <Text style={styles.line}>{item.title}</Text>
       <Meta>{question}</Meta>
       <TextInput
         style={styles.input}
@@ -67,6 +80,90 @@ function Clarify({
         onPress={() => void send()}
       />
     </View>
+  );
+}
+
+function WaitingFor({
+  item,
+  onResponded,
+}: {
+  item: NeedsAttentionData;
+  onResponded: () => void;
+}) {
+  const { token } = useSession();
+
+  return (
+    <View style={styles.clarify}>
+      <Text style={styles.line}>
+        {item.title}
+        {item.detail ? ` · ${item.detail}` : ''}
+      </Text>
+      <Responses
+        responses={waitingForResponses}
+        onRespond={async (response) => {
+          await api.respondToWaitingFor(token as string, item.id, response);
+          onResponded();
+        }}
+      />
+    </View>
+  );
+}
+
+function JustFinished({
+  finished,
+  onRepeated,
+}: {
+  finished: JustFinishedData;
+  onRepeated: () => void;
+}) {
+  const { token } = useSession();
+  const [everyDays, setEveryDays] = useState('7');
+  const [saving, setSaving] = useState(false);
+
+  const repeat = async () => {
+    const days = Number(everyDays);
+
+    if (!Number.isInteger(days) || days < 1) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await api.repeatIntention(token as string, finished.id, days);
+      onRepeated();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Band label="Just finished">
+      <Text style={styles.line}>{finished.title}</Text>
+      {finished.recurrenceEveryDays ? (
+        <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
+      ) : (
+        <>
+          <View style={styles.repeat}>
+            <Meta>Repeat every</Meta>
+            <TextInput
+              style={[styles.input, styles.days]}
+              value={everyDays}
+              onChangeText={setEveryDays}
+              keyboardType="number-pad"
+              inputMode="numeric"
+              accessibilityLabel="Repeat every how many days"
+            />
+            <Meta>days</Meta>
+          </View>
+          <Button
+            label={saving ? 'Saving' : 'Repeat'}
+            disabled={saving}
+            onPress={() => void repeat()}
+          />
+        </>
+      )}
+    </Band>
   );
 }
 
@@ -88,8 +185,24 @@ export default function Home() {
     );
   }
 
-  const { rightNow, session, comingUp, reminder, needsAttention, restCount } =
-    data;
+  const {
+    rightNow,
+    rightNowIsCommitment,
+    hasOpenCommitments,
+    session,
+    comingUp,
+    reminder,
+    justFinished,
+    needsAttention,
+    restCount,
+  } = data;
+
+  const promote = async () => {
+    if (rightNow) {
+      await api.promoteToCommitment(token as string, rightNow.intention.id);
+      await reload();
+    }
+  };
 
   const start = async () => {
     if (!rightNow) {
@@ -129,6 +242,14 @@ export default function Home() {
                   {line}
                 </Text>
               ))}
+              {rightNowIsCommitment ? (
+                <Text style={styles.line}>{commitmentCopy.promised}</Text>
+              ) : (
+                <QuietAction
+                  label={commitmentCopy.promise}
+                  onPress={() => void promote()}
+                />
+              )}
             </Band>
           )}
         </>
@@ -137,6 +258,10 @@ export default function Home() {
           <OneThing>Nothing needs you right now.</OneThing>
           <Meta>that is the whole answer</Meta>
         </>
+      )}
+
+      {justFinished && (
+        <JustFinished finished={justFinished} onRepeated={() => void reload()} />
       )}
 
       {reminder && (
@@ -174,23 +299,57 @@ export default function Home() {
 
       {needsAttention.length > 0 && (
         <Band label="Needs attention">
-          {needsAttention.map((intention) => (
-            <Clarify
-              key={intention.id}
-              intention={intention}
-              onAnswered={() => void reload()}
-            />
-          ))}
+          {needsAttention.map((item) => {
+            switch (item.kind) {
+              case 'waiting_for':
+                return (
+                  <WaitingFor
+                    key={item.id}
+                    item={item}
+                    onResponded={() => void reload()}
+                  />
+                );
+              case 'commitment':
+                return (
+                  <CommitmentRow
+                    key={item.id}
+                    id={item.id}
+                    description={item.title}
+                    provenance={item.provenance}
+                    awaitingConfirmation={item.awaitingConfirmation}
+                    onResponded={() => void reload()}
+                  />
+                );
+              case 'intention':
+                return (
+                  <Clarify
+                    key={item.id}
+                    item={item}
+                    onAnswered={() => void reload()}
+                  />
+                );
+            }
+          })}
         </Band>
       )}
 
       <Meta>{restCountLine(restCount)}</Meta>
+      {hasOpenCommitments && (
+        <QuietAction
+          label={commitmentCopy.list}
+          onPress={() => router.push('/commitments')}
+        />
+      )}
 
       <View style={styles.thumbReach}>
         <Button
           label="Capture a thought"
           tone="primary"
           onPress={() => router.push('/capture')}
+        />
+        <Button
+          label="Something else"
+          onPress={() => router.push('/add')}
         />
         <Button
           label="I'm overwhelmed"
@@ -204,8 +363,10 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  line: { color: theme.color.text, fontSize: 16, lineHeight: 24 },
+  line,
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
+  repeat: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1) },
+  days: { width: 72, textAlign: 'right' },
 });

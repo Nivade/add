@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Data\Ai\ParsedStepData;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Parsers\DecomposeParser;
@@ -13,12 +14,7 @@ use Illuminate\Support\Facades\File;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/**
- * risk 2's trigger: the first `openai` run against a live key. Scores the same
- * three things `DecomposeParser::violations()` already checks in production —
- * step count, first-step size, first-step phrasing — against a small seed
- * corpus, and writes what it found as the first baseline to compare against.
- */
+/** Scores a seed corpus on what `DecomposeParser::violations()` checks, and writes it as a baseline. */
 final class RunDecompositionEval
 {
     use AsCommand;
@@ -78,10 +74,10 @@ final class RunDecompositionEval
 
         try {
             $steps = $this->parser->parse($this->provider->complete($request)->payload);
-        } catch (AiResponseInvalid $exception) {
+        } catch (AiResponseInvalid $aiResponseInvalid) {
             return [
-                'row' => [$task['id'], '—', '—', 'invalid response: '.$exception->getMessage()],
-                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$exception->getMessage()]],
+                'row' => [$task['id'], '—', '—', 'invalid response: '.$aiResponseInvalid->getMessage()],
+                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$aiResponseInvalid->getMessage()]],
             ];
         }
 
@@ -92,7 +88,7 @@ final class RunDecompositionEval
             'result' => [
                 'id' => $task['id'],
                 'shape' => $task['shape'],
-                'steps' => array_map(fn ($step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
+                'steps' => array_map(fn (ParsedStepData $step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
                 'violations' => $violations,
             ],
         ];

@@ -31,7 +31,7 @@ it('carries one typed thought all the way to a finished intention', function ():
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow.step.title', 'Grab a bin bag.')
             ->where('home.rightNow.intention.why', 'Parents are coming')
         );
@@ -52,7 +52,7 @@ it('carries one typed thought all the way to a finished intention', function ():
     $this->actingAs($user)
         ->get(route('focus'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('state.session.currentStep.title', 'Put the obvious rubbish in the bag.')
             ->where('state.progress.0', '1 of 2 steps done.')
         );
@@ -70,7 +70,7 @@ it('carries one typed thought all the way to a finished intention', function ():
     $this->actingAs($user)
         ->get(route('focus'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page->where('state.session.pausedAt', fn (?string $at): bool => $at !== null));
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.session.pausedAt', fn (?string $at): bool => $at !== null));
 
     $this->actingAs($user)
         ->from(route('focus'))
@@ -85,7 +85,7 @@ it('carries one typed thought all the way to a finished intention', function ():
     $this->actingAs($user)
         ->get(route('home'))
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('home.rightNow', null)
             ->where('home.session', null)
             ->where('home.restCount', 0)

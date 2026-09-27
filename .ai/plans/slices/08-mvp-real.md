@@ -151,7 +151,9 @@ spine's row and `.ai/RESUME.md` together.
 ## Open
 
 Named preparation items, step editing and location triggers stay out: each needs
-a model the spec defers, and slice 9 is where the first of them earns one.
+a model the spec defers. Slice 9's six phases do not include named preparation
+items or step editing either — neither has a slice yet. Location triggers are
+recorded under slice 10 alongside the `Context` model they would need.
 
 Phase 1's done-when — a real feed puts an appointment on home, a reminder
 fires, removing the feed orphans nothing — is unverified end to end: it needs

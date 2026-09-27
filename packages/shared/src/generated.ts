@@ -28,6 +28,20 @@ inWords: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };
+export type CommitmentData = {
+id: string,
+description: string,
+provenance: CommitmentProvenance,
+status: CommitmentStatus,
+awaitingConfirmation: boolean,
+confirmedAt: string | null,
+};
+export type CommitmentListData = {
+commitments: CommitmentData[],
+};
+export type CommitmentProvenance = 'user_task' | 'user_stated' | 'system_inferred';
+export type CommitmentResponse = 'confirm' | 'keep' | 'release';
+export type CommitmentStatus = 'open' | 'kept' | 'released';
 export type DeviceData = {
 id: string,
 platform: DevicePlatform,
@@ -49,14 +63,32 @@ session: ExecutionSessionData,
 intention: IntentionData,
 progress: string[],
 elapsed: string,
+currentStepIsCommitment: boolean,
+};
+export type FutureReminderData = {
+id: string,
+message: string,
+triggerAt: string | null,
+calendarEventId: string | null,
+offsetSeconds: number | null,
 };
 export type HomeData = {
 rightNow: NextActionData | null,
+rightNowIsCommitment: boolean,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
 reminder: ReminderData | null,
-needsAttention: IntentionData[],
+justFinished: JustFinishedData | null,
+needsAttention: NeedsAttentionData[],
 restCount: number,
+hasOpenCommitments: boolean,
+};
+export type IngestionClassificationData = {
+actionable: boolean,
+title: string | null,
+why: string | null,
+deadlineAt: string | null,
+estimatedSeconds: number | null,
 };
 export type IntentionData = {
 id: string,
@@ -66,8 +98,24 @@ status: IntentionStatus,
 deadlineAt: string | null,
 deadlineInferred: boolean,
 clarifyingQuestion: string | null,
+recurrenceEveryDays: number | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
+export type JustFinishedData = {
+id: string,
+title: string,
+recurrenceEveryDays: number | null,
+};
+export type NeedsAttentionData = {
+kind: NeedsAttentionKind,
+id: string,
+title: string,
+detail: string | null,
+clarifyingQuestion: string | null,
+awaitingConfirmation: boolean,
+provenance: CommitmentProvenance | null,
+};
+export type NeedsAttentionKind = 'intention' | 'waiting_for' | 'commitment';
 export type NextActionData = {
 step: StepData,
 intention: IntentionData,
@@ -111,3 +159,11 @@ generated: boolean,
 };
 export type StepStatus = 'pending' | 'done' | 'skipped';
 export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';
+export type WaitingForData = {
+id: string,
+subject: string,
+note: string | null,
+status: WaitingForStatus,
+};
+export type WaitingForResponse = 'wait_longer' | 'follow_up' | 'cancel' | 'receive';
+export type WaitingForStatus = 'waiting' | 'followed_up' | 'cancelled' | 'received';
