@@ -9,17 +9,22 @@ import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { QuietAction } from '@/components/quiet-action';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { StaleNote, Unreachable } from '@/components/unreachable';
 import { theme } from '@/theme';
 
 export default function Focus() {
   const { token } = useSession();
   const load = useCallback(() => api.currentSession(token as string), [token]);
-  const { data, loading, replace, reload } =
+  const { data, loading, problem, replace, reload } =
     useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
 
   if (loading && !data) {
     return <Loading />;
+  }
+
+  if (!data && problem) {
+    return <Unreachable problem={problem} onRetry={() => void reload()} />;
   }
 
   if (!data) {
@@ -55,6 +60,7 @@ export default function Focus() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       <Meta>{intention.title}</Meta>
 
       {paused ? (

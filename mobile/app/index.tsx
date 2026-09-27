@@ -22,6 +22,7 @@ import { CommitmentRow } from '@/components/commitment-row';
 import { QuietAction } from '@/components/quiet-action';
 import { Responses } from '@/components/responses';
 import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { StaleNote, Unreachable } from '@/components/unreachable';
 import { field, line, theme } from '@/theme';
 
 function Clarify({
@@ -177,12 +178,7 @@ export default function Home() {
   }
 
   if (!data) {
-    return (
-      <Screen>
-        <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
-        <Button label="Try again" onPress={() => void reload()} />
-      </Screen>
-    );
+    return <Unreachable problem={problem} onRetry={() => void reload()} />;
   }
 
   const {
@@ -215,6 +211,7 @@ export default function Home() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       {session ? (
         <>
           <OneThing>

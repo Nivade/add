@@ -4,11 +4,12 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { StaleNote, Unreachable } from '@/components/unreachable';
 
 export default function Settings() {
   const { token } = useSession();
   const load = useCallback(() => api.aiConsent(token as string), [token]);
-  const { data, loading, problem, replace } = useResource(load);
+  const { data, loading, problem, reload, replace } = useResource(load);
   const [saving, setSaving] = useState(false);
 
   if (loading && !data) {
@@ -16,11 +17,7 @@ export default function Settings() {
   }
 
   if (!data) {
-    return (
-      <Screen>
-        <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
-      </Screen>
-    );
+    return <Unreachable problem={problem} onRetry={() => void reload()} />;
   }
 
   const toggle = async () => {
@@ -35,6 +32,7 @@ export default function Settings() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       <OneThing>AI</OneThing>
       <Meta>
         {data.consented

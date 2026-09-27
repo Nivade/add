@@ -9,22 +9,28 @@ import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { StaleNote, Unreachable } from '@/components/unreachable';
 import { theme } from '@/theme';
 
 /** Reached only from home; home stays the place things are chosen from. */
 export default function Commitments() {
   const { token } = useSession();
   const load = useCallback(() => api.commitments(token as string), [token]);
-  const { data, loading, reload } = useResource<CommitmentListData>(load);
+  const { data, loading, problem, reload } = useResource<CommitmentListData>(load);
 
   if (loading && !data) {
     return <Loading />;
   }
 
-  const open = data?.commitments ?? [];
+  if (!data) {
+    return <Unreachable problem={problem} onRetry={() => void reload()} />;
+  }
+
+  const open = data.commitments;
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       <OneThing>{commitmentCopy.listTitle}</OneThing>
       {open.length === 0 && (
         <Meta>{commitmentCopy.listEmpty}</Meta>

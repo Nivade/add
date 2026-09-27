@@ -8,6 +8,7 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { StaleNote, Unreachable } from '@/components/unreachable';
 import { field, TOUCH_TARGET, theme } from '@/theme';
 
 /** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
@@ -18,7 +19,8 @@ export default function Appointment() {
     () => api.appointment(token as string, kind, id),
     [token, kind, id],
   );
-  const { data: appointment, loading } = useResource<ComingUpData | null>(load);
+  const { data: appointment, loading, problem, reload } =
+    useResource<ComingUpData | null>(load);
 
   const [minutes, setMinutes] = useState<Partial<Record<PlanRung, string>>>({});
   const [saving, setSaving] = useState(false);
@@ -28,6 +30,10 @@ export default function Appointment() {
 
   if (loading && !appointment) {
     return <Loading />;
+  }
+
+  if (!appointment && problem) {
+    return <Unreachable problem={problem} onRetry={() => void reload()} />;
   }
 
   if (!appointment) {
@@ -79,6 +85,7 @@ export default function Appointment() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       <OneThing>{appointment.title}</OneThing>
       <Meta>{appointment.inWords}</Meta>
 
