@@ -8,17 +8,17 @@ import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 export default function Settings() {
   const { token } = useSession();
   const load = useCallback(() => api.aiConsent(token as string), [token]);
-  const { data, loading, failed, replace } = useResource(load);
+  const { data, loading, problem, replace } = useResource(load);
   const [saving, setSaving] = useState(false);
 
   if (loading && !data) {
     return <Loading />;
   }
 
-  if (failed || !data) {
+  if (problem || !data) {
     return (
       <Screen>
-        <OneThing>The app could not reach the server.</OneThing>
+        <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
       </Screen>
     );
   }

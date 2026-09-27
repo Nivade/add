@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { whenUnauthorized } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { registerForPush } from '@/push/register-for-push';
 
@@ -53,6 +54,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  // Only the token that was refused is forgotten: a late answer to an old one must not sign out a fresh sign-in.
+  useEffect(() => {
+    whenUnauthorized(async (refused) => {
+      if ((await SecureStore.getItemAsync(KEY)) !== refused) {
+        return;
+      }
+
+      await SecureStore.deleteItemAsync(KEY);
+      setToken(null);
+    });
+
+    return () => whenUnauthorized(null);
+  }, []);
 
   const signOut = useCallback(async () => {
     const current = token;

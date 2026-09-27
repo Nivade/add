@@ -170,16 +170,16 @@ function JustFinished({
 export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
-  const { data, loading, failed, reload } = useResource<HomeData>(load);
+  const { data, loading, problem, reload } = useResource<HomeData>(load);
 
   if (loading && !data) {
     return <Loading />;
   }
 
-  if (failed || !data) {
+  if (problem || !data) {
     return (
       <Screen>
-        <OneThing>The app could not reach the server.</OneThing>
+        <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
         <Button label="Try again" onPress={() => void reload()} />
       </Screen>
     );

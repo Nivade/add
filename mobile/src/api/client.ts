@@ -14,6 +14,13 @@ export class ApiError extends Error {
   }
 }
 
+let onUnauthorized: ((token: string) => void) | null = null;
+
+/** The session registers this, so a token the server stopped accepting signs the phone out from any screen. */
+export function whenUnauthorized(handler: ((token: string) => void) | null): void {
+  onUnauthorized = handler;
+}
+
 function baseUrl(): string {
   const url = Constants.expoConfig?.extra?.apiUrl;
 
@@ -43,6 +50,10 @@ export async function request<T>(
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+
+  if (response.status === 401 && token) {
+    onUnauthorized?.(token);
+  }
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));

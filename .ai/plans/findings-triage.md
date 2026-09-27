@@ -98,9 +98,10 @@ fails forever. The home screen is where it was seen; `focus`, `overwhelmed`, `se
   then throws as before. Handling it once in the client covers every screen and every write,
   rather than a check per screen.
 - The handler clears the stored token without calling `api.signOut` — the token is already dead,
-  and calling the API with it would 401 back into the handler. `Gate` in `mobile/app/_layout.tsx`
+  and calling the API with it would 401 back into the handler. It forgets only the token that
+  was refused, so a late answer to an old token cannot sign out a fresh sign-in. `Gate` in `mobile/app/_layout.tsx`
   already routes a null token to sign-in.
-- `useResource` keeps the error it caught, and screens word the two failures differently: no
+- `useResource` answers with a `problem` line instead of a `failed` flag, and screens word the two failures differently: no
   answer at all keeps "The app could not reach the server."; a server that answered with an error
   says so and offers the retry. No failure words from `product-invariants.md`.
 
