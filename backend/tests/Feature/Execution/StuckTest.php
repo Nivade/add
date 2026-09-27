@@ -70,7 +70,7 @@ it('records the blocker and moves to another step when something is missing', fu
 
     $event = $session->events()->where('type', 'stuck')->sole();
 
-    expect($event->payload)->toBe(['reason' => 'need_something', 'note' => 'The drill is at my mother-in-law.'])
+    expect($event->payload)->toEqual(['reason' => 'need_something', 'note' => 'The drill is at my mother-in-law.'])
         ->and($event->step_id)->toBe($blocked)
         ->and($session->refresh()->current_step_id)->not->toBe($blocked);
 });
