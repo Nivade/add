@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Actions\Intentions\ClarifyIntention;
+use App\Contracts\DeadlineExtractor;
 use App\Contracts\NextActionResolver;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
 use App\Support\NextAction\ResolutionContext;
+use App\Support\Time\ExtractedDeadline;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
@@ -126,4 +129,21 @@ it('refuses an empty answer and a second one', function (): void {
         ->assertJsonValidationErrors('answer');
 
     expect($clear->refresh()->clarification)->toBeNull();
+});
+
+it('keeps the question open when reading the answer for a date fails', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->unclear()->for($user)->create();
+    $this->app->instance(DeadlineExtractor::class, new class implements DeadlineExtractor
+    {
+        public function extract(string $text, CarbonImmutable $now): ?ExtractedDeadline
+        {
+            throw new RuntimeException('Extraction failed.');
+        }
+    });
+
+    expect(fn (): Intention => ClarifyIntention::run($intention, 'Lisbon in March'))->toThrow(RuntimeException::class);
+
+    expect($intention->refresh()->needs_clarification)->toBeTrue()
+        ->and($intention->clarification)->toBeNull();
 });

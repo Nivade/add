@@ -7,7 +7,7 @@ namespace App\Actions\Intentions;
 use App\Contracts\DeadlineExtractor;
 use App\Models\Intention;
 use App\Support\Time\ExtractedDeadline;
-use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -20,18 +20,20 @@ final class ClarifyIntention
 
     public function handle(Intention $intention, string $answer): Intention
     {
-        $answered = Intention::query()
-            ->whereKey($intention->id)
-            ->awaitingClarification()
-            ->update(['clarification' => $answer]);
+        DB::transaction(function () use ($intention, $answer): void {
+            $answered = Intention::query()
+                ->whereKey($intention->id)
+                ->awaitingClarification()
+                ->update(['clarification' => $answer]);
 
-        if ($answered === 0) {
-            throw ValidationException::withMessages(['answer' => __('This has already been answered.')]);
-        }
+            if ($answered === 0) {
+                throw ValidationException::withMessages(['answer' => __('This has already been answered.')]);
+            }
 
-        $intention->refresh();
+            $intention->refresh();
 
-        $this->inferDeadline($intention, $answer);
+            $this->inferDeadline($intention, $answer);
+        });
 
         DecomposeIntention::dispatch($intention);
 
@@ -45,7 +47,7 @@ final class ClarifyIntention
             return;
         }
 
-        $extracted = $this->extractor->extract($answer, CarbonImmutable::now($intention->user()->sole()->timezone));
+        $extracted = $this->extractor->extract($answer, $intention->user->now());
 
         if ($extracted instanceof ExtractedDeadline) {
             $intention->update(['deadline_at' => $extracted->at]);
