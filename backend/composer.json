@@ -26,6 +26,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.4",
         "fakerphp/faker": "^1.24",
+        "heyosseus/sloppy": "^1.0",
         "larastan/larastan": "^3.9",
         "laravel/boost": "^2.9",
         "laravel/pail": "^1.2.5",
@@ -40,6 +41,7 @@
         "pestphp/pest-plugin-browser": "^5.0",
         "pestphp/pest-plugin-drift": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-type-coverage": "^3.0||^4.0||^5.0",
         "spatie/laravel-typescript-transformer": "^3.3"
     },
     "autoload": {
@@ -130,6 +132,12 @@
         ],
         "test:browser": [
             "@php vendor/bin/pest tests/Browser"
+        ],
+        "slop:check": [
+            "sloppy scan"
+        ],
+        "types:coverage": [
+            "pest --type-coverage --min=100"
         ]
     },
     "extra": {
@@ -141,8 +149,10 @@
         },
         "devtools": {
             "components": [
+                "arch",
                 "branches",
                 "ci",
+                "claude",
                 "commits",
                 "compose",
                 "editorconfig",
@@ -152,11 +162,94 @@
                 "phpstan",
                 "phpunit",
                 "pint",
+                "precommit",
                 "rector",
                 "scripts",
+                "sloppy",
                 "vite"
             ],
-            "ci-host": "github"
+            "ci-host": "github",
+            "php": "8.5",
+            "added": {
+                "sloppy": {
+                    "packages": [
+                        "heyosseus/sloppy"
+                    ],
+                    "gitignore": [],
+                    "entries": {
+                        "composer.json sloppy scripts": {
+                            "slop:check": null
+                        }
+                    }
+                },
+                "precommit": {
+                    "packages": [],
+                    "gitignore": [],
+                    "entries": []
+                },
+                "claude": {
+                    "packages": [],
+                    "gitignore": [],
+                    "entries": {
+                        ".claude/settings.json permissions.allow": {
+                            "Bash(composer test *)": null,
+                            "Bash(composer test:impact *)": null,
+                            "Bash(composer test:serial *)": null,
+                            "Bash(composer lint *)": null,
+                            "Bash(composer lint:dirty *)": null,
+                            "Bash(composer lint:check *)": null,
+                            "Bash(composer types:check *)": null,
+                            "Bash(composer refactor *)": null,
+                            "Bash(composer refactor:check *)": null,
+                            "Bash(php artisan test *)": null,
+                            "Bash(php artisan route:list *)": null,
+                            "Bash(php artisan about *)": null,
+                            "Bash(vendor/bin/pint *)": null,
+                            "Bash(vendor/bin/pest *)": null,
+                            "Bash(vendor/bin/sail composer test *)": null,
+                            "Bash(vendor/bin/sail composer test:impact *)": null,
+                            "Bash(vendor/bin/sail composer test:serial *)": null,
+                            "Bash(vendor/bin/sail composer lint *)": null,
+                            "Bash(vendor/bin/sail composer lint:dirty *)": null,
+                            "Bash(vendor/bin/sail composer lint:check *)": null,
+                            "Bash(vendor/bin/sail composer types:check *)": null,
+                            "Bash(vendor/bin/sail composer refactor *)": null,
+                            "Bash(vendor/bin/sail composer refactor:check *)": null,
+                            "Bash(vendor/bin/sail artisan test *)": null,
+                            "Bash(vendor/bin/sail artisan route:list *)": null,
+                            "Bash(vendor/bin/sail artisan about *)": null,
+                            "Bash(./vendor/bin/pint *)": null,
+                            "Bash(./vendor/bin/pest *)": null,
+                            "Bash(./vendor/bin/sail composer test *)": null,
+                            "Bash(./vendor/bin/sail composer test:impact *)": null,
+                            "Bash(./vendor/bin/sail composer test:serial *)": null,
+                            "Bash(./vendor/bin/sail composer lint *)": null,
+                            "Bash(./vendor/bin/sail composer lint:dirty *)": null,
+                            "Bash(./vendor/bin/sail composer lint:check *)": null,
+                            "Bash(./vendor/bin/sail composer types:check *)": null,
+                            "Bash(./vendor/bin/sail composer refactor *)": null,
+                            "Bash(./vendor/bin/sail composer refactor:check *)": null,
+                            "Bash(./vendor/bin/sail artisan test *)": null,
+                            "Bash(./vendor/bin/sail artisan route:list *)": null,
+                            "Bash(./vendor/bin/sail artisan about *)": null
+                        },
+                        ".claude/settings.json hooks": {
+                            "PostToolUse Edit|Write": null
+                        }
+                    }
+                },
+                "arch": {
+                    "packages": [
+                        "pestphp/pest-plugin-type-coverage"
+                    ],
+                    "gitignore": [],
+                    "entries": {
+                        "composer.json arch scripts": {
+                            "types:coverage": null
+                        }
+                    }
+                }
+            }
         }
     },
     "config": {

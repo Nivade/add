@@ -30,6 +30,16 @@
             "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/review-ledger.py\""
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pint.sh",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -58,5 +68,49 @@
     "frontend-design": "off",
     "dataviz": "off",
     "unslop": "off"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(composer test *)",
+      "Bash(composer test:impact *)",
+      "Bash(composer test:serial *)",
+      "Bash(composer lint *)",
+      "Bash(composer lint:dirty *)",
+      "Bash(composer lint:check *)",
+      "Bash(composer types:check *)",
+      "Bash(composer refactor *)",
+      "Bash(composer refactor:check *)",
+      "Bash(php artisan test *)",
+      "Bash(php artisan route:list *)",
+      "Bash(php artisan about *)",
+      "Bash(vendor/bin/pint *)",
+      "Bash(vendor/bin/pest *)",
+      "Bash(vendor/bin/sail composer test *)",
+      "Bash(vendor/bin/sail composer test:impact *)",
+      "Bash(vendor/bin/sail composer test:serial *)",
+      "Bash(vendor/bin/sail composer lint *)",
+      "Bash(vendor/bin/sail composer lint:dirty *)",
+      "Bash(vendor/bin/sail composer lint:check *)",
+      "Bash(vendor/bin/sail composer types:check *)",
+      "Bash(vendor/bin/sail composer refactor *)",
+      "Bash(vendor/bin/sail composer refactor:check *)",
+      "Bash(vendor/bin/sail artisan test *)",
+      "Bash(vendor/bin/sail artisan route:list *)",
+      "Bash(vendor/bin/sail artisan about *)",
+      "Bash(./vendor/bin/pint *)",
+      "Bash(./vendor/bin/pest *)",
+      "Bash(./vendor/bin/sail composer test *)",
+      "Bash(./vendor/bin/sail composer test:impact *)",
+      "Bash(./vendor/bin/sail composer test:serial *)",
+      "Bash(./vendor/bin/sail composer lint *)",
+      "Bash(./vendor/bin/sail composer lint:dirty *)",
+      "Bash(./vendor/bin/sail composer lint:check *)",
+      "Bash(./vendor/bin/sail composer types:check *)",
+      "Bash(./vendor/bin/sail composer refactor *)",
+      "Bash(./vendor/bin/sail composer refactor:check *)",
+      "Bash(./vendor/bin/sail artisan test *)",
+      "Bash(./vendor/bin/sail artisan route:list *)",
+      "Bash(./vendor/bin/sail artisan about *)"
+    ]
   }
 }

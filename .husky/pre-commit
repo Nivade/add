@@ -1,0 +1,83 @@
+# Local check only: --no-verify skips it. The lint:check step in CI is the gate that
+# actually stops unformatted PHP.
+set -eu
+
+app_dir="backend"
+nl='
+'
+
+cd "$app_dir"
+
+staged=$(git -c core.quotePath=false diff --cached --name-only --relative --diff-filter=ACMR -- '*.php')
+[ -n "$staged" ] || exit 0
+
+if [ ! -x vendor/bin/pint ]; then
+    echo "pre-commit: no $app_dir/vendor/bin/pint, skipping Pint. Run composer install." >&2
+    exit 0
+fi
+
+if command -v php >/dev/null 2>&1; then
+    run=vendor/bin/pint
+    node=$(command -v node || true)
+elif [ -f compose.yaml ] && [ -n "$(vendor/bin/sail ps --quiet 2>/dev/null)" ]; then
+    run="vendor/bin/sail pint"
+    node=container
+else
+    echo "pre-commit: no php on this host and Sail is not running, skipping Pint." >&2
+    exit 0
+fi
+
+# `git commit <paths>` commits a temporary index; restaging there would leave the real one unformatted, so none is.
+case ${GIT_INDEX_FILE:-} in
+    */next-index*) partial=1 ;;
+    *) partial="" ;;
+esac
+
+# With the Blade rule on, Pint refuses to run at all, PHP files included, until node and its prettier packages are there.
+if grep -q '"Pint/laravel_blade": *true' pint.json 2>/dev/null; then
+    for package in prettier prettier-plugin-blade prettier-plugin-tailwindcss; do
+        if [ -z "$node" ] || [ ! -d "node_modules/$package" ]; then
+            echo "pre-commit: pint.json formats Blade, which needs node and $package. Run npm install; skipping Pint." >&2
+            exit 0
+        fi
+    done
+fi
+
+# Pint formats a copy of the staged content in one run: pint.json excludes apply and unstaged edits stay out.
+# Inside the app, so Sail's container sees it too.
+stage=$(mktemp -d ./.pre-commit.XXXXXX)
+trap 'rm -rf "$stage"' EXIT
+
+while IFS= read -r file; do
+    mkdir -p "$stage/$(dirname -- "$file")"
+    git show ":./$file" > "$stage/$file"
+done <<STAGED
+$staged
+STAGED
+
+$run --quiet "$stage"
+
+unstaged="$nl$(git -c core.quotePath=false diff --name-only --relative)$nl"
+[ -n "$partial" ] && unstaged="$nl$staged$nl"
+unformatted=""
+
+while IFS= read -r file; do
+    [ "$(git hash-object --no-filters -- "$stage/$file")" = "$(git rev-parse ":./$file")" ] && continue
+
+    case $unstaged in
+        *"$nl$file$nl"*) unformatted="$unformatted '$file'"; continue ;;
+    esac
+
+    cp -- "$stage/$file" "$file"
+    git add -- "$file"
+done <<STAGED
+$staged
+STAGED
+
+if [ -n "$unformatted" ]; then
+    prefix=""
+    [ "$app_dir" = . ] || prefix="cd $app_dir && "
+    echo "pre-commit: Pint would change staged files it cannot restage, since they have unstaged edits or the commit names paths." >&2
+    echo "Run: $prefix$run$unformatted, then stage the result and commit again." >&2
+    exit 1
+fi
