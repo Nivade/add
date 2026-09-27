@@ -167,6 +167,13 @@ and `nvade.debug` plus `*.nvade.debug` in the mkcert SAN list behind
 `../traefik/certs/local.cert.pem`. Both are already there, and any sibling repo
 wanting this pattern reuses them.
 
+## `vite.add.nvade.dev` needs its own SAN
+
+A wildcard covers one level, so `*.nvade.dev` does not reach `vite.add.nvade.dev`
+or `mailpit.add.nvade.dev`, and `npm run web` then loads no assets. The shared
+certificate carries `*.add.nvade.dev` for this; regenerating it with mkcert must
+keep every SAN already listed, since the sibling repos rely on them too.
+
 ## Ports are offset to coexist with the sibling repos
 
 tabellio uses 6380 / 1026 / 8026 / 5174, first-move 6381 / 1027 / 8027 / 5175.

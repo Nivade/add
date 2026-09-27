@@ -1,0 +1,83 @@
+{
+    "scored_at": "2026-09-27T13:52:37+00:00",
+    "model": "gpt-5.6-luna",
+    "captures": [
+        {
+            "id": "passport-control",
+            "expects_question": true,
+            "question": "Is there a trip you need it for, and when?",
+            "copied": true,
+            "invalid": null
+        },
+        {
+            "id": "thing-control",
+            "expects_question": true,
+            "question": "Which thing do you mean?",
+            "copied": true,
+            "invalid": null
+        },
+        {
+            "id": "driving-licence",
+            "expects_question": true,
+            "question": "Do you have a trip or expiry date you need it for?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "teeth",
+            "expects_question": true,
+            "question": "Do you want to book a dental appointment?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "spanish",
+            "expects_question": true,
+            "question": "Do you want to commit to learning Spanish?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "letter",
+            "expects_question": true,
+            "question": "What would you like to do with the letter?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "car-thing",
+            "expects_question": true,
+            "question": "What do you need to do about the car?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "grandma",
+            "expects_question": true,
+            "question": "When would you like to call grandma?",
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "dentist",
+            "expects_question": false,
+            "question": null,
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "electricity",
+            "expects_question": false,
+            "question": null,
+            "copied": false,
+            "invalid": null
+        },
+        {
+            "id": "bins",
+            "expects_question": false,
+            "question": null,
+            "copied": false,
+            "invalid": null
+        }
+    ]
+}

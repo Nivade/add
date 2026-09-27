@@ -1,6 +1,6 @@
 # Findings triage — clearing `.ai/findings.md`
 
-**State:** building, 2026-09-27 · [the slice table](executive-function-os.md#slices)
+**State:** done, 2026-09-27 · [the slice table](executive-function-os.md#slices)
 
 *Rules: `domain-model.md`, `support-and-concerns.md`, `api-and-data.md`, `ai-layer.md`,
 `product-invariants.md`, `toolchain.md`, `testing.md`, `general.md`.
@@ -167,6 +167,9 @@ against this baseline. If they do not, the finding closes with no prompt change.
 **Done when** the baseline answers whether questions are copied, and the finding line is
 replaced by that answer or removed.
 
+**Answer.** The first run found no copying outside the controls: every capture that needed a
+question got one of its own, and none that needed none got one. The prompt stays as it is.
+
 ## Phase 6 — the local certificate covers this repo's subdomains
 
 *Finding 2026-09-24. Skills: `sail-and-root-scripts`. No branch for the host step.*
@@ -184,6 +187,8 @@ already solved it with a nested SAN, and the sibling repos share one pattern.
   for `*.nvade.debug`, and delete the finding.
 
 **Done when** `npm run web` serves assets and HMR in a browser without a certificate warning.
+TLS was confirmed on `vite`, `mailpit` and the app host after the regeneration; the browser
+check is the person's.
 
 ## After the last phase
 
