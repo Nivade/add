@@ -1,7 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { captureFieldClassName, CaptureDialog } from '@/components/capture-dialog';
+import {
+    captureFieldClassName,
+    CaptureDialog,
+} from '@/components/capture-dialog';
 import { store } from '@/routes/waiting-fors';
 
 /** Same zero-friction shape as capture: who or what, and what for. No AI, no classification. */

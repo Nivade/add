@@ -1,7 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { captureFieldClassName, CaptureDialog } from '@/components/capture-dialog';
+import {
+    captureFieldClassName,
+    CaptureDialog,
+} from '@/components/capture-dialog';
 import { store } from '@/routes/captures';
 
 function isTyping(target: EventTarget | null): boolean {

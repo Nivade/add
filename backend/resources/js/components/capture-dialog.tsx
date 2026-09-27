@@ -30,7 +30,11 @@ export function CaptureDialog({
 }) {
     return (
         <>
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(true)}>
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(true)}
+            >
                 {trigger}
             </Button>
 

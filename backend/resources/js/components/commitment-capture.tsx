@@ -1,7 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { captureFieldClassName, CaptureDialog } from '@/components/capture-dialog';
+import {
+    captureFieldClassName,
+    CaptureDialog,
+} from '@/components/capture-dialog';
 import { store } from '@/routes/commitments';
 
 /** Typed directly, same immediate confirmation as promoting a step: the person just said it themselves. */

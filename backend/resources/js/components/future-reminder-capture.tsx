@@ -1,7 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { captureFieldClassName, CaptureDialog } from '@/components/capture-dialog';
+import {
+    captureFieldClassName,
+    CaptureDialog,
+} from '@/components/capture-dialog';
 import { store } from '@/routes/future-reminders';
 
 /** §15, time trigger only: a phrase carrying its own time, read back exactly as typed. */
@@ -34,7 +37,9 @@ export function FutureReminderCapture() {
                             className={captureFieldClassName}
                         />
                         {errors.text && (
-                            <p className="text-destructive text-sm">{errors.text}</p>
+                            <p className="text-destructive text-sm">
+                                {errors.text}
+                            </p>
                         )}
                         <Button type="submit" className="self-end">
                             Save
