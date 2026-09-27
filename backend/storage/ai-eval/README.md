@@ -15,6 +15,15 @@ The scorer is `DecomposeParser::violations()`, the same one production runs on
 every decomposition — step count, first-step size, first-step phrasing. This
 corpus does not add a second definition of what a good answer looks like.
 
+## Clarifying questions
+
+`capture-corpus.json` — captures that need a clarifying question and are not
+the prompt's examples, the prompt's two examples marked `-control`, and three
+that need none. `ai:eval:capture` (`npm run artisan -- ai:eval:capture`) scores
+whether a question was asked when one was expected and whether it is one of the
+prompt's example questions, and writes `capture-baseline.json`. Same live key,
+same cost, same rule: never in CI.
+
 ## Known weak spots
 
 Recorded when the baseline was scored, still unfixed:

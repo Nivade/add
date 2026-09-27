@@ -150,14 +150,15 @@ The live model answered the passport capture with the prompt's own example quest
 word. That capture is the prompt's example, so the copy may simply be the right answer; one
 data point cannot tell copying from correctness. Measure before touching the prompt.
 
-- Extend `ai:eval` with a second corpus in `backend/storage/ai-eval`, for `parse_capture`:
-  captures that need a question and are not any of the prompt's examples, plus the examples
-  themselves as a control.
+- A second command, `ai:eval:capture`, beside `ai:eval` rather than inside it, with its own
+  corpus in `backend/storage/ai-eval`: captures that need a question and are not any of the
+  prompt's examples, plus the examples themselves as marked controls. It sends the same
+  message production sends, through `ConvertCaptureToIntention::describe()`.
 - Score two things per answer: whether a question was asked when one was expected, and whether
   it matches one of the prompt's example questions after normalising case and punctuation. The
   examples are read out of `Prompts` at run time rather than copied into the eval, so the check
   cannot drift from the prompt.
-- Write the result into the baseline beside the decomposition scores.
+- Write the result to its own baseline beside the decomposition one.
 
 The run needs a live key, so a person runs it. If non-example captures come back with copied
 questions, the follow-up is a prompt edit with a `_VERSION` bump — its own change, judged

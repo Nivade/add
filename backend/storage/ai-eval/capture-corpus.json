@@ -1,0 +1,13 @@
+[
+    {"id": "passport-control", "capture": "I should probably renew my passport", "expects_question": true},
+    {"id": "thing-control", "capture": "sort the thing out", "expects_question": true},
+    {"id": "driving-licence", "capture": "I should probably renew my driving licence", "expects_question": true},
+    {"id": "teeth", "capture": "maybe do something about my teeth at some point", "expects_question": true},
+    {"id": "spanish", "capture": "should probably learn Spanish", "expects_question": true},
+    {"id": "letter", "capture": "the letter", "expects_question": true},
+    {"id": "car-thing", "capture": "deal with the car thing", "expects_question": true},
+    {"id": "grandma", "capture": "call grandma at some point", "expects_question": true},
+    {"id": "dentist", "capture": "book the dentist for next Tuesday", "expects_question": false},
+    {"id": "electricity", "capture": "pay the electricity bill by Friday", "expects_question": false},
+    {"id": "bins", "capture": "take the bins out tonight", "expects_question": false}
+]
