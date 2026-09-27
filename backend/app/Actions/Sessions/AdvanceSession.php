@@ -55,7 +55,7 @@ final class AdvanceSession
                 'completed_at' => now(),
             ]);
 
-            Commitment::query()->open()->where('intention_id', $session->intention_id)->update(['status' => CommitmentStatus::Kept]);
+            Commitment::query()->open()->forIntention($session->intention_id)->update(['status' => CommitmentStatus::Kept]);
         }
 
         return $session;

@@ -21,5 +21,6 @@ class HomeData extends Data
         public ?JustFinishedData $justFinished,
         public array $needsAttention,
         public int $restCount,
+        public bool $hasOpenCommitments,
     ) {}
 }

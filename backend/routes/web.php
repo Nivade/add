@@ -3,13 +3,14 @@
 declare(strict_types=1);
 
 use App\Enums\AppointmentKind;
+use App\Http\Controllers\ClassifyPastedTextController;
 use App\Http\Controllers\Web\AdjustPlanController;
 use App\Http\Controllers\Web\ClarifyIntentionController;
-use App\Http\Controllers\Web\ClassifyPastedTextController;
 use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
 use App\Http\Controllers\Web\DismissReminderController;
 use App\Http\Controllers\Web\PauseFocusController;
+use App\Http\Controllers\Web\PromoteCurrentStepToCommitmentController;
 use App\Http\Controllers\Web\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Web\RecordDistractionController;
 use App\Http\Controllers\Web\ReportStuckController;
@@ -69,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::post('stuck', ReportStuckController::class)->name('stuck');
         Route::post('distracted', RecordDistractionController::class)->name('distracted');
         Route::post('stop', StopFocusController::class)->name('stop');
+        Route::post('commitment', PromoteCurrentStepToCommitmentController::class)->name('commitment');
     });
 });
 

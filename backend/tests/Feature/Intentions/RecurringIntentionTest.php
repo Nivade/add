@@ -9,6 +9,7 @@ use App\Models\Intention;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
+use Inertia\Testing\AssertableInertia;
 use Lorisleiva\Actions\Decorators\JobDecorator;
 
 it('sets recurrence on a done intention from the web', function (): void {
@@ -89,6 +90,32 @@ it('creates one intention for a template overdue by several periods, and schedul
 
     expect(Intention::query()->count())->toBe(2)
         ->and($template->refresh()->recurrence_next_at?->equalTo($now->subDays(30)->addDays(35)))->toBeTrue();
+});
+
+it('shows a finished copy repeating on its template, and refuses to start a second schedule from it', function (): void {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $template = Intention::factory()->for($user)->done()->create([
+        'completed_at' => now()->subDays(7),
+        'recurrence_every_days' => 7,
+        'recurrence_next_at' => now()->subMinute(),
+    ]);
+    $copy = SendDueRecurringIntentions::run($user, CarbonImmutable::now())[0];
+    $copy->update(['status' => IntentionStatus::Done, 'completed_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.justFinished.id', $copy->id)
+            ->where('home.justFinished.recurrenceEveryDays', 7));
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.intentions.recurrence', $copy), ['every_days' => 3])
+        ->assertConflict();
+
+    expect($copy->refresh()->recurrence_every_days)->toBeNull()
+        ->and($template->refresh()->recurrence_every_days)->toBe(7);
 });
 
 it('leaves a template alone before it is due', function (): void {

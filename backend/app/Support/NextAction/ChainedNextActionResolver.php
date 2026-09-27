@@ -108,8 +108,7 @@ final class ChainedNextActionResolver implements NextActionResolver
     }
 
     /**
-     * The highest rung that put anything below the winner. A sibling of the same
-     * intention ties all the way down, so the runner-up alone would hide the reason.
+     * The highest rung that put anything below the winner, since a sibling step ties all the way down.
      *
      * @param  list<Candidate>  $ranked
      */

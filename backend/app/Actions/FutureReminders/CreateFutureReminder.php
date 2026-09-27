@@ -12,10 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/**
- * §15, time trigger only. The extractor reads the phrase deterministically — no model call,
- * the same zone-aware technique `ConvertCaptureToIntention` already uses for capture deadlines.
- */
+/** §15, time trigger only: the phrase is read deterministically, never by a model. */
 final class CreateFutureReminder
 {
     use AsObject;

@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\Api\V1\AdjustPlanController;
 use App\Http\Controllers\Api\V1\ClarifyIntentionController;
-use App\Http\Controllers\Api\V1\ClassifyPastedTextController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
+use App\Http\Controllers\Api\V1\PromoteCurrentStepToCommitmentController;
 use App\Http\Controllers\Api\V1\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\V1\StoreSessionController;
 use App\Http\Controllers\Api\V1\StoreTokenController;
 use App\Http\Controllers\Api\V1\StoreWaitingForController;
 use App\Http\Controllers\Api\V1\UpdateAiConsentController;
+use App\Http\Controllers\ClassifyPastedTextController;
 use Illuminate\Support\Facades\Route;
 
 // The device has no session to authenticate with yet, so this is the one route outside the guard.
@@ -86,5 +87,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
         Route::post('stuck', ReportStuckController::class)->name('stuck');
         Route::post('distracted', RecordDistractionController::class)->name('distracted');
         Route::post('stop', StopSessionController::class)->name('stop');
+        Route::post('commitment', PromoteCurrentStepToCommitmentController::class)->name('commitment');
     });
 });

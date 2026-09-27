@@ -12,6 +12,3 @@ arch()->preset()->laravel()->ignoring([
     'App\Support\Ai\Exceptions',
     'App\Support\Calendar\Exceptions',
 ]);
-
-// Fails on a stock skeleton (non-final classes, abstract Controller): opt in once the app is final and strict.
-// arch()->preset()->strict();

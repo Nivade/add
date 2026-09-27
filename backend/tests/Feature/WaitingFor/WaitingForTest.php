@@ -75,6 +75,33 @@ it('retires a waiting-for marked received or cancelled', function (): void {
             ->has('home.needsAttention', 0));
 });
 
+it('refuses to reopen a waiting-for once it is retired', function (): void {
+    $user = User::factory()->create();
+    $received = WaitingFor::factory()->for($user)->create(['status' => WaitingForStatus::Received]);
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.waiting-fors.respond', $received), ['response' => 'wait_longer'])
+        ->assertConflict();
+
+    expect($received->refresh()->status)->toBe(WaitingForStatus::Received);
+});
+
+it('counts staleness from the last answer, not from an unrelated edit', function (): void {
+    $user = User::factory()->create();
+    $waitingFor = WaitingFor::factory()->for($user)->stale()->create();
+    $waitingFor->update(['note' => 'the signed contract']);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('home.needsAttention', 1));
+
+    $this->actingAs($user)->post(route('waiting-fors.respond', $waitingFor), ['response' => 'wait_longer']);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('home.needsAttention', 0));
+});
+
 it('answers over the API too', function (): void {
     $user = User::factory()->create();
 

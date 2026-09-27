@@ -6,7 +6,7 @@ namespace App\Actions\Commitments;
 
 use App\Enums\CommitmentResponse;
 use App\Enums\CommitmentStatus;
-use App\Exceptions\InvalidCommitmentResponse;
+use App\Exceptions\InvalidResponse;
 use App\Models\Commitment;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -18,11 +18,11 @@ final class RespondToCommitment
     public function handle(Commitment $commitment, CommitmentResponse $response): Commitment
     {
         if ($commitment->status !== CommitmentStatus::Open) {
-            throw new InvalidCommitmentResponse("Commitment {$commitment->id} is no longer open.");
+            throw new InvalidResponse("Commitment {$commitment->id} is no longer open.");
         }
 
-        if ($response === CommitmentResponse::Confirm && ! $commitment->awaitsConfirmation()) {
-            throw new InvalidCommitmentResponse("Commitment {$commitment->id} has nothing to confirm.");
+        if ($response === CommitmentResponse::Confirm && ! $commitment->awaiting_confirmation) {
+            throw new InvalidResponse("Commitment {$commitment->id} has nothing to confirm.");
         }
 
         $commitment->update(match ($response) {

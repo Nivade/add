@@ -48,14 +48,15 @@ final class BuildHome
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
             justFinished: $this->justFinished($user, $context->now),
-            needsAttention: $needsAttention['items'],
-            restCount: $this->open($user)->count() + $needsAttention['outstanding'] - count($needsAttention['items']),
+            needsAttention: $needsAttention->items,
+            restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
+            hasOpenCommitments: Commitment::query()->where('user_id', $user->id)->open()->exists(),
         );
     }
 
     private function isCommitment(string $intentionId): bool
     {
-        return Commitment::query()->open()->where('intention_id', $intentionId)->exists();
+        return Commitment::query()->open()->forIntention($intentionId)->exists();
     }
 
     private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData
@@ -67,7 +68,7 @@ final class BuildHome
             ->latest('completed_at')
             ->first();
 
-        return $intention instanceof Intention ? JustFinishedData::from($intention) : null;
+        return $intention instanceof Intention ? new JustFinishedData($intention->id, $intention->title, $intention->repeatsEveryDays()) : null;
     }
 
     private function session(User $user): ?ExecutionStateData

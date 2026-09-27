@@ -7,10 +7,7 @@ namespace App\Support\Ai\Parsers;
 use App\Data\Ai\ParsedStepData;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 
-/**
- * Structure is rejected; quality is only reported. Rejecting a usable-but-flawed
- * plan leaves the person with nothing, which is the one outcome worth avoiding.
- */
+/** Bad structure is rejected, weak quality only reported: a flawed plan beats no plan. */
 final class DecomposeParser
 {
     public const int MAX_STEPS = 6;

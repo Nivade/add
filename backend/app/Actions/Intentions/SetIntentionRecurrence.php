@@ -20,6 +20,10 @@ final class SetIntentionRecurrence
             throw new InvalidIntentionTransition("Intention {$intention->id} is not done.");
         }
 
+        if ($intention->recurrence_template_id !== null) {
+            throw new InvalidIntentionTransition("Intention {$intention->id} already repeats through its template.");
+        }
+
         $intention->update([
             'recurrence_every_days' => $everyDays,
             'recurrence_next_at' => ($intention->completed_at ?? $intention->user->now())->addDays($everyDays),

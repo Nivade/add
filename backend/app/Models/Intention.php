@@ -42,6 +42,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property CarbonImmutable|null $completed_at
  * @property int|null $recurrence_every_days
  * @property CarbonImmutable|null $recurrence_next_at
+ * @property string|null $recurrence_template_id
+ * @property-read Intention|null $recurrenceTemplate
  * @property-read bool $is_recurring
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
@@ -98,6 +100,18 @@ class Intention extends Model implements Appointment
     protected function isRecurring(): Attribute
     {
         return Attribute::get(fn (): bool => $this->recurrence_every_days !== null);
+    }
+
+    /** @return BelongsTo<Intention, $this> */
+    public function recurrenceTemplate(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'recurrence_template_id');
+    }
+
+    /** A copy repeats on its template's schedule; the template repeats on its own. */
+    public function repeatsEveryDays(): ?int
+    {
+        return $this->recurrence_every_days ?? $this->recurrenceTemplate?->recurrence_every_days;
     }
 
     /** @return BelongsTo<User, $this> */

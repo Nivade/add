@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $subject
  * @property string|null $note
  * @property WaitingForStatus $status
+ * @property CarbonImmutable|null $last_answered_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -46,7 +47,14 @@ class WaitingFor extends Model
     {
         return [
             'status' => WaitingForStatus::class,
+            'last_answered_at' => 'immutable_datetime',
         ];
+    }
+
+    /** Staleness counts from creation or the last answer, never from an unrelated edit. */
+    public function quietSince(): CarbonImmutable
+    {
+        return $this->last_answered_at ?? $this->created_at ?? CarbonImmutable::now();
     }
 
     /**
@@ -57,6 +65,6 @@ class WaitingFor extends Model
     #[Scope]
     protected function open(Builder $query): void
     {
-        $query->whereIn('status', [WaitingForStatus::Waiting, WaitingForStatus::FollowedUp]);
+        $query->whereIn('status', WaitingForStatus::open());
     }
 }

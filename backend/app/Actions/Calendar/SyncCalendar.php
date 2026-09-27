@@ -48,14 +48,12 @@ final class SyncCalendar
 
         $events = $this->store($user, $drafts);
 
-        // A read that came back empty is a source that failed, not a day that cleared:
-        // it cannot be told from an outage here, and reaping would take stated minutes with it.
+        // An empty read cannot be told from an outage, and reaping would take stated minutes with it.
         if ($drafts === []) {
             return $events;
         }
 
-        // An event the source stopped reporting was moved or cancelled there, and
-        // keeping it would have us plan a day around something nobody is attending.
+        // An event the source stopped reporting was moved or cancelled there.
         CalendarEvent::forget(CalendarEvent::query()
             ->ofSource($user, $this->source->name())
             ->whereBetween('starts_at', [$from, $until])

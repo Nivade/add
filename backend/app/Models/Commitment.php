@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,10 +23,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $id
  * @property int $user_id
  * @property string|null $intention_id
+ * @property string|null $step_id
  * @property string $description
  * @property CommitmentProvenance $provenance
  * @property CarbonImmutable|null $confirmed_at
  * @property CommitmentStatus $status
+ * @property-read bool $awaiting_confirmation
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -45,9 +48,10 @@ class Commitment extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function awaitsConfirmation(): bool
+    /** @return Attribute<bool, never> */
+    protected function awaitingConfirmation(): Attribute
     {
-        return $this->provenance->isInferred() && $this->confirmed_at === null;
+        return Attribute::get(fn (): bool => $this->provenance->isInferred() && $this->confirmed_at === null);
     }
 
     /** @param  Builder<static>  $query */
@@ -55,6 +59,20 @@ class Commitment extends Model
     protected function open(Builder $query): void
     {
         $query->where('status', CommitmentStatus::Open);
+    }
+
+    /** @param  Builder<static>  $query */
+    #[Scope]
+    protected function forIntention(Builder $query, string $intentionId): void
+    {
+        $query->where('intention_id', $intentionId);
+    }
+
+    /** @param  Builder<static>  $query */
+    #[Scope]
+    protected function forStep(Builder $query, string $stepId): void
+    {
+        $query->where('step_id', $stepId);
     }
 
     /**

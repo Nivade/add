@@ -14,8 +14,14 @@ enum WaitingForStatus: string
     case Cancelled = 'cancelled';
     case Received = 'received';
 
+    /** @return list<self> */
+    public static function open(): array
+    {
+        return [self::Waiting, self::FollowedUp];
+    }
+
     public function isOpen(): bool
     {
-        return $this === self::Waiting || $this === self::FollowedUp;
+        return in_array($this, self::open(), true);
     }
 }

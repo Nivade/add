@@ -20,6 +20,6 @@ final class RespondToCommitmentController extends Controller
     {
         $updated = RespondToCommitment::run($this->owned($request, $commitment), $request->response());
 
-        return CommitmentData::from($updated)->toResponse($request)->setStatusCode(200);
+        return CommitmentData::from($updated)->toResponse($request)->setStatusCode(Response::HTTP_OK);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Home;
 
+use App\Data\NeedsAttentionBand;
 use App\Data\NeedsAttentionData;
 use App\Models\Commitment;
 use App\Models\Intention;
@@ -24,24 +25,23 @@ final class BuildNeedsAttention
     /** How long a waiting-for goes untouched before it is worth a nudge. */
     private const int WAITING_FOR_STALE_AFTER_DAYS = 4;
 
-    /** @return array{items: list<NeedsAttentionData>, outstanding: int} */
-    public function handle(User $user, CarbonImmutable $now): array
+    public function handle(User $user, CarbonImmutable $now): NeedsAttentionBand
     {
-        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderBy('updated_at')->get();
+        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderByRaw('coalesce(last_answered_at, created_at)')->get();
         $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->whereNull('intention_id')->mostPressingFirst()->get();
 
         $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $now);
         // One tied to an intention settles when the intention finishes, so home already shows it as that intention.
         $commitment = $openCommitments->first();
 
-        return [
-            'items' => [
+        return new NeedsAttentionBand(
+            items: [
                 ...$this->awaitingClarification($user),
                 ...($staleWaitingFor instanceof WaitingFor ? [NeedsAttentionData::forWaitingFor($staleWaitingFor)] : []),
                 ...($commitment instanceof Commitment ? [NeedsAttentionData::forCommitment($commitment)] : []),
             ],
-            'outstanding' => $openWaitingFors->count() + $openCommitments->count(),
-        ];
+            openBesidesIntentions: $openWaitingFors->count() + $openCommitments->count(),
+        );
     }
 
     /** @return list<NeedsAttentionData> */
@@ -58,15 +58,12 @@ final class BuildNeedsAttention
             ->all());
     }
 
-    /**
-     * `updated_at` is the last time it was touched, by creation or by a response — the one clock this needs.
-     *
-     * @param  Collection<int, WaitingFor>  $openWaitingFors
+    /** @param  Collection<int, WaitingFor>  $openWaitingFors
      */
     private function staleWaitingFor(Collection $openWaitingFors, CarbonImmutable $now): ?WaitingFor
     {
         $threshold = $now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS);
 
-        return $openWaitingFors->first(fn (WaitingFor $waitingFor): bool => $waitingFor->updated_at !== null && $waitingFor->updated_at->lte($threshold));
+        return $openWaitingFors->first(fn (WaitingFor $waitingFor): bool => $waitingFor->quietSince()->lte($threshold));
     }
 }

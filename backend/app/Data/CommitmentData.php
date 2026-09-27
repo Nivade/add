@@ -21,6 +21,7 @@ class CommitmentData extends Data
         public string $description,
         public CommitmentProvenance $provenance,
         public CommitmentStatus $status,
+        public bool $awaitingConfirmation,
         public ?CarbonImmutable $confirmedAt,
     ) {}
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-it('classifies pasted text as actionable through the manual ingestion source', function (): void {
+it('classifies pasted text as actionable', function (): void {
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
 
     fakeAi()->push([
@@ -19,7 +19,7 @@ it('classifies pasted text as actionable through the manual ingestion source', f
         ->postJson(route('api.v1.ingestion.classify'), [
             'text' => 'Your car insurance policy expires on 14 October.',
         ])
-        ->assertCreated();
+        ->assertOk();
 
     expect($response->json('actionable'))->toBeTrue()
         ->and($response->json('title'))->toBe('Car insurance renewal')
@@ -42,7 +42,7 @@ it('classifies pasted text as not actionable, with no title invented', function 
         ->postJson(route('api.v1.ingestion.classify'), [
             'text' => 'Thanks for your recent purchase. Your receipt is attached.',
         ])
-        ->assertCreated();
+        ->assertOk();
 
     expect($response->json('actionable'))->toBeFalse()
         ->and($response->json('title'))->toBeNull();
@@ -74,7 +74,7 @@ it('classifies from the web too, for the paste dialog', function (): void {
 
     $this->actingAs($user)
         ->postJson(route('ingestion.classify'), ['text' => 'Your water bill of 42 euro is due.'])
-        ->assertCreated()
+        ->assertOk()
         ->assertJsonPath('title', 'Pay the water bill');
 });
 

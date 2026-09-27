@@ -27,7 +27,6 @@ class WaitingForFactory extends Factory
     {
         return $this->state(fn (): array => [
             'created_at' => now()->subDays($days),
-            'updated_at' => now()->subDays($days),
         ]);
     }
 }

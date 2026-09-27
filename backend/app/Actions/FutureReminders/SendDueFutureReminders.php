@@ -13,10 +13,7 @@ use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/**
- * A different shape than `SendDueReminders`: no plan, no preparation, just an instant to
- * compare against. Kept as its own command rather than a branch in that one.
- */
+/** No plan and no preparation, only an instant, so it is not a branch of `SendDueReminders`. */
 final class SendDueFutureReminders
 {
     use AsCommand;

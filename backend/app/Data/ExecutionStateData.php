@@ -19,6 +19,7 @@ class ExecutionStateData extends Data
         public IntentionData $intention,
         public array $progress,
         public string $elapsed,
+        public bool $currentStepIsCommitment,
     ) {}
 
     /** Every control but Start mutates something that already exists, so 201 would be a lie. */

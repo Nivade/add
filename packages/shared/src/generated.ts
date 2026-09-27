@@ -33,6 +33,7 @@ id: string,
 description: string,
 provenance: CommitmentProvenance,
 status: CommitmentStatus,
+awaitingConfirmation: boolean,
 confirmedAt: string | null,
 };
 export type CommitmentListData = {
@@ -62,6 +63,7 @@ session: ExecutionSessionData,
 intention: IntentionData,
 progress: string[],
 elapsed: string,
+currentStepIsCommitment: boolean,
 };
 export type FutureReminderData = {
 id: string,
@@ -79,6 +81,7 @@ reminder: ReminderData | null,
 justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
+hasOpenCommitments: boolean,
 };
 export type IngestionClassificationData = {
 actionable: boolean,
@@ -109,7 +112,8 @@ id: string,
 title: string,
 detail: string | null,
 clarifyingQuestion: string | null,
-inferred: boolean,
+awaitingConfirmation: boolean,
+provenance: CommitmentProvenance | null,
 };
 export type NeedsAttentionKind = 'intention' | 'waiting_for' | 'commitment';
 export type NextActionData = {

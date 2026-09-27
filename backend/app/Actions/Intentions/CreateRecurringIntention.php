@@ -11,10 +11,7 @@ use Illuminate\Support\Facades\DB;
 use LogicException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/**
- * A fresh intention from a due template, re-decomposed rather than copied: a stale step set is
- * worse than a fresh decomposition pass, so no steps travel with it.
- */
+/** Re-decomposed rather than copied: a stale step set is worse than a fresh pass. */
 final class CreateRecurringIntention
 {
     use AsObject;
@@ -29,6 +26,7 @@ final class CreateRecurringIntention
 
             return Intention::query()->create([
                 'user_id' => $template->user_id,
+                'recurrence_template_id' => $template->id,
                 'title' => $template->title,
                 'why' => $template->why,
                 'status' => IntentionStatus::Captured,

@@ -10,11 +10,7 @@ use App\Support\Ai\AiRequest;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-/**
- * Wraps whichever driver is configured so the path off this machine is auditable.
- * What is logged is the shape of the call, never the text: an audit trail that
- * copies the person's thoughts into a log file defeats what it exists to prove.
- */
+/** Logs the shape of every call off this machine, never its text. */
 final class LoggingAiProvider implements AiProvider
 {
     public function __construct(public readonly AiProvider $inner) {}

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('subject');
             $table->text('note')->nullable();
             $table->string('status', 32)->default('waiting');
+            $table->timestamp('last_answered_at')->nullable();
             $table->timestamps();
         });
     }

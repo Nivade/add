@@ -180,14 +180,14 @@ what moving a plan to `done` requires.
 | 8 | [Make the MVP real](slices/08-mvp-real.md) — real calendar, live model behind consent, a device, the journey under a browser | §18, §22, §28, §32, §39 | done |
 | — | [Agent tooling](agent-tooling.md) — code-review then simplify, gated at merge; vendored skills restored from the lock | — | done |
 | — | [Support and Concerns boundaries](archive/support-and-concerns-boundaries.md) — where Support, Concerns and Exceptions decisions land, and the guard tests that hold the line | — | done |
-| 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, an ingestion port | §15, §17, §19–§21, §33 | done |
+| 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, pasted-text ingestion | §15, §17, §19–§21, §33 | done |
 | — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | designed |
 | 10 | Phase 3 — companion, location awareness, bill/subscription detection, full ingestion (email, documents, receipts, bank/gov correspondence), the `Context` model, Friend body doubling | §4, §9, §17, §19, §34 | recorded only |
 
 **Slice 10** is recorded so it is not reinvented, not planned. §17's Friend mode
 and the `Context` model (§4, §9's location/available-tools inputs) have no
 other slice claiming them, so they are recorded here rather than left
-unmentioned; §19's port lands in slice 9, the sources it reads do not.
+unmentioned; slice 9 classifies pasted text, and the source contract waits for §19's real sources here.
 
 ## Measuring it
 

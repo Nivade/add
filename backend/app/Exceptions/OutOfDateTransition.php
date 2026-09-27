@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
-final class InvalidCommitmentResponse extends RuntimeException implements ShouldntReport
+/** A client asking for a change that no longer applies is out of date, not broken. */
+abstract class OutOfDateTransition extends RuntimeException implements ShouldntReport
 {
-    /** Answering a commitment that is already settled is an out-of-date client, not a bug. */
     public function render(Request $request): ?JsonResponse
     {
         return $request->expectsJson()

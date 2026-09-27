@@ -62,7 +62,7 @@ it('renders a system-inferred commitment as inferred and unconfirmed, never as f
             ->has('home.needsAttention', 1)
             ->where('home.needsAttention.0.kind', 'commitment')
             ->where('home.needsAttention.0.id', $inferred->id)
-            ->where('home.needsAttention.0.inferred', true));
+            ->where('home.needsAttention.0.awaitingConfirmation', true));
 
     $this->actingAs($user)
         ->get(route('commitments.index'))
@@ -175,4 +175,90 @@ it('lists open commitments over the API', function (): void {
         ->assertJsonCount(1, 'commitments')
         ->assertJsonPath('commitments.0.description', "I'll bring the documents")
         ->assertJsonPath('commitments.0.status', 'open');
+});
+
+it('refuses to promote an intention that is already done', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->for($user)->done()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.intentions.commitment', $intention))
+        ->assertConflict();
+
+    expect(Commitment::query()->count())->toBe(0);
+});
+
+it('reopens the one commitment when an intention is promoted again after letting it go', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->for($user)->create();
+
+    $first = $this->actingAs($user)->postJson(route('api.v1.intentions.commitment', $intention))->assertCreated();
+    $this->actingAs($user)->post(route('commitments.respond', $first->json('id')), ['response' => 'release']);
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.intentions.commitment', $intention))
+        ->assertOk()
+        ->assertJsonPath('status', 'open');
+
+    expect(Commitment::query()->count())->toBe(1);
+});
+
+it('keeps the list reachable when every open commitment is tied to an intention', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->for($user)->create();
+    $this->actingAs($user)->post(route('intentions.commitment', $intention));
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.needsAttention', 0)
+            ->where('home.hasOpenCommitments', true));
+});
+
+it('says where a commitment on home came from', function (): void {
+    $user = User::factory()->create();
+    Commitment::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.needsAttention.0.provenance', 'user_stated')
+            ->where('home.needsAttention.0.awaitingConfirmation', false));
+});
+
+it('promotes the step on screen, and keeps the commitment when that step is done', function (): void {
+    $session = started(2);
+    $step = $session->currentStep()->sole();
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route('focus.commitment', $session))
+        ->assertRedirect(route('focus'));
+
+    $commitment = Commitment::query()->sole();
+
+    expect($commitment->step_id)->toBe($step->id)
+        ->and($commitment->description)->toBe($step->title)
+        ->and($commitment->provenance)->toBe(CommitmentProvenance::UserTask);
+
+    $this->actingAs($session->user)
+        ->get(route('focus'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.currentStepIsCommitment', true));
+
+    CompleteStep::run($session);
+
+    expect($commitment->refresh()->status)->toBe(CommitmentStatus::Kept);
+});
+
+it('promotes the step on screen over the API too, and only for its owner', function (): void {
+    $session = started(2);
+
+    $this->actingAs(User::factory()->create())
+        ->postJson(route('api.v1.sessions.commitment', $session))
+        ->assertNotFound();
+
+    $this->actingAs($session->user)
+        ->postJson(route('api.v1.sessions.commitment', $session))
+        ->assertCreated()
+        ->assertJsonPath('provenance', 'user_task');
 });

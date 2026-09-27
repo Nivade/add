@@ -20,6 +20,6 @@ final class RespondToWaitingForController extends Controller
     {
         $updated = RespondToWaitingFor::run($this->owned($request, $waitingFor), $request->response());
 
-        return WaitingForData::from($updated)->toResponse($request)->setStatusCode(200);
+        return WaitingForData::from($updated)->toResponse($request)->setStatusCode(Response::HTTP_OK);
     }
 }

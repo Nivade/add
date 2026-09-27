@@ -66,7 +66,8 @@ inventing a second one: `HomeData.needsAttention` is currently
 union the way `ComingUpData` already unions `Intention` and `CalendarEvent` —
 a waiting-for old enough to be worth a nudge shows there with "John hasn't
 sent the contract yet" and the four responses as buttons. "Old enough" is a
-fixed constant (days since `created_at` or the last `followed_up`), not a
+fixed constant (days since `created_at` or the last answer, which
+`last_answered_at` holds so an unrelated edit never resets it), not a
 model call — deterministic, same as everything in `next-action-resolver`.
 
 No backlog dump: at most one stale waiting-for competes for the band's
@@ -100,7 +101,9 @@ answers are built anyway: a commitment nothing displays is not tracked at all.
 and an optional `intention_id`. Home's needs-attention band shows the one most
 pressing open commitment — an unconfirmed inference first — with confirm, keep
 and release; the full list is `/commitments`, reached only from that row.
-Promoting an intention is idempotent, and finishing the intention keeps it.
+An intention or the step on screen in focus can be promoted, once each:
+promoting again reopens the one commitment, finishing the intention or step
+keeps it, and a finished intention cannot be promoted.
 
 **Done when** a commitment can be created from either reachable provenance,
 carries the right label, and an inferred one — created directly in a test,
@@ -161,7 +164,8 @@ copied forward; a stale step set is worse than a fresh decomposition pass.
 Missed runs collapse into one fresh intention and the schedule keeps its
 original rhythm, so a stalled scheduler never produces a backlog of copies.
 "Repeat this" lives in home's just-finished band, shown for an hour after the
-session that finished the intention.
+session that finished the intention. A copy points at its template and shows the
+template's rhythm there, so repeating a copy can never start a second schedule.
 
 ## Phase 5 — body doubling, solo
 
@@ -187,9 +191,14 @@ text, the same box as capture, routed through a distinct classification
 prompt that only this phase adds) is the one adapter built, so the port has a
 real caller without touching a mailbox.
 
-**Done when** the contract exists, one adapter implements it, and nothing in
-this phase reads external data without the same explicit-consent gate slice 8
-built for the AI path generally. The web paste dialog and the native paste screen
+**Revised, 2026-09-27:** the port was dropped. A contract, one adapter and a
+provider around a single call was indirection with nothing on the other side;
+`ClassifyPastedText` calls the AI layer directly, and the contract arrives with
+the second source that needs it, in slice 10.
+
+**Done when** pasted text is classified through the classification prompt, and
+nothing in this phase reads external data without the same explicit-consent gate
+slice 8 built for the AI path generally. The web paste dialog and the native paste screen
 are its callers; an actionable result becomes an ordinary capture of the pasted
 text, so deadlines and clarification go through the capture path unchanged.
 
