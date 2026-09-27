@@ -1,13 +1,18 @@
 import { router } from 'expo-router';
+import type { Resource } from '@/api/use-resource';
 import { Button } from '@/components/button';
-import { Meta, OneThing, Screen } from '@/components/screen';
+import { Loading, Meta, OneThing, Screen } from '@/components/screen';
 
-/** A first load that failed: nothing to show, so the problem is the one thing and retrying is the way on. */
-export function Unreachable({ problem, onRetry }: { problem: string | null; onRetry: () => void }) {
+/** Everything a screen shows before it has an answer: the wait, or the problem with a way to retry. */
+export function Pending<T>({ resource }: { resource: Resource<T> & { status: 'loading' | 'unreachable' } }) {
+  if (resource.status === 'loading') {
+    return <Loading />;
+  }
+
   return (
     <Screen>
-      <OneThing>{problem ?? 'The app could not reach the server.'}</OneThing>
-      <Button label="Try again" onPress={onRetry} />
+      <OneThing>{resource.problem}</OneThing>
+      <Button label="Try again" onPress={() => void resource.reload()} />
       {router.canGoBack() && <Button label="Back" onPress={() => router.back()} />}
     </Screen>
   );

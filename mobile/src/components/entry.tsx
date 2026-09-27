@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
-import { ApiError } from '@/api/client';
+import { writeProblem } from '@/api/client';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { field, theme } from '@/theme';
@@ -44,11 +44,7 @@ export function Entry({
     try {
       await onSave(trimmed, secondText.trim());
     } catch (error) {
-      setProblem(
-        error instanceof ApiError
-          ? error.firstMessage('That did not go through. Try again.')
-          : 'The app could not reach the server.',
-      );
+      setProblem(writeProblem(error));
     } finally {
       setSaving(false);
     }

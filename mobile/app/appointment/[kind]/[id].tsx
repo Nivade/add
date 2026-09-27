@@ -7,8 +7,8 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { StaleNote, Unreachable } from '@/components/unreachable';
+import { Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 import { field, TOUCH_TARGET, theme } from '@/theme';
 
 /** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
@@ -19,8 +19,7 @@ export default function Appointment() {
     () => api.appointment(token as string, kind, id),
     [token, kind, id],
   );
-  const { data: appointment, loading, problem, reload } =
-    useResource<ComingUpData | null>(load);
+  const resource = useResource<ComingUpData | null>(load);
 
   const [minutes, setMinutes] = useState<Partial<Record<PlanRung, string>>>({});
   const [saving, setSaving] = useState(false);
@@ -28,13 +27,11 @@ export default function Appointment() {
   const [afterMinutes, setAfterMinutes] = useState('30');
   const [remindSaved, setRemindSaved] = useState(false);
 
-  if (loading && !appointment) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  if (!appointment && problem) {
-    return <Unreachable problem={problem} onRetry={() => void reload()} />;
-  }
+  const { data: appointment, problem } = resource;
 
   if (!appointment) {
     return (

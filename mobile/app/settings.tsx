@@ -3,22 +3,20 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { StaleNote, Unreachable } from '@/components/unreachable';
+import { Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 
 export default function Settings() {
   const { token } = useSession();
   const load = useCallback(() => api.aiConsent(token as string), [token]);
-  const { data, loading, problem, reload, replace } = useResource(load);
+  const resource = useResource(load);
   const [saving, setSaving] = useState(false);
 
-  if (loading && !data) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  if (!data) {
-    return <Unreachable problem={problem} onRetry={() => void reload()} />;
-  }
+  const { data, problem, replace } = resource;
 
   const toggle = async () => {
     setSaving(true);

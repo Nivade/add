@@ -8,24 +8,21 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { QuietAction } from '@/components/quiet-action';
-import { Loading, Meta, OneThing, Screen } from '@/components/screen';
-import { StaleNote, Unreachable } from '@/components/unreachable';
+import { Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 import { theme } from '@/theme';
 
 export default function Focus() {
   const { token } = useSession();
   const load = useCallback(() => api.currentSession(token as string), [token]);
-  const { data, loading, problem, replace, reload } =
-    useResource<ExecutionStateData | null>(load);
+  const resource = useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
 
-  if (loading && !data) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  if (!data && problem) {
-    return <Unreachable problem={problem} onRetry={() => void reload()} />;
-  }
+  const { data, problem, replace, reload } = resource;
 
   if (!data) {
     return (
