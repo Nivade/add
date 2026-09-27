@@ -16,6 +16,8 @@ final class PromoteIntentionToCommitment
 
     public function handle(Intention $intention): Commitment
     {
-        return CreateCommitment::run($intention->user, $intention->title, CommitmentProvenance::UserTask);
+        $existing = Commitment::query()->open()->where('intention_id', $intention->id)->first();
+
+        return $existing ?? CreateCommitment::run($intention->user, $intention->title, CommitmentProvenance::UserTask, $intention);
     }
 }

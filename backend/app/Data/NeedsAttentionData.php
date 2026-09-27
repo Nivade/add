@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\NeedsAttentionKind;
+use App\Models\Commitment;
 use App\Models\Intention;
 use App\Models\WaitingFor;
 use Spatie\LaravelData\Data;
@@ -20,6 +21,7 @@ class NeedsAttentionData extends Data
         public string $title,
         public ?string $detail,
         public ?string $clarifyingQuestion,
+        public bool $inferred = false,
     ) {}
 
     public static function forIntention(Intention $intention): self
@@ -41,6 +43,18 @@ class NeedsAttentionData extends Data
             $waitingFor->subject,
             $waitingFor->note,
             null,
+        );
+    }
+
+    public static function forCommitment(Commitment $commitment): self
+    {
+        return new self(
+            NeedsAttentionKind::Commitment,
+            $commitment->id,
+            $commitment->description,
+            null,
+            null,
+            $commitment->awaitsConfirmation(),
         );
     }
 }

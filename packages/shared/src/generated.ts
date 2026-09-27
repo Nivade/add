@@ -32,9 +32,15 @@ export type CommitmentData = {
 id: string,
 description: string,
 provenance: CommitmentProvenance,
+status: CommitmentStatus,
 confirmedAt: string | null,
 };
+export type CommitmentListData = {
+commitments: CommitmentData[],
+};
 export type CommitmentProvenance = 'user_task' | 'user_stated' | 'system_inferred';
+export type CommitmentResponse = 'confirm' | 'keep' | 'release';
+export type CommitmentStatus = 'open' | 'kept' | 'released';
 export type DeviceData = {
 id: string,
 platform: DevicePlatform,
@@ -66,11 +72,20 @@ offsetSeconds: number | null,
 };
 export type HomeData = {
 rightNow: NextActionData | null,
+rightNowIsCommitment: boolean,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
 reminder: ReminderData | null,
+justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
+};
+export type IngestionClassificationData = {
+actionable: boolean,
+title: string | null,
+why: string | null,
+deadlineAt: string | null,
+estimatedSeconds: number | null,
 };
 export type IntentionData = {
 id: string,
@@ -83,14 +98,20 @@ clarifyingQuestion: string | null,
 recurrenceEveryDays: number | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
+export type JustFinishedData = {
+id: string,
+title: string,
+recurrenceEveryDays: number | null,
+};
 export type NeedsAttentionData = {
 kind: NeedsAttentionKind,
 id: string,
 title: string,
 detail: string | null,
 clarifyingQuestion: string | null,
+inferred: boolean,
 };
-export type NeedsAttentionKind = 'intention' | 'waiting_for';
+export type NeedsAttentionKind = 'intention' | 'waiting_for' | 'commitment';
 export type NextActionData = {
 step: StepData,
 intention: IntentionData,

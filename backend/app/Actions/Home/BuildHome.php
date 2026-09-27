@@ -10,18 +10,19 @@ use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
 use App\Data\ExecutionStateData;
 use App\Data\HomeData;
-use App\Data\NeedsAttentionData;
+use App\Data\JustFinishedData;
+use App\Data\NextActionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
+use App\Enums\IntentionStatus;
+use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
-use App\Models\WaitingFor;
 use App\Notifications\AppointmentReminder;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Home asks one question per band and answers each with one thing, or a count. */
@@ -29,51 +30,44 @@ final class BuildHome
 {
     use AsObject;
 
-    /** Enough to act on, few enough that the band is not a list to work through. */
-    private const int NEEDS_ATTENTION_LIMIT = 3;
-
-    /** How long a waiting-for goes untouched before it is worth a nudge. */
-    private const int WAITING_FOR_STALE_AFTER_DAYS = 4;
+    /** Long enough to come back from a break and still see what you finished. */
+    private const int JUST_FINISHED_WITHIN_MINUTES = 60;
 
     public function __construct(private readonly NextActionResolver $resolver) {}
 
     public function handle(User $user): HomeData
     {
         $context = ResolutionContext::forUser($user);
-        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open()->orderBy('updated_at')->get();
-        $needsAttention = $this->needsAttention($user, $openWaitingFors, $context->now);
+        $needsAttention = BuildNeedsAttention::run($user, $context->now);
+        $rightNow = $this->resolver->resolve($user, $context);
 
         return new HomeData(
-            rightNow: $this->resolver->resolve($user, $context),
+            rightNow: $rightNow,
+            rightNowIsCommitment: $rightNow instanceof NextActionData && $this->isCommitment($rightNow->intention->id),
             session: $this->session($user),
             comingUp: $this->comingUp($context),
             reminder: $this->reminder($user, $context),
-            needsAttention: $needsAttention,
-            restCount: $this->open($user)->count() + $openWaitingFors->count() - count($needsAttention),
+            justFinished: $this->justFinished($user, $context->now),
+            needsAttention: $needsAttention['items'],
+            restCount: $this->open($user)->count() + $needsAttention['outstanding'] - count($needsAttention['items']),
         );
     }
 
-    /**
-     * @param  Collection<int, WaitingFor>  $openWaitingFors
-     * @return list<NeedsAttentionData>
-     */
-    private function needsAttention(User $user, Collection $openWaitingFors, CarbonImmutable $now): array
+    private function isCommitment(string $intentionId): bool
     {
-        $needsAttention = array_values($this->open($user)
-            ->awaitingClarification()
-            ->oldest()
-            ->limit(self::NEEDS_ATTENTION_LIMIT)
-            ->get()
-            ->map(fn (Intention $intention): NeedsAttentionData => NeedsAttentionData::forIntention($intention))
-            ->all());
+        return Commitment::query()->open()->where('intention_id', $intentionId)->exists();
+    }
 
-        $staleWaitingFor = $this->staleWaitingFor($openWaitingFors, $now);
+    private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData
+    {
+        $intention = Intention::query()
+            ->where('user_id', $user->id)
+            ->where('status', IntentionStatus::Done)
+            ->where('completed_at', '>=', $now->subMinutes(self::JUST_FINISHED_WITHIN_MINUTES))
+            ->latest('completed_at')
+            ->first();
 
-        if ($staleWaitingFor instanceof WaitingFor) {
-            $needsAttention[] = NeedsAttentionData::forWaitingFor($staleWaitingFor);
-        }
-
-        return $needsAttention;
+        return $intention instanceof Intention ? JustFinishedData::from($intention) : null;
     }
 
     private function session(User $user): ?ExecutionStateData
@@ -81,19 +75,6 @@ final class BuildHome
         $session = $user->runningSession()->getResults();
 
         return $session instanceof ExecutionSession ? BuildExecutionState::run($session) : null;
-    }
-
-    /**
-     * At most one, the same one-thing-at-a-time rule the clarifying-question slot already follows.
-     * `updated_at` is the last time it was touched, by creation or by a response — the one clock this needs.
-     *
-     * @param  Collection<int, WaitingFor>  $openWaitingFors
-     */
-    private function staleWaitingFor(Collection $openWaitingFors, CarbonImmutable $now): ?WaitingFor
-    {
-        $threshold = $now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS);
-
-        return $openWaitingFors->first(fn (WaitingFor $waitingFor): bool => $waitingFor->updated_at !== null && $waitingFor->updated_at->lte($threshold));
     }
 
     /** The band stands until the person dismisses it or the appointment it prepared for is behind them. */

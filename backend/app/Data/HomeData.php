@@ -14,9 +14,11 @@ class HomeData extends Data
     /** @param  list<NeedsAttentionData>  $needsAttention */
     public function __construct(
         public ?NextActionData $rightNow,
+        public bool $rightNowIsCommitment,
         public ?ExecutionStateData $session,
         public ?ComingUpData $comingUp,
         public ?ReminderData $reminder,
+        public ?JustFinishedData $justFinished,
         public array $needsAttention,
         public int $restCount,
     ) {}

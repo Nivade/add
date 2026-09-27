@@ -1,4 +1,10 @@
-import type { PlanRung, StuckReason, WaitingForResponse } from './generated';
+import type {
+    CommitmentProvenance,
+    CommitmentResponse,
+    PlanRung,
+    StuckReason,
+    WaitingForResponse,
+} from './generated';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
@@ -32,3 +38,28 @@ export const waitingForResponses: { value: WaitingForResponse; label: string }[]
     { value: 'receive', label: 'Mark received' },
     { value: 'cancel', label: 'Cancel' },
 ];
+
+/** An inferred commitment is asked about before it is treated as the person's own. */
+export function commitmentResponses(
+    inferred: boolean,
+): { value: CommitmentResponse; label: string }[] {
+    return inferred
+        ? [
+              { value: 'confirm', label: "That's mine" },
+              { value: 'release', label: 'Not mine' },
+          ]
+        : [
+              { value: 'keep', label: 'Done' },
+              { value: 'release', label: 'Let it go' },
+          ];
+}
+
+export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = {
+    user_task: 'from something you were doing',
+    user_stated: 'you said this',
+    system_inferred: 'read from what you wrote',
+};
+
+export function recurrenceLine(everyDays: number): string {
+    return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
+}

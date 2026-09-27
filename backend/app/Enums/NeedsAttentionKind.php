@@ -12,4 +12,5 @@ enum NeedsAttentionKind: string
 {
     case Intention = 'intention';
     case WaitingFor = 'waiting_for';
+    case Commitment = 'commitment';
 }

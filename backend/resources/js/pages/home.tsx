@@ -1,13 +1,25 @@
-import type { HomeData, NeedsAttentionData } from '@add/shared';
-import { restCountLine, waitingForResponses } from '@add/shared';
+import type {
+    HomeData,
+    JustFinishedData,
+    NeedsAttentionData,
+} from '@add/shared';
+import {
+    commitmentProvenanceLabels,
+    commitmentResponses,
+    recurrenceLine,
+    restCountLine,
+    waitingForResponses,
+} from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
+import { quietButtonClassName, Responses } from '@/components/responses';
 import { Button } from '@/components/ui/button';
 import { focus, overwhelmed } from '@/routes';
 import calendarEvents from '@/routes/calendar-events';
+import commitments from '@/routes/commitments';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
 import waitingFors from '@/routes/waiting-fors';
@@ -46,7 +58,7 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
                             type="submit"
                             variant="outline"
                             disabled={processing}
-                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                            className={quietButtonClassName}
                         >
                             Answer
                         </Button>
@@ -73,25 +85,90 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
                     </span>
                 )}
             </p>
-            <div className="flex flex-wrap gap-3">
-                {waitingForResponses.map(({ value, label }) => (
-                    <Form
-                        key={value}
-                        {...waitingFors.respond.form(item.id)}
-                        transform={(data) => ({ ...data, response: value })}
-                        options={{ preserveScroll: true }}
-                    >
-                        <Button
-                            type="submit"
-                            variant="outline"
-                            className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
-                        >
-                            {label}
-                        </Button>
-                    </Form>
-                ))}
-            </div>
+            <Responses
+                action={waitingFors.respond.form(item.id)}
+                responses={waitingForResponses}
+            />
         </div>
+    );
+}
+
+function Commitment({ item }: { item: NeedsAttentionData }) {
+    return (
+        <div className="space-y-2">
+            <p>
+                {item.title}
+                {item.inferred && (
+                    <span className="text-muted-foreground font-mono text-[13px]">
+                        {' '}
+                        · {commitmentProvenanceLabels.system_inferred}
+                    </span>
+                )}
+            </p>
+            <Responses
+                action={commitments.respond.form(item.id)}
+                responses={commitmentResponses(item.inferred)}
+            />
+            <Link
+                href={commitments.index()}
+                className="text-muted-foreground hover:text-foreground inline-block font-mono text-[13px] underline-offset-4 hover:underline"
+            >
+                Everything you said you'd do
+            </Link>
+        </div>
+    );
+}
+
+function JustFinished({ finished }: { finished: JustFinishedData }) {
+    return (
+        <Band label="Just finished">
+            <p>{finished.title}</p>
+            {finished.recurrenceEveryDays ? (
+                <p className="text-muted-foreground mt-2 font-mono text-[13px]">
+                    {recurrenceLine(finished.recurrenceEveryDays)}
+                </p>
+            ) : (
+                <Form
+                    {...intentions.recurrence.form(finished.id)}
+                    options={{ preserveScroll: true }}
+                    className="mt-3 flex flex-wrap items-center gap-3"
+                >
+                    {({ errors }) => (
+                        <>
+                            <label
+                                htmlFor="repeat-every-days"
+                                className="text-muted-foreground font-mono text-[13px]"
+                            >
+                                Repeat every
+                            </label>
+                            <input
+                                id="repeat-every-days"
+                                type="number"
+                                name="every_days"
+                                min={1}
+                                max={365}
+                                defaultValue={7}
+                                className="border-input focus-visible:border-ring focus-visible:ring-ring/50 w-20 rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]"
+                            />
+                            <span className="text-muted-foreground font-mono text-[13px]">
+                                days
+                            </span>
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className={quietButtonClassName}
+                            >
+                                Repeat
+                            </Button>
+                            <InputError
+                                message={errors.every_days}
+                                className="basis-full"
+                            />
+                        </>
+                    )}
+                </Form>
+            )}
+        </Band>
     );
 }
 
@@ -137,7 +214,15 @@ function RightNow({ rightNow, session }: HomeData) {
 }
 
 export default function Home({ home: data }: { home: HomeData }) {
-    const { rightNow, comingUp, reminder, needsAttention, restCount } = data;
+    const {
+        rightNow,
+        rightNowIsCommitment,
+        comingUp,
+        reminder,
+        justFinished,
+        needsAttention,
+        restCount,
+    } = data;
 
     return (
         <>
@@ -160,9 +245,33 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {rightNow.why.map((line) => (
                                 <li key={line}>{line}</li>
                             ))}
+                            {rightNowIsCommitment && (
+                                <li>
+                                    {commitmentProvenanceLabels.user_task}, and
+                                    you said you'd do it
+                                </li>
+                            )}
                         </ul>
+                        {!rightNowIsCommitment && (
+                            <Form
+                                {...intentions.commitment.form(
+                                    rightNow.intention.id,
+                                )}
+                                options={{ preserveScroll: true }}
+                                className="mt-3"
+                            >
+                                <button
+                                    type="submit"
+                                    className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
+                                >
+                                    I said I'd do this
+                                </button>
+                            </Form>
+                        )}
                     </Band>
                 )}
+
+                {justFinished && <JustFinished finished={justFinished} />}
 
                 {reminder && (
                     <Band label="Before you go">
@@ -178,7 +287,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                             <Button
                                 type="submit"
                                 variant="outline"
-                                className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                className={quietButtonClassName}
                             >
                                 Got it
                             </Button>
@@ -208,7 +317,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <Button
                                     type="submit"
                                     variant="outline"
-                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                    className={quietButtonClassName}
                                 >
                                     That{"'"}s right
                                 </Button>
@@ -242,7 +351,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <Button
                                     type="submit"
                                     variant="outline"
-                                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
+                                    className={quietButtonClassName}
                                 >
                                     Remind me after
                                 </Button>
@@ -256,9 +365,13 @@ export default function Home({ home: data }: { home: HomeData }) {
                         <ul className="space-y-6">
                             {needsAttention.map((item) => (
                                 <li key={item.id}>
-                                    {item.kind === 'waiting_for' ? (
+                                    {item.kind === 'waiting_for' && (
                                         <WaitingFor item={item} />
-                                    ) : (
+                                    )}
+                                    {item.kind === 'commitment' && (
+                                        <Commitment item={item} />
+                                    )}
+                                    {item.kind === 'intention' && (
                                         <Clarify item={item} />
                                     )}
                                 </li>

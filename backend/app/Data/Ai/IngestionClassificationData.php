@@ -6,7 +6,9 @@ namespace App\Data\Ai;
 
 use Carbon\CarbonImmutable;
 use Spatie\LaravelData\Data;
+use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
+#[TypeScript]
 class IngestionClassificationData extends Data
 {
     public function __construct(

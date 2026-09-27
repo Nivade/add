@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\CommitmentProvenance;
+use App\Enums\CommitmentStatus;
 use App\Models\Commitment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,7 @@ class CommitmentFactory extends Factory
             'description' => "I'll call Sarah Friday",
             'provenance' => CommitmentProvenance::UserStated,
             'confirmed_at' => now(),
+            'status' => CommitmentStatus::Open,
         ];
     }
 

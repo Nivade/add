@@ -60,3 +60,30 @@ it('requires authentication', function (): void {
     $this->postJson(route('api.v1.ingestion.classify'), ['text' => 'anything'])
         ->assertUnauthorized();
 });
+
+it('classifies from the web too, for the paste dialog', function (): void {
+    $user = User::factory()->create();
+
+    fakeAi()->push([
+        'actionable' => true,
+        'title' => 'Pay the water bill',
+        'why' => null,
+        'deadline_at' => null,
+        'estimated_seconds' => 300,
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('ingestion.classify'), ['text' => 'Your water bill of 42 euro is due.'])
+        ->assertCreated()
+        ->assertJsonPath('title', 'Pay the water bill');
+});
+
+it('says why it cannot read anything when AI consent is off', function (): void {
+    $user = User::factory()->create(['ai_consented_at' => null]);
+    app()->instance(App\Contracts\AiProvider::class, new App\Support\Ai\Providers\ConsentGatedAiProvider(fakeAi()));
+
+    $this->actingAs($user)
+        ->postJson(route('ingestion.classify'), ['text' => 'Your water bill of 42 euro is due.'])
+        ->assertServiceUnavailable()
+        ->assertJsonPath('message', 'Reading this needs AI, which is off. It can be turned on in settings.');
+});

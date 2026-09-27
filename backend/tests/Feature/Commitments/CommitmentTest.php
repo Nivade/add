@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\CompleteStep;
 use App\Enums\CommitmentProvenance;
+use App\Enums\CommitmentStatus;
 use App\Models\Commitment;
 use App\Models\Intention;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia;
 
 it('creates a commitment typed directly, confirmed immediately', function (): void {
     $user = User::factory()->create();
@@ -50,11 +53,94 @@ it("does not let one person promote another person's intention", function (): vo
 
 it('renders a system-inferred commitment as inferred and unconfirmed, never as fact', function (): void {
     $user = User::factory()->create();
+    Commitment::factory()->for($user)->create(['created_at' => now()->subDay()]);
     $inferred = Commitment::factory()->for($user)->inferred()->create();
 
-    expect($inferred->provenance)->toBe(CommitmentProvenance::SystemInferred)
-        ->and($inferred->provenance->isInferred())->toBeTrue()
-        ->and($inferred->confirmed_at)->toBeNull();
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.needsAttention', 1)
+            ->where('home.needsAttention.0.kind', 'commitment')
+            ->where('home.needsAttention.0.id', $inferred->id)
+            ->where('home.needsAttention.0.inferred', true));
+
+    $this->actingAs($user)
+        ->get(route('commitments.index'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->component('commitments')
+            ->has('list.commitments', 2)
+            ->where('list.commitments.0.provenance', 'system_inferred')
+            ->where('list.commitments.0.confirmedAt', null));
+});
+
+it('confirms an inferred commitment, then keeps it', function (): void {
+    $user = User::factory()->create();
+    $commitment = Commitment::factory()->for($user)->inferred()->create();
+
+    $this->actingAs($user)
+        ->from(route('home'))
+        ->post(route('commitments.respond', $commitment), ['response' => 'confirm'])
+        ->assertRedirect(route('home'));
+
+    expect($commitment->refresh()->confirmed_at)->not->toBeNull()
+        ->and($commitment->status)->toBe(CommitmentStatus::Open);
+
+    $this->actingAs($user)->post(route('commitments.respond', $commitment), ['response' => 'keep']);
+
+    expect($commitment->refresh()->status)->toBe(CommitmentStatus::Kept);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('home.needsAttention', 0));
+});
+
+it('lets go of a commitment for good', function (): void {
+    $user = User::factory()->create();
+    $commitment = Commitment::factory()->for($user)->create();
+
+    $this->actingAs($user)->post(route('commitments.respond', $commitment), ['response' => 'release']);
+
+    expect($commitment->refresh()->status)->toBe(CommitmentStatus::Released);
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.commitments.respond', $commitment), ['response' => 'keep'])
+        ->assertConflict();
+});
+
+it('refuses to confirm what nobody inferred', function (): void {
+    $user = User::factory()->create();
+    $commitment = Commitment::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->postJson(route('api.v1.commitments.respond', $commitment), ['response' => 'confirm'])
+        ->assertConflict();
+});
+
+it("does not let one person answer another person's commitment", function (): void {
+    $commitment = Commitment::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('commitments.respond', $commitment), ['response' => 'release'])
+        ->assertNotFound();
+
+    expect($commitment->refresh()->status)->toBe(CommitmentStatus::Open);
+});
+
+it('promotes an intention once, and keeps the commitment when the intention is finished', function (): void {
+    $session = started(1);
+    $intention = $session->intention;
+
+    $this->actingAs($intention->user)->post(route('intentions.commitment', $intention));
+    $this->actingAs($intention->user)->post(route('intentions.commitment', $intention));
+
+    $this->actingAs($intention->user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.rightNowIsCommitment', true));
+
+    CompleteStep::run($session);
+
+    expect(Commitment::query()->sole()->status)->toBe(CommitmentStatus::Kept);
 });
 
 it('answers over the API too', function (): void {
@@ -73,4 +159,18 @@ it('answers over the API too', function (): void {
         ->assertCreated()
         ->assertJsonPath('description', 'Book the movers')
         ->assertJsonPath('provenance', 'user_task');
+});
+
+it('lists open commitments over the API', function (): void {
+    $user = User::factory()->create();
+    Commitment::factory()->for($user)->create(['description' => "I'll bring the documents"]);
+    Commitment::factory()->for($user)->create(['status' => CommitmentStatus::Kept]);
+    Commitment::factory()->create();
+
+    $this->actingAs($user)
+        ->getJson(route('api.v1.commitments.index'))
+        ->assertOk()
+        ->assertJsonCount(1, 'commitments')
+        ->assertJsonPath('commitments.0.description', "I'll bring the documents")
+        ->assertJsonPath('commitments.0.status', 'open');
 });
