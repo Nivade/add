@@ -1,6 +1,6 @@
 # Custom attributes — declared intent the code already repeats by hand
 
-**State:** designed, 2026-09-27 · [the slice table](executive-function-os.md#slices)
+**State:** in progress — phases 1-4/6 done (`OneThing`, `RespondsWith`, `FailOn`, `PerUserCommand`), 2026-09-28 · [the slice table](executive-function-os.md#slices)
 
 *Rules: `general.md` (prefer attributes; rules are held down by tests), `support-and-concerns.md`,
 `product-invariants.md`, `api-and-data.md`, `domain-model.md`, `ai-layer.md`, `testing.md`.
