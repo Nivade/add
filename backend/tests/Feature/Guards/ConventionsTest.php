@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\Attributes\OneThing;
+use App\Attributes\OneThing;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Models\Concerns\StoresDatesInUtc;
@@ -195,6 +195,20 @@ it('schedules only commands that exist', function (): void {
     }
 });
 
+// One renderer for domain exceptions, read from #[RespondsWith] in bootstrap/app.php.
+it('renders no domain exception with its own render()', function (): void {
+    $directories = array_merge(
+        glob(app_path('Exceptions'), GLOB_ONLYDIR) ?: [],
+        glob(app_path('Support/*/Exceptions'), GLOB_ONLYDIR) ?: [],
+    );
+
+    foreach ($directories as $directory) {
+        foreach (glob("{$directory}/*.php") ?: [] as $file) {
+            expect((string) file_get_contents($file))->not->toContain('function render(');
+        }
+    }
+});
+
 // .ai/rules/support-and-concerns.md: Support holds adapters and calculation, never a caller of the layers above it.
 arch('Support depends on nothing above it')
     ->expect('App\Support')
@@ -221,7 +235,7 @@ it('keeps every #[OneThing] Data class to one thing', function (): void {
     foreach (glob(app_path('Data/*.php')) ?: [] as $file) {
         $class = 'App\\Data\\'.basename($file, '.php');
 
-        if ((new ReflectionClass($class))->getAttributes(OneThing::class) === []) {
+        if (new ReflectionClass($class)->getAttributes(OneThing::class) === []) {
             continue;
         }
 

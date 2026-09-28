@@ -4,22 +4,31 @@ declare(strict_types=1);
 
 namespace App\Actions\Intentions;
 
+use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Contracts\AiProvider;
+use App\CustomAttributes\FailOn;
 use App\Enums\IntentionStatus;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Support\Ai\AiRequest;
+use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\Parsers\DecomposeParser;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Queue\Attributes\Backoff;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
+#[Tries(3)]
+#[Backoff(30, 120, 300)]
+#[FailOn(AiUnavailable::class)]
 final class DecomposeIntention
 {
     use AsJob;
     use AsObject;
+    use ConfiguresJobByAttribute;
 
     public function __construct(
         private readonly AiProvider $provider,

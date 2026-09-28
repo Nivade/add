@@ -8,6 +8,18 @@ Skills: `laravel-attributes`, `laravel-actions`, `laravel-data`, `ai-layer-chang
 `testing-best-practices`, `tdd`, `phpstan-larastan`, `sail-and-root-scripts`, `generated-artifacts`,
 `split-to-prs`, `finish-branch`, `update-resume`.*
 
+## Skills
+
+- `laravel-attributes`: every phase, before writing an attribute — check the framework hasn't grown one.
+- `laravel-data`: phase 1 (`#[OneThing]`, the `DataConfig`/`DataClass` walk).
+- `pest-testing`, `testing-best-practices`, `tdd`: every phase's guard and regression tests.
+- `laravel-actions`: phases 3 and 4 (`configureJob`, `getJobMiddleware`, command signature/description).
+- `ai-layer-changes`: phases 3 and 5 (`AiUnavailable`, provider drivers).
+- `phpstan-larastan`: every phase, before finishing.
+- `sail-and-root-scripts`: phase 4 (`schedule:list`).
+- `generated-artifacts`: closing check, none of this reaches `generated.ts`.
+- `split-to-prs`, `finish-branch`, `update-resume`: closing out the branch.
+
 Six hand-rolled attributes, each replacing a fact the code currently writes twice or holds
 by goodwill. Laravel 13 already ships attributes for commands, jobs and controllers; this plan
 adds ours only where no framework attribute says the thing, and reuses the framework's
@@ -16,8 +28,14 @@ wherever one does (`#[Signature]`, `#[Description]`, `#[Tries]`, `#[Backoff]`).
 ## Shape every attribute follows
 
 - `#[Attribute(Attribute::TARGET_CLASS)]`, `final readonly class`, promoted constructor, no logic.
-- The attribute lives with the layer that reads it, in an `Attributes/` folder beside that layer's
-  `Concerns/` — the same placement `support-and-concerns.md` gives traits. No new base folder.
+- Every attribute lives in one shared `backend/app/Attributes/`, regardless of which layer reads
+  it — not scattered into a per-layer `Attributes/` folder beside each layer's `Concerns/`.
+- Pest's Laravel arch preset reserves that exact namespace for
+  `Illuminate\Contracts\Container\ContextualAttribute` classes, a check its own `->ignoring()`
+  cannot suppress (the `toImplement()` call fires eagerly, inside `__call`, before `ignoring()` on
+  the preset's return value can reach it). `tests/Pest.php` registers a `laravelMinusAttributes`
+  custom preset — the framework's `Laravel` preset with that one rule removed — and `ArchTest.php`
+  uses it instead of `arch()->preset()->laravel()`.
 - One **reader** per attribute, next to it, reading with
   `(new ReflectionClass($class))->getAttributes(X::class)[0] ?? null`. A missing attribute on a
   class that needs one throws a `LogicException` naming the class, never a silent default.
@@ -36,7 +54,7 @@ Phases are independent and ordered by value. Each is one commit, or one PR throu
 `product-invariants.md`: execution mode and "I'm overwhelmed" show one step, never a list.
 Today only the current shape of the Data classes keeps that.
 
-- `backend/app/Data/Attributes/OneThing.php`, no parameters.
+- `backend/app/Attributes/OneThing.php`, no parameters.
 - Mark `app/Data/OverwhelmedData.php`, `app/Data/ExecutionStateData.php`,
   `app/Data/NextActionData.php`.
 - Guard, "keeps every one-thing screen to one thing": for each class under `app/Data` carrying
@@ -52,7 +70,7 @@ Today only the current shape of the Data classes keeps that.
 `InvalidCommitmentResponse`, `InvalidIntentionTransition` and `InvalidSessionTransition` each carry
 the same `render()`; `AiUnavailable` has its own closure in `bootstrap/app.php`.
 
-- `backend/app/Exceptions/Attributes/RespondsWith.php`: `int $status`, `?string $message = null`
+- `backend/app/Attributes/RespondsWith.php`: `int $status`, `?string $message = null`
   (null answers with the exception's own message).
 - Delete the three `render()` methods; annotate them `#[RespondsWith(Response::HTTP_CONFLICT)]`.
   Annotate `AiUnavailable` with 503 and its fixed sentence, and delete its closure.
@@ -76,7 +94,7 @@ worker default decides. `AiRateLimited` and `AiProviderRequestFailed` are transi
 - Framework `#[Tries]` and `#[Backoff]` on each job action; laravel-actions does not read them,
   so `backend/app/Actions/Concerns/ConfiguresJobByAttribute.php` supplies `configureJob()` and
   `getJobBackoff()` from them.
-- `backend/app/Actions/Attributes/FailOn.php`: `class-string<Throwable> ...$exceptions`. The same
+- `backend/app/Attributes/FailOn.php`: `class-string<Throwable> ...$exceptions`. The same
   trait's `getJobMiddleware()` returns `new FailOnException($exceptions)`.
 - `#[FailOn(AiUnavailable::class)]` on all three. `AiResponseInvalid` retries: a model answer is not
   deterministic, and the parser still judges the retry.
@@ -92,7 +110,7 @@ property, and their cadence lives as name strings in `routes/console.php`.
 
 - `backend/app/Enums/Cadence.php`: `EveryMinute`, `Hourly`, with `apply(Event $event): Event`
   as an exhaustive `match`. Not `#[TypeScript]`; it never crosses the API.
-- `backend/app/Actions/Attributes/PerUserCommand.php`: `string $name`, `string $description`,
+- `backend/app/Attributes/PerUserCommand.php`: `string $name`, `string $description`,
   `Cadence $every`.
 - `QueuesPerUser` implements `getCommandSignature()` (name plus the `{user?}` argument) and
   `getCommandDescription()` from the attribute; laravel-actions prefers those methods to the
@@ -116,7 +134,7 @@ property, and their cadence lives as name strings in `routes/console.php`.
 Each AI provider and calendar source writes its driver name in `name()`, and the service provider
 writes it again in its `match`. Only `IcsCalendarSource::NAME` is shared.
 
-- `backend/app/Support/Attributes/Driver.php`: `string $name`, plus a static
+- `backend/app/Attributes/Driver.php`: `string $name`, plus a static
   `classFor(string $configured, list<class-string> $candidates): ?class-string`.
 - `backend/app/Support/Concerns/NamedByDriver.php` implements `name()` from the attribute. The
   wrappers (`LoggingAiProvider`, `ConsentGatedAiProvider`) keep delegating and carry no attribute.
@@ -134,7 +152,7 @@ writes it again in its `match`. Only `IcsCalendarSource::NAME` is shared.
 `FutureReminderDue` writes `'future_reminder'` in both `toArray()` and `toExpo()`, and the mobile
 app routes on it. Both notifications repeat the same `via()`.
 
-- `backend/app/Notifications/Attributes/NotificationKind.php`: `string $kind`.
+- `backend/app/Attributes/NotificationKind.php`: `string $kind`.
 - `backend/app/Notifications/Concerns/PushesToDevices.php`: `via()` and a `kind()` read from the
   attribute. `AppointmentReminder` overrides `kind()` with its appointment's kind, so only
   `FutureReminderDue` carries the attribute today.
@@ -163,6 +181,5 @@ app routes on it. Both notifications repeat the same `via()`.
 
 ## Open
 
-- Whether "custom attributes live in `<layer>/Attributes/`" becomes a line in
-  `support-and-concerns.md`. That's the person's call once phase 1 lands; record it with
-  `record-rule` only when asked.
+- Whether "custom attributes live in `app/Attributes/`" becomes a line in
+  `support-and-concerns.md`. Record it with `record-rule` only when asked.

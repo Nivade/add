@@ -12,7 +12,101 @@ use App\Models\User;
 use App\Support\Ai\Providers\FakeAiProvider;
 use App\Support\Ai\Providers\LoggingAiProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Pest\Preset;
 use Tests\TestCase;
+
+/*
+|--------------------------------------------------------------------------
+| Arch Presets
+|--------------------------------------------------------------------------
+|
+| Pest's own "laravel" preset reserves App\Attributes for classes implementing
+| Illuminate\Contracts\Container\ContextualAttribute, and that rule's
+| toImplement() check cannot be scoped with ->ignoring() — it fires eagerly,
+| inside __call(), before the preset's return value ever receives our
+| ->ignoring() call. This is the same preset with that one rule removed.
+|
+*/
+
+Preset::custom('laravelMinusAttributes', fn (): array => [
+    expect('App\Traits')->toBeTraits(),
+
+    expect('App\Concerns')->toBeTraits(),
+
+    expect('App')->not->toBeEnums()->ignoring('App\Enums'),
+
+    expect('App\Enums')->toBeEnums()->ignoring('App\Enums\Concerns'),
+
+    expect('App\Features')->toBeClasses()->ignoring('App\Features\Concerns'),
+
+    expect('App\Features')->toHaveMethod('resolve')->ignoring('App\Features\Concerns'),
+
+    expect('App\Exceptions')->classes()->toImplement('Throwable')->ignoring('App\Exceptions\Handler'),
+
+    expect('App')->not->toImplement(Throwable::class)->ignoring('App\Exceptions'),
+
+    expect('App\Http\Middleware')->classes()->toHaveMethod('handle'),
+
+    expect('App\Models')->classes()->toExtend(Illuminate\Database\Eloquent\Model::class)->ignoring('App\Models\Scopes'),
+
+    expect('App\Models')->classes()->not->toHaveSuffix('Model'),
+
+    expect('App')->not->toExtend(Illuminate\Database\Eloquent\Model::class)->ignoring('App\Models'),
+
+    expect('App\Http\Requests')->classes()->toHaveSuffix('Request'),
+
+    expect('App\Http\Requests')->classes()->toExtend(Illuminate\Foundation\Http\FormRequest::class),
+
+    expect('App\Http\Requests')->toHaveMethod('rules'),
+
+    expect('App')->not->toExtend(Illuminate\Foundation\Http\FormRequest::class)->ignoring('App\Http\Requests'),
+
+    expect('App\Console\Commands')->classes()->toHaveSuffix('Command'),
+
+    expect('App\Console\Commands')->classes()->toExtend(Illuminate\Console\Command::class),
+
+    expect('App\Console\Commands')->classes()->toHaveMethod('handle'),
+
+    expect('App')->not->toExtend(Illuminate\Console\Command::class)->ignoring('App\Console\Commands'),
+
+    expect('App\Mail')->classes()->toExtend(Illuminate\Mail\Mailable::class),
+
+    expect('App\Mail')->classes()->toImplement(Illuminate\Contracts\Queue\ShouldQueue::class),
+
+    expect('App')->not->toExtend(Illuminate\Mail\Mailable::class)->ignoring('App\Mail'),
+
+    expect('App\Jobs')->classes()->toImplement(Illuminate\Contracts\Queue\ShouldQueue::class),
+
+    expect('App\Jobs')->classes()->toHaveMethod('handle'),
+
+    expect('App\Listeners')->toHaveMethod('handle'),
+
+    expect('App\Notifications')->classes()->toExtend(Illuminate\Notifications\Notification::class),
+
+    expect('App')->not->toExtend(Illuminate\Notifications\Notification::class)->ignoring('App\Notifications'),
+
+    expect('App\Providers')->toHaveSuffix('ServiceProvider'),
+
+    expect('App\Providers')->classes()->toExtend(Illuminate\Support\ServiceProvider::class),
+
+    expect('App\Providers')->not->toBeUsed(),
+
+    expect('App')->not->toExtend(Illuminate\Support\ServiceProvider::class)->ignoring('App\Providers'),
+
+    expect('App')->not->toHaveSuffix('ServiceProvider')->ignoring('App\Providers'),
+
+    expect('App')->not->toHaveSuffix('Controller')->ignoring('App\Http\Controllers'),
+
+    expect('App\Http\Controllers')->classes()->toHaveSuffix('Controller'),
+
+    expect('App\Http')->toOnlyBeUsedIn(['App\Http', 'App\Providers']),
+
+    expect('App\Http\Controllers')->not->toHavePublicMethodsBesides(['__construct', '__invoke', 'index', 'show', 'create', 'store', 'edit', 'update', 'destroy', 'middleware']),
+
+    expect(['dd', 'ddd', 'dump', 'env', 'exit', 'ray'])->not->toBeUsed(),
+
+    expect('App\Policies')->classes()->toHaveSuffix('Policy'),
+]);
 
 /*
 |--------------------------------------------------------------------------

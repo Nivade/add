@@ -88,16 +88,14 @@ it('resolves every relative link in an agent document', function (): void {
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     $planned = [
-        'backend/app/Data/Attributes/OneThing.php',
-        'backend/app/Exceptions/Attributes/RespondsWith.php',
-        'backend/app/Actions/Attributes/FailOn.php',
+        'backend/app/Attributes/FailOn.php',
         'backend/app/Actions/Concerns/ConfiguresJobByAttribute.php',
         'backend/app/Enums/Cadence.php',
-        'backend/app/Actions/Attributes/PerUserCommand.php',
+        'backend/app/Attributes/PerUserCommand.php',
         'backend/app/Actions/Concerns/ReadsCommandAttributes.php',
-        'backend/app/Support/Attributes/Driver.php',
+        'backend/app/Attributes/Driver.php',
         'backend/app/Support/Concerns/NamedByDriver.php',
-        'backend/app/Notifications/Attributes/NotificationKind.php',
+        'backend/app/Attributes/NotificationKind.php',
         'backend/app/Notifications/Concerns/PushesToDevices.php',
     ];
 

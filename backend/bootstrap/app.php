@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Attributes\RespondsWith;
+use App\Attributes\RespondsWithReader;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Sentry\Laravel\Integration;
@@ -37,4 +40,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
+            $respondsWith = RespondsWithReader::for($e);
+
+            if (! $respondsWith instanceof RespondsWith || ! $request->expectsJson()) {
+                return null;
+            }
+
+            return new JsonResponse(
+                ['message' => $respondsWith->message ?? $e->getMessage()],
+                $respondsWith->status,
+            );
+        });
     })->create();

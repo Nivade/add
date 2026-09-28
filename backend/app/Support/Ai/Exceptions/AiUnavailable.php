@@ -4,33 +4,26 @@ declare(strict_types=1);
 
 namespace App\Support\Ai\Exceptions;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Attributes\RespondsWith;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
+#[RespondsWith(Response::HTTP_SERVICE_UNAVAILABLE)]
 final class AiUnavailable extends RuntimeException
 {
-    private bool $withoutConsent = false;
-
-    public static function withoutConsent(string $message): self
+    public static function withoutConsent(string $detail): self
     {
-        $exception = new self($message);
-        $exception->withoutConsent = true;
-
-        return $exception;
+        return new self($detail, withoutConsent: true);
     }
 
-    /** A question asked synchronously gets a sentence back, never a stack trace. */
-    public function render(Request $request): ?JsonResponse
+    /** A question asked synchronously gets one of these sentences back; $detail stays on the previous exception, for Sentry. */
+    public function __construct(string $detail, bool $withoutConsent = false)
     {
-        if (! $request->expectsJson()) {
-            return null;
-        }
-
-        return new JsonResponse(['message' => $this->withoutConsent
-            ? 'Reading this needs AI, which is off. It can be turned on in settings.'
-            : 'Reading this needs AI, which is not reachable right now. Try again in a while.',
-        ], Response::HTTP_SERVICE_UNAVAILABLE);
+        parent::__construct(
+            $withoutConsent
+                ? 'Reading this needs AI, which is off. It can be turned on in settings.'
+                : 'Reading this needs AI, which is not reachable right now. Try again in a while.',
+            previous: new RuntimeException($detail),
+        );
     }
 }

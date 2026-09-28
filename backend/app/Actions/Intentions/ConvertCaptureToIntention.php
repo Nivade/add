@@ -4,24 +4,33 @@ declare(strict_types=1);
 
 namespace App\Actions\Intentions;
 
+use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Contracts\AiProvider;
 use App\Contracts\DeadlineExtractor;
+use App\CustomAttributes\FailOn;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Support\Ai\AiRequest;
+use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\Parsers\ParseCaptureParser;
 use App\Support\Time\ExtractedDeadline;
 use Carbon\CarbonImmutable;
+use Illuminate\Queue\Attributes\Backoff;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** The extractor answers first and its answer wins; the model is asked only about what it left behind. */
+#[Tries(3)]
+#[Backoff(30, 120, 300)]
+#[FailOn(AiUnavailable::class)]
 final class ConvertCaptureToIntention
 {
     use AsJob;
     use AsObject;
+    use ConfiguresJobByAttribute;
 
     public function __construct(
         private readonly AiProvider $provider,
