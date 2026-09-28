@@ -6,8 +6,8 @@ namespace App\Actions\Steps;
 
 use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Actions\Sessions\RecordExecutionEvent;
+use App\Attributes\FailOn;
 use App\Contracts\AiProvider;
-use App\CustomAttributes\FailOn;
 use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;

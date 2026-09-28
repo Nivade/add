@@ -2,18 +2,30 @@
 
 declare(strict_types=1);
 
+use App\Attributes\PerUserCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Lorisleiva\Lody\Lody;
 
 Artisan::command('inspire', function (): void {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Preparation is a minutes-scale thing, so the check is cheap and frequent.
-Schedule::command('reminders:dispatch')->everyMinute()->withoutOverlapping();
-Schedule::command('future-reminders:dispatch')->everyMinute()->withoutOverlapping();
-Schedule::command('calendar:sync')->hourly()->withoutOverlapping();
+// Every per-user command names its own cadence, so nothing here repeats it by hand.
+Lody::classes(app_path('Actions'))
+    ->each(function (string $class): void {
+        if (! class_exists($class)) {
+            return;
+        }
 
-// Recurrence is a days-scale thing; hourly is frequent enough without being wasteful.
-Schedule::command('intentions:recur')->hourly()->withoutOverlapping();
+        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+
+        if ($attribute === null) {
+            return;
+        }
+
+        $perUserCommand = $attribute->newInstance();
+
+        $perUserCommand->every->apply(Schedule::command($perUserCommand->name))->withoutOverlapping();
+    });

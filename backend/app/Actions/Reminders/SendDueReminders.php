@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Reminders;
 
 use App\Actions\Concerns\QueuesPerUser;
+use App\Attributes\PerUserCommand;
 use App\Contracts\Appointment;
 use App\Data\BackwardsPlanData;
+use App\Enums\Cadence;
 use App\Models\Reminder;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
@@ -18,16 +20,17 @@ use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** One reminder per appointment, sent when its first preparation is due and not before. */
+#[PerUserCommand(
+    name: 'reminders:dispatch',
+    description: 'Send the reminders whose preparation is due.',
+    every: Cadence::EveryMinute,
+)]
 final class SendDueReminders
 {
     use AsCommand;
     use AsJob;
     use AsObject;
     use QueuesPerUser;
-
-    public string $commandSignature = 'reminders:dispatch {user? : the id of one person, or every person when omitted}';
-
-    public string $commandDescription = 'Send the reminders whose preparation is due.';
 
     /** @return list<Reminder> */
     public function handle(User $user, ?CarbonImmutable $now = null): array

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Calendar;
 
 use App\Actions\Concerns\QueuesPerUser;
+use App\Attributes\PerUserCommand;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
+use App\Enums\Cadence;
 use App\Models\CalendarEvent;
 use App\Models\FutureReminder;
 use App\Models\User;
@@ -20,6 +22,11 @@ use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Read-only in one direction: the calendar tells us the day, and we never write back to it. */
+#[PerUserCommand(
+    name: 'calendar:sync',
+    description: 'Read the days ahead off the connected calendar.',
+    every: Cadence::Hourly,
+)]
 final class SyncCalendar
 {
     use AsCommand;
@@ -28,10 +35,6 @@ final class SyncCalendar
     use QueuesPerUser;
 
     private const int TEXT_COLUMN_LIMIT = 250;
-
-    public string $commandSignature = 'calendar:sync {user? : the id of one person, or every person when omitted}';
-
-    public string $commandDescription = 'Read the days ahead off the connected calendar.';
 
     public function __construct(private readonly CalendarSource $source) {}
 

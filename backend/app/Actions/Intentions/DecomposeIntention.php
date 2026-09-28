@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Intentions;
 
 use App\Actions\Concerns\ConfiguresJobByAttribute;
+use App\Attributes\FailOn;
 use App\Contracts\AiProvider;
-use App\CustomAttributes\FailOn;
 use App\Enums\IntentionStatus;
 use App\Models\Intention;
 use App\Models\Step;

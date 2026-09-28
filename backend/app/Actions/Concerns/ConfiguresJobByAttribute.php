@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
-use App\CustomAttributes\FailOn;
+use App\Attributes\FailOn;
 use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Queue\Middleware\FailOnException;

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Intentions;
 
 use App\Actions\Concerns\ConfiguresJobByAttribute;
+use App\Attributes\FailOn;
 use App\Contracts\AiProvider;
 use App\Contracts\DeadlineExtractor;
-use App\CustomAttributes\FailOn;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
