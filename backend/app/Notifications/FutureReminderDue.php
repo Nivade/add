@@ -4,30 +4,28 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Attributes\NotificationKind;
 use App\Contracts\ExpoPushable;
 use App\Models\FutureReminder;
-use App\Notifications\Channels\ExpoPushChannel;
+use App\Notifications\Concerns\PushesToDevices;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Arr;
 
 /** What you wanted, stated plainly — §15's own bar, nothing generated on top of it. */
+#[NotificationKind('future_reminder')]
 final class FutureReminderDue extends Notification implements ExpoPushable
 {
+    use PushesToDevices;
+
     public function __construct(
         private readonly FutureReminder $reminder,
     ) {}
-
-    /** @return list<string> */
-    public function via(object $notifiable): array
-    {
-        return ['database', ExpoPushChannel::class];
-    }
 
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
         return [
-            'kind' => 'future_reminder',
+            'kind' => $this->kind(),
             'future_reminder_id' => $this->reminder->id,
             'message' => $this->reminder->message,
         ];

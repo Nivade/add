@@ -38,7 +38,7 @@ it('pushes the same lines the band shows, not a bare title', function (): void {
             'to' => 'ExponentPushToken[abc]',
             'title' => 'Dentist',
             'body' => "Dentist is at 14:00.\nStart finding what you need.\nLeaving is 28 minutes away.\nIf this waits, leaving at 13:30 waits with it.",
-        ]);
+        ])->and($request->data()[0]['data']['kind'])->toBe('calendar_event');
 
         return true;
     });

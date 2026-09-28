@@ -255,6 +255,29 @@ it('gives every AI provider and calendar source one #[Driver] name, and no two s
     }
 });
 
+// The deep-link key, once: either a fixed #[NotificationKind] or a kind() the class answers itself.
+it('gives every push notification a kind, declared or attributed', function (): void {
+    foreach (glob(app_path('Notifications/*.php')) ?: [] as $file) {
+        $class = 'App\\Notifications\\'.basename($file, '.php');
+
+        if (! is_subclass_of($class, App\Contracts\ExpoPushable::class)) {
+            continue;
+        }
+
+        $reflection = new ReflectionClass($class);
+        $attributed = $reflection->getAttributes(App\Attributes\NotificationKind::class) !== [];
+
+        // A trait's methods report the using class as their declaring class, so an override is
+        // told apart from the trait's own kind() by comparing where each is actually defined.
+        $traitKind = new ReflectionMethod(App\Notifications\Concerns\PushesToDevices::class, 'kind');
+        $classKind = $reflection->hasMethod('kind') ? $reflection->getMethod('kind') : null;
+        $overridesKind = $classKind instanceof ReflectionMethod
+            && [$classKind->getFileName(), $classKind->getStartLine()] !== [$traitKind->getFileName(), $traitKind->getStartLine()];
+
+        expect($attributed || $overridesKind)->toBeTrue($class);
+    }
+});
+
 // .ai/rules/support-and-concerns.md: Support holds adapters and calculation, never a caller of the layers above it.
 arch('Support depends on nothing above it')
     ->expect('App\Support')
