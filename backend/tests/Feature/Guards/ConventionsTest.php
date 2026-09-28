@@ -2,12 +2,39 @@
 
 declare(strict_types=1);
 
+use App\Data\Attributes\OneThing;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Models\Concerns\StoresDatesInUtc;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
+use Spatie\LaravelData\Support\DataConfig;
+
+/** @param  class-string  $class */
+function violatesOneThing(string $class, DataConfig $config, array &$seen = []): bool
+{
+    if (in_array($class, $seen, true)) {
+        return false;
+    }
+
+    $seen[] = $class;
+
+    $dataClass = $config->getDataClass($class);
+
+    foreach ($dataClass->properties as $property) {
+        if ($property->type->kind->isDataCollectable() && $property->type->dataCollectableClass !== null) {
+            return true;
+        }
+
+        if ($property->type->kind->isDataObject() && $property->type->dataClass !== null
+            && violatesOneThing($property->type->dataClass, $config, $seen)) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /** @return list<string> */
 function phpSourceFiles(): array
@@ -185,4 +212,19 @@ it('keeps App\Concerns down to the Fortify validation traits', function (): void
     $files = array_map(basename(...), glob(app_path('Concerns/*.php')) ?: []);
 
     expect($files)->toBe(['PasswordValidationRules.php', 'ProfileValidationRules.php']);
+});
+
+// product-invariants.md: execution mode and "I'm overwhelmed" show one step, never a list.
+it('keeps every #[OneThing] Data class to one thing', function (): void {
+    $config = app(DataConfig::class);
+
+    foreach (glob(app_path('Data/*.php')) ?: [] as $file) {
+        $class = 'App\\Data\\'.basename($file, '.php');
+
+        if ((new ReflectionClass($class))->getAttributes(OneThing::class) === []) {
+            continue;
+        }
+
+        expect(violatesOneThing($class, $config))->toBeFalse($class);
+    }
 });
