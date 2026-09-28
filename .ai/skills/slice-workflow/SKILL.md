@@ -17,6 +17,7 @@ slice being built, not all of them.
 4. `.ai/plans/slices/<n>-<name>.md` — the design for this slice.
 5. `.ai/plans/product-spec.md` — the original prompt, verbatim, cited by section
    number. Authoritative on intent.
+6. `.ai/findings.md` — triage it before planning a new slice, with `note-finding`.
 
 `.ai/plans/hardening.md` records what the pass over the earlier slices settled
 and what it deliberately left open.
