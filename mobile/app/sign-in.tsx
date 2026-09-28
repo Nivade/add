@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import { ApiError } from '@/api/client';
+import { ApiError, writeProblem } from '@/api/client';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
@@ -26,11 +26,7 @@ export default function SignIn() {
         setNeedsCode(true);
       }
 
-      setProblem(
-        error instanceof ApiError
-          ? error.firstMessage('That did not go through. Try again.')
-          : 'The app could not reach the server.',
-      );
+      setProblem(writeProblem(error));
     } finally {
       setBusy(false);
     }

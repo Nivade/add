@@ -6,19 +6,22 @@ import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
-import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 
 /** No bands, no capture, one way back: this screen exists to remove everything else. */
 export default function Overwhelmed() {
   const { token } = useSession();
   const load = useCallback(() => api.overwhelmed(token as string), [token]);
-  const { data, loading } = useResource<OverwhelmedData>(load);
+  const resource = useResource<OverwhelmedData>(load);
 
-  if (loading && !data) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  const step = data?.smallestStep;
+  const { data, problem } = resource;
+
+  const step = data.smallestStep;
 
   const start = async () => {
     if (!step) {
@@ -31,6 +34,7 @@ export default function Overwhelmed() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       {step ? (
         <>
           <OneThing>{step.step.title}</OneThing>

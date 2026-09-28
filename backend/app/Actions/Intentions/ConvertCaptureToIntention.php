@@ -43,7 +43,8 @@ final class ConvertCaptureToIntention
         $parsed = $this->parser->parse(
             $this->provider->complete(AiRequest::parseCapture(
                 $capture->user_id,
-                $this->describe($extracted?->remainderOf($capture->body) ?? $capture->body, $now)
+                $extracted?->remainderOf($capture->body) ?? $capture->body,
+                $now,
             ))->payload,
             $timezone,
         );
@@ -68,15 +69,5 @@ final class ConvertCaptureToIntention
         DecomposeIntention::dispatch($intention);
 
         return $intention;
-    }
-
-    /** A model with no date cannot resolve "Saturday", and one with no zone answers on the wrong clock. */
-    private function describe(string $text, CarbonImmutable $now): string
-    {
-        return implode("\n", [
-            'Today is '.$now->format('l j F Y').' in '.$now->getTimezone()->getName().'.',
-            '',
-            $text,
-        ]);
     }
 }

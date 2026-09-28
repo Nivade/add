@@ -13,7 +13,7 @@ import {
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { ApiError } from '@/api/client';
+import { writeProblem } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
@@ -21,7 +21,8 @@ import { Button } from '@/components/button';
 import { CommitmentRow } from '@/components/commitment-row';
 import { QuietAction } from '@/components/quiet-action';
 import { Responses } from '@/components/responses';
-import { Band, Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { Band, Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 import { field, line, theme } from '@/theme';
 
 function Clarify({
@@ -51,11 +52,7 @@ function Clarify({
       await api.clarify(token as string, item.id, text);
       onAnswered();
     } catch (error) {
-      setProblem(
-        error instanceof ApiError
-          ? error.firstMessage('That did not go through. Try again.')
-          : 'The app could not reach the server.',
-      );
+      setProblem(writeProblem(error));
     } finally {
       setSaving(false);
     }
@@ -170,20 +167,13 @@ function JustFinished({
 export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
-  const { data, loading, failed, reload } = useResource<HomeData>(load);
+  const resource = useResource<HomeData>(load);
 
-  if (loading && !data) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  if (failed || !data) {
-    return (
-      <Screen>
-        <OneThing>The app could not reach the server.</OneThing>
-        <Button label="Try again" onPress={() => void reload()} />
-      </Screen>
-    );
-  }
+  const { data, problem, reload } = resource;
 
   const {
     rightNow,
@@ -215,6 +205,7 @@ export default function Home() {
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       {session ? (
         <>
           <OneThing>

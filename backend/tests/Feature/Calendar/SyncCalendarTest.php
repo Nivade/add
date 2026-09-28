@@ -188,7 +188,7 @@ it('queues the sync per person rather than reading every calendar inline', funct
 });
 
 it('queues a feed sync only for the people who pasted a feed', function (): void {
-    app()->instance(CalendarSource::class, new IcsCalendarSource);
+    app()->instance(CalendarSource::class, app(IcsCalendarSource::class));
     Queue::fake();
 
     User::factory()->create(['calendar_feed_url' => 'https://calendar.example.test/private.ics']);

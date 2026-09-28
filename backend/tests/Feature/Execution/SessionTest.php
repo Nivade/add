@@ -7,6 +7,7 @@ use App\Actions\Sessions\BuildExecutionState;
 use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\PauseSession;
 use App\Actions\Sessions\RecordDistraction;
+use App\Actions\Sessions\ReportStuck;
 use App\Actions\Sessions\ResumeSession;
 use App\Actions\Sessions\SkipCurrentStep;
 use App\Actions\Sessions\StartSession;
@@ -14,6 +15,7 @@ use App\Actions\Sessions\StopSession;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
+use App\Enums\StuckReason;
 use App\Exceptions\InvalidSessionTransition;
 use App\Models\ExecutionSession;
 use App\Models\User;
@@ -147,6 +149,48 @@ it('refuses to land a session a second time even when advanced directly', functi
 
     expect(fn (): mixed => AdvanceSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
         ->and(replay($session))->toBe(['started', 'stopped']);
+});
+
+it('refuses a transition on a copy read before the session ended elsewhere', function (string $action, array $arguments): void {
+    $session = started();
+    $stale = ExecutionSession::query()->findOrFail($session->id);
+
+    StopSession::run($session);
+
+    expect(fn (): mixed => $action::run($stale, ...$arguments))->toThrow(InvalidSessionTransition::class)
+        ->and(replay($session))->toBe(['started', 'stopped']);
+})->with([
+    'pause' => [PauseSession::class, []],
+    'resume' => [ResumeSession::class, []],
+    'distraction' => [RecordDistraction::class, []],
+    'complete' => [CompleteStep::class, []],
+    'skip' => [SkipCurrentStep::class, []],
+    'stuck' => [ReportStuck::class, [StuckReason::Tired]],
+    'advance' => [AdvanceSession::class, []],
+    'stop' => [StopSession::class, []],
+]);
+
+it('refuses a second pause from a copy read before the first', function (): void {
+    $session = started();
+    $stale = ExecutionSession::query()->findOrFail($session->id);
+
+    PauseSession::run($session);
+
+    expect(fn (): mixed => PauseSession::run($stale))->toThrow(InvalidSessionTransition::class)
+        ->and(replay($session))->toBe(['started', 'paused']);
+});
+
+it('keeps the count true when a second done lands from a copy read before the first', function (): void {
+    $session = started();
+    $stale = ExecutionSession::query()->findOrFail($session->id);
+
+    CompleteStep::run($session);
+    CompleteStep::run($stale);
+
+    $done = $session->intention->steps()->where('status', StepStatus::Done)->count();
+
+    expect($done)->toBe(2)
+        ->and($session->refresh()->steps_completed)->toBe($done);
 });
 
 it('records a distraction without ending or scoring anything', function (): void {

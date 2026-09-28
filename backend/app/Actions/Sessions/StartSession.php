@@ -30,22 +30,24 @@ final class StartSession
     /** Pressing start on something else is an answer to "what now", so the session follows rather than ignoring it. */
     private function retarget(ExecutionSession $running, User $user, Step $step): ExecutionSession
     {
-        if ($running->current_step_id === $step->id) {
+        return $running->transition(function () use ($running, $user, $step): ExecutionSession {
+            if ($running->current_step_id === $step->id) {
+                return $running;
+            }
+
+            // A session belongs to one intention, so moving to another one closes this stretch and opens the next.
+            if ($running->intention_id !== $step->intention_id) {
+                StopSession::run($running);
+
+                return $this->open($user, $step);
+            }
+
+            $running->update(['current_step_id' => $step->id]);
+
+            RecordExecutionEvent::run($running, ExecutionEventType::Started, $step->id);
+
             return $running;
-        }
-
-        // A session belongs to one intention, so moving to another one closes this stretch and opens the next.
-        if ($running->intention_id !== $step->intention_id) {
-            StopSession::run($running);
-
-            return $this->open($user, $step);
-        }
-
-        $running->update(['current_step_id' => $step->id]);
-
-        RecordExecutionEvent::run($running, ExecutionEventType::Started, $step->id);
-
-        return $running;
+        });
     }
 
     private function open(User $user, Step $step): ExecutionSession

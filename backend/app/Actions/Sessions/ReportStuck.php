@@ -23,25 +23,27 @@ final class ReportStuck
 
     public function handle(ExecutionSession $session, StuckReason $reason, ?string $note = null): ExecutionSession
     {
-        $step = $session->currentStepOrFail();
+        return $session->transition(function () use ($session, $reason, $note): ExecutionSession {
+            $step = $session->currentStepOrFail();
 
-        RecordExecutionEvent::run($session, ExecutionEventType::Stuck, $step->id, [
-            'reason' => $reason->value,
-            'note' => $note,
-        ]);
+            RecordExecutionEvent::run($session, ExecutionEventType::Stuck, $step->id, [
+                'reason' => $reason->value,
+                'note' => $note,
+            ]);
 
-        return match ($reason->resolution()) {
-            StuckResolution::Split => $this->makeItSmaller($session, $step),
-            StuckResolution::NextStep => AdvanceSession::run($session, $step->id),
-            StuckResolution::Stop => StopSession::run($session),
-            StuckResolution::StayPut => $session,
-        };
+            return match ($reason->resolution()) {
+                StuckResolution::Split => $this->makeItSmaller($session, $step),
+                StuckResolution::NextStep => AdvanceSession::run($session, $step->id),
+                StuckResolution::Stop => StopSession::run($session),
+                StuckResolution::StayPut => $session,
+            };
+        });
     }
 
     /** The move is deterministic and immediate; the split lands whenever the model answers. */
     private function makeItSmaller(ExecutionSession $session, Step $step): ExecutionSession
     {
-        SplitStep::dispatch($step);
+        SplitStep::dispatch($step)->afterCommit();
 
         $smallest = $this->shortestSibling($session, $step);
 

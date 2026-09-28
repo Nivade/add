@@ -139,6 +139,24 @@ it('never imports a global class in a Pest file', function (): void {
     }
 });
 
+// Two taps can both pass an unlocked open check, so every transition re-reads its session under the row lock.
+it('locks the session before any transition reads it', function (): void {
+    $notTransitions = ['BuildExecutionState', 'RecordExecutionEvent', 'StopSession'];
+
+    foreach (glob(app_path('Actions/Sessions/*.php')) ?: [] as $file) {
+        if (in_array(basename($file, '.php'), $notTransitions, true)) {
+            continue;
+        }
+
+        $source = (string) file_get_contents($file);
+        $transition = strpos($source, '->transition(function');
+
+        expect($transition)->not->toBeFalse($file)
+            ->and($source)->not->toContain('DB::transaction')
+            ->and(preg_match('/->(paused_at|current_step_id|ended_at|intention_id)\b|currentStep(OrFail)?\(/', substr($source, 0, (int) $transition)))->toBe(0, $file);
+    }
+});
+
 // A scheduled name that nothing answers fails every minute in silence, so the schedule is checked here.
 it('schedules only commands that exist', function (): void {
     $registered = array_keys(Artisan::all());

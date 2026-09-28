@@ -8,23 +8,27 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { CommitmentRow } from '@/components/commitment-row';
-import { Loading, Meta, OneThing, Screen } from '@/components/screen';
+import { Meta, OneThing, Screen } from '@/components/screen';
+import { Pending, StaleNote } from '@/components/resource-state';
 import { theme } from '@/theme';
 
 /** Reached only from home; home stays the place things are chosen from. */
 export default function Commitments() {
   const { token } = useSession();
   const load = useCallback(() => api.commitments(token as string), [token]);
-  const { data, loading, reload } = useResource<CommitmentListData>(load);
+  const resource = useResource<CommitmentListData>(load);
 
-  if (loading && !data) {
-    return <Loading />;
+  if (resource.status !== 'ready') {
+    return <Pending resource={resource} />;
   }
 
-  const open = data?.commitments ?? [];
+  const { data, problem, reload } = resource;
+
+  const open = data.commitments;
 
   return (
     <Screen>
+      <StaleNote problem={problem} />
       <OneThing>{commitmentCopy.listTitle}</OneThing>
       {open.length === 0 && (
         <Meta>{commitmentCopy.listEmpty}</Meta>

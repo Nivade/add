@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Actions\Concerns\ScoresAgainstACorpus;
+use App\Contracts\AiProvider;
 use App\Data\Ai\ParsedStepData;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Parsers\DecomposeParser;
+use App\Support\Ai\Providers\LoggingAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -19,15 +21,28 @@ final class RunDecompositionEval
 {
     use AsCommand;
     use AsObject;
+    use ScoresAgainstACorpus;
 
     public string $commandSignature = 'ai:eval';
 
     public string $commandDescription = 'Score the live decomposition driver against the seed corpus in storage/ai-eval.';
 
-    public function __construct(
-        private readonly OpenAiProvider $provider,
-        private readonly DecomposeParser $parser,
-    ) {}
+    private readonly AiProvider $provider;
+
+    public function __construct(OpenAiProvider $provider, private readonly DecomposeParser $parser)
+    {
+        $this->provider = new LoggingAiProvider($provider);
+    }
+
+    /** @return list<array{id: string, shape: string, steps: list<array{title: string, estimated_seconds: int}>, violations: list<string>}> */
+    public function handle(): array
+    {
+        $scored = array_map($this->score(...), $this->corpus());
+
+        $this->writeBaseline('baseline.json', 'tasks', $scored);
+
+        return $scored;
+    }
 
     public function asCommand(Command $command): int
     {
@@ -37,22 +52,17 @@ final class RunDecompositionEval
             return Command::FAILURE;
         }
 
-        $corpus = $this->corpus();
-        $rows = [];
-        $scored = [];
-        $passed = 0;
+        $scored = $this->handle();
 
-        foreach ($corpus as $task) {
-            $scoredTask = $this->score($task);
-            $rows[] = $scoredTask['row'];
-            $scored[] = $scoredTask['result'];
-            $passed += $scoredTask['result']['violations'] === [] ? 1 : 0;
-        }
+        $command->table(['id', 'steps', 'first step (s)', 'violations'], array_map(fn (array $task): array => [
+            $task['id'],
+            (string) count($task['steps']),
+            isset($task['steps'][0]) ? (string) $task['steps'][0]['estimated_seconds'] : '—',
+            implode('; ', $task['violations']) ?: 'clean',
+        ], $scored));
 
-        $command->table(['id', 'steps', 'first step (s)', 'violations'], $rows);
-        $command->info("{$passed}/".count($corpus).' tasks scored clean.');
-
-        $this->writeBaseline($scored);
+        $clean = count(array_filter($scored, fn (array $task): bool => $task['violations'] === []));
+        $command->info("{$clean}/".count($scored).' tasks scored clean.');
 
         return Command::SUCCESS;
     }
@@ -61,56 +71,26 @@ final class RunDecompositionEval
     private function corpus(): array
     {
         /** @var list<array{id: string, shape: string, task: string}> */
-        return json_decode(File::get($this->corpusPath()), true, flags: JSON_THROW_ON_ERROR);
+        return $this->readCorpus('corpus.json');
     }
 
     /**
      * @param  array{id: string, shape: string, task: string}  $task
-     * @return array{row: list<string>, result: array<string, mixed>}
+     * @return array{id: string, shape: string, steps: list<array{title: string, estimated_seconds: int}>, violations: list<string>}
      */
     private function score(array $task): array
     {
-        $request = AiRequest::decomposeIntention(userId: 0, user: 'Intention: '.$task['task']);
-
         try {
-            $steps = $this->parser->parse($this->provider->complete($request)->payload);
+            $steps = $this->parser->parse($this->provider->complete(AiRequest::decomposeIntention(userId: 0, user: 'Intention: '.$task['task']))->payload);
         } catch (AiResponseInvalid $aiResponseInvalid) {
-            return [
-                'row' => [$task['id'], '—', '—', 'invalid response: '.$aiResponseInvalid->getMessage()],
-                'result' => ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => [$aiResponseInvalid->getMessage()]],
-            ];
+            return ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => ['invalid response: '.$aiResponseInvalid->getMessage()]];
         }
 
-        $violations = $this->parser->violations($steps);
-
         return [
-            'row' => [$task['id'], (string) count($steps), (string) $steps[0]->estimatedSeconds, implode('; ', $violations) ?: 'clean'],
-            'result' => [
-                'id' => $task['id'],
-                'shape' => $task['shape'],
-                'steps' => array_map(fn (ParsedStepData $step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
-                'violations' => $violations,
-            ],
+            'id' => $task['id'],
+            'shape' => $task['shape'],
+            'steps' => array_map(fn (ParsedStepData $step): array => ['title' => $step->title, 'estimated_seconds' => $step->estimatedSeconds], $steps),
+            'violations' => $this->parser->violations($steps),
         ];
-    }
-
-    /** @param  list<array<string, mixed>>  $scored */
-    private function writeBaseline(array $scored): void
-    {
-        File::put($this->baselinePath(), json_encode([
-            'scored_at' => now()->toIso8601String(),
-            'model' => config('ai.openai.model'),
-            'tasks' => $scored,
-        ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
-    }
-
-    private function corpusPath(): string
-    {
-        return storage_path('ai-eval/corpus.json');
-    }
-
-    private function baselinePath(): string
-    {
-        return storage_path('ai-eval/baseline.json');
     }
 }

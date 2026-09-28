@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Intentions;
 
+use App\Contracts\DeadlineExtractor;
 use App\Models\Intention;
+use App\Support\Time\ExtractedDeadline;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -13,21 +16,41 @@ final class ClarifyIntention
 {
     use AsObject;
 
+    public function __construct(private readonly DeadlineExtractor $extractor) {}
+
     public function handle(Intention $intention, string $answer): Intention
     {
-        $answered = Intention::query()
-            ->whereKey($intention->id)
-            ->awaitingClarification()
-            ->update(['clarification' => $answer]);
+        DB::transaction(function () use ($intention, $answer): void {
+            $answered = Intention::query()
+                ->whereKey($intention->id)
+                ->awaitingClarification()
+                ->update(['clarification' => $answer]);
 
-        if ($answered === 0) {
-            throw ValidationException::withMessages(['answer' => __('This has already been answered.')]);
-        }
+            if ($answered === 0) {
+                throw ValidationException::withMessages(['answer' => __('This has already been answered.')]);
+            }
 
-        $intention->refresh();
+            $intention->refresh();
+
+            $this->inferDeadline($intention, $answer);
+        });
 
         DecomposeIntention::dispatch($intention);
 
         return $intention;
+    }
+
+    /** Left unconfirmed so the person is asked about it, and never over a date they already gave. */
+    private function inferDeadline(Intention $intention, string $answer): void
+    {
+        if ($intention->deadline_at !== null) {
+            return;
+        }
+
+        $extracted = $this->extractor->extract($answer, $intention->user->now());
+
+        if ($extracted instanceof ExtractedDeadline) {
+            $intention->update(['deadline_at' => $extracted->at]);
+        }
     }
 }

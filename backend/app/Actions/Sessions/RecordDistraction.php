@@ -15,10 +15,10 @@ final class RecordDistraction
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $session->assertOpen();
+        return $session->transition(function () use ($session): ExecutionSession {
+            RecordExecutionEvent::run($session, ExecutionEventType::Distracted);
 
-        RecordExecutionEvent::run($session, ExecutionEventType::Distracted);
-
-        return $session;
+            return $session;
+        });
     }
 }

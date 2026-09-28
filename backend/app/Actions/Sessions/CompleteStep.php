@@ -9,7 +9,6 @@ use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 final class CompleteStep
@@ -18,9 +17,9 @@ final class CompleteStep
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $step = $session->currentStepOrFail();
+        return $session->transition(function () use ($session): ExecutionSession {
+            $step = $session->currentStepOrFail();
 
-        return DB::transaction(function () use ($session, $step): ExecutionSession {
             $step->update(['status' => StepStatus::Done, 'completed_at' => now()]);
 
             Commitment::query()->open()->forStep($step->id)->update(['status' => CommitmentStatus::Kept]);

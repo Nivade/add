@@ -20,19 +20,19 @@ final class AdvanceSession
 
     public function handle(ExecutionSession $session, ?string $exceptStepId = null): ExecutionSession
     {
-        $session->assertOpen();
+        return $session->transition(function () use ($session, $exceptStepId): ExecutionSession {
+            $pending = $session->intention->remainingSteps()->orderBy('position')->get();
+            $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
+            $next = $this->next($offerable, $session);
 
-        $pending = $session->intention->remainingSteps()->orderBy('position')->get();
-        $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
-        $next = $this->next($offerable, $session);
+            if (! $next instanceof Step) {
+                return $this->end($session, $pending->isEmpty() ? SessionOutcome::Completed : SessionOutcome::Continued);
+            }
 
-        if (! $next instanceof Step) {
-            return $this->end($session, $pending->isEmpty() ? SessionOutcome::Completed : SessionOutcome::Continued);
-        }
+            $session->update(['current_step_id' => $next->id]);
 
-        $session->update(['current_step_id' => $next->id]);
-
-        return $session;
+            return $session;
+        });
     }
 
     /** @param  Collection<int, Step>  $offerable */

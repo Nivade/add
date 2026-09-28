@@ -16,16 +16,16 @@ final class PauseSession
 
     public function handle(ExecutionSession $session): ExecutionSession
     {
-        $session->assertOpen();
+        return $session->transition(function () use ($session): ExecutionSession {
+            if ($session->paused_at !== null) {
+                throw new InvalidSessionTransition("Session {$session->id} is already paused.");
+            }
 
-        if ($session->paused_at !== null) {
-            throw new InvalidSessionTransition("Session {$session->id} is already paused.");
-        }
+            $session->update(['paused_at' => now()]);
 
-        $session->update(['paused_at' => now()]);
+            RecordExecutionEvent::run($session, ExecutionEventType::Paused);
 
-        RecordExecutionEvent::run($session, ExecutionEventType::Paused);
-
-        return $session;
+            return $session;
+        });
     }
 }
