@@ -6,11 +6,13 @@ namespace App\Notifications\Concerns;
 
 use App\Attributes\NotificationKind;
 use App\Notifications\Channels\ExpoPushChannel;
+use Illuminate\Support\Traits\ReadsClassAttributes;
 use LogicException;
-use ReflectionClass;
 
 trait PushesToDevices
 {
+    use ReadsClassAttributes;
+
     /** @return list<string> */
     public function via(object $notifiable): array
     {
@@ -19,12 +21,12 @@ trait PushesToDevices
 
     public function kind(): string
     {
-        $attribute = new ReflectionClass(static::class)->getAttributes(NotificationKind::class)[0] ?? null;
+        $attribute = $this->getAttributeInstance($this, NotificationKind::class);
 
-        if ($attribute === null) {
+        if (! $attribute instanceof NotificationKind) {
             throw new LogicException(static::class.' uses PushesToDevices but carries no #[NotificationKind] attribute and does not override kind().');
         }
 
-        return $attribute->newInstance()->kind;
+        return $attribute->kind;
     }
 }

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Attributes\OneThing;
-use App\Attributes\PerUserCommand;
+use App\Attributes\PerUserCommandReader;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Models\Concerns\StoresDatesInUtc;
@@ -196,13 +196,13 @@ it('schedules every per-user command', function (): void {
     }
 
     foreach (Lody::classes(app_path('Actions')) as $class) {
-        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+        $perUserCommand = PerUserCommandReader::tryFor($class);
 
-        if ($attribute === null) {
+        if (! $perUserCommand instanceof App\Attributes\PerUserCommand) {
             continue;
         }
 
-        expect($scheduled)->toContain($attribute->newInstance()->name);
+        expect($scheduled)->toContain($perUserCommand->name);
     }
 });
 

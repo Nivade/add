@@ -16,14 +16,11 @@ final class AiUnavailable extends RuntimeException
         return new self($detail, withoutConsent: true);
     }
 
-    /** A question asked synchronously gets one of these sentences back; $detail stays on the previous exception, for Sentry. */
-    public function __construct(string $detail, bool $withoutConsent = false)
+    /** A question asked synchronously gets one of these sentences back, never $detail; that stays on the instance, for Sentry. */
+    public function __construct(public readonly string $detail, bool $withoutConsent = false)
     {
-        parent::__construct(
-            $withoutConsent
-                ? 'Reading this needs AI, which is off. It can be turned on in settings.'
-                : 'Reading this needs AI, which is not reachable right now. Try again in a while.',
-            previous: new RuntimeException($detail),
-        );
+        parent::__construct($withoutConsent
+            ? 'Reading this needs AI, which is off. It can be turned on in settings.'
+            : 'Reading this needs AI, which is not reachable right now. Try again in a while.');
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Attributes\PerUserCommand;
+use App\Attributes\PerUserCommandReader;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -19,13 +19,11 @@ Lody::classes(app_path('Actions'))
             return;
         }
 
-        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+        $perUserCommand = PerUserCommandReader::tryFor($class);
 
-        if ($attribute === null) {
+        if (! $perUserCommand instanceof App\Attributes\PerUserCommand) {
             return;
         }
-
-        $perUserCommand = $attribute->newInstance();
 
         $perUserCommand->every->apply(Schedule::command($perUserCommand->name))->withoutOverlapping();
     });

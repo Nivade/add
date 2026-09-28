@@ -12,12 +12,20 @@ final readonly class PerUserCommandReader
     /** @param  class-string  $class */
     public static function for(string $class): PerUserCommand
     {
-        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+        $attribute = self::tryFor($class);
 
-        if ($attribute === null) {
+        if (! $attribute instanceof PerUserCommand) {
             throw new LogicException("{$class} uses QueuesPerUser but carries no #[PerUserCommand] attribute.");
         }
 
-        return $attribute->newInstance();
+        return $attribute;
+    }
+
+    /** @param  class-string  $class */
+    public static function tryFor(string $class): ?PerUserCommand
+    {
+        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+
+        return $attribute?->newInstance();
     }
 }
