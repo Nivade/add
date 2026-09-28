@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Calendar\Sources;
 
+use App\Attributes\Driver;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\User;
 use App\Support\Calendar\Exceptions\CalendarFeedUnreadable;
 use App\Support\Calendar\PublicFeedHost;
+use App\Support\Concerns\NamedByDriver;
 use Carbon\CarbonImmutable;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -29,18 +31,14 @@ use Sabre\VObject\Reader;
 use Throwable;
 
 /** The private feed a person's calendar already publishes: no OAuth, and no way to write back. */
+#[Driver('ics')]
 final class IcsCalendarSource implements CalendarSource
 {
-    public const string NAME = 'ics';
+    use NamedByDriver;
 
     private const int MAX_REDIRECTS = 3;
 
     public function __construct(private readonly PublicFeedHost $publicHost) {}
-
-    public function name(): string
-    {
-        return self::NAME;
-    }
 
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array
     {

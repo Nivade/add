@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Actions\Concerns\ReadsCommandAttributes;
 use App\Actions\Concerns\ScoresAgainstACorpus;
 use App\Contracts\AiProvider;
 use App\Data\Ai\ParsedStepData;
@@ -12,20 +13,21 @@ use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Parsers\DecomposeParser;
 use App\Support\Ai\Providers\LoggingAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Scores a seed corpus on what `DecomposeParser::violations()` checks, and writes it as a baseline. */
+#[Signature('ai:eval')]
+#[Description('Score the live decomposition driver against the seed corpus in storage/ai-eval.')]
 final class RunDecompositionEval
 {
     use AsCommand;
     use AsObject;
+    use ReadsCommandAttributes;
     use ScoresAgainstACorpus;
-
-    public string $commandSignature = 'ai:eval';
-
-    public string $commandDescription = 'Score the live decomposition driver against the seed corpus in storage/ai-eval.';
 
     private readonly AiProvider $provider;
 

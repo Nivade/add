@@ -7,7 +7,8 @@ arch()->preset()->php();
 
 arch()->preset()->security();
 
-arch()->preset()->laravel()->ignoring([
+// tests/Pest.php: the framework's own preset minus a rule its ->ignoring() cannot reach.
+arch()->preset()->laravelMinusAttributes()->ignoring([
     'App\Notifications\Channels',
     'App\Support\Ai\Exceptions',
     'App\Support\Calendar\Exceptions',

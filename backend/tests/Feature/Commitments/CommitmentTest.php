@@ -108,6 +108,20 @@ it('lets go of a commitment for good', function (): void {
         ->assertConflict();
 });
 
+// #[RespondsWith] only answers JSON; a web request an invalid transition keeps rendering unhandled.
+it('does not render an invalid transition as JSON for a web request', function (): void {
+    $user = User::factory()->create();
+    $commitment = Commitment::factory()->for($user)->create();
+
+    $this->actingAs($user)->post(route('commitments.respond', $commitment), ['response' => 'release']);
+
+    $response = $this->actingAs($user)
+        ->from(route('home'))
+        ->post(route('commitments.respond', $commitment), ['response' => 'keep']);
+
+    expect($response->headers->get('Content-Type'))->not->toContain('application/json');
+});
+
 it('refuses to confirm what nobody inferred', function (): void {
     $user = User::factory()->create();
     $commitment = Commitment::factory()->for($user)->create();

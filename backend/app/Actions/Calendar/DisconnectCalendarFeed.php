@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Calendar;
 
+use App\Attributes\Driver;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use App\Support\Calendar\Sources\IcsCalendarSource;
@@ -22,7 +23,7 @@ final class DisconnectCalendarFeed
         }
 
         DB::transaction(function () use ($user): void {
-            CalendarEvent::forget(CalendarEvent::query()->ofSource($user, IcsCalendarSource::NAME));
+            CalendarEvent::forget(CalendarEvent::query()->ofSource($user, Driver::nameOf(IcsCalendarSource::class)));
 
             $user->calendar_feed_url = null;
             $user->save();

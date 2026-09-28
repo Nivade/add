@@ -7,13 +7,15 @@ namespace App\Notifications;
 use App\Contracts\Appointment;
 use App\Contracts\ExpoPushable;
 use App\Data\BackwardsPlanData;
-use App\Notifications\Channels\ExpoPushChannel;
+use App\Notifications\Concerns\PushesToDevices;
 use Carbon\CarbonImmutable;
 use Illuminate\Notifications\Notification;
 
 /** Carries the preparation and the leave-by time. A bare "dentist tomorrow" is a bug. */
 final class AppointmentReminder extends Notification implements ExpoPushable
 {
+    use PushesToDevices;
+
     /** @var list<string> */
     private readonly array $lines;
 
@@ -25,17 +27,17 @@ final class AppointmentReminder extends Notification implements ExpoPushable
         $this->lines = $this->buildLines($plan, $now);
     }
 
-    /** @return list<string> */
-    public function via(object $notifiable): array
+    /** Each appointment answers its own kind, so this never carries #[NotificationKind]. */
+    public function kind(): string
     {
-        return ['database', ExpoPushChannel::class];
+        return $this->appointment->appointmentKind()->value;
     }
 
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {
         return [
-            'kind' => $this->appointment->appointmentKind()->value,
+            'kind' => $this->kind(),
             'appointment_id' => $this->appointment->appointmentId(),
             'title' => $this->appointment->appointmentTitle(),
             'lines' => $this->lines,
@@ -53,7 +55,7 @@ final class AppointmentReminder extends Notification implements ExpoPushable
             'title' => $this->appointment->appointmentTitle(),
             'body' => implode("\n", $this->lines),
             'data' => [
-                'kind' => $this->appointment->appointmentKind()->value,
+                'kind' => $this->kind(),
                 'appointment_id' => $this->appointment->appointmentId(),
             ],
         ];

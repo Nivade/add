@@ -181,7 +181,7 @@ what moving a plan to `done` requires.
 | — | [Agent tooling](agent-tooling.md) — code-review then simplify, gated at merge; vendored skills restored from the lock | — | done |
 | — | [Support and Concerns boundaries](archive/support-and-concerns-boundaries.md) — where Support, Concerns and Exceptions decisions land, and the guard tests that hold the line | — | done |
 | 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, pasted-text ingestion | §15, §17, §19–§21, §33 | done |
-| — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | designed |
+| — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | done |
 | — | [Findings triage](archive/findings-triage.md) — session transitions under the row lock, feed fetches to public hosts only, a dead token signs the phone out, dated clarification answers, a copied-question eval, the local certificate | — | done |
 | 10 | Phase 3 — companion, location awareness, bill/subscription detection, full ingestion (email, documents, receipts, bank/gov correspondence), the `Context` model, Friend body doubling | §4, §9, §17, §19, §34 | recorded only |
 

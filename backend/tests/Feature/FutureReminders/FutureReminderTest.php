@@ -87,7 +87,8 @@ it('fires a time-triggered reminder at the right instant for a non-UTC user', fu
     SendDueFutureReminders::run($user, CarbonImmutable::parse('2026-09-26 05:00:00', 'Europe/Amsterdam'));
 
     Notification::assertSentTo($user, FutureReminderDue::class, function (FutureReminderDue $notification) use ($user): bool {
-        expect($notification->toArray($user)['message'])->toBe('buy dishwasher tablets');
+        expect($notification->toArray($user)['message'])->toBe('buy dishwasher tablets')
+            ->and($notification->toExpo($user)['data']['kind'])->toBe('future_reminder');
 
         return true;
     });

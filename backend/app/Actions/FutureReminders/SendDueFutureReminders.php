@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\FutureReminders;
 
 use App\Actions\Concerns\QueuesPerUser;
+use App\Attributes\PerUserCommand;
+use App\Enums\Cadence;
 use App\Models\FutureReminder;
 use App\Models\User;
 use App\Notifications\FutureReminderDue;
@@ -15,16 +17,17 @@ use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** No plan and no preparation, only an instant, so it is not a branch of `SendDueReminders`. */
+#[PerUserCommand(
+    name: 'future-reminders:dispatch',
+    description: 'Send the future-self reminders whose trigger has passed.',
+    every: Cadence::EveryMinute,
+)]
 final class SendDueFutureReminders
 {
     use AsCommand;
     use AsJob;
     use AsObject;
     use QueuesPerUser;
-
-    public string $commandSignature = 'future-reminders:dispatch {user? : the id of one person, or every person when omitted}';
-
-    public string $commandDescription = 'Send the future-self reminders whose trigger has passed.';
 
     /** @return list<FutureReminder> */
     public function handle(User $user, ?CarbonImmutable $now = null): array

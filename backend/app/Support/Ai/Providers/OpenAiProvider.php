@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Ai\Providers;
 
+use App\Attributes\Driver;
 use App\Contracts\AiProvider;
 use App\Data\Ai\AiResponseData;
 use App\Support\Ai\AiRequest;
@@ -11,20 +12,19 @@ use App\Support\Ai\Exceptions\AiProviderRequestFailed;
 use App\Support\Ai\Exceptions\AiRateLimited;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\StructuredAgent;
+use App\Support\Concerns\NamedByDriver;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use LogicException;
 use Throwable;
 
+#[Driver('openai')]
 final class OpenAiProvider implements AiProvider
 {
-    private const string RATE_LIMIT_KEY = 'ai-openai';
+    use NamedByDriver;
 
-    public function name(): string
-    {
-        return 'openai';
-    }
+    private const string RATE_LIMIT_KEY = 'ai-openai';
 
     public function isAvailable(): bool
     {

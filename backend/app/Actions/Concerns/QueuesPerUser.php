@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Attributes\PerUserCommandReader;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,6 +15,17 @@ trait QueuesPerUser
 {
     /** Chunked, because the whole user table does not belong in memory to queue off it. */
     private const int QUEUE_CHUNK = 200;
+
+    public static function getCommandSignature(): string
+    {
+        return PerUserCommandReader::for(static::class)->name
+            .' {user? : the id of one person, or every person when omitted}';
+    }
+
+    public static function getCommandDescription(): string
+    {
+        return PerUserCommandReader::for(static::class)->description;
+    }
 
     public function asCommand(Command $command): void
     {
