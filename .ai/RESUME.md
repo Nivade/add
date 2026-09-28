@@ -22,7 +22,8 @@ execution mode (slice 4) already answers §17's solo requirement. Slice 10
 `Context` model, and §19's real ingestion sources (email, documents, receipts,
 bank/gov correspondence), none of which any built slice claims. The hardening
 pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md) carries
-what it settled and what it deliberately left open.
+what it settled and what it deliberately left open. Triage
+[`findings.md`](findings.md) before planning slice 10.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera
