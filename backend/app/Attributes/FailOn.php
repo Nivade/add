@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\CustomAttributes;
+namespace App\Attributes;
 
 use Attribute;
 use Throwable;
