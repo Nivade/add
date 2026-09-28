@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Support\Calendar\Sources;
 
+use App\Attributes\Driver;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\User;
 use App\Support\Calendar\Exceptions\CalendarFixtureInvalid;
+use App\Support\Concerns\NamedByDriver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\File;
 
 /** A day read off disk, so the whole path runs with no provider and nothing leaving the machine. */
+#[Driver('fixture')]
 final class FixtureCalendarSource implements CalendarSource
 {
-    public function name(): string
-    {
-        return 'fixture';
-    }
+    use NamedByDriver;
 
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $until): array
     {

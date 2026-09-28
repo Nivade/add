@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Calendar;
 
 use App\Actions\Concerns\QueuesPerUser;
+use App\Attributes\Driver;
 use App\Attributes\PerUserCommand;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
@@ -77,7 +78,7 @@ final class SyncCalendar
      */
     protected function constrainQueued(Builder $query): void
     {
-        if ($this->source->name() === IcsCalendarSource::NAME) {
+        if ($this->source->name() === Driver::nameOf(IcsCalendarSource::class)) {
             $query->whereNotNull('calendar_feed_url');
         }
     }

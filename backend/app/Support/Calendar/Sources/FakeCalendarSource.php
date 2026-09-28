@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Support\Calendar\Sources;
 
+use App\Attributes\Driver;
 use App\Contracts\CalendarSource;
 use App\Data\Calendar\CalendarEventDraftData;
 use App\Models\User;
+use App\Support\Concerns\NamedByDriver;
 use Carbon\CarbonImmutable;
 
 /** Pushed events for tests, so no file has to exist on disk. */
+#[Driver('fake')]
 final class FakeCalendarSource implements CalendarSource
 {
+    use NamedByDriver;
+
     /** @var list<CalendarEventDraftData> */
     private array $events = [];
 
@@ -22,11 +27,6 @@ final class FakeCalendarSource implements CalendarSource
         }
 
         return $this;
-    }
-
-    public function name(): string
-    {
-        return 'fake';
     }
 
     /**

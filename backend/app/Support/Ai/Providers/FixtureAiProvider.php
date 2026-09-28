@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Support\Ai\Providers;
 
+use App\Attributes\Driver;
 use App\Contracts\AiProvider;
 use App\Data\Ai\AiResponseData;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiFixtureMissing;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
+use App\Support\Concerns\NamedByDriver;
 use Illuminate\Support\Facades\File;
 
 /** Answers from a file, so the pipeline runs without credentials and the real parser still judges. */
+#[Driver('fixture')]
 final class FixtureAiProvider implements AiProvider
 {
-    public function name(): string
-    {
-        return 'fixture';
-    }
+    use NamedByDriver;
 
     public function isAvailable(): bool
     {

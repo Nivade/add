@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use App\Attributes\OneThing;
+use App\Attributes\PerUserCommand;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Models\Concerns\StoresDatesInUtc;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
+use Lorisleiva\Lody\Lody;
 use Spatie\LaravelData\Support\DataConfig;
 
 /** @param  class-string  $class */
@@ -184,14 +185,24 @@ it('locks the session before any transition reads it', function (): void {
     }
 });
 
-// A scheduled name that nothing answers fails every minute in silence, so the schedule is checked here.
-it('schedules only commands that exist', function (): void {
-    $registered = array_keys(Artisan::all());
+// routes/console.php builds the schedule from #[PerUserCommand] rather than a hand-written line per command.
+it('schedules every per-user command', function (): void {
+    $scheduled = [];
 
     foreach (app(Schedule::class)->events() as $event) {
         preg_match('/artisan[\'"]? (\S+)/', (string) $event->command, $matches);
 
-        expect($registered)->toContain($matches[1] ?? $event->command);
+        $scheduled[] = $matches[1] ?? $event->command;
+    }
+
+    foreach (Lody::classes(app_path('Actions')) as $class) {
+        $attribute = new ReflectionClass($class)->getAttributes(PerUserCommand::class)[0] ?? null;
+
+        if ($attribute === null) {
+            continue;
+        }
+
+        expect($scheduled)->toContain($attribute->newInstance()->name);
     }
 });
 
@@ -205,6 +216,41 @@ it('renders no domain exception with its own render()', function (): void {
     foreach ($directories as $directory) {
         foreach (glob("{$directory}/*.php") ?: [] as $file) {
             expect((string) file_get_contents($file))->not->toContain('function render(');
+        }
+    }
+});
+
+// One name per adapter, read from #[Driver] rather than repeated in a service provider's match.
+it('gives every AI provider and calendar source one #[Driver] name, and no two share one', function (): void {
+    $exempt = [
+        App\Support\Ai\Providers\LoggingAiProvider::class,
+        App\Support\Ai\Providers\ConsentGatedAiProvider::class,
+        App\Support\Ai\Providers\NullAiProvider::class,
+        App\Support\Calendar\Sources\NullCalendarSource::class,
+    ];
+
+    foreach ([
+        'App\Support\Ai\Providers' => glob(app_path('Support/Ai/Providers/*.php')) ?: [],
+        'App\Support\Calendar\Sources' => glob(app_path('Support/Calendar/Sources/*.php')) ?: [],
+    ] as $namespace => $files) {
+        $names = [];
+
+        foreach ($files as $file) {
+            $class = $namespace.'\\'.basename($file, '.php');
+
+            if (in_array($class, $exempt, true)) {
+                continue;
+            }
+
+            $attribute = new ReflectionClass($class)->getAttributes(App\Attributes\Driver::class)[0] ?? null;
+
+            expect($attribute)->not->toBeNull($class);
+
+            $name = $attribute->newInstance()->name;
+
+            expect(in_array($name, $names, true))->toBeFalse("{$class} shares the driver name \"{$name}\"");
+
+            $names[] = $name;
         }
     }
 });
