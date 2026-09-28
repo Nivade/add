@@ -1,7 +1,8 @@
 # Checks a branch name against Conventional Branches (https://conventionalbranch.org),
 # with the commit types added as documented custom types. See .husky/branch-names for
 # a project's own extra types and allowed patterns.
-set -eu
+# -f: allow patterns such as renovate/* must stay patterns, not expand to matching paths.
+set -euf
 
 branch=$1
 ci_flag=${2:-}
