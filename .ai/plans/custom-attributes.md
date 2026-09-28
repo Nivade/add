@@ -2,10 +2,6 @@
 
 **State:** building, 2026-09-28 · [the slice table](executive-function-os.md#slices)
 
-All 6 phases done: `#[OneThing]`, `#[RespondsWith]`, `#[FailOn]`, `#[PerUserCommand]`, `#[Driver]`,
-`#[NotificationKind]`. `npm run test`, `npm run stan` (via `composer test`) and `npm run types:generate`
-all pass with no diff. Left for `finish-branch`: code-review, simplify, and opening the PR.
-
 *Rules: `general.md` (prefer attributes; rules are held down by tests), `support-and-concerns.md`,
 `product-invariants.md`, `api-and-data.md`, `domain-model.md`, `ai-layer.md`, `testing.md`.
 Skills: `laravel-attributes`, `laravel-actions`, `laravel-data`, `ai-layer-changes`, `pest-testing`,

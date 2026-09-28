@@ -28,9 +28,10 @@ function runQueuedJob(JobDecorator $job): void
 it('fails a decomposition job immediately when the AI layer is unavailable', function (): void {
     $intention = Intention::factory()->create();
 
-    runQueuedJob(DecomposeIntention::makeJob($intention));
+    $job = DecomposeIntention::makeJob($intention);
+    runQueuedJob($job);
 
-    expect(DecomposeIntention::makeJob($intention)->withFakeQueueInteractions()->job->hasFailed())->toBeFalse();
+    $job->assertFailed();
 });
 
 it('leaves a decomposition job for the worker to retry on an invalid AI answer', function (): void {
