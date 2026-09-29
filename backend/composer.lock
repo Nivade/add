@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cb25a1734bf415f8a4975aa2c88427f8",
+    "content-hash": "48c39adca9e4f51b70c5cd50a2957466",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1688,16 +1688,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v13.33.0",
+            "version": "v13.34.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "91188a17ceaa3dbace6e8a5f7abd0d042e466359"
+                "reference": "c829b4982d29344cbcf1d7ad78eb5d2bb8ae66c4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/91188a17ceaa3dbace6e8a5f7abd0d042e466359",
-                "reference": "91188a17ceaa3dbace6e8a5f7abd0d042e466359",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/c829b4982d29344cbcf1d7ad78eb5d2bb8ae66c4",
+                "reference": "c829b4982d29344cbcf1d7ad78eb5d2bb8ae66c4",
                 "shasum": ""
             },
             "require": {
@@ -1813,10 +1813,10 @@
                 "league/flysystem-sftp-v3": "^3.25.1",
                 "mockery/mockery": "^1.6.10",
                 "opis/json-schema": "^2.4.1",
-                "orchestra/testbench-core": "^11.0.0",
+                "orchestra/testbench-core": "^11.5.0",
                 "pda/pheanstalk": "^7.0.0 || ^8.0.0",
                 "php-http/discovery": "^1.15",
-                "phpstan/phpstan": "^2.2.14",
+                "phpstan/phpstan": "2.2.15",
                 "phpunit/phpunit": "^11.5.50 || ^12.5.8 || ^13.0.3",
                 "predis/predis": "^2.3 || ^3.0",
                 "rector/rector": "2.6.3",
@@ -1915,7 +1915,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-09-22T14:12:33+00:00"
+            "time": "2026-09-29T12:46:21+00:00"
         },
         {
             "name": "laravel/passkeys",
@@ -3600,16 +3600,16 @@
         },
         {
             "name": "nvade/ai-toolkit",
-            "version": "v0.2.1",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/nvade-packages/ai-toolkit.git",
-                "reference": "062a0a489e2065694c803fd88e5ed6f05db5cd41"
+                "reference": "19ffe0f92546604621a99197b766a87702e9df97"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fai-toolkit/repository/archive.zip?sha=062a0a489e2065694c803fd88e5ed6f05db5cd41",
-                "reference": "062a0a489e2065694c803fd88e5ed6f05db5cd41",
+                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fai-toolkit/repository/archive.zip?sha=19ffe0f92546604621a99197b766a87702e9df97",
+                "reference": "19ffe0f92546604621a99197b766a87702e9df97",
                 "shasum": ""
             },
             "require": {
@@ -3890,9 +3890,9 @@
                 "laravel"
             ],
             "support": {
-                "source": "https://gitlab.com/nvade-packages/ai-toolkit/-/tree/v0.2.1"
+                "source": "https://gitlab.com/nvade-packages/ai-toolkit/-/tree/v0.3.0"
             },
-            "time": "2026-09-29T11:59:10+00:00"
+            "time": "2026-09-29T13:11:34+00:00"
         },
         {
             "name": "nyholm/psr7",

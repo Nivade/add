@@ -6,7 +6,6 @@ declare(strict_types=1);
 return [
 
     'openai' => [
-        'api_key' => env('OPENAI_API_KEY'),
         'model' => env('AI_MODEL', 'gpt-5.6-luna'),
         'reasoning_effort' => env('AI_REASONING_EFFORT', 'low'),
         'timeout' => (int) env('AI_TIMEOUT', 30),
