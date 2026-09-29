@@ -21,7 +21,7 @@ trait ScoresAgainstACorpus
     {
         File::put(storage_path('ai-eval/'.$file), json_encode([
             'scored_at' => now()->toIso8601String(),
-            'model' => config('ai.openai.model'),
+            'model' => config('ai-toolkit.openai.model'),
             $key => $scored,
         ], JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
     }

@@ -97,6 +97,6 @@ final readonly class AiRequest
 
     private static function maxOutputTokens(): int
     {
-        return (int) config('ai.openai.max_output_tokens', 900);
+        return (int) config('ai-toolkit.openai.max_output_tokens', 900);
     }
 }

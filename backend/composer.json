@@ -19,6 +19,7 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "lorisleiva/laravel-actions": "^2.12",
+        "nvade/ai-toolkit": "^0.2.1",
         "sabre/vobject": "^5.0",
         "sentry/sentry-laravel": "^4.28",
         "spatie/laravel-data": "^4.23"
@@ -264,9 +265,13 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": {
+        "ai-toolkit": {
+            "type": "vcs",
+            "url": "https://gitlab.com/nvade-packages/ai-toolkit.git"
+        },
         "devtools": {
             "type": "vcs",
-            "url": "git@gitlab.com:nvade-packages/devtools.git"
+            "url": "https://gitlab.com/nvade-packages/devtools.git"
         }
     }
 }
