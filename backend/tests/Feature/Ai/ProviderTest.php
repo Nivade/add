@@ -7,6 +7,7 @@ use App\Enums\Ai\AiOperation;
 use App\Models\User;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiFixtureMissing;
+use App\Support\Ai\Exceptions\AiProviderRequestFailed;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\Prompts;
@@ -200,7 +201,7 @@ it('names a content-filter stop in the failure, never the provider text', functi
     Http::fake(['*/responses' => Http::response($body, $status)]);
 
     expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
-        ->toThrow(function (App\Support\Ai\Exceptions\AiProviderRequestFailed $failed) use ($expected): void {
+        ->toThrow(function (AiProviderRequestFailed $failed) use ($expected): void {
             expect($failed->getMessage())->toContain($expected)->not->toContain('passport');
         });
 })->with([
