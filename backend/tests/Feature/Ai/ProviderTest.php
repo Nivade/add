@@ -19,6 +19,7 @@ use App\Support\Ai\Providers\NullAiProvider;
 use App\Support\Ai\Providers\OpenAiProvider;
 use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
@@ -170,13 +171,28 @@ it('rate-limits the openai driver per user, so one burst cannot lock another per
 });
 
 it("throttles the openai driver on the asking person's own key", function (): void {
-    config()->set('ai-toolkit.openai.api_key', 'sk-test');
+    config()->set('ai.providers.openai.key', 'sk-test');
     StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
 
     app(OpenAiProvider::class)->complete(aiRequest(userId: 7));
 
     expect(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey('7')))->toBe(1)
         ->and(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey(null)))->toBe(0);
+});
+
+it('reports an openai answer cut off at the token limit as invalid', function (): void {
+    config()->set('ai.providers.openai.key', 'sk-test');
+    Http::fake(['*/responses' => Http::response([
+        'id' => 'resp_1',
+        'model' => 'gpt-test',
+        'status' => 'incomplete',
+        'incomplete_details' => ['reason' => 'max_output_tokens'],
+        'output' => [['type' => 'message', 'status' => 'incomplete', 'content' => [['type' => 'output_text', 'text' => '{"title":"Ren']]]],
+        'usage' => ['input_tokens' => 10, 'output_tokens' => 5],
+    ])]);
+
+    expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
+        ->toThrow(AiResponseInvalid::class);
 });
 
 it("refuses to reach a person's words off the machine without their consent", function (): void {

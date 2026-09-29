@@ -25,7 +25,7 @@ it('keeps the prompt examples in the corpus only as marked controls', function (
 });
 
 it('refuses to score without a live key', function (): void {
-    config(['ai-toolkit.openai.api_key' => null]);
+    config(['ai.providers.openai.key' => null]);
 
     $this->artisan('ai:eval:capture')
         ->expectsOutputToContain('No OPENAI_API_KEY configured')

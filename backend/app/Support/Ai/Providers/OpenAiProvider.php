@@ -10,11 +10,13 @@ use App\Data\Ai\AiResponseData;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiProviderRequestFailed;
 use App\Support\Ai\Exceptions\AiRateLimited;
+use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Concerns\NamedByDriver;
 use Nvade\AiToolkit\AiRequest as ToolkitRequest;
 use Nvade\AiToolkit\Exceptions\AiProviderRequestFailed as ToolkitRequestFailed;
 use Nvade\AiToolkit\Exceptions\AiRateLimited as ToolkitRateLimited;
+use Nvade\AiToolkit\Exceptions\AiResponseTruncated as ToolkitTruncated;
 use Nvade\AiToolkit\Exceptions\AiUnavailable as ToolkitUnavailable;
 use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
 
@@ -47,6 +49,8 @@ final class OpenAiProvider implements AiProvider
             throw new AiUnavailable($unavailable->getMessage());
         } catch (ToolkitRateLimited $rateLimited) {
             throw new AiRateLimited($rateLimited->getMessage(), previous: $rateLimited);
+        } catch (ToolkitTruncated $truncated) {
+            throw new AiResponseInvalid($truncated->getMessage(), previous: $truncated);
         } catch (ToolkitRequestFailed $failed) {
             $cause = $failed->getPrevious() ?? $failed;
 
