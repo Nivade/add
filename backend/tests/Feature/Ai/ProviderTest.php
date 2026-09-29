@@ -7,6 +7,7 @@ use App\Enums\Ai\AiOperation;
 use App\Models\User;
 use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiFixtureMissing;
+use App\Support\Ai\Exceptions\AiProviderRequestFailed;
 use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Ai\Prompts;
@@ -194,6 +195,26 @@ it('reports an openai answer cut off at the token limit as invalid', function ()
     expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
         ->toThrow(AiResponseInvalid::class);
 });
+
+it('names a content-filter stop in the failure, never the provider text', function (int $status, array $body, string $expected): void {
+    config()->set('ai.providers.openai.key', 'sk-test');
+    Http::fake(['*/responses' => Http::response($body, $status)]);
+
+    expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
+        ->toThrow(function (AiProviderRequestFailed $failed) use ($expected): void {
+            expect($failed->getMessage())->toContain($expected)->not->toContain('passport');
+        });
+})->with([
+    'content filter' => [200, [
+        'id' => 'resp_1',
+        'model' => 'gpt-test',
+        'status' => 'incomplete',
+        'incomplete_details' => ['reason' => 'content_filter'],
+        'output' => [['type' => 'message', 'status' => 'incomplete', 'content' => [['type' => 'output_text', 'text' => '{"title":"Ren']]]],
+        'usage' => ['input_tokens' => 10, 'output_tokens' => 5],
+    ], 'content filter'],
+    'provider error echoing the prompt' => [400, ['error' => ['message' => 'Your passport renewal prompt was rejected.']], 'OpenAI request failed: '],
+]);
 
 it("refuses to reach a person's words off the machine without their consent", function (): void {
     $user = User::factory()->create(['ai_consented_at' => null]);

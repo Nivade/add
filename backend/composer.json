@@ -19,7 +19,7 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "lorisleiva/laravel-actions": "^2.12",
-        "nvade/ai-toolkit": "^0.3",
+        "nvade/ai-toolkit": "^0.4",
         "sabre/vobject": "^5.0",
         "sentry/sentry-laravel": "^4.28",
         "spatie/laravel-data": "^4.23"

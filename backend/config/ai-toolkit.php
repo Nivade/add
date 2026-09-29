@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-// Only openai is read: drivers and fixtures are chosen in config/ai.php. Env names are this app's own.
+// Drivers and fixtures are chosen in config/ai.php. Env names are this app's own.
 return [
+
+    // Messages carry the cause's class only; provider text can echo a person's words.
+    'expose_provider_errors' => false,
 
     'openai' => [
         'model' => env('AI_MODEL', 'gpt-5.6-luna'),
