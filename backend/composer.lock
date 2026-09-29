@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6e88f74d1afbc5fab99c4c09ef25263",
+    "content-hash": "cb25a1734bf415f8a4975aa2c88427f8",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3597,6 +3597,302 @@
                 }
             ],
             "time": "2026-02-16T23:10:27+00:00"
+        },
+        {
+            "name": "nvade/ai-toolkit",
+            "version": "v0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/nvade-packages/ai-toolkit.git",
+                "reference": "062a0a489e2065694c803fd88e5ed6f05db5cd41"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fai-toolkit/repository/archive.zip?sha=062a0a489e2065694c803fd88e5ed6f05db5cd41",
+                "reference": "062a0a489e2065694c803fd88e5ed6f05db5cd41",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^11.0||^12.0||^13.0",
+                "illuminate/support": "^11.0||^12.0||^13.0",
+                "laravel/ai": "^0.11",
+                "php": "^8.4",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/boost": "^2.7",
+                "laravel/pint": "^1.14",
+                "nunomaduro/collision": "^8.8",
+                "nvade/devtools": "^0.24",
+                "orchestra/testbench": "^11.0.0||^10.0.0||^9.0.0",
+                "pestphp/pest": "^4.0",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "pestphp/pest-plugin-type-coverage": "^3.0||^4.0||^5.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nvade\\AiToolkit\\AiToolkitServiceProvider"
+                    ]
+                },
+                "devtools": {
+                    "ci-host": "gitlab",
+                    "php": "8.5",
+                    "agent-packages": [
+                        "laravel/ai",
+                        "nvade/devtools"
+                    ],
+                    "components": [
+                        "agents",
+                        "arch",
+                        "branches",
+                        "ci",
+                        "claude",
+                        "commits",
+                        "editorconfig",
+                        "gitattributes",
+                        "phpstan",
+                        "pint",
+                        "precommit",
+                        "rector",
+                        "release",
+                        "renovate"
+                    ],
+                    "added": {
+                        "pint": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "phpstan": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "rector": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "editorconfig": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "gitattributes": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "precommit": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": {
+                                "package.json devDependencies": {
+                                    "husky": null
+                                },
+                                "package.json scripts": {
+                                    "prepare": null
+                                }
+                            }
+                        },
+                        "claude": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": {
+                                ".claude/settings.json permissions.allow": {
+                                    "Bash(composer test *)": null,
+                                    "Bash(composer lint *)": null,
+                                    "Bash(composer lint:check *)": null,
+                                    "Bash(composer types:check *)": null,
+                                    "Bash(composer refactor *)": null,
+                                    "Bash(composer refactor:check *)": null,
+                                    "Bash(vendor/bin/pint *)": null,
+                                    "Bash(vendor/bin/pest *)": null,
+                                    "Bash(./vendor/bin/pint *)": null,
+                                    "Bash(./vendor/bin/pest *)": null,
+                                    "Bash(vendor/bin/testbench route:list *)": null,
+                                    "Bash(vendor/bin/testbench about *)": null,
+                                    "Bash(./vendor/bin/testbench route:list *)": null,
+                                    "Bash(./vendor/bin/testbench about *)": null
+                                },
+                                ".claude/settings.json hooks": {
+                                    "PostToolUse Edit|Write": null,
+                                    "PreToolUse Edit|Write": null,
+                                    "UserPromptSubmit ": null,
+                                    "PostToolUse Skill": null,
+                                    "PreToolUse Bash": null
+                                }
+                            }
+                        },
+                        "arch": {
+                            "packages": [
+                                "pestphp/pest-plugin-type-coverage"
+                            ],
+                            "gitignore": [],
+                            "entries": {
+                                "composer.json arch scripts": {
+                                    "types:coverage": null
+                                }
+                            }
+                        },
+                        "agents": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": {
+                                ".mcp.json mcpServers": {
+                                    "laravel-boost": {
+                                        "command": "php",
+                                        "args": [
+                                            "artisan",
+                                            "boost:mcp"
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "ci": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "commits": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": {
+                                "package.json devDependencies": {
+                                    "husky": null,
+                                    "@commitlint/cli": null,
+                                    "@commitlint/config-conventional": null
+                                },
+                                "package.json scripts": {
+                                    "prepare": null
+                                }
+                            }
+                        },
+                        "branches": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": {
+                                "package.json devDependencies": {
+                                    "husky": null
+                                },
+                                "package.json scripts": {
+                                    "prepare": null
+                                }
+                            }
+                        },
+                        "release": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        },
+                        "renovate": {
+                            "packages": [],
+                            "gitignore": [],
+                            "entries": []
+                        }
+                    },
+                    "agent-context": {
+                        "CLAUDE.md": "block",
+                        ".ai/skills/ai-sdk-development": "08e4e03e5c4b8806",
+                        ".claude/skills/ai-sdk-development": "",
+                        ".ai/skills/codebase-learnings": "1720f654742c1c25",
+                        ".ai/skills/finish-branch": "7c0bf1f76dea762a",
+                        ".ai/skills/laravel-packages": "24f3486268090bbb",
+                        ".ai/skills/note-finding": "d8a4d00a85d32729",
+                        ".ai/skills/phpstan-larastan": "50a9ea19a64a38b2",
+                        ".ai/rules/nvade-devtools-general.md": "a75e035b78019abe",
+                        ".ai/rules/nvade-devtools-laravel.md": "5f840f754098597d",
+                        ".ai/rules/nvade-devtools-package-testing.md": "fe8ca8a485653403",
+                        ".ai/rules/nvade-devtools-plans.md": "d9c2a12ef74d7b09",
+                        ".ai/rules/nvade-devtools-rector.md": "a9e45e3d801e83c9",
+                        ".ai/rules/nvade-devtools-testing.md": "ee662ebbd9d8f03d",
+                        ".claude/skills/codebase-learnings": "",
+                        ".claude/skills/finish-branch": "",
+                        ".claude/skills/laravel-packages": "",
+                        ".claude/skills/note-finding": "",
+                        ".claude/skills/phpstan-larastan": "",
+                        ".claude/rules/nvade-devtools-general.md": "",
+                        ".claude/rules/nvade-devtools-laravel.md": "",
+                        ".claude/rules/nvade-devtools-package-testing.md": "",
+                        ".claude/rules/nvade-devtools-plans.md": "",
+                        ".claude/rules/nvade-devtools-rector.md": "",
+                        ".claude/rules/nvade-devtools-testing.md": "",
+                        "AGENTS.md": "block"
+                    },
+                    "declined": [
+                        "skill:update-resume"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nvade\\AiToolkit\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nvade\\AiToolkit\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "post-autoload-dump": [
+                    "@composer run prepare"
+                ],
+                "prepare": [
+                    "@php vendor/bin/testbench package:discover --ansi"
+                ],
+                "lint": [
+                    "pint --parallel"
+                ],
+                "lint:check": [
+                    "pint --parallel --test"
+                ],
+                "types:check": [
+                    "phpstan analyse --memory-limit=3G"
+                ],
+                "refactor": [
+                    "rector process"
+                ],
+                "refactor:check": [
+                    "rector process --dry-run"
+                ],
+                "test": [
+                    "@lint:check",
+                    "@types:check",
+                    "@refactor:check",
+                    "pest"
+                ],
+                "types:coverage": [
+                    "pest --type-coverage --min=100"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Niels van Deursen",
+                    "email": "nhavandeursen@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Provider-agnostic AI request/response toolkit for Laravel: DTO, provider contract, fixture and null providers, structured schema agent.",
+            "homepage": "https://github.com/nvade/ai-toolkit",
+            "keywords": [
+                "Nvade",
+                "ai-toolkit",
+                "laravel"
+            ],
+            "support": {
+                "source": "https://gitlab.com/nvade-packages/ai-toolkit/-/tree/v0.2.1"
+            },
+            "time": "2026-09-29T11:59:10+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -16043,5 +16339,5 @@
         "php": "^8.5"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

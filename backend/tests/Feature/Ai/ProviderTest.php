@@ -21,6 +21,8 @@ use App\Support\Ai\Schemas\ParseCaptureSchema;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
+use Nvade\AiToolkit\Providers\StructuredAgent;
 
 function aiRequest(
     AiOperation $operation = AiOperation::ParseCapture,
@@ -160,11 +162,21 @@ it('logs the shape of every call and none of the text', function (): void {
 });
 
 it('rate-limits the openai driver per user, so one burst cannot lock another person out', function (): void {
-    config()->set('ai.openai.rate_limit.max_attempts', 1);
-    RateLimiter::hit(OpenAiProvider::rateLimitKey(1), 60);
+    config()->set('ai-toolkit.openai.rate_limit.max_attempts', 1);
+    RateLimiter::hit(ToolkitOpenAiProvider::rateLimitKey('1'), 60);
 
-    expect(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey(1), 1))->toBeTrue()
-        ->and(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey(2), 1))->toBeFalse();
+    expect(RateLimiter::tooManyAttempts(ToolkitOpenAiProvider::rateLimitKey('1'), 1))->toBeTrue()
+        ->and(RateLimiter::tooManyAttempts(ToolkitOpenAiProvider::rateLimitKey('2'), 1))->toBeFalse();
+});
+
+it("throttles the openai driver on the asking person's own key", function (): void {
+    config()->set('ai-toolkit.openai.api_key', 'sk-test');
+    StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
+
+    app(OpenAiProvider::class)->complete(aiRequest(userId: 7));
+
+    expect(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey('7')))->toBe(1)
+        ->and(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey(null)))->toBe(0);
 });
 
 it("refuses to reach a person's words off the machine without their consent", function (): void {

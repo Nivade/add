@@ -11,82 +11,55 @@ use App\Support\Ai\AiRequest;
 use App\Support\Ai\Exceptions\AiProviderRequestFailed;
 use App\Support\Ai\Exceptions\AiRateLimited;
 use App\Support\Ai\Exceptions\AiUnavailable;
-use App\Support\Ai\StructuredAgent;
 use App\Support\Concerns\NamedByDriver;
-use Illuminate\Support\Facades\RateLimiter;
-use Laravel\Ai\Enums\Lab;
-use Laravel\Ai\Responses\StructuredAgentResponse;
-use LogicException;
-use Throwable;
+use Nvade\AiToolkit\AiRequest as ToolkitRequest;
+use Nvade\AiToolkit\Exceptions\AiProviderRequestFailed as ToolkitRequestFailed;
+use Nvade\AiToolkit\Exceptions\AiRateLimited as ToolkitRateLimited;
+use Nvade\AiToolkit\Exceptions\AiUnavailable as ToolkitUnavailable;
+use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
 
+/** Throttled per person, so one burst cannot lock everyone else out; failures come back as this app's exceptions. */
 #[Driver('openai')]
 final class OpenAiProvider implements AiProvider
 {
     use NamedByDriver;
 
-    private const string RATE_LIMIT_KEY = 'ai-openai';
+    public function __construct(private readonly ToolkitOpenAiProvider $openAi) {}
 
     public function isAvailable(): bool
     {
-        return filled(config('ai.openai.api_key'));
-    }
-
-    public static function rateLimitKey(int $userId): string
-    {
-        return self::RATE_LIMIT_KEY.'-'.$userId;
+        return $this->openAi->isAvailable();
     }
 
     public function complete(AiRequest $request): AiResponseData
     {
-        throw_unless($this->isAvailable(), AiUnavailable::class, 'OpenAI provider called without ai.openai.api_key configured.');
-
-        $this->guardRateLimit($request->userId);
-
-        $model = (string) config('ai.openai.model');
-
-        $agent = new StructuredAgent(
-            instructions: $request->system,
-            schema: $request->schema,
-            maxOutputTokens: $request->maxOutputTokens,
-            reasoningEffort: (string) config('ai.openai.reasoning_effort'),
-        );
-
         try {
-            $response = $agent->prompt(
-                $request->user,
-                provider: Lab::OpenAI,
-                model: $model,
-                timeout: (int) config('ai.openai.timeout'),
-            );
-        } catch (Throwable $throwable) {
-            throw new AiProviderRequestFailed('OpenAI request failed: '.$throwable::class, previous: $throwable);
-        }
+            $response = $this->openAi->respond(new ToolkitRequest(
+                system: $request->system,
+                user: $request->user,
+                schema: $request->schema,
+                promptVersion: $request->promptVersion,
+                schemaVersion: $request->schemaVersion,
+                maxOutputTokens: $request->maxOutputTokens,
+                rateLimitScope: (string) $request->userId,
+            ));
+        } catch (ToolkitUnavailable $unavailable) {
+            throw new AiUnavailable($unavailable->getMessage());
+        } catch (ToolkitRateLimited $rateLimited) {
+            throw new AiRateLimited($rateLimited->getMessage(), previous: $rateLimited);
+        } catch (ToolkitRequestFailed $failed) {
+            $cause = $failed->getPrevious() ?? $failed;
 
-        if (! $response instanceof StructuredAgentResponse) {
-            throw new LogicException('StructuredAgent must always receive a StructuredAgentResponse.');
+            throw new AiProviderRequestFailed('OpenAI request failed: '.$cause::class, previous: $cause);
         }
 
         return new AiResponseData(
-            payload: $response->toArray(),
+            payload: $response->payload,
             provider: $this->name(),
-            model: $response->meta->model ?? $model,
-            inputTokens: $response->usage->promptTokens,
-            outputTokens: $response->usage->completionTokens,
-            cachedInputTokens: $response->usage->cacheReadInputTokens,
+            model: $response->model,
+            inputTokens: $response->inputTokens,
+            outputTokens: $response->outputTokens,
+            cachedInputTokens: $response->cachedInputTokens,
         );
-    }
-
-    /** laravel/ai does not throttle itself, so this is the only place a burst is stopped. Keyed per person so one burst cannot lock everyone else out. */
-    private function guardRateLimit(int $userId): void
-    {
-        $maxAttempts = (int) config('ai.openai.rate_limit.max_attempts');
-        $decaySeconds = (int) config('ai.openai.rate_limit.decay_seconds');
-        $key = self::rateLimitKey($userId);
-
-        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            throw new AiRateLimited("OpenAI provider rate limit exceeded ({$maxAttempts} calls per {$decaySeconds}s).");
-        }
-
-        RateLimiter::hit($key, $decaySeconds);
     }
 }
