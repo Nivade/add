@@ -47,12 +47,12 @@ final class OpenAiProvider implements AiProvider
                 rateLimitScope: (string) $request->userId,
                 operation: $request->operation->value,
             ));
-        } catch (AiException $failed) {
+        } catch (AiException $aiException) {
             throw match (true) {
-                $failed instanceof ToolkitUnavailable => new AiUnavailable($failed->getMessage()),
-                $failed instanceof ToolkitRateLimited => new AiRateLimited($failed->getMessage(), previous: $failed),
-                $failed instanceof ToolkitTruncated, $failed instanceof ToolkitResponseInvalid => new AiResponseInvalid($failed->getMessage(), previous: $failed),
-                default => new AiProviderRequestFailed($failed->getMessage(), previous: $failed),
+                $aiException instanceof ToolkitUnavailable => new AiUnavailable($aiException->getMessage()),
+                $aiException instanceof ToolkitRateLimited => new AiRateLimited($aiException->getMessage(), previous: $aiException),
+                $aiException instanceof ToolkitTruncated, $aiException instanceof ToolkitResponseInvalid => new AiResponseInvalid($aiException->getMessage(), previous: $aiException),
+                default => new AiProviderRequestFailed($aiException->getMessage(), previous: $aiException),
             };
         }
 
