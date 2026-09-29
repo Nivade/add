@@ -2,12 +2,8 @@
 
 declare(strict_types=1);
 
-// nvade/ai-toolkit's config under this app's env names; only openai is read, drivers are chosen in config/ai.php.
+// Only openai is read: drivers and fixtures are chosen in config/ai.php. Env names are this app's own.
 return [
-
-    'driver' => 'null',
-
-    'fixture_path' => storage_path('ai-fixtures'),
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
