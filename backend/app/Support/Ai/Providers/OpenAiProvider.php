@@ -14,8 +14,9 @@ use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Exceptions\AiUnavailable;
 use App\Support\Concerns\NamedByDriver;
 use Nvade\AiToolkit\AiRequest as ToolkitRequest;
-use Nvade\AiToolkit\Exceptions\AiProviderRequestFailed as ToolkitRequestFailed;
+use Nvade\AiToolkit\Exceptions\AiException;
 use Nvade\AiToolkit\Exceptions\AiRateLimited as ToolkitRateLimited;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid as ToolkitResponseInvalid;
 use Nvade\AiToolkit\Exceptions\AiResponseTruncated as ToolkitTruncated;
 use Nvade\AiToolkit\Exceptions\AiUnavailable as ToolkitUnavailable;
 use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
@@ -44,17 +45,15 @@ final class OpenAiProvider implements AiProvider
                 schemaVersion: $request->schemaVersion,
                 maxOutputTokens: $request->maxOutputTokens,
                 rateLimitScope: (string) $request->userId,
+                operation: $request->operation->value,
             ));
-        } catch (ToolkitUnavailable $unavailable) {
-            throw new AiUnavailable($unavailable->getMessage());
-        } catch (ToolkitRateLimited $rateLimited) {
-            throw new AiRateLimited($rateLimited->getMessage(), previous: $rateLimited);
-        } catch (ToolkitTruncated $truncated) {
-            throw new AiResponseInvalid($truncated->getMessage(), previous: $truncated);
-        } catch (ToolkitRequestFailed $failed) {
-            $cause = $failed->getPrevious() ?? $failed;
-
-            throw new AiProviderRequestFailed('OpenAI request failed: '.$cause::class, previous: $cause);
+        } catch (AiException $failed) {
+            throw match (true) {
+                $failed instanceof ToolkitUnavailable => new AiUnavailable($failed->getMessage()),
+                $failed instanceof ToolkitRateLimited => new AiRateLimited($failed->getMessage(), previous: $failed),
+                $failed instanceof ToolkitTruncated, $failed instanceof ToolkitResponseInvalid => new AiResponseInvalid($failed->getMessage(), previous: $failed),
+                default => new AiProviderRequestFailed($failed->getMessage(), previous: $failed),
+            };
         }
 
         return new AiResponseData(
