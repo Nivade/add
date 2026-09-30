@@ -87,7 +87,26 @@ it('resolves every relative link in an agent document', function (): void {
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
-    $planned = [];
+    $planned = [
+        'backend/app/Actions/CheckIns/DueCheckIn.php',
+        'backend/app/Actions/CheckIns/RecordCheckIn.php',
+        'backend/app/Actions/Metrics/ReportOutcomes.php',
+        'backend/app/Enums/CheckInAnswer.php',
+        'backend/app/Enums/CheckInTopic.php',
+        'backend/app/Http/Controllers/Api/V1/StoreCheckInController.php',
+        'backend/app/Http/Controllers/Web/StoreCheckInController.php',
+        'backend/app/Http/Requests/StoreCheckInRequest.php',
+        'backend/app/Models/CheckIn.php',
+        'backend/app/Support/Metrics/MetricsWindow.php',
+        'backend/app/Support/Metrics/Percentile.php',
+        'backend/app/Support/NextAction/Decision.php',
+        'backend/database/factories/CheckInFactory.php',
+        'backend/resources/js/components/check-in.tsx',
+        'backend/tests/Feature/CheckIns/CheckInEndpointTest.php',
+        'backend/tests/Feature/CheckIns/DueCheckInTest.php',
+        'backend/tests/Feature/Metrics/ReportOutcomesTest.php',
+        'backend/tests/Unit/Metrics/PercentileTest.php',
+    ];
 
     foreach ($planned as $path) {
         expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');

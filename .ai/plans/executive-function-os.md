@@ -194,7 +194,7 @@ what moving a plan to `done` requires.
 | — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | done |
 | — | [Findings triage](archive/findings-triage.md) — session transitions under the row lock, feed fetches to public hosts only, a dead token signs the phone out, dated clarification answers, a copied-question eval, the local certificate | — | done |
 | 10 | [Context](slices/10-context.md) — where a step happens, where the person seems to be, and a rung that reorders on it without ever filtering | §4, §9 | done |
-| 11 | Measuring it — §36's outcome metrics, aggregated from the events already recorded | §36 | recorded only |
+| 11 | [Measuring it](slices/11-measuring.md) — §36's outcomes on demand from recorded rows, the rung behind each start, and a fortnightly check-in | §36 | designed |
 | 12 | Ingestion — the threat model first, then email, documents, receipts, bank/gov correspondence, bill and subscription detection, and the first `system_inferred` commitment producer | §19, §21, §28, §34 | recorded only |
 | 13 | Location — device location as a second whereabouts source behind its own consent, and location-triggered reminders | §14, §15, §34 | recorded only |
 | 14 | Body doubling beyond solo — friend, anonymous group, AI companion | §17, §34 | recorded only |
@@ -204,8 +204,8 @@ the engine, it is deterministic, and it adds no privacy surface. Measurement is
 next, because it is cheap and says whether context helped. Ingestion waits for
 its threat model, which also settles notification payload encryption. Location
 needs a consent surface, and Friend mode needs a second person in the system,
-so both come last. Only slice 10 is designed. The rest get their files when
-they are next up.
+so both come last. Slices 10 and 11 are designed. The rest get their files
+when they are next up.
 
 ## Measuring it
 
