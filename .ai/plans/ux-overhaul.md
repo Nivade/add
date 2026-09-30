@@ -176,7 +176,7 @@ desktop                                          phone
 - [x] **2.1 Tokens in one place.** Invoke skills: `frontend-design`, `expo-react-native`.
   - New `packages/shared/src/tokens.ts`: `export const lightColors = {...} as const`, `export const darkColors = {...} as const`, `export const dayStripLight`, `export const dayStripDark` (the stops above, each `{ minute, color }`), `export const radius = { control: 12, field: 8, panel: 16 } as const` (px, for React Native), `export const typeScale` (the table above, in px at a 16px root). One flat `key: '#RRGGBB'` per line, which the guard test parses. Export it from `packages/shared/src/index.ts`.
   - Check: `npm run typecheck` passes.
-- [ ] **2.2 A guard holds the palette.** Invoke skills: `pest-testing`, `testing-best-practices`.
+- [x] **2.2 A guard holds the palette.** Invoke skills: `pest-testing`, `testing-best-practices`.
   - New `backend/tests/Feature/Guards/DesignTokensTest.php`: parses `lightColors` and `darkColors` from `packages/shared/src/tokens.ts`; asserts ink/paper, ink/surface ≥ 7; muted/paper, muted/surface, now/paper, now/surface, on-now/now ≥ 4.5; field/paper, field/surface ≥ 3, in both themes (WCAG relative luminance, written in the test file as `designTokenContrast()`); asserts `backend/resources/css/app.css` declares `--paper`, `--surface`, `--ink`, `--muted`, `--line`, `--field`, `--now`, `--on-now` with the same hex in `:root` and `.dark`; asserts no `uppercase` class and no `text-[<n>px]` under `backend/resources/js` outside `components/ui/`.
   - Verify the guard by breaking one hex in `app.css` and watching it fail.
   - Check: the test fails until 2.3 and 2.4 land, then passes.
