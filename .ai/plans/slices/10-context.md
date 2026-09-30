@@ -387,7 +387,7 @@ day, and `model:prune` runs daily.
 
   *Check:* `npm run typecheck` passes.
 
-- [ ] **13. Browser journey.** Invoke skills: `pest-testing`,
+- [x] **13. Browser journey.** Invoke skills: `pest-testing`,
   `testing-best-practices`. Add one test to
   `backend/tests/Browser/JourneyTest.php`:
   - complete a home step;
