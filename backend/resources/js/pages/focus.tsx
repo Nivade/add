@@ -1,8 +1,9 @@
 import type { ExecutionStateData } from '@add/shared';
 import { returnCopy, stuckReasonsFor } from '@add/shared';
-import { Form, Head, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
+import { OneTapForm } from '@/components/one-tap-form';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +13,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { useOneRequestAtATime } from '@/hooks/use-one-request-at-a-time';
 import focusRoutes from '@/routes/focus';
 
 const CONTROL_CLASS =
@@ -30,8 +30,6 @@ function Control({
     stepId?: string;
     onClick?: () => void;
 }) {
-    const oneAtATime = useOneRequestAtATime();
-
     if (!form) {
         return (
             <Button
@@ -46,37 +44,18 @@ function Control({
     }
 
     return (
-        <Form {...form} {...oneAtATime}>
-            {({ processing }) => (
-                <>
-                    {stepId && (
-                        <input type="hidden" name="step_id" value={stepId} />
-                    )}
-                    <Button
-                        type="submit"
-                        variant="outline"
-                        className={CONTROL_CLASS}
-                        aria-disabled={processing}
-                    >
-                        {label}
-                    </Button>
-                </>
-            )}
-        </Form>
-    );
-}
-
-function Continue({ sessionId }: { sessionId: string }) {
-    const oneAtATime = useOneRequestAtATime();
-
-    return (
-        <Form {...focusRoutes.resume.form(sessionId)} {...oneAtATime}>
-            {({ processing }) => (
-                <Button type="submit" aria-disabled={processing}>
-                    Continue
+        <OneTapForm form={form} stepId={stepId}>
+            {(processing) => (
+                <Button
+                    type="submit"
+                    variant="outline"
+                    className={CONTROL_CLASS}
+                    aria-disabled={processing}
+                >
+                    {label}
                 </Button>
             )}
-        </Form>
+        </OneTapForm>
     );
 }
 
@@ -102,18 +81,27 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 ? returnCopy.welcome
                                 : returnCopy.paused}
                         </OneThing>
-                        {state.returning ? (
-                            <Meta>
-                                {returnCopy.meta(
-                                    intention.title,
-                                    state.stepsDone,
-                                )}
-                            </Meta>
-                        ) : (
-                            <Meta>{returnCopy.pausedMeta}</Meta>
-                        )}
+                        <Meta>
+                            {state.returning
+                                ? returnCopy.meta(
+                                      intention.title,
+                                      state.stepsDone,
+                                  )
+                                : returnCopy.pausedMeta}
+                        </Meta>
                         <div className="pl-5">
-                            <Continue sessionId={session.id} />
+                            <OneTapForm
+                                form={focusRoutes.resume.form(session.id)}
+                            >
+                                {(processing) => (
+                                    <Button
+                                        type="submit"
+                                        aria-disabled={processing}
+                                    >
+                                        Continue
+                                    </Button>
+                                )}
+                            </OneTapForm>
                         </div>
                     </div>
                 ) : (

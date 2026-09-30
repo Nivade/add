@@ -18,29 +18,30 @@ final class RecordTimezone
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $zone = $this->canonical($request->header('X-Timezone') ?? $request->cookie('tz'));
+        $sent = $request->header('X-Timezone') ?? $request->cookie('tz');
 
-        if ($user instanceof User && $zone !== null && $zone !== $user->timezone) {
-            $user->forceFill(['timezone' => $zone])->save();
+        if ($user instanceof User && is_string($sent) && $sent !== $user->timezone) {
+            $zone = $this->canonical($sent);
+
+            if ($zone !== null && $zone !== $user->timezone) {
+                $user->forceFill(['timezone' => $zone])->save();
+            }
         }
 
         return $next($request);
     }
 
     /** Some browsers still report a renamed zone, such as Asia/Calcutta, which PHP no longer knows. */
-    private function canonical(mixed $zone): ?string
+    private function canonical(string $zone): ?string
     {
-        if (! is_string($zone)) {
-            return null;
+        $known = DateTimeZone::listIdentifiers();
+
+        if (in_array($zone, $known, true)) {
+            return $zone;
         }
 
-        $known = DateTimeZone::listIdentifiers();
         $renamed = IntlTimeZone::getIanaID($zone);
 
-        return match (true) {
-            in_array($zone, $known, true) => $zone,
-            is_string($renamed) && in_array($renamed, $known, true) => $renamed,
-            default => null,
-        };
+        return is_string($renamed) && in_array($renamed, $known, true) ? $renamed : null;
     }
 }

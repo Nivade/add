@@ -16,8 +16,8 @@ import {
   sortingLine,
   waitingForResponses,
 } from '@add/shared';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
 import { api } from '@/api/endpoints';
@@ -178,15 +178,33 @@ export default function Home() {
     resource.status === 'ready' ? resource.data.sortingCount : 0;
   const { reload: reloadHome } = resource;
 
-  useEffect(() => {
-    if (sortingCount === 0) {
-      return;
-    }
+  /** One read at a time, and only while home is on screen. */
+  useFocusEffect(
+    useCallback(() => {
+      if (sortingCount === 0) {
+        return;
+      }
 
-    const poll = setInterval(() => void reloadHome(), 3000);
+      let stopped = false;
+      let timer: ReturnType<typeof setTimeout>;
+      const next = () => {
+        timer = setTimeout(async () => {
+          await reloadHome();
 
-    return () => clearInterval(poll);
-  }, [sortingCount, reloadHome]);
+          if (!stopped) {
+            next();
+          }
+        }, 3000);
+      };
+
+      next();
+
+      return () => {
+        stopped = true;
+        clearTimeout(timer);
+      };
+    }, [sortingCount, reloadHome]),
+  );
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;

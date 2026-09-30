@@ -48,7 +48,7 @@ final class BuildHome
     {
         $context = ResolutionContext::forUser($user);
         $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
-        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->whereNull('intention_id')->whereNull('step_id')->values());
+        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->first(fn (Commitment $commitment): bool => $commitment->isStandalone()));
         $rightNow = $this->resolver->resolve($user, $context);
         $session = $this->session($user);
         $reminder = $this->reminder($user, $context);

@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Models\WaitingFor;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/** One meaning for "everything else": a commitment tied to an intention or step is already counted through it. */
+/** One meaning for "everything else" on every screen that states it. */
 final class CountOpenThings
 {
     use AsObject;
@@ -19,6 +19,6 @@ final class CountOpenThings
     {
         return Intention::query()->where('user_id', $user->id)->open()->count()
             + WaitingFor::query()->where('user_id', $user->id)->open()->count()
-            + Commitment::query()->where('user_id', $user->id)->open()->whereNull('intention_id')->whereNull('step_id')->count();
+            + Commitment::query()->where('user_id', $user->id)->open()->standalone()->count();
     }
 }

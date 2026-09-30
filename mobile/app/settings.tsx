@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { deviceTimezone } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
@@ -43,8 +44,7 @@ export default function Settings() {
         disabled={saving}
       />
       <Meta>
-        Times are read in {Intl.DateTimeFormat().resolvedOptions().timeZone},
-        taken from this device.
+        Times are read in {deviceTimezone()}, taken from this device.
       </Meta>
     </Screen>
   );

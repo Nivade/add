@@ -31,14 +31,10 @@ export const returnCopy = {
     paused: 'Paused.',
     pausedMeta: 'Continue whenever you are ready.',
     workingOn: (title: string): string => `You were working on ${title}.`,
-    stepsDone: (count: number): string | null =>
-        count === 0
-            ? null
-            : `You had done ${count} ${count === 1 ? 'step' : 'steps'}.`,
     meta: (title: string, stepsDone: number): string =>
-        [returnCopy.workingOn(title), returnCopy.stepsDone(stepsDone)]
-            .filter((line) => line !== null)
-            .join(' '),
+        stepsDone === 0
+            ? returnCopy.workingOn(title)
+            : `${returnCopy.workingOn(title)} You had done ${stepsDone} ${stepsDone === 1 ? 'step' : 'steps'}.`,
     partWay: (title: string): string => `Part-way through ${title}.`,
 };
 

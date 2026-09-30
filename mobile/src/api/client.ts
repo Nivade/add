@@ -14,6 +14,11 @@ export class ApiError extends Error {
   }
 }
 
+/** The zone the server reads every clock in comes from here. */
+export function deviceTimezone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 export const UNREACHABLE = 'The app could not reach the server.';
 
 /** Every form words a write that did not land the same way. */
@@ -54,7 +59,7 @@ export async function request<T>(
     method,
     headers: {
       Accept: 'application/json',
-      'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+      'X-Timezone': deviceTimezone(),
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
