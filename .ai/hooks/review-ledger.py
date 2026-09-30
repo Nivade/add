@@ -7,7 +7,7 @@ import sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import REQUIRED_SEQUENCE, append_entry, current_branch, fork_point, git, ledger_path  # noqa: E402
+from _ledger import REQUIRED_SEQUENCE, append_entry, current_branch, fork_point, git, ledger_path, session_root  # noqa: E402
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
     if skill not in REQUIRED_SEQUENCE:
         sys.exit(0)
 
-    root = os.environ.get("CLAUDE_PROJECT_DIR", "")
+    root = session_root(event)
     if not root:
         sys.exit(0)
 

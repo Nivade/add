@@ -7,7 +7,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import current_branch, fork_point, gh, ledger_path, load_entries, ran_in_order  # noqa: E402
+from _ledger import current_branch, fork_point, gh, ledger_path, load_entries, ran_in_order, session_root  # noqa: E402
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
 PR_NUMBER_RE = re.compile(r"\bgh\s+pr\s+merge\s+(\d+)\b")
@@ -35,7 +35,7 @@ def main():
     if not MERGE_RE.search(command):
         allow()
 
-    root = os.environ.get("CLAUDE_PROJECT_DIR", "")
+    root = session_root(event)
     if not root:
         allow()
 
@@ -48,7 +48,7 @@ def main():
     if not branch:
         allow()
 
-    fork = fork_point(root)
+    fork = fork_point(root, branch) or fork_point(root, "origin/" + branch)
     entries = load_entries(ledger_path(root, branch))
 
     if ran_in_order(entries, fork):

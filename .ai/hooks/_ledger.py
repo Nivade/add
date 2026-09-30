@@ -1,4 +1,4 @@
-"""Shared by review-ledger.py and merge-gate.py: git/gh plumbing, the ledger path, and the required skill order."""
+"""Shared by review-ledger.py, merge-gate.py and skill-gate.py: git/gh plumbing, the ledger path, and the required skill order."""
 
 import json
 import os
@@ -24,13 +24,19 @@ def gh(root, *args):
     return _run(["gh", *args], root)
 
 
+def session_root(event):
+    """The checkout the session works in, which is a worktree's own top level rather than CLAUDE_PROJECT_DIR."""
+    cwd = event.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR", "")
+    return git(cwd, "rev-parse", "--show-toplevel") if cwd else None
+
+
 def current_branch(root):
     branch = git(root, "rev-parse", "--abbrev-ref", "HEAD")
     return branch if branch and branch != "HEAD" else None
 
 
-def fork_point(root):
-    return git(root, "merge-base", "origin/main", "HEAD")
+def fork_point(root, ref="HEAD"):
+    return git(root, "merge-base", "origin/main", ref)
 
 
 def ledger_path(root, branch):
