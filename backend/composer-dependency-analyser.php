@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Nvade\Devtools\Dependencies\Preset;
 use ShipMonk\ComposerDependencyAnalyser\Config\ErrorType;
 
-// bootstrap/providers.php registers both only when their class exists, so --no-dev still boots.
+// Each path registers its provider only when the dev package's class exists, so --no-dev still boots.
 return Preset::laravel(__DIR__)
     ->ignoreErrorsOnPackageAndPath('laravel/telescope', __DIR__.'/bootstrap/providers.php', [ErrorType::DEV_DEPENDENCY_IN_PROD])
     ->ignoreErrorsOnPackageAndPath('spatie/laravel-typescript-transformer', __DIR__.'/bootstrap/providers.php', [ErrorType::DEV_DEPENDENCY_IN_PROD])
