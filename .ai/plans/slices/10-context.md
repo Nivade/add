@@ -203,7 +203,7 @@ day, and `model:prune` runs daily.
   passes, and `npm run stan` is clean. Do not run `ai:eval`: it spends live
   tokens, and place accuracy is not scored this slice (see Open).
 
-- [ ] **4. `not_here_reports`.** Invoke skills: `laravel-attributes`,
+- [x] **4. `not_here_reports`.** Invoke skills: `laravel-attributes`,
   `laravel-best-practices`.
   - Migration `create_not_here_reports_table` with these columns:
     - `ulid('id')->primary()`
