@@ -351,7 +351,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run typecheck` passes.
 
-- [ ] **9. Web.** Invoke skills: `frontend-design`, `inertia-react-development`,
+- [x] **9. Web.** Invoke skills: `frontend-design`, `inertia-react-development`,
   `wayfinder-development`, `tailwindcss-development`.
   - Create `backend/resources/js/components/check-in.tsx`, rendering
     `<Band label={checkInCopy.band}>` with, in order:

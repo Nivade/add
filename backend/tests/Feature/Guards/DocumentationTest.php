@@ -91,7 +91,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Actions/Metrics/ReportOutcomes.php',
         'backend/app/Support/Metrics/MetricsWindow.php',
         'backend/app/Support/Metrics/Percentile.php',
-        'backend/resources/js/components/check-in.tsx',
         'backend/tests/Feature/Metrics/ReportOutcomesTest.php',
         'backend/tests/Unit/Metrics/PercentileTest.php',
     ];

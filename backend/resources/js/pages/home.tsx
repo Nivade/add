@@ -12,6 +12,7 @@ import {
 import { Form, Head, Link } from '@inertiajs/react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { captureFieldClassName } from '@/components/capture-dialog';
+import { CheckIn } from '@/components/check-in';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
@@ -366,6 +367,8 @@ export default function Home({ home: data }: { home: HomeData }) {
                         </ul>
                     </Band>
                 )}
+
+                {data.checkIn && <CheckIn topic={data.checkIn} />}
 
                 <div className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-5">
                     <p className="text-muted-foreground font-mono text-[13px]">
