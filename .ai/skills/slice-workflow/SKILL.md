@@ -92,10 +92,10 @@ already puts them in order.
 ## Deliberately unbuilt is not a gap
 
 The plan records what is not built and why. Before building something that looks
-missing, check whether it was declined — named preparation items, push, per-user
-AI consent, the deferred spec models (`Project`, `Task`, `Commitment`,
-`WaitingFor`, `Context`, `Document`). Reopening one of those needs a new
-decision, not a refactor commit.
+missing, check whether it was declined — named preparation items, camera
+capture, location triggers, the deferred spec models (`Project`, `Task`,
+`Document`). Reopening one of those needs a new decision, not a refactor
+commit.
 
 When the spec and `~/repos/private/first-move` disagree, the spec wins.
 first-move contributed conventions only — never scope or product decisions.

@@ -53,7 +53,7 @@ classes live. "Next action" stays the product word and is what
 | Table | Carries | Notes |
 | --- | --- | --- |
 | `captures` | raw text, source, `intention_id` nullable | immutable, `created_at` only |
-| `intentions` | title, why, status, `deadline_at` nullable, `clarifying_question` and its answer, plan assumptions | the thing the person wants handled |
+| `intentions` | title, why, status, `deadline_at` nullable, `clarifying_question` and its answer, plan assumptions, `recurrence_every_days` and `recurrence_next_at` nullable, `recurrence_template_id` | the thing the person wants handled; a recurring one is a template that spawns a fresh copy |
 | `steps` | intention, title, `estimated_seconds`, `place` nullable, position, status | one physical action each; a null place means anywhere |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
@@ -61,13 +61,15 @@ classes live. "Next action" stays the product word and is what
 | `reminders` | user, appointment kind and id, `sent_at` | one row per appointment, which is what keeps reminders sparse |
 | `devices` | user, Expo push token, platform | the token identifies the device, so registering twice moves it |
 | `not_here_reports` | user, place | what the person said about where they are not; pruned after a day |
+| `waiting_fors` | user, subject, note, status, `last_answered_at` | something the person is waiting on from someone else; no AI |
+| `commitments` | user, description, provenance, `confirmed_at`, status, `intention_id` or `step_id` | provenance is `user_task`, `user_stated` or `system_inferred`; an inference stays unconfirmed until the person says so |
+| `future_reminders` | user, message, `trigger_at`, `calendar_event_id` and `offset_seconds` nullable, `sent_at` | a note to a future self, at a time or relative to an event |
 
-Deferred until they earn their place: `Project`, `Task`, `Commitment`,
-`WaitingFor`, `Document`. The spec lists them; building them before
-the first journey is polished is the premature normalisation it warns against.
-`CalendarEvent` and `Reminder` earned theirs in slice 6. `Context` earned its
-place in slice 10, as a `Place` on a step and a computed `Whereabouts`, not a
-table.
+Deferred until they earn their place: `Project`, `Task`, `Document`. The spec
+lists them; building them before the first journey is polished is the premature
+normalisation it warns against. `CalendarEvent` and `Reminder` earned theirs in
+slice 6, `WaitingFor` and `Commitment` in slice 9. `Context` earned its place in
+slice 10, as a `Place` on a step and a computed `Whereabouts`, not a table.
 
 An appointment is the `Appointment` contract, not a table: a dated intention and
 a calendar event both answer it, so backwards planning, the rail and reminders
