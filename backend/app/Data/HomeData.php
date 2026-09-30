@@ -26,4 +26,10 @@ class HomeData extends Data
         public bool $hasOpenCommitments,
         public ?CheckInTopic $checkIn,
     ) {}
+
+    /** The step Start would begin; a running session is continued, not started. */
+    public function startableStepSeconds(): ?int
+    {
+        return $this->session instanceof ExecutionStateData ? null : $this->rightNow?->step->estimatedSeconds;
+    }
 }

@@ -38,7 +38,7 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                             min={0}
                             max={1440}
                             defaultValue={Math.round(rung.seconds / 60)}
-                            className="border-field focus-visible:ring-ring h-11 w-16 rounded-lg border bg-transparent px-2 text-right font-mono tabular-nums focus-visible:ring-2 focus-visible:outline-none"
+                            className="border-field focus-visible:ring-ring bg-surface h-11 w-16 rounded-lg border px-2 text-right font-mono tabular-nums focus-visible:ring-2 focus-visible:outline-none"
                         />
                         <span className="text-small w-20">
                             {rungMinutesNote(rung.assumed)}

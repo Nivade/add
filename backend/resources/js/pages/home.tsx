@@ -28,11 +28,7 @@ import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
-import {
-    quietButtonClassName,
-    quietLineClassName,
-    Responses,
-} from '@/components/responses';
+import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -78,9 +74,8 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
                         />
                         <Button
                             type="submit"
-                            variant="outline"
+                            variant="quiet"
                             disabled={processing}
-                            className={quietButtonClassName}
                         >
                             Answer
                         </Button>
@@ -147,11 +142,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 className={cn(captureFieldClassName, 'w-20')}
                             />
                             <span className="text-muted-foreground">days</span>
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className={quietButtonClassName}
-                            >
+                            <Button type="submit" variant="quiet">
                                 Repeat
                             </Button>
                             <InputError
@@ -181,7 +172,7 @@ function RightNow({ rightNow, session }: HomeData) {
                         ? returnCopy.workingOn(session.intention.title)
                         : partWayLine(session.intention.title)}
                 </Meta>
-                <Button asChild size="action">
+                <Button asChild variant="now" size="action">
                     <Link href={focus()}>{focusCopy.continue}</Link>
                 </Button>
             </div>
@@ -284,11 +275,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {...reminders.dismiss.form(reminder.id)}
                             className="mt-3"
                         >
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className={quietButtonClassName}
-                            >
+                            <Button type="submit" variant="quiet">
                                 Got it
                             </Button>
                         </Form>
@@ -314,11 +301,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <span className="text-muted-foreground">
                                     read from what you wrote
                                 </span>
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className={quietButtonClassName}
-                                >
+                                <Button type="submit" variant="quiet">
                                     That{"'"}s right
                                 </Button>
                             </Form>
@@ -354,11 +337,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                         'w-20',
                                     )}
                                 />
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className={quietButtonClassName}
-                                >
+                                <Button type="submit" variant="quiet">
                                     {remindAfterCopy.action}
                                 </Button>
                             </Form>

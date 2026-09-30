@@ -14,7 +14,7 @@ export function Band({
         <section aria-labelledby={id}>
             <h2
                 id={id}
-                className="text-muted-foreground text-body mb-3 leading-snug font-semibold"
+                className="text-muted-foreground text-band-heading mb-3"
             >
                 {label}
             </h2>

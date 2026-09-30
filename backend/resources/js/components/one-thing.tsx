@@ -24,7 +24,7 @@ export function StartStep({ stepId }: { stepId: string }) {
     return (
         <Form {...focusRoutes.start.form()}>
             <input type="hidden" name="step_id" value={stepId} />
-            <Button type="submit" size="action">
+            <Button type="submit" variant="now" size="action">
                 {focusCopy.start}
             </Button>
         </Form>

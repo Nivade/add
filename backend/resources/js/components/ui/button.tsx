@@ -10,6 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
+          "border border-field bg-transparent text-ink hover:bg-accent",
+        now:
           "bg-now text-on-now hover:bg-now/90",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
@@ -18,7 +20,9 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        link: "text-ink underline-offset-4 hover:underline",
+        quiet:
+          "h-auto min-h-11 px-0 font-normal text-muted-foreground underline-offset-4 hover:text-ink hover:underline has-[>svg]:px-0",
       },
       size: {
         default: "h-11 px-4 has-[>svg]:px-3",

@@ -21,7 +21,7 @@ export default function Overwhelmed({
             <Head title="One thing" />
 
             <div className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-20">
-                <div className="mx-auto flex w-full max-w-[40rem] flex-col items-start gap-8">
+                <div className="max-w-content mx-auto flex w-full flex-col items-start gap-8">
                     <p className="text-muted-foreground text-lead">One thing</p>
 
                     <OneThing>

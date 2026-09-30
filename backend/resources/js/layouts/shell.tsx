@@ -9,8 +9,8 @@ import { WaitingForCapture } from '@/components/waiting-for-capture';
 import { Wordmark } from '@/components/wordmark';
 
 /** The header shares the content's column, so the eye never crosses the screen. */
-const COLUMN =
-    'w-full px-5 sm:mr-6 sm:ml-[clamp(1.5rem,6vw,6rem)] sm:max-w-[40rem] sm:px-0';
+const columnClassName =
+    'w-full px-5 sm:mr-6 sm:ml-[clamp(1.5rem,6vw,6rem)] sm:max-w-content sm:px-0';
 
 /** The day, drawn beside a single column: one key to capture, and nothing else in the frame. */
 export default function Shell({ children }: { children: React.ReactNode }) {
@@ -28,7 +28,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
             <div className="flex min-w-0 flex-1 flex-col">
                 <header
-                    className={`${COLUMN} flex flex-wrap items-center gap-x-3 gap-y-2 py-4`}
+                    className={`${columnClassName} flex flex-wrap items-center gap-x-3 gap-y-2 py-4`}
                 >
                     <Wordmark />
 
@@ -50,7 +50,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     />
                 )}
 
-                <main className={`${COLUMN} flex-1 pt-8 pb-20 sm:pt-10`}>
+                <main
+                    className={`${columnClassName} flex-1 pt-8 pb-20 sm:pt-10`}
+                >
                     {children}
                 </main>
             </div>

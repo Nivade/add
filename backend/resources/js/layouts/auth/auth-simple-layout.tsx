@@ -11,10 +11,12 @@ export default function AuthSimpleLayout({
             <div className="w-full max-w-sm">
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">
-                        <Wordmark className="text-2xl" />
+                        <Wordmark />
 
                         <div className="space-y-2 text-center">
-                            <h1 className="text-2xl font-semibold">{title}</h1>
+                            <h1 className="text-one-thing text-balance">
+                                {title}
+                            </h1>
                             <p className="text-muted-foreground text-lead text-center">
                                 {description}
                             </p>

@@ -1,5 +1,5 @@
 import type { RailData } from '@add/shared';
-import { focusCopy, homeBands } from '@add/shared';
+import { clockOf, doneMinute, focusCopy, homeBands } from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,10 @@ const sampleRail: RailData = {
     marks: [],
     appointmentTitle: null,
 };
+
+const sampleDoneAt = clockOf(
+    doneMinute(sampleRail.nowMinute, sampleRail.stepSeconds ?? 0),
+);
 
 /** A still of home, so the promise is shown rather than described. */
 function SampleHome() {
@@ -41,9 +45,11 @@ function SampleHome() {
                         Put the laundry in the washing machine.
                     </p>
                     <p className="text-muted-foreground">
-                        About 3 minutes, so done around 19:08 if you start now.
+                        About 3 minutes, so done around {sampleDoneAt} if you
+                        start now.
                     </p>
                     <Button
+                        variant="now"
                         disabled
                         tabIndex={-1}
                         className="disabled:opacity-100"
@@ -93,7 +99,7 @@ export default function Welcome() {
                                         Create an account
                                     </Link>
                                 </Button>
-                                <Button asChild size="action" variant="outline">
+                                <Button asChild size="action">
                                     <Link href={login()}>Log in</Link>
                                 </Button>
                             </div>

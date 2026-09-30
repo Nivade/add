@@ -3,8 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F4F5" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F1B22" />
+    @if (($appearance ?? 'system') === 'system')
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F4F5" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F1B22" />
+    @else
+        <meta name="theme-color" content="{{ $appearance === 'dark' ? '#0F1B22' : '#F2F4F5' }}" />
+    @endif
 
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>

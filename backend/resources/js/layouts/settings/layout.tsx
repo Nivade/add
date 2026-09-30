@@ -43,7 +43,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
     return (
         <div className="flex flex-col gap-10">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold">Settings</h1>
+                <h1 className="text-one-thing">Settings</h1>
 
                 <nav className="flex flex-wrap gap-x-6" aria-label="Settings">
                     {settingsNavItems.map((item) => {

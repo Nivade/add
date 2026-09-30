@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
                     weights: [400, 500, 600, 700],
                 }),
                 bunny('Atkinson Hyperlegible Mono', {
-                    weights: [400, 500],
+                    weights: [400, 500, 600],
                 }),
             ],
         }),

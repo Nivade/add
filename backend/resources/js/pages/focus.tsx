@@ -93,6 +93,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             {(processing) => (
                                 <Button
                                     type="submit"
+                                    variant="now"
                                     size="action"
                                     aria-disabled={processing}
                                 >

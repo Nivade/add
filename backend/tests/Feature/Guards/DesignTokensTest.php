@@ -36,6 +36,49 @@ function designTokenCssColors(string $selector): array
     return $colors;
 }
 
+/** @return array<string, string> css variable name without the dashes => hex */
+function designTokenStripStops(string $theme): array
+{
+    $source = (string) file_get_contents(repoPath('packages/shared/src/tokens.ts'));
+
+    preg_match('/export const dayStrip'.$theme.': readonly DayStripStop\[\] = \[(.*?)\];/s', $source, $block);
+    preg_match_all("/name: '(\w+)', minute: [^,]+, color: '(#[0-9A-Fa-f]{6})'/", $block[1] ?? '', $stops, PREG_SET_ORDER);
+
+    $colors = [];
+
+    foreach ($stops as [, $name, $hex]) {
+        $colors['strip-'.$name] = strtoupper($hex);
+    }
+
+    return $colors;
+}
+
+/** @return array<string, array{size: int, maxSize: int|null, lineHeight: string}> css role => its row in typeScale */
+function designTokenTypeScale(): array
+{
+    $source = (string) file_get_contents(repoPath('packages/shared/src/tokens.ts'));
+
+    preg_match('/export const typeScale = \{(.*?)\n\} as const;/s', $source, $block);
+    preg_match_all('/^\s*(\w+): \{ size: (\d+), (?:maxSize: (\d+), )?lineHeight: ([\d.]+),/m', $block[1] ?? '', $rows, PREG_SET_ORDER);
+
+    $scale = [];
+
+    foreach ($rows as [, $role, $size, $maxSize, $lineHeight]) {
+        $scale[strtolower((string) preg_replace('/[A-Z]/', '-$0', $role))] = [
+            'size' => (int) $size,
+            'maxSize' => $maxSize === '' ? null : (int) $maxSize,
+            'lineHeight' => $lineHeight,
+        ];
+    }
+
+    return $scale;
+}
+
+function designTokenRem(int $pixels): string
+{
+    return rtrim(rtrim(number_format($pixels / 16, 4, '.', ''), '0'), '.').'rem';
+}
+
 function designTokenLuminance(string $hex): float
 {
     $channels = array_map(function (string $pair): float {
@@ -92,6 +135,41 @@ it('declares every token in the stylesheet with the same hex as the shared token
     ['light', ':root'],
     ['dark', '.dark'],
 ]);
+
+it('declares every day-strip stop in the stylesheet with the same hex as the shared tokens', function (string $theme, string $selector): void {
+    $stops = designTokenStripStops($theme);
+    $css = designTokenCssColors($selector);
+
+    expect($stops)->toHaveCount(6);
+
+    foreach ($stops as $name => $hex) {
+        expect($css[$name] ?? null)->toBe($hex, "{$selector} --{$name}");
+    }
+})->with([
+    ['Light', ':root'],
+    ['Dark', '.dark'],
+]);
+
+it('declares every role of the type scale in the stylesheet at the size the shared tokens give it', function (): void {
+    $css = (string) file_get_contents(base_path('resources/css/app.css'));
+    $scale = designTokenTypeScale();
+
+    expect($scale)->toHaveCount(6);
+
+    foreach ($scale as $role => ['size' => $size, 'maxSize' => $maxSize, 'lineHeight' => $lineHeight]) {
+        preg_match('/--text-'.$role.':\s*([^;]+);/', $css, $value);
+        preg_match('/--text-'.$role.'--line-height:\s*([^;]+);/', $css, $leading);
+
+        $expected = $maxSize === null
+            ? designTokenRem($size)
+            : '/^clamp\('.preg_quote(designTokenRem($size), '/').',.*, '.preg_quote(designTokenRem($maxSize), '/').'\)$/';
+
+        $maxSize === null
+            ? expect($value[1] ?? null)->toBe($expected, "--text-{$role}")
+            : expect($value[1] ?? '')->toMatch($expected, "--text-{$role}");
+        expect($leading[1] ?? null)->toBe($lineHeight, "--text-{$role}--line-height");
+    }
+});
 
 it('keeps shouting labels and pixel type sizes out of the web components', function (): void {
     $root = base_path('resources/js');

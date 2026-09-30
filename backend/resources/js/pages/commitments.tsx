@@ -16,7 +16,7 @@ export default function Commitments({
             <Head title={commitmentCopy.listTitle} />
 
             <div className="flex flex-col items-start gap-10">
-                <h1 className="text-2xl font-semibold text-balance">
+                <h1 className="text-one-thing text-balance">
                     {commitmentCopy.listTitle}
                 </h1>
 

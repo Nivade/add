@@ -30,7 +30,7 @@ export default function Ai({ consented }: { consented: boolean }) {
                 >
                     {({ processing }) => (
                         <>
-                            <p className="text-sm">{consent.line}</p>
+                            <p className="text-small">{consent.line}</p>
 
                             <Button
                                 variant={consented ? 'secondary' : 'default'}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Home;
 
 use App\Data\BackwardsPlanData;
-use App\Data\PlanRungData;
 use App\Data\RailData;
 use App\Data\RailMarkData;
 use App\Models\ExecutionSession;
@@ -41,23 +40,25 @@ final class BuildRail
     /** @return list<RailMarkData> */
     private function marks(ResolutionContext $context): array
     {
+        $plan = $context->plan;
         $at = $context->appointment?->appointmentAt();
 
-        if (! $context->plan instanceof BackwardsPlanData || ! $at instanceof CarbonImmutable) {
+        if (! $plan instanceof BackwardsPlanData || ! $at instanceof CarbonImmutable) {
             return [];
         }
 
-        $instants = array_map(fn (PlanRungData $rung): array => [$rung->rung, $rung->instant()], $context->plan->rungs);
-        $instants[] = [null, $at];
         $marks = [];
 
-        foreach ($instants as [$rung, $instant]) {
-            $local = $instant->setTimezone($context->now->getTimezone());
+        foreach ($plan->rungs as $rung) {
+            $local = $rung->instant()->setTimezone($context->now->getTimezone());
 
             if ($local->isSameDay($context->now)) {
-                $marks[] = new RailMarkData($rung, $this->minuteOf($local), $local->format('H:i'));
+                $marks[] = new RailMarkData($rung->rung, $this->minuteOf($local), $rung->clock);
             }
         }
+
+        // A plan only exists for an appointment today, so the appointment itself always has a mark.
+        $marks[] = new RailMarkData(null, $this->minuteOf($at->setTimezone($context->now->getTimezone())), $plan->deadlineClock);
 
         return $marks;
     }

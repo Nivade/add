@@ -15,6 +15,9 @@
 
     --font-mono: 'Atkinson Hyperlegible Mono', ui-monospace, monospace;
 
+    /* The one reading column: shell, overwhelmed and anything else that holds a single thread. */
+    --container-content: 40rem;
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -27,6 +30,9 @@
     --text-lead--line-height: 1.55;
     --text-body: 1rem;
     --text-body--line-height: 1.55;
+    --text-band-heading: 1rem;
+    --text-band-heading--line-height: 1.4;
+    --text-band-heading--font-weight: 600;
     --text-small: 0.875rem;
     --text-small--line-height: 1.4;
     --text-numeric: 0.9375rem;
@@ -57,8 +63,7 @@
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
 
-    /* --muted is the secondary text colour here, so shadcn's muted fill reads the accent. */
-    --color-muted: var(--accent);
+    --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
 
     --color-accent: var(--accent);
@@ -122,8 +127,8 @@
     --card-foreground: var(--ink);
     --popover: var(--surface);
     --popover-foreground: var(--ink);
-    --primary: var(--now);
-    --primary-foreground: var(--on-now);
+    --primary: var(--ink);
+    --primary-foreground: var(--paper);
     --secondary: var(--accent);
     --secondary-foreground: var(--ink);
     --accent: color-mix(in srgb, var(--ink) 7%, var(--surface));
