@@ -277,7 +277,7 @@ gone on the next render, and that absence is the whole confirmation.
   `ConventionsTest` covers the new model. `packages/shared/src/generated.ts`
   exports `CheckInTopic` and `CheckInAnswer`.
 
-- [ ] **5. When it is due, and recording it.** Invoke skills: `laravel-actions`,
+- [x] **5. When it is due, and recording it.** Invoke skills: `laravel-actions`,
   `laravel-attributes`, `laravel-best-practices`.
   - Create `backend/app/Actions/CheckIns/DueCheckIn.php`: `AsObject`, with
     `public const int EVERY_DAYS = 14;` and

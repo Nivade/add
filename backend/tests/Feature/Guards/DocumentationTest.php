@@ -88,8 +88,6 @@ it('resolves every relative link in an agent document', function (): void {
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     $planned = [
-        'backend/app/Actions/CheckIns/DueCheckIn.php',
-        'backend/app/Actions/CheckIns/RecordCheckIn.php',
         'backend/app/Actions/Metrics/ReportOutcomes.php',
         'backend/app/Http/Controllers/Api/V1/StoreCheckInController.php',
         'backend/app/Http/Controllers/Web/StoreCheckInController.php',
@@ -98,7 +96,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Support/Metrics/Percentile.php',
         'backend/resources/js/components/check-in.tsx',
         'backend/tests/Feature/CheckIns/CheckInEndpointTest.php',
-        'backend/tests/Feature/CheckIns/DueCheckInTest.php',
         'backend/tests/Feature/Metrics/ReportOutcomesTest.php',
         'backend/tests/Unit/Metrics/PercentileTest.php',
     ];
