@@ -16,10 +16,10 @@ export default defineConfig(({ mode }) => ({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
             fonts: [
-                bunny('IBM Plex Sans', {
-                    weights: [400, 500, 600],
+                bunny('Atkinson Hyperlegible Next', {
+                    weights: [400, 500, 600, 700],
                 }),
-                bunny('IBM Plex Mono', {
+                bunny('Atkinson Hyperlegible Mono', {
                     weights: [400, 500],
                 }),
             ],
