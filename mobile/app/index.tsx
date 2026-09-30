@@ -8,10 +8,14 @@ import {
   checkInQuestions,
   checkInResponses,
   commitmentCopy,
-  formatEstimate,
+  homeBands,
+  homeCopy,
+  nothingNeedsYou,
   notHereLabels,
+  partWayLine,
   recurrenceLine,
   restCountLine,
+  rightNowMeta,
   waitingForResponses,
 } from '@add/shared';
 import { router } from 'expo-router';
@@ -139,14 +143,14 @@ function JustFinished({
   };
 
   return (
-    <Band label="Just finished">
+    <Band label={homeBands.justFinished}>
       <Text style={styles.line}>{finished.title}</Text>
       {finished.recurrenceEveryDays ? (
         <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
       ) : (
         <>
           <View style={styles.repeat}>
-            <Meta>Repeat every</Meta>
+            <Meta>{homeCopy.repeatEvery}</Meta>
             <TextInput
               style={[styles.input, styles.days]}
               value={everyDays}
@@ -223,7 +227,7 @@ export default function Home() {
           <OneThing>
             {session.session.currentStep?.title ?? session.intention.title}
           </OneThing>
-          <Meta>part-way through {session.intention.title.toLowerCase()}</Meta>
+          <Meta>{partWayLine(session.intention.title)}</Meta>
           <Button
             label="Continue"
             tone="primary"
@@ -233,13 +237,10 @@ export default function Home() {
       ) : rightNow ? (
         <>
           <OneThing>{rightNow.step.title}</OneThing>
-          <Meta>
-            {formatEstimate(rightNow.step.estimatedSeconds) ?? 'no guess yet'} ·{' '}
-            {rightNow.intention.title.toLowerCase()}
-          </Meta>
+          <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
           <Button label="Start" tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
-            <Band label="Why this one">
+            <Band label={homeBands.why}>
               {rightNow.why.map((line) => (
                 <Text key={line} style={styles.line}>
                   {line}
@@ -264,8 +265,8 @@ export default function Home() {
         </>
       ) : (
         <>
-          <OneThing>Nothing needs you right now.</OneThing>
-          <Meta>that is the whole answer</Meta>
+          <OneThing>{nothingNeedsYou}</OneThing>
+          <Meta>{homeCopy.wholeAnswer}</Meta>
         </>
       )}
 
@@ -274,7 +275,7 @@ export default function Home() {
       )}
 
       {reminder && (
-        <Band label="Before you go">
+        <Band label={homeBands.beforeYouGo}>
           {reminder.lines.map((line) => (
             <Text key={line} style={styles.line}>
               {line}
@@ -307,7 +308,7 @@ export default function Home() {
       )}
 
       {needsAttention.length > 0 && (
-        <Band label="Needs attention">
+        <Band label={homeBands.needsAttention}>
           {needsAttention.map((item) => {
             switch (item.kind) {
               case 'waiting_for':

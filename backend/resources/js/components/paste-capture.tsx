@@ -129,9 +129,9 @@ function Classification({
     if (!result.actionable) {
         return (
             <div className="flex flex-col gap-3">
-                <p>Nothing in this needs you.</p>
+                <p>{entryCopy.paste.nothingNeeded}</p>
                 <Button variant="outline" onClick={onDone} className="self-end">
-                    Close
+                    {entryCopy.paste.close}
                 </Button>
             </div>
         );
@@ -151,10 +151,10 @@ function Classification({
             )}
             <div className="flex justify-end gap-3">
                 <Button type="button" variant="outline" onClick={onDone}>
-                    Leave it
+                    {entryCopy.paste.leave}
                 </Button>
                 <Button type="submit" variant="outline">
-                    Add it
+                    {entryCopy.paste.add}
                 </Button>
             </div>
         </Form>

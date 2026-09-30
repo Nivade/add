@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -62,10 +62,8 @@ export default function Focus() {
 
       {paused ? (
         <>
-          <OneThing>Welcome back.</OneThing>
-          <Meta>
-            you left off at {(step?.title ?? intention.title).toLowerCase()}
-          </Meta>
+          <OneThing>{focusCopy.welcomeBack}</OneThing>
+          <Meta>{leftOffLine(step?.title ?? intention.title)}</Meta>
           <Button
             label="Continue"
             tone="primary"
@@ -75,6 +73,7 @@ export default function Focus() {
       ) : (
         <>
           <OneThing>{step?.title ?? intention.title}</OneThing>
+          {step && <Meta>{stepMeta(step)}</Meta>}
           {data.currentStepIsCommitment ? (
             <Meta>{commitmentCopy.promised}</Meta>
           ) : (
@@ -82,15 +81,15 @@ export default function Focus() {
           )}
 
           <View style={styles.controls}>
-            <Button label="Done" onPress={() => void control('complete-step')} />
-            <Button label="Skip" onPress={() => void control('skip-step')} />
-            <Button label="Pause" onPress={() => void control('pause')} />
-            <Button label="I'm stuck" onPress={() => setStuckOpen(true)} />
+            <Button label={focusCopy.done} onPress={() => void control('complete-step')} />
+            <Button label={focusCopy.skip} onPress={() => void control('skip-step')} />
+            <Button label={focusCopy.pause} onPress={() => void control('pause')} />
+            <Button label={focusCopy.stuck} onPress={() => setStuckOpen(true)} />
             <Button
-              label="I got distracted"
+              label={focusCopy.distracted}
               onPress={() => void control('distracted')}
             />
-            <Button label="Stop" onPress={() => void control('stop')} />
+            <Button label={focusCopy.stop} onPress={() => void control('stop')} />
           </View>
         </>
       )}
@@ -111,8 +110,8 @@ export default function Focus() {
         onRequestClose={() => setStuckOpen(false)}
       >
         <Screen>
-          <OneThing>What's blocking you?</OneThing>
-          <Meta>every answer leads somewhere</Meta>
+          <OneThing>{focusCopy.stuckQuestion}</OneThing>
+          <Meta>{focusCopy.stuckMeta}</Meta>
 
           <View style={styles.controls}>
             {stuckReasonsFor(step?.place ?? null).map((reason) => (

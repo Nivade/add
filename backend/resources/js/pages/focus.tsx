@@ -1,8 +1,8 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasonsFor } from '@add/shared';
+import { focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Meta, OneThing, stepMeta } from '@/components/one-thing';
+import { Meta, OneThing } from '@/components/one-thing';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,10 +58,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                 {paused ? (
                     <div className="space-y-6">
-                        <OneThing>Welcome back.</OneThing>
+                        <OneThing>{focusCopy.welcomeBack}</OneThing>
                         <Meta>
-                            you left off at{' '}
-                            {(step?.title ?? intention.title).toLowerCase()}
+                            {leftOffLine(step?.title ?? intention.title)}
                         </Meta>
                         <div className="pl-5">
                             <Form {...focusRoutes.resume.form(session.id)}>
@@ -88,27 +87,27 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             <Control
-                                label="Done"
+                                label={focusCopy.done}
                                 form={focusRoutes.completeStep.form(session.id)}
                             />
                             <Control
-                                label="Skip"
+                                label={focusCopy.skip}
                                 form={focusRoutes.skipStep.form(session.id)}
                             />
                             <Control
-                                label="Pause"
+                                label={focusCopy.pause}
                                 form={focusRoutes.pause.form(session.id)}
                             />
                             <Control
-                                label="I'm stuck"
+                                label={focusCopy.stuck}
                                 onClick={() => setStuckOpen(true)}
                             />
                             <Control
-                                label="I got distracted"
+                                label={focusCopy.distracted}
                                 form={focusRoutes.distracted.form(session.id)}
                             />
                             <Control
-                                label="Stop"
+                                label={focusCopy.stop}
                                 form={focusRoutes.stop.form(session.id)}
                             />
                         </div>
@@ -126,9 +125,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
             <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>What's blocking you?</DialogTitle>
+                        <DialogTitle>{focusCopy.stuckQuestion}</DialogTitle>
                         <DialogDescription>
-                            Every answer leads somewhere.
+                            {focusCopy.stuckMeta}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">

@@ -1,3 +1,4 @@
+import { entryCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,7 @@ export function QuickCapture() {
                     <kbd className="text-muted-foreground ml-1 text-xs">c</kbd>
                 </>
             }
-            title="What's on your mind?"
+            title={entryCopy.thought.question}
             description="Write it however it comes out. Sorting it out is the app's job."
             open={open}
             onOpenChange={setOpen}
@@ -62,7 +63,7 @@ export function QuickCapture() {
                     name="body"
                     rows={3}
                     autoFocus
-                    aria-label="What's on your mind?"
+                    aria-label={entryCopy.thought.question}
                     className={captureFieldClassName}
                 />
                 <Button type="submit" className="self-end">
