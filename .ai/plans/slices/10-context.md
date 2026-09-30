@@ -398,7 +398,7 @@ day, and `model:prune` runs daily.
 
   *Check:* `npm run test:browser` passes.
 
-- [ ] **14. Documents.** Invoke skills: `next-action-resolver`,
+- [x] **14. Documents.** Invoke skills: `next-action-resolver`,
   `generated-artifacts`.
   - `.ai/skills/next-action-resolver/SKILL.md`: add `FitsWhereYouAre` to the
     chain line. Under `ResolutionContext`, add that `Whereabouts` is the spec's

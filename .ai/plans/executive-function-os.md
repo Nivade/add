@@ -54,17 +54,20 @@ classes live. "Next action" stays the product word and is what
 | --- | --- | --- |
 | `captures` | raw text, source, `intention_id` nullable | immutable, `created_at` only |
 | `intentions` | title, why, status, `deadline_at` nullable, `clarifying_question` and its answer, plan assumptions | the thing the person wants handled |
-| `steps` | intention, title, `estimated_seconds`, position, status | one physical action each |
+| `steps` | intention, title, `estimated_seconds`, `place` nullable, position, status | one physical action each; a null place means anywhere |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
 | `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
 | `calendar_events` | source, external id, title, `starts_at`, plan assumptions | read-only; the source owns it, we never write back |
 | `reminders` | user, appointment kind and id, `sent_at` | one row per appointment, which is what keeps reminders sparse |
 | `devices` | user, Expo push token, platform | the token identifies the device, so registering twice moves it |
+| `not_here_reports` | user, place | what the person said about where they are not; pruned after a day |
 
 Deferred until they earn their place: `Project`, `Task`, `Commitment`,
-`WaitingFor`, `Context`, `Document`. The spec lists them; building them before
+`WaitingFor`, `Document`. The spec lists them; building them before
 the first journey is polished is the premature normalisation it warns against.
-`CalendarEvent` and `Reminder` earned theirs in slice 6.
+`CalendarEvent` and `Reminder` earned theirs in slice 6. `Context` earned its
+place in slice 10, as a `Place` on a step and a computed `Whereabouts`, not a
+table.
 
 An appointment is the `Appointment` contract, not a table: a dated intention and
 a calendar event both answer it, so backwards planning, the rail and reminders

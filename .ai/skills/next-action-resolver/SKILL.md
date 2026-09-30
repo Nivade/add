@@ -20,9 +20,9 @@ first rung that returns non-zero decides. There is deliberately no numeric
 score: a number six inputs went into cannot be explained, and every
 recommendation has to be.
 
-The chain runs highest-priority first: `DeadlineWithinReach`, `HasDeadline`,
-`NotRecentlySkipped`, `PrerequisiteFirst`, `StartableNow`, `OldestIntention`,
-`EarliestPosition`. Read the classes for the current order rather than trusting
+The chain runs highest-priority first: `DeadlineWithinReach`, `FitsWhereYouAre`,
+`HasDeadline`, `NotRecentlySkipped`, `PrerequisiteFirst`, `StartableNow`,
+`OldestIntention`, `EarliestPosition`. Read the classes for the current order rather than trusting
 this line.
 
 A running session's `current_step_id` short-circuits the whole chain before
@@ -61,7 +61,9 @@ on their day rather than UTC's. `availableSeconds` is the time until the next
 leave-by rung, or `null` when the day is open. `ResolutionContext::forUser()`
 assembles it from `NextAppointment` and `BackwardsPlan`.
 
-It is **not** the spec's `Context` model. Do not grow it into one.
+It is **not** the spec's `Context` model. Do not grow it into one. The spec's
+Context is `Whereabouts` — where the person seems to be, computed on each
+resolve — and it rides on `ResolutionContext` as one field.
 
 ## Candidate cost
 
