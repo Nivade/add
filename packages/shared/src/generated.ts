@@ -84,6 +84,7 @@ justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
 hasOpenCommitments: boolean,
+checkIn: CheckInTopic | null,
 };
 export type IngestionClassificationData = {
 actionable: boolean,

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\StartSession;
+use App\Actions\Sessions\StopSession;
 use App\Enums\ExecutionEventType;
 use App\Enums\Place;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Nvade\AiToolkit\Facades\AiToolkit;
 use Nvade\AiToolkit\Testing\FakeAiProvider;
@@ -188,6 +190,28 @@ function finishStepAt(User $user, Place $place): void
     $step = Step::factory()->for($intention)->create(['position' => 1, 'place' => $place]);
 
     CompleteStep::run(StartSession::run($user, $step));
+}
+
+function workedOn(User $user): void
+{
+    $intention = kitchen();
+    $intention->update(['user_id' => $user->id]);
+
+    StopSession::run(StartSession::run($user, $intention->steps()->first()));
+}
+
+/** An account opened some days ago that stopped a session yesterday, with the clock left at 2026-09-30 10:00. */
+function activeFor(int $days = 30): User
+{
+    test()->travelTo(CarbonImmutable::parse('2026-09-30 10:00:00')->subDays($days));
+    $user = User::factory()->create();
+
+    test()->travelTo(CarbonImmutable::parse('2026-09-29 10:00:00'));
+    workedOn($user);
+
+    test()->travelTo(CarbonImmutable::parse('2026-09-30 10:00:00'));
+
+    return $user;
 }
 
 /** @return list<string> */

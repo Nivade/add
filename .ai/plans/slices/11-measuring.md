@@ -299,7 +299,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/CheckIns` passes.
 
-- [ ] **6. On home.** Invoke skills: `laravel-data`, `generated-artifacts`.
+- [x] **6. On home.** Invoke skills: `laravel-data`, `generated-artifacts`.
   - `HomeData` gains `public ?CheckInTopic $checkIn` as its last constructor
     parameter.
   - `BuildHome::handle()` computes `$session` and `$reminder` into locals
