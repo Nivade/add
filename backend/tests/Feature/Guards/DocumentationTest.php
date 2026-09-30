@@ -87,7 +87,20 @@ it('resolves every relative link in an agent document', function (): void {
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
-    $planned = [];
+    $planned = [
+        'backend/app/Actions/Whereabouts/ReportNotHere.php',
+        'backend/app/Enums/Place.php',
+        'backend/app/Http/Controllers/Api/V1/ReportNotHereController.php',
+        'backend/app/Http/Controllers/Web/ReportNotHereController.php',
+        'backend/app/Http/Requests/ReportNotHereRequest.php',
+        'backend/app/Models/NotHereReport.php',
+        'backend/app/Support/NextAction/Comparators/FitsWhereYouAre.php',
+        'backend/app/Support/NextAction/Whereabouts.php',
+        'backend/database/factories/NotHereReportFactory.php',
+        'backend/resources/js/components/not-here.tsx',
+        'backend/tests/Feature/NextAction/NotHereEndpointTest.php',
+        'backend/tests/Feature/NextAction/WhereaboutsTest.php',
+    ];
 
     foreach ($planned as $path) {
         expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');

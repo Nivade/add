@@ -1,5 +1,10 @@
 # Executive Function OS — build plan
 
+## Skills
+
+`slice-workflow` for choosing and opening a slice. Each slice file lists its
+own.
+
 ## What this repo is
 
 An external executive-function system, not a task manager. The product answers
@@ -183,12 +188,19 @@ what moving a plan to `done` requires.
 | 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, pasted-text ingestion | §15, §17, §19–§21, §33 | done |
 | — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | done |
 | — | [Findings triage](archive/findings-triage.md) — session transitions under the row lock, feed fetches to public hosts only, a dead token signs the phone out, dated clarification answers, a copied-question eval, the local certificate | — | done |
-| 10 | Phase 3 — companion, location awareness, bill/subscription detection, full ingestion (email, documents, receipts, bank/gov correspondence), the `Context` model, Friend body doubling | §4, §9, §17, §19, §34 | recorded only |
+| 10 | [Context](slices/10-context.md) — where a step happens, where the person seems to be, and a rung that reorders on it without ever filtering | §4, §9 | building |
+| 11 | Measuring it — §36's outcome metrics, aggregated from the events already recorded | §36 | recorded only |
+| 12 | Ingestion — the threat model first, then email, documents, receipts, bank/gov correspondence, bill and subscription detection, and the first `system_inferred` commitment producer | §19, §21, §28, §34 | recorded only |
+| 13 | Location — device location as a second whereabouts source behind its own consent, and location-triggered reminders | §14, §15, §34 | recorded only |
+| 14 | Body doubling beyond solo — friend, anonymous group, AI companion | §17, §34 | recorded only |
 
-**Slice 10** is recorded so it is not reinvented, not planned. §17's Friend mode
-and the `Context` model (§4, §9's location/available-tools inputs) have no
-other slice claiming them, so they are recorded here rather than left
-unmentioned; slice 9 classifies pasted text, and the source contract waits for §19's real sources here.
+**Slices 10–14** split the spec's Phase 3 by risk. Context comes first: it is
+the engine, it is deterministic, and it adds no privacy surface. Measurement is
+next, because it is cheap and says whether context helped. Ingestion waits for
+its threat model, which also settles notification payload encryption. Location
+needs a consent surface, and Friend mode needs a second person in the system,
+so both come last. Only slice 10 is designed. The rest get their files when
+they are next up.
 
 ## Measuring it
 
@@ -198,5 +210,4 @@ of sessions that make real progress, recovery rate after distraction. A person
 using this well should spend less time in it over time.
 
 No slice computes any of this yet. `execution_events`, skip history and session
-outcomes already carry the raw material; the aggregation layer is unscheduled,
-not deferred by decision — recorded here so it is not mistaken for done.
+outcomes already carry the raw material. The aggregation layer is slice 11.
