@@ -1,7 +1,7 @@
 import type { ExecutionStateData } from '@add/shared';
 import { stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,8 @@ function Control({
     stepId?: string;
     onClick?: () => void;
 }) {
+    const inFlight = useRef(false);
+
     if (!form) {
         return (
             <Button
@@ -43,7 +45,13 @@ function Control({
     }
 
     return (
-        <Form {...form}>
+        // Not `disabled`: that drops keyboard focus to the page mid-request.
+        <Form
+            {...form}
+            onBefore={() => !inFlight.current}
+            onStart={() => (inFlight.current = true)}
+            onFinish={() => (inFlight.current = false)}
+        >
             {({ processing }) => (
                 <>
                     {stepId && (
@@ -53,7 +61,7 @@ function Control({
                         type="submit"
                         variant="outline"
                         className={CONTROL_CLASS}
-                        disabled={processing}
+                        aria-disabled={processing}
                     >
                         {label}
                     </Button>

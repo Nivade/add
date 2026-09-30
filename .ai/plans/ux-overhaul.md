@@ -72,7 +72,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - Mobile `mobile/src/api/endpoints.ts`: `control()` sends `{ step_id }` for `complete-step` and `skip-step`; `stuck()` sends `step_id`. `mobile/app/focus.tsx` holds a `busy` flag that disables all six controls while a request runs, and an `ApiError` with status 409 calls `reload()`.
   - Tests in `backend/tests/Feature/Execution/SessionTest.php` and `backend/tests/Feature/Execution/ExecutionEndpointTest.php`: a second complete with the old step id throws and leaves the next step pending; the API answers 409; the web answers a redirect and changes nothing; a missing `step_id` is 422.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution` and `npm run typecheck` pass.
-- [ ] **1.2 The phone layout fits the phone.** Invoke skills: `tailwindcss-development`, `pest-testing`.
+- [x] **1.2 The phone layout fits the phone.** Invoke skills: `tailwindcss-development`, `pest-testing`.
   - `backend/resources/js/layouts/shell.tsx`: the header and its button group get `flex-wrap`. Phase 3 removes four of the buttons; this is the interim fix.
   - New `backend/tests/Browser/LayoutTest.php`: at a 390px-wide viewport (find the device method with `search-docs` query `browser testing device viewport`), `/home` has `document.documentElement.scrollWidth <= window.innerWidth`, and `assertNoJavaScriptErrors()`.
   - Check: `npm run test:browser` passes.

@@ -118,7 +118,6 @@ it('names only paths that exist', function (): void {
         'backend/resources/js/layouts/focus-frame.tsx',
         'backend/resources/js/pages/appointment.tsx',
         'backend/resources/js/pages/finished.tsx',
-        'backend/tests/Browser/LayoutTest.php',
         'backend/tests/Feature/Auth/TimezoneTest.php',
         'backend/tests/Feature/Captures/CaptureKindTest.php',
         'backend/tests/Feature/Captures/SortCaptureTest.php',

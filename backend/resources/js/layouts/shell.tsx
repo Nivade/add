@@ -24,7 +24,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             {rail && <Rail rail={rail} />}
 
             <div className="flex min-w-0 flex-1 flex-col">
-                <header className="mx-auto flex w-full max-w-2xl items-center gap-6 px-6 py-5 lg:mx-0 lg:ml-[8vw] lg:max-w-[calc(100%-8vw)] lg:pr-10">
+                <header className="mx-auto flex w-full max-w-2xl flex-wrap items-center gap-6 px-6 py-5 lg:mx-0 lg:ml-[8vw] lg:max-w-[calc(100%-8vw)] lg:pr-10">
                     <nav className="flex gap-5" aria-label="Main">
                         {tabs.map((tab) => (
                             <Link
@@ -41,7 +41,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                         ))}
                     </nav>
 
-                    <div className="ml-auto flex items-center gap-3">
+                    <div className="ml-auto flex flex-wrap items-center gap-3">
                         <QuickCapture />
                         <WaitingForCapture />
                         <CommitmentCapture />
