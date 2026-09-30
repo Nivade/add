@@ -1,7 +1,7 @@
 import type { ExecutionStateData } from '@add/shared';
 import { returnCopy, stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { useOneRequestAtATime } from '@/hooks/use-one-request-at-a-time';
 import focusRoutes from '@/routes/focus';
 
 const CONTROL_CLASS =
@@ -29,7 +30,7 @@ function Control({
     stepId?: string;
     onClick?: () => void;
 }) {
-    const inFlight = useRef(false);
+    const oneAtATime = useOneRequestAtATime();
 
     if (!form) {
         return (
@@ -45,13 +46,7 @@ function Control({
     }
 
     return (
-        // Not `disabled`: that drops keyboard focus to the page mid-request.
-        <Form
-            {...form}
-            onBefore={() => !inFlight.current}
-            onStart={() => (inFlight.current = true)}
-            onFinish={() => (inFlight.current = false)}
-        >
+        <Form {...form} {...oneAtATime}>
             {({ processing }) => (
                 <>
                     {stepId && (
@@ -66,6 +61,20 @@ function Control({
                         {label}
                     </Button>
                 </>
+            )}
+        </Form>
+    );
+}
+
+function Continue({ sessionId }: { sessionId: string }) {
+    const oneAtATime = useOneRequestAtATime();
+
+    return (
+        <Form {...focusRoutes.resume.form(sessionId)} {...oneAtATime}>
+            {({ processing }) => (
+                <Button type="submit" aria-disabled={processing}>
+                    Continue
+                </Button>
             )}
         </Form>
     );
@@ -95,16 +104,16 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         </OneThing>
                         {state.returning ? (
                             <Meta>
-                                {returnCopy.workingOn(intention.title)}{' '}
-                                {returnCopy.stepsDone(state.stepsDone)}
+                                {returnCopy.meta(
+                                    intention.title,
+                                    state.stepsDone,
+                                )}
                             </Meta>
                         ) : (
                             <Meta>{returnCopy.pausedMeta}</Meta>
                         )}
                         <div className="pl-5">
-                            <Form {...focusRoutes.resume.form(session.id)}>
-                                <Button type="submit">Continue</Button>
-                            </Form>
+                            <Continue sessionId={session.id} />
                         </div>
                     </div>
                 ) : (
@@ -138,6 +147,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Control
                                 label="Pause"
                                 form={focusRoutes.pause.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label="I'm stuck"
@@ -146,10 +156,12 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Control
                                 label="I got distracted"
                                 form={focusRoutes.distracted.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label="Stop"
                                 form={focusRoutes.stop.form(session.id)}
+                                stepId={step?.id}
                             />
                         </div>
                     </>

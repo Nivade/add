@@ -243,7 +243,7 @@ export default function Home() {
           <Meta>
             {session.returning
               ? returnCopy.workingOn(session.intention.title)
-              : `Part-way through ${session.intention.title}.`}
+              : returnCopy.partWay(session.intention.title)}
           </Meta>
           <Button
             label="Continue"
@@ -377,11 +377,9 @@ export default function Home() {
         </Band>
       )}
 
-      {sortingCount > 0 && (
-        <Text accessibilityLiveRegion="polite" style={styles.line}>
-          {sortingLine(sortingCount)}
-        </Text>
-      )}
+      <Text accessibilityLiveRegion="polite" style={styles.line}>
+        {sortingCount > 0 ? sortingLine(sortingCount) : ''}
+      </Text>
       <Meta>{restCountLine(restCount)}</Meta>
       {hasOpenCommitments && (
         <QuietAction

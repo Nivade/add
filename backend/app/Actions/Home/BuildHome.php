@@ -39,7 +39,10 @@ final class BuildHome
     /** Past a day, an unsorted capture is stuck rather than being sorted. */
     private const int SORTING_WITHIN_HOURS = 24;
 
-    public function __construct(private readonly NextActionResolver $resolver) {}
+    public function __construct(
+        private readonly NextActionResolver $resolver,
+        private readonly CountOpenThings $countOpenThings,
+    ) {}
 
     public function handle(User $user): HomeData
     {
@@ -59,7 +62,7 @@ final class BuildHome
             justFinished: $this->justFinished($user, $context->now),
             needsAttention: $needsAttention,
             restCount: $this->restCount($user, $needsAttention, $session?->intention->id ?? $rightNow?->intention->id),
-            sortingCount: $this->sorting($user, $context->now),
+            sortingCount: $this->sortingCount($user, $context->now),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
             checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
         );
@@ -74,10 +77,10 @@ final class BuildHome
         );
         $shownAbove = $shownIntentionId !== null && ! $shownElsewhere ? 1 : 0;
 
-        return max(0, CountOpenThings::make()->handle($user) - count($needsAttention) - $shownAbove);
+        return max(0, $this->countOpenThings->handle($user) - count($needsAttention) - $shownAbove);
     }
 
-    private function sorting(User $user, CarbonImmutable $now): int
+    private function sortingCount(User $user, CarbonImmutable $now): int
     {
         return Capture::query()
             ->where('user_id', $user->id)

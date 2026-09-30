@@ -90,12 +90,7 @@ export default function Focus() {
           </OneThing>
           <Meta>
             {data.returning
-              ? [
-                  returnCopy.workingOn(intention.title),
-                  returnCopy.stepsDone(data.stepsDone),
-                ]
-                  .filter(Boolean)
-                  .join(' ')
+              ? returnCopy.meta(intention.title, data.stepsDone)
               : returnCopy.pausedMeta}
           </Meta>
           <Button

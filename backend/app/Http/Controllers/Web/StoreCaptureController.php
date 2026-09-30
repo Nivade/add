@@ -18,7 +18,7 @@ final class StoreCaptureController extends Controller
 
         RecordCapture::run($user, $request->string('body')->toString(), $request->source());
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Got it. Sorting it out.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Got it. Sorting it out.')]);
 
         return back();
     }

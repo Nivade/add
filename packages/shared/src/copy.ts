@@ -35,6 +35,11 @@ export const returnCopy = {
         count === 0
             ? null
             : `You had done ${count} ${count === 1 ? 'step' : 'steps'}.`,
+    meta: (title: string, stepsDone: number): string =>
+        [returnCopy.workingOn(title), returnCopy.stepsDone(stepsDone)]
+            .filter((line) => line !== null)
+            .join(' '),
+    partWay: (title: string): string => `Part-way through ${title}.`,
 };
 
 export const planRungLabels: Record<PlanRung, string> = {

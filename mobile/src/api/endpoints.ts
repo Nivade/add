@@ -121,10 +121,7 @@ export const api = {
     request<ExecutionStateData>(`/sessions/${sessionId}/${control}`, {
       method: 'POST',
       token,
-      body:
-        control === 'complete-step' || control === 'skip-step'
-          ? { step_id: stepId }
-          : undefined,
+      body: { step_id: stepId },
     }),
 
   stuck: (

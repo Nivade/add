@@ -26,8 +26,10 @@ final class BuildExecutionState
     /** Below this, "a minute or two" is truer than a number. */
     private const int ELAPSED_FLOOR_SECONDS = 90;
 
+    /** A pause shorter than this was a breath, not an absence. */
     private const int RETURNING_AFTER_PAUSE_MINUTES = 5;
 
+    /** Quiet this long in a running session means they wandered off without saying so. */
     private const int RETURNING_AFTER_IDLE_MINUTES = 20;
 
     public function handle(ExecutionSession $session): ExecutionStateData

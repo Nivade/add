@@ -171,7 +171,7 @@ function RightNow({ rightNow, session }: HomeData) {
                 <Meta>
                     {session.returning
                         ? returnCopy.workingOn(session.intention.title)
-                        : `Part-way through ${session.intention.title}.`}
+                        : returnCopy.partWay(session.intention.title)}
                 </Meta>
                 <div className="pl-5">
                     <Button asChild>
@@ -244,11 +244,9 @@ export default function Home({ home: data }: { home: HomeData }) {
                     <RightNow {...data} />
                 </section>
 
-                {sortingCount > 0 && (
-                    <p role="status" className="text-muted-foreground">
-                        {sortingLine(sortingCount)}
-                    </p>
-                )}
+                <p role="status" className="text-muted-foreground empty:sr-only">
+                    {sortingCount > 0 && sortingLine(sortingCount)}
+                </p>
 
                 {!data.session && rightNow && rightNow.why.length > 0 && (
                     <Band label="Why this one">

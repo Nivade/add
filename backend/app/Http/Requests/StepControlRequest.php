@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\NamesTheStep;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class StepControlRequest extends FormRequest
 {
+    use NamesTheStep;
+
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
-        return [
-            'step_id' => ['required', 'string'],
-        ];
-    }
-
-    public function stepId(): string
-    {
-        return $this->string('step_id')->toString();
+        return $this->stepRules();
     }
 }
