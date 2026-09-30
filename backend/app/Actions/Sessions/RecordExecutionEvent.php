@@ -9,7 +9,7 @@ use App\Models\ExecutionEvent;
 use App\Models\ExecutionSession;
 use Lorisleiva\Actions\Concerns\AsObject;
 
-/** The events are the replay, so every transition writes exactly one and carries nothing the row already holds. */
+/** The events are the replay: one per transition, its payload only what the row cannot hold, such as the rung behind a start. */
 final class RecordExecutionEvent
 {
     use AsObject;

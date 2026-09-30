@@ -296,3 +296,33 @@ it('picks the newest of two running sessions for one person, breaking a tie on i
 
     expect($user->fresh()->runningSession?->id)->toBe($sameInstantLaterId->id);
 });
+
+/** @return array<string, mixed>|null */
+function startedPayload(ExecutionSession $session): ?array
+{
+    return $session->events()->where('type', 'started')->latest('id')->firstOrFail()->payload;
+}
+
+it('records the rung that recommended the step the person started', function (): void {
+    $session = started();
+
+    expect(startedPayload($session))->toBe(['recommended' => true, 'rung' => 'prerequisite_first']);
+});
+
+it('records a start the resolver would not have offered as unrecommended', function (): void {
+    $intention = kitchen();
+
+    $session = StartSession::run($intention->user, $intention->steps()->where('position', 3)->sole());
+
+    expect(startedPayload($session))->toBe(['recommended' => false, 'rung' => null]);
+});
+
+it('attributes a move to another intention against the step the person was part-way through', function (): void {
+    $session = started();
+    $elsewhere = kitchen()->steps()->first();
+    $elsewhere->intention->update(['user_id' => $session->user_id]);
+
+    $next = StartSession::run($session->user, $elsewhere);
+
+    expect(startedPayload($next))->toBe(['recommended' => false, 'rung' => null]);
+});

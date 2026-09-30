@@ -217,7 +217,7 @@ gone on the next render, and that absence is the whole confirmation.
   `npm run artisan -- test --compact tests/Feature/NextAction tests/Feature/Home`
   passes, with every existing scenario unchanged.
 
-- [ ] **3. The rung on `started`.** Invoke skills: `laravel-actions`,
+- [x] **3. The rung on `started`.** Invoke skills: `laravel-actions`,
   `laravel-best-practices`.
   - `StartSession` gains
     `public function __construct(private readonly NextActionResolver $resolver) {}`.
