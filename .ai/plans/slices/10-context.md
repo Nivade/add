@@ -285,7 +285,7 @@ day, and `model:prune` runs daily.
   `npm run artisan -- test --compact tests/Feature/NextAction tests/Feature/Home`
   passes, including every existing scenario unchanged.
 
-- [ ] **7. Overwhelm mode.** Invoke skill: `next-action-resolver`.
+- [x] **7. Overwhelm mode.** Invoke skill: `next-action-resolver`.
   - `SmallestFirst::sort` compares cool-off, then `FitsWhereYouAre::compare`,
     then size.
   - `ReduceToOneStep::why()` replaces the second line with "Nothing shorter can

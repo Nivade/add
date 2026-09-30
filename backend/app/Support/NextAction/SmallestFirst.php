@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\NextAction;
 
+use App\Support\NextAction\Comparators\FitsWhereYouAre;
 use App\Support\NextAction\Comparators\NotRecentlySkipped;
 
 /** One definition of "smallest": what overwhelm mode offers and what a step too big is traded for. */
@@ -16,8 +17,10 @@ final class SmallestFirst
     public static function sort(array $candidates, ResolutionContext $context): array
     {
         $coolOff = new NotRecentlySkipped;
+        $fit = new FitsWhereYouAre;
 
         usort($candidates, fn (Candidate $a, Candidate $b): int => $coolOff->compare($a, $b, $context)
+            ?: $fit->compare($a, $b, $context)
             ?: self::size($a) <=> self::size($b));
 
         return $candidates;
