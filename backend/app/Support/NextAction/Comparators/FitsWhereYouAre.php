@@ -26,8 +26,14 @@ final class FitsWhereYouAre extends Rung
 
     public function qualifies(Candidate $candidate, ResolutionContext $context): ?string
     {
+        return $this->assumedPlace($candidate, $context)?->seemsHere();
+    }
+
+    /** The guess the why states whenever this step fits, and so the one the person can take back. */
+    public function assumedPlace(Candidate $candidate, ResolutionContext $context): ?Place
+    {
         $place = $candidate->step->place;
 
-        return $place instanceof Place && in_array($place, $context->whereabouts->likely, true) ? $place->seemsHere() : null;
+        return $place instanceof Place && in_array($place, $context->whereabouts->likely, true) ? $place : null;
     }
 }

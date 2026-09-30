@@ -343,3 +343,18 @@ it('ranks placed steps exactly as before while nothing is known about where the 
         ->and($answer?->why)->toBe(['This takes about 1 minute.'])
         ->and($answer?->assumedPlace)->toBeNull();
 });
+
+it('offers no correction for a guess the why does not state', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120);
+    placedStep($user, 'Empty the dishwasher.', Place::Home, 300);
+    finishStepAt($user, Place::Home);
+
+    $answer = nextActionWhereYouAre($user);
+
+    expect($answer?->step->title)->toBe('Wipe one worktop.')
+        ->and($answer?->why)->not->toContain('You seem to be at home, where this gets done.')
+        ->and($answer?->assumedPlace)->toBeNull();
+});

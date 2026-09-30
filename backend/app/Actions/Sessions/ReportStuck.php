@@ -17,7 +17,6 @@ use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\NextAction\SmallestFirst;
-use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Every answer leaves the person with something to start or a clean stop. */
@@ -73,11 +72,13 @@ final class ReportStuck
 
         ReportNotHere::run($session->user, $place);
 
-        $sibling = $session->intention->remainingSteps()
-            ->whereKeyNot($step->id)
-            ->where(fn (Builder $query) => $query->whereNull('place')->orWhere('place', '!=', $place))
+        $elsewhere = $session->intention->remainingSteps()
             ->orderBy('position')
-            ->first();
+            ->get()
+            ->reject(fn (Step $sibling): bool => $sibling->place === $place);
+
+        // Onwards first, then from the front, the way the session moves on from anything else.
+        $sibling = $elsewhere->first(fn (Step $sibling): bool => $sibling->position > $step->position) ?? $elsewhere->first();
 
         if (! $sibling instanceof Step) {
             return LandSession::run($session, SessionOutcome::Continued);

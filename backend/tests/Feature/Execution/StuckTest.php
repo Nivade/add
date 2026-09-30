@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\ReportStuck;
+use App\Actions\Sessions\StartSession;
 use App\Actions\Steps\SkipStep;
 use App\Actions\Steps\SplitStep;
 use App\Enums\Place;
@@ -203,15 +204,15 @@ it('advances rather than leaving them on the step they called too big', function
 });
 
 /** @param  list<Place|null>  $places */
-function startedWithPlaces(array $places): ExecutionSession
+function startedWithPlaces(array $places, int $at = 1): ExecutionSession
 {
-    $session = started(count($places));
+    $intention = kitchen(count($places));
 
     foreach ($places as $index => $place) {
-        $session->intention->steps()->where('position', $index + 1)->update(['place' => $place]);
+        $intention->steps()->where('position', $index + 1)->update(['place' => $place]);
     }
 
-    return $session;
+    return StartSession::run($intention->user, $intention->steps()->where('position', $at)->sole());
 }
 
 it('moves on to a step somewhere else when the person is not in the right place', function (): void {
@@ -225,6 +226,19 @@ it('moves on to a step somewhere else when the person is not in the right place'
         ->and($session->user->notHereReports()->sole()->place)->toBe(Place::Out)
         ->and($first->refresh()->skip_count)->toBe(0)
         ->and($first->status)->toBe(StepStatus::Pending);
+});
+
+it('moves onwards before wrapping to the front, like any other move on', function (): void {
+    $onwards = startedWithPlaces([Place::Home, Place::Out, Place::Home], at: 2);
+
+    ReportStuck::run($onwards, StuckReason::NotHere);
+
+    $wrapped = startedWithPlaces([Place::Home, Place::Out, Place::Out], at: 2);
+
+    ReportStuck::run($wrapped, StuckReason::NotHere);
+
+    expect($onwards->refresh()->currentStep()->sole()->position)->toBe(3)
+        ->and($wrapped->refresh()->currentStep()->sole()->position)->toBe(1);
 });
 
 it('counts a step with no place as somewhere else', function (): void {

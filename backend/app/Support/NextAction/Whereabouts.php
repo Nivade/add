@@ -47,7 +47,7 @@ final readonly class Whereabouts
             ->oldest()
             ->pluck('created_at', 'place');
 
-        return self::weigh($completed->all(), $reported->all());
+        return self::weigh(self::instantsByPlace($completed->all()), self::instantsByPlace($reported->all()));
     }
 
     public function fit(?Place $place): int
@@ -66,50 +66,57 @@ final readonly class Whereabouts
     }
 
     /**
-     * @param  array<array-key, mixed>  $completed
-     * @param  array<array-key, mixed>  $reported
+     * @param  array<string, CarbonImmutable>  $completed
+     * @param  array<string, CarbonImmutable>  $reported
      */
     private static function weigh(array $completed, array $reported): self
     {
-        $likely = [];
-        $unlikely = [];
+        $stands = fn (Place $place): bool => isset($completed[$place->value])
+            && (! isset($reported[$place->value]) || $completed[$place->value] > $reported[$place->value]);
 
-        foreach (Place::cases() as $place) {
-            $doneAt = $completed[$place->value] ?? null;
-            $saidNotAt = $reported[$place->value] ?? null;
+        // Only the latest location can be where they are: an older one was left behind, whatever came after.
+        $latest = self::latestLocation($completed);
+        $here = $latest instanceof Place && $stands($latest) ? $latest : null;
 
-            if ($doneAt instanceof CarbonImmutable && (! $saidNotAt instanceof CarbonImmutable || $doneAt > $saidNotAt)) {
-                $likely[$place->value] = $doneAt;
-            } elseif ($saidNotAt instanceof CarbonImmutable) {
-                $unlikely[$place->value] = $place;
-            }
-        }
+        $likely = array_filter(Place::cases(), fn (Place $place): bool => $place === $here
+            || (! $place->isLocation() && $stands($place)));
 
-        $here = self::latestLocation($likely);
+        $unlikely = array_filter(Place::cases(), fn (Place $place): bool => ! in_array($place, $likely, true)
+            && (isset($reported[$place->value]) || ($place->isLocation() && $here instanceof Place)));
 
-        // A person is in one location at a time, so the latest one rules out the others.
-        if ($here instanceof Place) {
-            foreach (Place::cases() as $place) {
-                if ($place->isLocation() && $place !== $here) {
-                    unset($likely[$place->value]);
-                    $unlikely[$place->value] = $place;
-                }
-            }
-        }
-
-        return new self(
-            array_map(Place::from(...), array_keys($likely)),
-            array_values(array_filter(Place::cases(), fn (Place $place): bool => isset($unlikely[$place->value]))),
-        );
+        return new self(array_values($likely), array_values($unlikely));
     }
 
-    /** @param  array<string, CarbonImmutable>  $likely */
-    private static function latestLocation(array $likely): ?Place
+    /** @param  array<string, CarbonImmutable>  $completed */
+    private static function latestLocation(array $completed): ?Place
     {
-        $locations = array_filter($likely, fn (string $place): bool => Place::from($place)->isLocation(), ARRAY_FILTER_USE_KEY);
-        arsort($locations);
-        $latest = array_key_first($locations);
+        $latest = null;
 
-        return $latest === null ? null : Place::from($latest);
+        foreach ($completed as $value => $at) {
+            $place = Place::from($value);
+
+            if ($place->isLocation() && ($latest === null || $at > $completed[$latest->value])) {
+                $latest = $place;
+            }
+        }
+
+        return $latest;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $plucked
+     * @return array<string, CarbonImmutable>
+     */
+    private static function instantsByPlace(array $plucked): array
+    {
+        $instants = [];
+
+        foreach ($plucked as $place => $at) {
+            if (is_string($place) && $at instanceof CarbonImmutable) {
+                $instants[$place] = $at;
+            }
+        }
+
+        return $instants;
     }
 }

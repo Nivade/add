@@ -84,6 +84,23 @@ it('takes only the latest location, since a person is in one at a time', functio
         ->and($where->unlikely)->toBe([Place::Home, Place::Work]);
 });
 
+it('lets no older location stand in once the latest one is taken back', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 09:50:00'));
+
+    finishStepAt($user, Place::Work);
+    $this->travel(5)->minutes();
+    finishStepAt($user, Place::Home);
+    $this->travel(3)->minutes();
+    ReportNotHere::run($user, Place::Home);
+
+    $where = whereabouts($user);
+
+    expect($where->likely)->toBe([])
+        ->and($where->unlikely)->toBe([Place::Home])
+        ->and($where->fit(Place::Work))->toBe(1);
+});
+
 it('judges a computer on its own evidence, apart from any location', function (): void {
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));

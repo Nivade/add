@@ -74,7 +74,8 @@ forbids.
   correction.
 - The newer of the two wins for a given place.
 - Only one location can be likely: the most recently completed one. Once a
-  location is likely, the other two locations become unlikely.
+  location is likely, the other two locations become unlikely. If a newer
+  report takes it back, no location is likely: the older ones were left.
 - `computer` is judged on its own evidence only.
 
 Both windows are constants on `Whereabouts`. They are not config and not a
@@ -120,7 +121,7 @@ re-resolves.
 resolves to a new `StuckResolution::Elsewhere`:
 
 - It records the step's place as not-here and moves to the next sibling whose
-  place differs.
+  place differs, onwards first and then from the front, like `AdvanceSession`.
 - If there is no such sibling, it lands the session `continued`.
 - It is not a skip. `skip_count` is avoidance, and being in the wrong place is
   not avoidance.
@@ -263,14 +264,14 @@ day, and `model:prune` runs daily.
   - Create `backend/app/Support/NextAction/Comparators/FitsWhereYouAre.php`
     extending `Rung`:
     - `compare` returns `fit(b) <=> fit(a)`;
-    - `decides` returns `seemsHere()` when the winner fits, otherwise "This one
-      does not depend on where you are.";
+    - `decides` returns `seemsHere()` when the winner fits, otherwise the
+      neutral line from Decisions;
     - `qualifies` returns `seemsHere()` when the winner fits, otherwise null.
   - Insert it second in `ChainedNextActionResolver::$chain`.
   - `NextActionData` gains `public ?Place $assumedPlace = null` after `$why`.
-    `resolve()` sets it to the winner's place when
-    `in_array($place->seemsHere(), $why, true)`. A continuation answer leaves
-    it null.
+    `resolve()` sets it from `FitsWhereYouAre::assumedPlace()`, only when the
+    rung is at or below the separator, so it speaks in the `why`. A
+    continuation answer leaves it null.
   - Run `npm run types:generate`.
   - Add scenarios to `backend/tests/Feature/NextAction/ResolverTest.php`.
     Assert the step *and* the full `why`:
@@ -307,8 +308,8 @@ day, and `model:prune` runs daily.
   - `ReportStuck` matches `Elsewhere` to a private `elsewhere($session, $step)`:
     - if the step's place is null, it runs `AdvanceSession::run($session, $step->id)`;
     - otherwise it runs `ReportNotHere::run($session->user, $step->place)`,
-      then takes the first remaining sibling by position with a different
-      place (null counts as different);
+      then takes the next remaining sibling with a different place (null counts
+      as different), onwards from the step's position and then from the front;
     - with no such sibling, it runs
       `LandSession::run($session, SessionOutcome::Continued)`.
   - Add tests to `backend/tests/Feature/Execution/StuckTest.php`:
