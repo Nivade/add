@@ -89,13 +89,9 @@ it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     $planned = [
         'backend/app/Actions/Metrics/ReportOutcomes.php',
-        'backend/app/Http/Controllers/Api/V1/StoreCheckInController.php',
-        'backend/app/Http/Controllers/Web/StoreCheckInController.php',
-        'backend/app/Http/Requests/StoreCheckInRequest.php',
         'backend/app/Support/Metrics/MetricsWindow.php',
         'backend/app/Support/Metrics/Percentile.php',
         'backend/resources/js/components/check-in.tsx',
-        'backend/tests/Feature/CheckIns/CheckInEndpointTest.php',
         'backend/tests/Feature/Metrics/ReportOutcomesTest.php',
         'backend/tests/Unit/Metrics/PercentileTest.php',
     ];

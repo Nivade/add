@@ -315,7 +315,7 @@ gone on the next render, and that absence is the whole confirmation.
   *Check:* `npm run artisan -- test --compact tests/Feature/Home` passes, and
   `npm run typecheck` passes.
 
-- [ ] **7. The endpoint.** Invoke skills: `laravel-actions`,
+- [x] **7. The endpoint.** Invoke skills: `laravel-actions`,
   `laravel-attributes`, `laravel-best-practices`, `wayfinder-development`.
   - Create `backend/app/Http/Requests/StoreCheckInRequest.php`. It validates
     `'response' => ['required', Rule::enum(CheckInAnswer::class)]` and exposes
