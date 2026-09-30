@@ -76,7 +76,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - `backend/resources/js/layouts/shell.tsx`: the header and its button group get `flex-wrap`. Phase 3 removes four of the buttons; this is the interim fix.
   - New `backend/tests/Browser/LayoutTest.php`: at a 390px-wide viewport (find the device method with `search-docs` query `browser testing device viewport`), `/home` has `document.documentElement.scrollWidth <= window.innerWidth`, and `assertNoJavaScriptErrors()`.
   - Check: `npm run test:browser` passes.
-- [ ] **1.3 Every clock reads in the person's zone.** Invoke skills: `laravel-best-practices`, `expo-react-native`.
+- [x] **1.3 Every clock reads in the person's zone.** Invoke skills: `laravel-best-practices`, `expo-react-native`.
   - New `backend/app/Http/Middleware/RecordTimezone.php`: reads `X-Timezone` header, else the `tz` cookie; when the value is in `DateTimeZone::listIdentifiers()` and differs from `users.timezone`, saves it. Nothing else.
   - Register it on the authenticated group in `backend/routes/web.php` (after `verified`) and on the `auth:sanctum` group in `backend/routes/api.php`.
   - `backend/bootstrap/app.php`: add `tz` to `encryptCookies(except: [...])`.

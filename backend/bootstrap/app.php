@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // TLS terminates at Traefik, so without this every asset URL is http and the browser blocks it.
         $middleware->trustProxies(at: '*');
 
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'tz']);
 
         $middleware->web(append: [
             HandleAppearance::class,

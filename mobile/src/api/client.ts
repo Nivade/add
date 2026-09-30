@@ -54,6 +54,7 @@ export async function request<T>(
     method,
     headers: {
       Accept: 'application/json',
+      'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },

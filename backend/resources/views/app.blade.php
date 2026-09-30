@@ -7,6 +7,11 @@
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
         (function () {
+            document.cookie =
+                'tz=' +
+                encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone) +
+                '; path=/; max-age=31536000; samesite=lax';
+
             const appearance = '{{ $appearance ?? "system" }}';
 
             if (appearance === 'system') {

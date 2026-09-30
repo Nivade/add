@@ -39,6 +39,7 @@ use App\Http\Controllers\Api\V1\StoreTokenController;
 use App\Http\Controllers\Api\V1\StoreWaitingForController;
 use App\Http\Controllers\Api\V1\UpdateAiConsentController;
 use App\Http\Controllers\ClassifyPastedTextController;
+use App\Http\Middleware\RecordTimezone;
 use Illuminate\Support\Facades\Route;
 
 // The device has no session to authenticate with yet, so this is the one route outside the guard.
@@ -46,7 +47,7 @@ Route::post('v1/tokens', StoreTokenController::class)
     ->middleware('throttle:login')
     ->name('api.v1.tokens.store');
 
-Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function (): void {
+Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('api.v1.')->group(function (): void {
     Route::delete('tokens/current', DestroyTokenController::class)->name('tokens.destroy');
     Route::post('devices', StoreDeviceController::class)->name('devices.store');
 

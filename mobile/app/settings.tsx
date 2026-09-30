@@ -42,6 +42,10 @@ export default function Settings() {
         onPress={() => void toggle()}
         disabled={saving}
       />
+      <Meta>
+        Times are read in {Intl.DateTimeFormat().resolvedOptions().timeZone},
+        taken from this device.
+      </Meta>
     </Screen>
   );
 }

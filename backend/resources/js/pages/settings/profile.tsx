@@ -36,6 +36,11 @@ export default function Profile({
                     description="Update your name and email address"
                 />
 
+                <p className="text-muted-foreground text-sm">
+                    Times are read in {auth.user.timezone}, taken from this
+                    device.
+                </p>
+
                 <Form
                     {...ProfileController.update.form()}
                     options={{
