@@ -42,6 +42,7 @@ export function CaptureHost({
 }) {
     const [open, setOpen] = useState(false);
     const triggerRef = useRef<HTMLButtonElement>(null);
+    const saving = useRef(false);
 
     useEffect(() => {
         function onKeyDown(event: globalThis.KeyboardEvent) {
@@ -82,6 +83,13 @@ export function CaptureHost({
                 <Form
                     {...store.form()}
                     options={{ preserveScroll: true }}
+                    onBefore={() => !saving.current}
+                    onStart={() => {
+                        saving.current = true;
+                    }}
+                    onFinish={() => {
+                        saving.current = false;
+                    }}
                     onSuccess={() => setOpen(false)}
                     resetOnSuccess
                     className="flex flex-col gap-3"
