@@ -1,6 +1,6 @@
 # Slice 10 — context: where the person seems to be
 
-**State:** building, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
+**State:** done, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §2.4, §2.5, §4 (Context), §9,
 §26, §35. Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`,
@@ -417,7 +417,7 @@ day, and `model:prune` runs daily.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/Guards` passes.
 
-- [ ] **15. Finish.** Invoke skills: `finish-branch` (it runs `code-review`,
+- [x] **15. Finish.** Invoke skills: `finish-branch` (it runs `code-review`,
   then `simplify`, then `npm run test`, `npm run stan`, `npm run lint` and
   `composer refactor:check`), then `update-resume`.
   - Run `(cd backend && ./vendor/bin/sail php vendor/bin/sloppy diff main --fail-on=high)`

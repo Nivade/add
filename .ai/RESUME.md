@@ -15,10 +15,12 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 10 is being built** on `feature/slice-10-context`.
-[`10-context.md`](plans/slices/10-context.md) ticks its steps as they land;
-resume at the first unticked one. Slices 11–14 are recorded in the spine and
-have no files.
+**Slice 10 is done.** Slice 11 (measuring it)
+is next and has no file in `.ai/plans/slices/` yet: design it first with
+`slice-workflow`. Slices 12–14 have no files either. The Open section of
+[`10-context.md`](plans/slices/10-context.md) carries what slice 10 left:
+`place` cannot be corrected on a step, and the eval corpus scores no
+`expected_place`. Triage `findings.md` before planning slice 11.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera

@@ -191,7 +191,7 @@ what moving a plan to `done` requires.
 | 9 | [Phase 2](slices/09-phase-2.md) — waiting-for, commitments, future-self, recurring steps, solo body doubling, pasted-text ingestion | §15, §17, §19–§21, §33 | done |
 | — | [Custom attributes](custom-attributes.md) — declared intent over repeated code: one-thing screens, exception rendering, job retry policy, per-user commands, drivers, notification kinds | — | done |
 | — | [Findings triage](archive/findings-triage.md) — session transitions under the row lock, feed fetches to public hosts only, a dead token signs the phone out, dated clarification answers, a copied-question eval, the local certificate | — | done |
-| 10 | [Context](slices/10-context.md) — where a step happens, where the person seems to be, and a rung that reorders on it without ever filtering | §4, §9 | building |
+| 10 | [Context](slices/10-context.md) — where a step happens, where the person seems to be, and a rung that reorders on it without ever filtering | §4, §9 | done |
 | 11 | Measuring it — §36's outcome metrics, aggregated from the events already recorded | §36 | recorded only |
 | 12 | Ingestion — the threat model first, then email, documents, receipts, bank/gov correspondence, bill and subscription detection, and the first `system_inferred` commitment producer | §19, §21, §28, §34 | recorded only |
 | 13 | Location — device location as a second whereabouts source behind its own consent, and location-triggered reminders | §14, §15, §34 | recorded only |
