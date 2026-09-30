@@ -197,7 +197,7 @@ desktop                                          phone
   - Every `text-[11px]`/`text-[13px]`/`font-mono`/`uppercase`/`tracking-[...]` under `backend/resources/js` outside `components/ui/` goes; mono stays only on clocks, durations and counts.
   - Tests: `backend/tests/Feature/Home/RailTest.php` covers `stepSeconds` and `marks`.
   - Check: `DesignTokensTest.php` passes; `npm run composer -- ci:check` passes; screenshots of `/home`, `/focus`, `/overwhelmed` in light and dark at 1440 and 390 match the wireframe.
-- [ ] **2.5 The doors in.** Invoke skills: `fortify-development`, `frontend-design`.
+- [x] **2.5 The doors in.** Invoke skills: `fortify-development`, `frontend-design`.
   - `backend/resources/js/pages/welcome.tsx`: headline kept; beside it, a `<figure>` with a static, non-interactive sample of home (the strip, "Put the laundry in the washing machine.", "About 3 minutes, so done around 19:08 if you start now.", a disabled Start with `tabIndex={-1}`, "Why this one? Your parents arrive Saturday."), captioned "What opening the app looks like."; the footer line becomes "Built for the days when starting is the hard part."
   - `backend/resources/js/pages/auth/login.tsx`: title "Log in", description "Pick up where you left off.", the remember checkbox `defaultChecked`.
   - `backend/resources/js/pages/auth/register.tsx`: description "It takes a minute. Nothing else is asked of you."

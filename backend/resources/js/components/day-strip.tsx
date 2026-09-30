@@ -12,8 +12,9 @@ import { cn } from '@/lib/utils';
 
 const HOURS = [6, 8, 10, 12, 14, 16, 18, 20, 22];
 
-/** An hour label this close to something drawn would collide with its label. */
+/** An hour label this close to a mark, or to the now clock and its done line, would collide with them. */
 const CROWDED_MINUTES = 45;
+const CROWDED_NOW_MINUTES = 90;
 
 /** Marks this close together share one label block, so their words never overlap. */
 const SHARED_LABEL_MINUTES = 60;
@@ -52,11 +53,15 @@ function labelGroups(marks: RailMarkData[]): RailMarkData[][] {
 }
 
 /** The server said what minute it is in their zone; this only counts forward from it. */
-function useMinuteOfDay(from: number): number {
+function useMinuteOfDay(from: number, live: boolean): number {
     const [minute, setMinute] = useState(from);
 
     useEffect(() => {
         setMinute(from);
+
+        if (!live) {
+            return;
+        }
 
         const startedAt = Date.now();
         const tick = setInterval(
@@ -66,7 +71,7 @@ function useMinuteOfDay(from: number): number {
         );
 
         return () => clearInterval(tick);
-    }, [from]);
+    }, [from, live]);
 
     return minute;
 }
@@ -74,7 +79,11 @@ function useMinuteOfDay(from: number): number {
 type Drawing = { rail: RailData; nowMinute: number; doneAt: number | null };
 
 function Column({ rail, nowMinute, doneAt }: Drawing) {
-    const drawn = [nowMinute, ...rail.marks.map((mark) => mark.minute)];
+    const clear = (hour: number): boolean =>
+        Math.abs(hour * 60 - nowMinute) > CROWDED_NOW_MINUTES &&
+        rail.marks.every(
+            (mark) => Math.abs(hour * 60 - mark.minute) > CROWDED_MINUTES,
+        );
 
     return (
         <div aria-hidden="true" className="relative h-full">
@@ -103,11 +112,7 @@ function Column({ rail, nowMinute, doneAt }: Drawing) {
                 />
             )}
 
-            {HOURS.filter((hour) =>
-                drawn.every(
-                    (minute) => Math.abs(hour * 60 - minute) > CROWDED_MINUTES,
-                ),
-            ).map((hour) => (
+            {HOURS.filter(clear).map((hour) => (
                 <span
                     key={hour}
                     className="text-muted-foreground text-small absolute left-3 -translate-y-1/2 font-mono tabular-nums"
@@ -157,7 +162,7 @@ function Column({ rail, nowMinute, doneAt }: Drawing) {
                     {clockOf(nowMinute)}
                 </p>
                 {doneAt !== null && (
-                    <p className="text-now text-small absolute top-1.5 left-3">
+                    <p className="text-now text-small absolute top-1.5 left-3 whitespace-nowrap">
                         done ~
                         <span className="font-mono tabular-nums">
                             {clockOf(doneAt)}
@@ -236,12 +241,14 @@ export function DayStrip({
     rail,
     orientation,
     className,
+    live = true,
 }: {
     rail: RailData;
     orientation: 'column' | 'row';
     className?: string;
+    live?: boolean;
 }) {
-    const nowMinute = useMinuteOfDay(rail.nowMinute);
+    const nowMinute = useMinuteOfDay(rail.nowMinute, live);
     const doneAt =
         rail.stepSeconds === null
             ? null
