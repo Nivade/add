@@ -1,6 +1,6 @@
 # Slice 11 — measuring it: whether the app is helping
 
-**State:** designed, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
+**State:** building, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §2.4, §18, §28, §35, §36, §37.
 Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`,
@@ -173,7 +173,7 @@ gone on the next render, and that absence is the whole confirmation.
 
 ## Steps
 
-- [ ] **1. Orient.** Invoke skill: `slice-workflow`.
+- [x] **1. Orient.** Invoke skill: `slice-workflow`.
   - Read the rule files listed under the spec line.
   - Set this file's state to `building, <date>` and the spine's row to
     `building`.
@@ -181,7 +181,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/Guards` passes.
 
-- [ ] **2. `Decision` and `decide()`.** Invoke skills: `next-action-resolver`,
+- [x] **2. `Decision` and `decide()`.** Invoke skills: `next-action-resolver`,
   `laravel-actions`.
   - Create `backend/app/Support/NextAction/Decision.php`:
     ```php
