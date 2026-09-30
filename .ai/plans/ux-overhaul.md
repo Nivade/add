@@ -269,7 +269,7 @@ desktop                                          phone
   - `npm uninstall --workspace backend @radix-ui/react-navigation-menu @radix-ui/react-toggle @radix-ui/react-toggle-group` at the root; `grep -rn "react-navigation-menu\|react-toggle" backend/resources` prints nothing first.
   - Tests: delete the endpoint tests for the removed routes; everything they proved about the actions is now in `SortCaptureTest.php`.
   - Check: `npm run test` and `npm run typecheck` pass; `npm run artisan -- route:list --path=api` shows none of the removed routes.
-- [ ] **3.6 The browser journey captures through the box.** `backend/tests/Browser/JourneyTest.php`: capture "waiting for John to send the contract" and assert the read-back and "That's right"; capture "clean the kitchen before my parents arrive" and continue the existing journey. Check: `npm run test:browser` passes.
+- [x] **3.6 The browser journey captures through the box.** `backend/tests/Browser/JourneyTest.php`: capture "waiting for John to send the contract" and assert the read-back and "That's right"; capture "clean the kitchen before my parents arrive" and continue the existing journey. Check: `npm run test:browser` passes.
 - [ ] **3.7 The recorded decisions move.**
   - Under "The capture question, settled" in [`slices/09-phase-2.md`](slices/09-phase-2.md), add: "Reversed 2026-09-30 by the UX overhaul plan: the model sorts, the read-back marks it inferred, and one tap changes it."
   - In `.ai/rules/domain-model.md`, the captures sentence becomes: a capture's body is never edited; sorting writes its routing columns once, and changing the kind rewrites them.

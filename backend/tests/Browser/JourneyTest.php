@@ -44,19 +44,30 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     $page->assertSee('Nothing needs you right now.')
         ->assertNoJavaScriptErrors();
 
-    // Capture, via the global shortcut rather than a click.
+    // Capture, via the global shortcut rather than a click, and let the app sort it.
     $page->keys('header:first-of-type', 'c');
     $page->assertSee("What's on your mind?");
 
     expect(focusedDescriptor($page))->toBe("What's on your mind?");
 
+    $page->type('[aria-label="What\'s on your mind?"]', 'waiting for John to send the contract');
+    $page->keys('Save', 'Enter');
+
+    $page->assertSee('“waiting for John to send the contract”')
+        ->assertSee('Saved as something you are waiting on from John.');
+
+    $page->click("That's right");
+    $page->assertDontSee('Saved as something you are waiting on from John.');
+
+    $page->keys('header:first-of-type', 'c');
     $page->type('[aria-label="What\'s on your mind?"]', 'clean the kitchen before my parents arrive');
-    $page->keys('Capture', 'Enter');
+    $page->keys('Save', 'Enter');
+
+    // One action, and focus handed back to the button that opens the box.
+    $page->assertSee('Put the thing you need on the desk.')
+        ->assertDontSee('Write it however it comes out.');
 
     expect(focusedDescriptor($page))->toBe('Capture');
-
-    // One action.
-    $page->assertSee('Put the thing you need on the desk.');
 
     // Start.
     $page->keys('Start', 'Enter');

@@ -16,17 +16,19 @@ export function CaptureDialog({
     description,
     open,
     onOpenChange,
+    onCloseAutoFocus,
     children,
 }: {
     title: string;
     description: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onCloseAutoFocus?: (event: Event) => void;
     children: ReactNode;
 }) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent onCloseAutoFocus={onCloseAutoFocus}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>{description}</DialogDescription>
