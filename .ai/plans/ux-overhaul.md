@@ -110,7 +110,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - Test in `HomeTest.php`: three intentions and one waiting-for, one shown right now → home and `/overwhelmed` both answer 3.
   - Check: `npm run artisan -- test --compact tests/Feature/Home tests/Feature/Overwhelm` passes.
 - [x] **1.7 Plan state.** Tick 1.1–1.6 here.
-- [ ] **1.8 Finish.** Invoke skills: `security-review` (the timezone cookie and middleware), `phpstan-larastan`, `finish-branch`.
+- [x] **1.8 Finish.** Invoke skills: `security-review` (the timezone cookie and middleware), `phpstan-larastan`, `finish-branch`.
 
 ## Visual identity
 
