@@ -48,6 +48,9 @@ not use-cases themselves.
 capture is raw input and is never edited; conversion writes an intention and
 leaves the capture alone.
 
+`check_ins` are immutable and kept until the account goes: they are the
+person's own answers and the metric.
+
 Skipped steps are kept, not deleted. The skip history is what stops the resolver
 re-offering the same thing and is the eval corpus for decomposition quality.
 

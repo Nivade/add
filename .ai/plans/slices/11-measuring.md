@@ -474,7 +474,7 @@ gone on the next render, and that absence is the whole confirmation.
   passes, `npm run artisan -- metrics:report` prints the tables on a seeded
   database, and `npm run stan` is clean.
 
-- [ ] **12. Documents.** Invoke skills: `next-action-resolver`,
+- [x] **12. Documents.** Invoke skills: `next-action-resolver`,
   `generated-artifacts`.
   - `.ai/skills/next-action-resolver/SKILL.md`:
     - the contract has `decide()` beside `resolve()`, and `decide()` names the

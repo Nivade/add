@@ -54,3 +54,7 @@ there, one tap starts it. Test that path, not the motivated one.
 
 Measure completed intentions, time from capture to first action, recovery after
 a stopped session. Never optimise for time in app.
+
+`metrics:report` is the only place outcomes are shown, and it never reaches the
+person's screens: a metrics page for them is the dashboard §35 forbids. The
+fortnightly check-in is the only question home asks unprompted.

@@ -56,11 +56,12 @@ classes live. "Next action" stays the product word and is what
 | `intentions` | title, why, status, `deadline_at` nullable, `clarifying_question` and its answer, plan assumptions, `recurrence_every_days` and `recurrence_next_at` nullable, `recurrence_template_id` | the thing the person wants handled; a recurring one is a template that spawns a fresh copy |
 | `steps` | intention, title, `estimated_seconds`, `place` nullable, position, status | one physical action each; a null place means anywhere |
 | `execution_sessions` | intention, `current_step_id`, outcome | a focused stretch, may span steps |
-| `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed |
+| `execution_events` | session, type, payload | started/done/skipped/stuck/distracted/resumed; a `started` payload names the rung that recommended the step, or says it was not recommended |
 | `calendar_events` | source, external id, title, `starts_at`, plan assumptions | read-only; the source owns it, we never write back |
 | `reminders` | user, appointment kind and id, `sent_at` | one row per appointment, which is what keeps reminders sparse |
 | `devices` | user, Expo push token, platform | the token identifies the device, so registering twice moves it |
 | `not_here_reports` | user, place | what the person said about where they are not; pruned after a day |
+| `check_ins` | user, topic, answer | the fortnightly question's answers; immutable and kept, because they are the metric |
 | `waiting_fors` | user, subject, note, status, `last_answered_at` | something the person is waiting on from someone else; no AI |
 | `commitments` | user, description, provenance, `confirmed_at`, status, `intention_id` or `step_id` | provenance is `user_task`, `user_stated` or `system_inferred`; an inference stays unconfirmed until the person says so |
 | `future_reminders` | user, message, `trigger_at`, `calendar_event_id` and `offset_seconds` nullable, `sent_at` | a note to a future self, at a time or relative to an event |
@@ -214,5 +215,7 @@ captured intentions that get finished, time from capture to first action, share
 of sessions that make real progress, recovery rate after distraction. A person
 using this well should spend less time in it over time.
 
-No slice computes any of this yet. `execution_events`, skip history and session
-outcomes already carry the raw material. The aggregation layer is slice 11.
+Slice 11 computes it on demand with `metrics:report`, from rows already kept,
+for whoever builds the app and never on a screen. The two outcomes the spec
+calls user-reported, reduction in overwhelm and in remembering, come from the
+fortnightly check-in on home.

@@ -8,8 +8,12 @@ description: Use when touching how the single next step is chosen or explained �
 The engine is the product. A bad recommendation is worse than a list, because a
 list at least does not claim to have thought about it.
 
-`NextActionResolver` has one method. It returns the single most useful step or
-`null`, it never writes, and the `why` is populated whenever a step is. The
+`NextActionResolver` has two methods, and neither writes. `resolve()` returns
+the single most useful step or `null`, with the `why` populated whenever a step
+is. `decide()` returns the same answer wrapped in a `Decision`, which also names
+the rung that decided it — `continuation` when a running session short-circuited
+the chain. `resolve()` is `decide()?->answer`. The rung key stays off
+`NextActionData`: it is internal and must not reach the wire. The
 interface is bound to `ChainedNextActionResolver` with `#[Bind]` on the
 contract itself — there is no service-provider registration to hunt for.
 
@@ -42,6 +46,10 @@ speak override them. Implement:
 Then insert it into `ChainedNextActionResolver::$chain` at the position its
 priority demands. Position is the whole design; a rung added at the end changes
 nothing until everything above it ties.
+
+A rung's key is the snake case of its class basename, and `StartSession` stores
+it in every `started` event's payload. Renaming a rung class splits its history
+in `metrics:report`.
 
 ## How the `why` is built
 
