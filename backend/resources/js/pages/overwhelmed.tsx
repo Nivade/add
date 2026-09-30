@@ -1,7 +1,12 @@
 import type { OverwhelmedData } from '@add/shared';
-import { nothingNeedsYou, restCountLine } from '@add/shared';
+import {
+    nothingNeedsYou,
+    overwhelmedCopy,
+    restCountLine,
+    stepMeta,
+} from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
-import { OneThing, StartStep } from '@/components/one-thing';
+import { Meta, OneThing, StartStep } from '@/components/one-thing';
 import { home } from '@/routes';
 
 /** No rail, no nav, no capture: the screen suppresses everything until this one step is done. */
@@ -28,6 +33,11 @@ export default function Overwhelmed({
 
                     {smallestStep && (
                         <>
+                            <Meta>
+                                {stepMeta(smallestStep.step)} ·{' '}
+                                {overwhelmedCopy.allYouHaveToDo}
+                            </Meta>
+
                             <ul className="text-muted-foreground space-y-1 pl-5 font-mono text-[13px]">
                                 {smallestStep.why.map((line) => (
                                     <li key={line}>{line}</li>
@@ -46,7 +56,7 @@ export default function Overwhelmed({
                         href={home()}
                         className="text-muted-foreground hover:text-foreground font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"
                     >
-                        Back to home
+                        {overwhelmedCopy.back}
                     </Link>
                 </div>
             </div>

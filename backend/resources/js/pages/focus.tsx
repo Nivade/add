@@ -88,15 +88,15 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             <Control
-                                label="Done"
+                                label={focusCopy.done}
                                 form={focusRoutes.completeStep.form(session.id)}
                             />
                             <Control
-                                label="Skip"
+                                label={focusCopy.skip}
                                 form={focusRoutes.skipStep.form(session.id)}
                             />
                             <Control
-                                label="Pause"
+                                label={focusCopy.pause}
                                 form={focusRoutes.pause.form(session.id)}
                             />
                             <Control
@@ -108,7 +108,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 form={focusRoutes.distracted.form(session.id)}
                             />
                             <Control
-                                label="Stop"
+                                label={focusCopy.stop}
                                 form={focusRoutes.stop.form(session.id)}
                             />
                         </div>

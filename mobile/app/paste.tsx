@@ -46,7 +46,7 @@ export default function Paste() {
     return (
       <Screen>
         <OneThing>{entryCopy.paste.nothingNeeded}</OneThing>
-        <Button label="Close" onPress={() => router.back()} />
+        <Button label={entryCopy.paste.close} onPress={() => router.back()} />
       </Screen>
     );
   }
@@ -68,11 +68,11 @@ export default function Paste() {
       {result.why && <Text style={styles.line}>{result.why}</Text>}
       <Meta>add it and the app works out the first step</Meta>
       <Button
-        label={saving ? 'Adding' : 'Add it'}
+        label={saving ? 'Adding' : entryCopy.paste.add}
         disabled={saving}
         onPress={() => void add()}
       />
-      <Button label="Leave it" onPress={() => router.back()} />
+      <Button label={entryCopy.paste.leave} onPress={() => router.back()} />
     </Screen>
   );
 }

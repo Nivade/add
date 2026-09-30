@@ -29,12 +29,11 @@ export function rungMinutesLabel(rung: PlanRung): string {
     return `Minutes to ${planRungLabels[rung]}`;
 }
 
-/** Whose number a rung's minutes are: the app's guess or the person's own. */
 export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
-/** A step with no estimate says so instead of going quiet. */
+/** Going quiet on a missing estimate would read as zero minutes, and a guessed step must say who guessed. */
 export function stepMeta(step: { estimatedSeconds: number | null; generated: boolean }): string {
     const estimate = formatEstimate(step.estimatedSeconds);
 
@@ -60,7 +59,16 @@ export const remindAfterCopy = {
     question: 'What should future you hear?',
 } as const;
 
+export const overwhelmedCopy = {
+    allYouHaveToDo: 'that is all you have to do',
+    back: 'Back to home',
+} as const;
+
 export const focusCopy = {
+    done: 'Done',
+    skip: 'Skip',
+    pause: 'Pause',
+    stop: 'Stop',
     welcomeBack: 'Welcome back.',
     leftOffAt: 'you left off at',
     stuck: "I'm stuck",
@@ -178,6 +186,9 @@ export const entryCopy = {
         placeholder: 'Your car insurance expires on 14 October.',
         label: 'What arrived',
         nothingNeeded: 'Nothing in this needs you.',
+        add: 'Add it',
+        leave: 'Leave it',
+        close: 'Close',
     },
     thought: {
         question: "What's on your mind?",

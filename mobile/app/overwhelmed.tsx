@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { nothingNeedsYou, restCountLine, stepMeta } from '@add/shared';
+import { nothingNeedsYou, overwhelmedCopy, restCountLine, stepMeta } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -39,7 +39,7 @@ export default function Overwhelmed() {
         <>
           <OneThing>{step.step.title}</OneThing>
           <Meta>
-            {stepMeta(step.step)} · that is all you have to do
+            {stepMeta(step.step)} · {overwhelmedCopy.allYouHaveToDo}
           </Meta>
           {step.why.map((line) => (
             <Meta key={line}>{line}</Meta>
@@ -52,7 +52,7 @@ export default function Overwhelmed() {
 
       <Meta>{restCountLine(data.restCount)}</Meta>
 
-      <Button label="Back" onPress={() => router.replace('/')} />
+      <Button label={overwhelmedCopy.back} onPress={() => router.replace('/')} />
     </Screen>
   );
 }

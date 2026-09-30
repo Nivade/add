@@ -83,15 +83,15 @@ export default function Focus() {
           )}
 
           <View style={styles.controls}>
-            <Button label="Done" onPress={() => void control('complete-step')} />
-            <Button label="Skip" onPress={() => void control('skip-step')} />
-            <Button label="Pause" onPress={() => void control('pause')} />
+            <Button label={focusCopy.done} onPress={() => void control('complete-step')} />
+            <Button label={focusCopy.skip} onPress={() => void control('skip-step')} />
+            <Button label={focusCopy.pause} onPress={() => void control('pause')} />
             <Button label={focusCopy.stuck} onPress={() => setStuckOpen(true)} />
             <Button
               label={focusCopy.distracted}
               onPress={() => void control('distracted')}
             />
-            <Button label="Stop" onPress={() => void control('stop')} />
+            <Button label={focusCopy.stop} onPress={() => void control('stop')} />
           </View>
         </>
       )}
