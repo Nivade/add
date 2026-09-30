@@ -386,7 +386,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run typecheck` passes.
 
-- [ ] **11. `metrics:report`.** Invoke skills: `laravel-actions`,
+- [x] **11. `metrics:report`.** Invoke skills: `laravel-actions`,
   `laravel-data`, `laravel-attributes`, `laravel-best-practices`.
   - Create `backend/app/Support/Metrics/MetricsWindow.php`, a `final readonly`
     class:
