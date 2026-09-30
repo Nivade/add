@@ -52,7 +52,7 @@ class ExecutionEvent extends Model
     /**
      * Joined through the session, so each row also carries `intention_id`.
      *
-     * @param  Builder<self>  $query
+     * @param  Builder<static>  $query
      * @param  iterable<mixed>  $intentionIds
      */
     #[Scope]

@@ -55,7 +55,7 @@ final class BuildHome
             needsAttention: $needsAttention->items,
             restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
-            checkIn: $session === null && $reminder === null ? DueCheckIn::run($user, $context->now) : null,
+            checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
         );
     }
 

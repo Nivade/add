@@ -1,6 +1,6 @@
 # Slice 11 — measuring it: whether the app is helping
 
-**State:** building, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
+**State:** done, 2026-09-30 · [the slice table](../executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](../product-spec.md) §2.4, §18, §28, §35, §36, §37.
 Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`,
@@ -499,7 +499,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/Guards` passes.
 
-- [ ] **13. Finish.** Invoke skills: `finish-branch` (it runs `code-review`,
+- [x] **13. Finish.** Invoke skills: `finish-branch` (it runs `code-review`,
   then `simplify`, then `npm run test`, `npm run stan`, `npm run lint` and
   `composer refactor:check`), then `update-resume`.
   - Run `(cd backend && ./vendor/bin/sail php vendor/bin/sloppy diff main --fail-on=high)`
