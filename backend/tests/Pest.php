@@ -10,7 +10,6 @@ use App\Models\Step;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Nvade\AiToolkit\Facades\AiToolkit;
-use Nvade\AiToolkit\Providers\DispatchingAiProvider;
 use Nvade\AiToolkit\Testing\FakeAiProvider;
 use Pest\Preset;
 use Tests\TestCase;
@@ -122,7 +121,7 @@ Preset::custom('laravelMinusAttributes', fn (): array => [
 // A test that reaches the AI path without seeding an answer fails rather than collecting a canned one.
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->beforeEach(fn (): FakeAiProvider => AiToolkit::fake())
+    ->beforeEach(fn (): mixed => app()->instance(FakeAiProvider::class, AiToolkit::fake()))
     ->in('Feature', 'Browser');
 
 /*
@@ -193,13 +192,7 @@ function replay(ExecutionSession $session): array
 
 function fakeAi(): FakeAiProvider
 {
-    $provider = AiToolkit::driver('fake');
-    $fake = $provider instanceof DispatchingAiProvider ? $provider->inner : $provider;
-
-    expect($fake)->toBeInstanceOf(FakeAiProvider::class);
-
-    /** @var FakeAiProvider $fake */
-    return $fake;
+    return app(FakeAiProvider::class);
 }
 
 /**

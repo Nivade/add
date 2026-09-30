@@ -4,49 +4,37 @@ declare(strict_types=1);
 
 namespace App\Support\Ai;
 
+use App\Exceptions\AiConsentRequired;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Nvade\AiToolkit\AiRequest;
 use Nvade\AiToolkit\Contracts\AiProvider;
-use Nvade\AiToolkit\Exceptions\AiUnavailable;
+use Nvade\AiToolkit\Events\AiRequestFailed;
 
 /** Without consent a driver that leaves the machine answers exactly as it would with no key, never a degraded try. */
 final class AiConsent
 {
-    public const string REFUSAL = 'Reading this needs AI, which is off. It can be turned on in settings.';
-
-    /** A recording fixture driver asks a live driver on a miss, and the toolkit builds that one unwrapped. */
+    /** Unknown drivers count as leaving, so a new live driver is gated before anyone remembers to list it. */
     public static function leavesTheMachine(AiProvider $provider): bool
     {
-        return $provider->name() === 'openai'
-            || ($provider->name() === 'fixture' && str_starts_with((string) config('ai-toolkit.fixture.on_miss'), 'record:'));
+        return match ($provider->name()) {
+            'canned', 'fake', 'null' => false,
+            // A recording fixture driver asks a live driver on a miss, and the toolkit builds that one unwrapped.
+            'fixture' => str_starts_with((string) config('ai-toolkit.fixture.on_miss'), 'record:'),
+            default => true,
+        };
     }
 
-    public static function refusal(AiRequest $request, string $provider): ?string
+    /** The toolkit's dispatcher sits inside the gate, so a refusal fires its failure event from here. */
+    public static function ensureConsented(AiRequest $request, string $provider): void
     {
         if (User::query()->find($request->rateLimitScope)?->hasConsentedToAi() === true) {
-            return null;
-        }
-
-        self::logRefusal($request, $provider);
-
-        return self::REFUSAL;
-    }
-
-    private static function logRefusal(AiRequest $request, string $provider): void
-    {
-        $channel = config('ai-toolkit.log.channel');
-
-        if (! is_string($channel) || $channel === '') {
             return;
         }
 
-        Log::channel($channel)->warning('AI call refused', [
-            'operation' => $request->operation,
-            'provider' => $provider,
-            'prompt_version' => $request->promptVersion,
-            'schema_version' => $request->schemaVersion,
-            'exception' => AiUnavailable::class,
-        ]);
+        $refusal = new AiConsentRequired("No AI consent on record for {$request->operation}.");
+
+        event(new AiRequestFailed($request, $refusal, $provider, 0));
+
+        throw $refusal;
     }
 }

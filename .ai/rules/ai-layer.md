@@ -55,19 +55,22 @@ reintroduce the second copy.
 
 ## Consent is per person, and every call is logged
 
-§28 asks for an explicit, consented, logged path off the machine. `canned`,
-`fake` and `null` never leave. `openai` does, and so does `fixture` recording
-through `AI_FIXTURE_ON_MISS=record:<driver>`, because the toolkit builds the
-driver it records through without any wrapper. `AiConsent::leavesTheMachine()`
-names both, and `AiServiceProvider` wraps them in the toolkit's `GatedAiProvider`.
-The gate reads `ai_consented_at` for the user in the request's `rateLimitScope`,
-which `AiRequests` fills with the asking person's id; a request with no person
-is refused. The evals score a corpus nobody wrote, so they build the OpenAI
-provider themselves and skip the gate.
+§28 asks for an explicit, consented, logged path off the machine.
+`AiConsent::leavesTheMachine()` lists what stays: `canned`, `fake`, `null`, and
+`fixture` unless it records through `AI_FIXTURE_ON_MISS=record:<driver>`, since
+the toolkit builds the driver it records through without any wrapper. Every other
+driver, including one added later, is wrapped in the toolkit's `GatedAiProvider`.
+The gate asks `User::hasConsentedToAi()` for the user in the request's
+`rateLimitScope`, which `AiRequests` fills with the asking person's id, so a
+request with no person is refused too. A refusal is `AiConsentRequired`, whose
+`#[RespondsWith]` carries the sentence the person reads. The evals score a corpus
+nobody wrote, so `AiServiceProvider` hands them an ungated OpenAI provider.
 
 Every call is logged on `ai-toolkit.log.channel`, which falls back to the app's
 own channel: `null` there switches the audit off silently. The toolkit's events
-fire inside the gate, so a refusal is logged by `AiConsent` itself. It records the operation, provider, model, prompt and schema versions,
+fire inside the gate, so `AiConsent` fires its failure event for a refusal.
+
+The log records the operation, provider, model, prompt and schema versions,
 duration and token counts — and never the prompt or the answer. A log holding the
 person's own sentences is a second copy of the thing being protected, so a config
 flag claiming to redact input was deleted rather than left reading like a feature.

@@ -10,14 +10,11 @@ use App\Support\Ai\ParseCaptureExamples;
 use App\Support\Ai\Parsers\ParseCaptureParser;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Container\Container;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 use Nvade\AiToolkit\Contracts\AiProvider;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
-use Nvade\AiToolkit\Providers\DispatchingAiProvider;
-use Nvade\AiToolkit\Providers\OpenAiProvider;
 
 /** Scores whether the live model asks when it should, and whether what it asks is the prompt's own example. */
 final class RunCaptureEval
@@ -30,13 +27,7 @@ final class RunCaptureEval
 
     public string $commandDescription = 'Score the clarifying questions the live capture parser asks against the corpus in storage/ai-eval.';
 
-    private readonly AiProvider $provider;
-
-    /** The corpus is nobody's words, so no consent gate; the dispatcher keeps each call in the log. */
-    public function __construct(OpenAiProvider $provider, Container $container, private readonly ParseCaptureParser $parser)
-    {
-        $this->provider = new DispatchingAiProvider($provider, $container);
-    }
+    public function __construct(private readonly AiProvider $provider, private readonly ParseCaptureParser $parser) {}
 
     /** @return list<array{id: string, expects_question: bool, question: ?string, copied: bool, invalid: ?string}> */
     public function handle(): array

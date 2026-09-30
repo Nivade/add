@@ -6,7 +6,6 @@ use App\Attributes\RespondsWith;
 use App\Attributes\RespondsWithReader;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Support\Ai\AiConsent;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -44,13 +43,6 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );
 
-        // A question asked synchronously gets one of two sentences back, never the exception's own detail.
-        $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()
-            ? new JsonResponse(['message' => $e->getMessage() === AiConsent::REFUSAL
-                ? AiConsent::REFUSAL
-                : 'Reading this needs AI, which is not reachable right now. Try again in a while.'], Response::HTTP_SERVICE_UNAVAILABLE)
-            : null);
-
         $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
             $respondsWith = RespondsWithReader::for($e);
 
@@ -63,4 +55,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 $respondsWith->status,
             );
         });
+
+        // After the attribute renderer, so a consent refusal keeps its own sentence; never the exception's detail.
+        $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()
+            ? new JsonResponse(['message' => 'Reading this needs AI, which is not reachable right now. Try again in a while.'], Response::HTTP_SERVICE_UNAVAILABLE)
+            : null);
     })->create();

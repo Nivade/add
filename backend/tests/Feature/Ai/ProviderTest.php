@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\Ai\AiOperation;
+use App\Exceptions\AiConsentRequired;
 use App\Models\User;
-use App\Support\Ai\AiConsent;
 use App\Support\Ai\AiRequests;
 use App\Support\Ai\Providers\CannedAiProvider;
 use Carbon\CarbonImmutable;
@@ -84,7 +84,31 @@ it('gates only a driver that leaves the machine on per-user consent', function (
     'fixture replaying' => ['fixture', 'dump', false],
     'canned' => ['canned', 'dump', false],
     'fake' => ['fake', 'dump', false],
+    'null' => ['null', 'dump', false],
 ]);
+
+it('gates a driver nobody has said stays on the machine', function (): void {
+    AiToolkit::extend('elsewhere', fn (): AiProvider => new class implements AiProvider
+    {
+        public function name(): string
+        {
+            return 'elsewhere';
+        }
+
+        public function isAvailable(): bool
+        {
+            return true;
+        }
+
+        public function respond(AiRequest $request): AiResponse
+        {
+            return new AiResponse(payload: [], provider: 'elsewhere', model: 'elsewhere');
+        }
+    });
+    config()->set('ai-toolkit.driver', 'elsewhere');
+
+    expect(app(AiProvider::class))->toBeInstanceOf(GatedAiProvider::class);
+});
 
 it('refuses to answer when AI is disabled rather than returning an empty payload', function (): void {
     expect(fn (): AiResponse => (new NullAiProvider)->respond(aiRequest()))
@@ -223,8 +247,8 @@ it("refuses to reach a person's words off the machine without their consent, and
     $userId = $consented === null ? null : User::factory()->create(['ai_consented_at' => null])->id;
 
     expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest('renew my passport', $userId)))
-        ->toThrow(AiUnavailable::class, AiConsent::REFUSAL)
-        ->and($log->hasWarningThatPasses(fn (LogRecord $record): bool => $record->message === 'AI call refused'
+        ->toThrow(AiConsentRequired::class)
+        ->and($log->hasWarningThatPasses(fn (LogRecord $record): bool => $record->context['exception'] === AiConsentRequired::class
             && $record->context['operation'] === 'parse_capture'
             && $record->context['provider'] === 'openai'
             && ! str_contains(json_encode($record->context, JSON_THROW_ON_ERROR), 'passport')))->toBeTrue();

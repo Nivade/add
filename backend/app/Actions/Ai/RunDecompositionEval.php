@@ -12,14 +12,11 @@ use App\Support\Ai\Parsers\DecomposeParser;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Container\Container;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
 use Nvade\AiToolkit\Contracts\AiProvider;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
-use Nvade\AiToolkit\Providers\DispatchingAiProvider;
-use Nvade\AiToolkit\Providers\OpenAiProvider;
 
 /** Scores a seed corpus on what `DecomposeParser::violations()` checks, and writes it as a baseline. */
 #[Signature('ai:eval')]
@@ -31,13 +28,7 @@ final class RunDecompositionEval
     use ReadsCommandAttributes;
     use ScoresAgainstACorpus;
 
-    private readonly AiProvider $provider;
-
-    /** The corpus is nobody's words, so no consent gate; the dispatcher keeps each call in the log. */
-    public function __construct(OpenAiProvider $provider, Container $container, private readonly DecomposeParser $parser)
-    {
-        $this->provider = new DispatchingAiProvider($provider, $container);
-    }
+    public function __construct(private readonly AiProvider $provider, private readonly DecomposeParser $parser) {}
 
     /** @return list<array{id: string, shape: string, steps: list<array{title: string, estimated_seconds: int}>, violations: list<string>}> */
     public function handle(): array

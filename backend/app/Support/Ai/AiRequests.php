@@ -17,68 +17,37 @@ final class AiRequests
     /** A model with no date cannot resolve "Saturday", and one with no zone answers on the wrong clock. */
     public static function parseCapture(?int $userId, string $capture, CarbonImmutable $now): AiRequest
     {
-        return new AiRequest(
-            system: Prompts::PARSE_CAPTURE,
-            user: implode("\n", ['Today is '.$now->format('l j F Y').' in '.$now->getTimezone()->getName().'.', '', $capture]),
-            schema: ParseCaptureSchema::builder(),
-            promptVersion: Prompts::PARSE_CAPTURE_VERSION,
-            schemaVersion: ParseCaptureSchema::VERSION,
-            maxOutputTokens: self::maxOutputTokens(),
-            rateLimitScope: self::scope($userId),
-            operation: AiOperation::ParseCapture->value,
-        );
+        return self::make(AiOperation::ParseCapture, Prompts::PARSE_CAPTURE, Prompts::PARSE_CAPTURE_VERSION, ParseCaptureSchema::class, $userId, implode("\n", ['Today is '.$now->format('l j F Y').' in '.$now->getTimezone()->getName().'.', '', $capture]));
     }
 
     public static function decomposeIntention(?int $userId, string $user): AiRequest
     {
-        return new AiRequest(
-            system: Prompts::DECOMPOSE,
-            user: $user,
-            schema: DecomposeIntentionSchema::builder(),
-            promptVersion: Prompts::DECOMPOSE_VERSION,
-            schemaVersion: DecomposeIntentionSchema::VERSION,
-            maxOutputTokens: self::maxOutputTokens(),
-            rateLimitScope: self::scope($userId),
-            operation: AiOperation::DecomposeIntention->value,
-        );
+        return self::make(AiOperation::DecomposeIntention, Prompts::DECOMPOSE, Prompts::DECOMPOSE_VERSION, DecomposeIntentionSchema::class, $userId, $user);
     }
 
     /** The answer has the same shape as a decomposition, so it shares that schema and its parser. */
     public static function splitStep(int $userId, string $user): AiRequest
     {
-        return new AiRequest(
-            system: Prompts::SPLIT_STEP,
-            user: $user,
-            schema: DecomposeIntentionSchema::builder(),
-            promptVersion: Prompts::SPLIT_STEP_VERSION,
-            schemaVersion: DecomposeIntentionSchema::VERSION,
-            maxOutputTokens: self::maxOutputTokens(),
-            rateLimitScope: self::scope($userId),
-            operation: AiOperation::SplitStep->value,
-        );
+        return self::make(AiOperation::SplitStep, Prompts::SPLIT_STEP, Prompts::SPLIT_STEP_VERSION, DecomposeIntentionSchema::class, $userId, $user);
     }
 
     public static function classifyIngestion(int $userId, string $user): AiRequest
     {
+        return self::make(AiOperation::ClassifyIngestion, Prompts::CLASSIFY_INGESTION, Prompts::CLASSIFY_INGESTION_VERSION, ClassifyIngestionSchema::class, $userId, $user);
+    }
+
+    /** @param  class-string<ClassifyIngestionSchema|DecomposeIntentionSchema|ParseCaptureSchema>  $schema */
+    private static function make(AiOperation $operation, string $system, string $promptVersion, string $schema, ?int $userId, string $user): AiRequest
+    {
         return new AiRequest(
-            system: Prompts::CLASSIFY_INGESTION,
+            system: $system,
             user: $user,
-            schema: ClassifyIngestionSchema::builder(),
-            promptVersion: Prompts::CLASSIFY_INGESTION_VERSION,
-            schemaVersion: ClassifyIngestionSchema::VERSION,
-            maxOutputTokens: self::maxOutputTokens(),
-            rateLimitScope: self::scope($userId),
-            operation: AiOperation::ClassifyIngestion->value,
+            schema: $schema::builder(),
+            promptVersion: $promptVersion,
+            schemaVersion: $schema::VERSION,
+            maxOutputTokens: (int) config('ai-toolkit.openai.max_output_tokens', 900),
+            rateLimitScope: $userId === null ? null : (string) $userId,
+            operation: $operation->value,
         );
-    }
-
-    private static function scope(?int $userId): ?string
-    {
-        return $userId === null ? null : (string) $userId;
-    }
-
-    private static function maxOutputTokens(): int
-    {
-        return (int) config('ai-toolkit.openai.max_output_tokens', 900);
     }
 }
