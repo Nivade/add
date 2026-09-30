@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'timezone' => 'UTC',
+            'ai_consented_at' => now(),
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
@@ -46,6 +47,13 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    public function withoutAiConsent(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'ai_consented_at' => null,
         ]);
     }
 

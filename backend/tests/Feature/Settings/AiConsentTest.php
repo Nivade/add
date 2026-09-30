@@ -8,8 +8,8 @@ use App\Models\User;
 use Inertia\Testing\AssertableInertia;
 use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
-it('reads off by default', function (): void {
-    $this->actingAs(User::factory()->create())
+it('reads off once it has been withdrawn', function (): void {
+    $this->actingAs(User::factory()->withoutAiConsent()->create())
         ->get(route('ai.edit'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
@@ -19,7 +19,7 @@ it('reads off by default', function (): void {
 });
 
 it('turns AI on and records when', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->withoutAiConsent()->create();
 
     $this->actingAs($user)
         ->put(route('ai.update'), ['consented' => true])
@@ -29,7 +29,7 @@ it('turns AI on and records when', function (): void {
 });
 
 it('turns AI back off rather than leaving a stale timestamp', function (): void {
-    $user = User::factory()->create(['ai_consented_at' => now()]);
+    $user = User::factory()->create();
 
     $this->actingAs($user)
         ->put(route('ai.update'), ['consented' => false])
@@ -43,7 +43,7 @@ it('sends a guest to sign in', function (): void {
 });
 
 it('serves the same consent switch to the API', function (): void {
-    $user = User::factory()->create();
+    $user = User::factory()->withoutAiConsent()->create();
 
     $this->actingAs($user)
         ->getJson(route('api.v1.ai-consent.show'))
@@ -60,7 +60,7 @@ it('serves the same consent switch to the API', function (): void {
 
 it('never reaches a live model for a person who has not consented, even when the driver is openai', function (): void {
     config()->set('ai-toolkit.driver', 'openai');
-    $user = User::factory()->create(['ai_consented_at' => null]);
+    $user = User::factory()->withoutAiConsent()->create();
     $capture = Capture::factory()->for($user)->create();
 
     expect(fn (): mixed => SortCapture::run($capture))->toThrow(AiUnavailable::class);

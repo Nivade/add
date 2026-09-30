@@ -275,7 +275,7 @@ desktop                                          phone
   - In `.ai/rules/domain-model.md`, the captures sentence becomes: a capture's body is never edited; sorting writes its routing columns once, and changing the kind rewrites them.
   - `.ai/plans/executive-function-os.md` API boundaries: add `POST /api/v1/captures/{id}/kind` and `POST /api/v1/captures/{id}/confirm`.
   - Check: `DocumentationTest.php` passes.
-- [ ] **3.8 Consent at the door.** Invoke skills: `fortify-development`, `ai-layer-changes`, `pest-testing`.
+- [x] **3.8 Consent at the door.** Invoke skills: `fortify-development`, `ai-layer-changes`, `pest-testing`.
   - `backend/app/Actions/Fortify/CreateNewUser.php`: validates `'ai_consent' => ['accepted']` and creates the user with `ai_consented_at = now()`.
   - `backend/resources/js/pages/auth/register.tsx`: a required checkbox `ai_consent`, unchecked by default, labelled from shared `registerConsentLabel` = "Send what I write to a model outside this server, so it can be sorted for me.", with its `InputError`.
   - `aiConsentCopy(false).line` becomes "Nothing you write leaves this server, so nothing you capture gets sorted." The settings switch stays on web and mobile: consent can be withdrawn, and 3.4's `unsortedLine` says what that stops. The gate in `AiConsent` is unchanged.

@@ -63,7 +63,9 @@ driver, including one added later, is wrapped in the toolkit's `GatedAiProvider`
 The gate asks `User::hasConsentedToAi()` for the user in the request's
 `rateLimitScope`, which `AiRequests` fills with the asking person's id, so a
 request with no person is refused too. A refusal is `AiConsentRequired`, whose
-`#[RespondsWith]` carries the sentence the person reads. The evals score a corpus
+`#[RespondsWith]` carries the sentence the person reads. Registration requires consent,
+because sorting what the person writes is the app's job; withdrawing it in
+settings stops sorting, and home says so. The evals score a corpus
 nobody wrote, so `AiServiceProvider` hands them an ungated OpenAI provider.
 
 Every call is logged on `ai-toolkit.log.channel`, which falls back to the app's

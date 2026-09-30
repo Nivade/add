@@ -230,7 +230,7 @@ it("reaches the openai driver once consent is on record, throttled on the asking
     config()->set('ai-toolkit.driver', 'openai');
     config()->set('ai.providers.openai.key', 'sk-test');
     StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
-    $user = User::factory()->create(['ai_consented_at' => now()]);
+    $user = User::factory()->create();
 
     $answer = app(AiProvider::class)->respond(aiRequest(userId: $user->id));
 
@@ -244,7 +244,7 @@ it("refuses to reach a person's words off the machine without their consent, and
     config()->set('ai-toolkit.driver', 'openai');
     config()->set('ai.providers.openai.key', 'sk-test');
     StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
-    $userId = $consented === null ? null : User::factory()->create(['ai_consented_at' => null])->id;
+    $userId = $consented === null ? null : User::factory()->withoutAiConsent()->create()->id;
 
     expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest('renew my passport', $userId)))
         ->toThrow(AiConsentRequired::class)

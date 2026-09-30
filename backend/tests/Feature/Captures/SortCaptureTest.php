@@ -325,7 +325,7 @@ it('routes again from the stored parse without asking the model', function (): v
 
 it('marks a capture it cannot sort without consent, and stops counting it as sorting', function (): void {
     config()->set('ai-toolkit.driver', 'openai');
-    $user = User::factory()->create(['ai_consented_at' => null]);
+    $user = User::factory()->withoutAiConsent()->create();
 
     // The sync queue rethrows after failing the job; a worker would only record it.
     expect(fn (): Capture => RecordCapture::run($user, 'call the dentist'))->toThrow(AiConsentRequired::class);
@@ -339,7 +339,7 @@ it('marks a capture it cannot sort without consent, and stops counting it as sor
 
 it('sorts what waited once consent is turned on', function (): void {
     answeredAi();
-    $user = User::factory()->create(['ai_consented_at' => null]);
+    $user = User::factory()->withoutAiConsent()->create();
     $capture = Capture::factory()->for($user)->create(['body' => 'clean the apartment', 'failed_at' => now()]);
 
     UpdateAiConsent::run($user, true);

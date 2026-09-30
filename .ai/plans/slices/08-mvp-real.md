@@ -97,6 +97,8 @@ Three parts, in order, and the third does not start until the first two land.
    person's text never reaches an external provider, and the app falls back to
    the answer it gives with no key. §28's "intentional architectural path" is
    this switch, and it is per person, not per deployment.
+   Amended 2026-10-01 by the UX overhaul plan: consent is asked at signup and
+   required; the settings switch withdraws it.
 2. **The two provider findings.** The log copying a person's sentences out of a
    provider error, and the one global rate-limit key. Both are in
    `.ai/findings.md`; remove each entry in the change that fixes it.

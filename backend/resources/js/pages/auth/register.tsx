@@ -1,8 +1,10 @@
+import { registerConsentLabel } from '@add/shared';
 import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -90,10 +92,37 @@ export default function Register({ passwordRules }: Props) {
                                 />
                             </div>
 
+                            <div className="grid gap-2">
+                                <div className="flex items-start gap-3">
+                                    <Checkbox
+                                        id="ai_consent"
+                                        name="ai_consent"
+                                        required
+                                        tabIndex={5}
+                                        aria-invalid={
+                                            errors.ai_consent ? true : undefined
+                                        }
+                                        aria-describedby={
+                                            errors.ai_consent
+                                                ? 'ai_consent-error'
+                                                : undefined
+                                        }
+                                        className="mt-1"
+                                    />
+                                    <Label htmlFor="ai_consent">
+                                        {registerConsentLabel}
+                                    </Label>
+                                </div>
+                                <InputError
+                                    id="ai_consent-error"
+                                    message={errors.ai_consent}
+                                />
+                            </div>
+
                             <Button
                                 type="submit"
                                 className="mt-2 w-full"
-                                tabIndex={5}
+                                tabIndex={6}
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
@@ -103,7 +132,7 @@ export default function Register({ passwordRules }: Props) {
 
                         <div className="text-muted-foreground text-small text-center">
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
+                            <TextLink href={login()} tabIndex={7}>
                                 Log in
                             </TextLink>
                         </div>

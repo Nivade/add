@@ -189,7 +189,7 @@ it('asks about an inferred promise in its read-back, not in Needs you as well', 
 });
 
 it('counts a capture that could not be sorted as unsorted, not as still sorting', function (): void {
-    $user = User::factory()->create(['ai_consented_at' => now()]);
+    $user = User::factory()->create();
     Capture::factory()->for($user)->create(['failed_at' => now()]);
     Capture::factory()->for($user)->create();
 

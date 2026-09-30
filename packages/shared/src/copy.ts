@@ -210,8 +210,11 @@ export const focusCopy = {
 export function aiConsentCopy(consented: boolean): { line: string; action: string } {
     return consented
         ? { line: 'A model outside this server can read what you capture.', action: 'Turn off' }
-        : { line: 'Nothing you write leaves this server.', action: 'Turn on' };
+        : { line: 'Nothing you write leaves this server, so nothing you capture gets sorted.', action: 'Turn on' };
 }
+
+/** Asked once, at signup: the app sorts what you write, so it cannot work without this. */
+export const registerConsentLabel = 'Send what I write to a model outside this server, so it can be sorted for me.';
 
 /** In the order they are offered, which is part of the copy: the gentlest answers come first. */
 const stuckReasons: { value: StuckReason; label: string }[] = [
