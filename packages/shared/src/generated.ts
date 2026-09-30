@@ -89,6 +89,10 @@ justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
 sortingCount: number,
+sorted: SortedCaptureData[],
+sortedMore: number,
+unsortedCount: number,
+aiConsented: boolean,
 hasOpenCommitments: boolean,
 checkIn: CheckInTopic | null,
 };
@@ -162,6 +166,12 @@ title: string,
 lines: string[],
 };
 export type SessionOutcome = 'continued' | 'completed' | 'stopped';
+export type SortedCaptureData = {
+id: string,
+excerpt: string,
+kind: CaptureKind,
+detail: string | null,
+};
 export type StepData = {
 id: string,
 intentionId: string,

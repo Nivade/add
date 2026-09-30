@@ -251,7 +251,7 @@ desktop                                          phone
   - API: same paths under `/api/v1` → `backend/app/Http/Controllers/Api/V1/ChangeCaptureKindController.php` and `backend/app/Http/Controllers/Api/V1/ConfirmCaptureKindController.php`, returning `CaptureData`, which gains `?CaptureKind $kind` and `?string $kindConfirmedAt`.
   - New `backend/tests/Feature/Captures/CaptureKindTest.php`: change each way; "Keep it anyway" turns not-for-you into a thought; an acted-on record answers 409; another person's capture is refused; confirm sets the stamp and confirms a promise.
   - Check: the test file passes; `npm run types:generate`.
-- [ ] **3.4 Home reads back what it sorted.** Invoke skills: `laravel-data`, `inertia-react-development`, `frontend-design`.
+- [x] **3.4 Home reads back what it sorted.** Invoke skills: `laravel-data`, `inertia-react-development`, `frontend-design`.
   - New `backend/app/Data/SortedCaptureData.php`, `#[TypeScript]`: `id`, `excerpt` (`Str::limit($body, 80)`), `CaptureKind $kind`, `?string $detail` (the waiting-for subject; the reminder's trigger in words, the same way `ComingUpData::$inWords` is built).
   - New `backend/app/Actions/Home/BuildSortedCaptures.php`: `handle(User $user): array{items: list<SortedCaptureData>, more: int}`; unconfirmed captures whose kind is set and not `Thought`, newest first, three shown, the rest counted. They stay until answered.
   - `HomeData` gains `array $sorted`, `int $sortedMore`, `int $unsortedCount` (the person's captures with `failed_at` set) and `bool $aiConsented` (`hasConsentedToAi()`). `BuildNeedsAttention` takes the ids of commitments routed from an unconfirmed capture and leaves them out.

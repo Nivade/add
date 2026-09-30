@@ -1,4 +1,5 @@
 import type {
+    CaptureKind,
     CheckInAnswer,
     CheckInTopic,
     CommitmentProvenance,
@@ -32,6 +33,55 @@ export function sortingLine(count: number): string {
     return count === 1
         ? 'Sorting the thought you just wrote down.'
         : `Sorting the ${count} thoughts you just wrote down.`;
+}
+
+/** What stopped sorting is said once, and always with the reassurance that nothing was lost. */
+export function unsortedLine(count: number, consented: boolean): { line: string; action: string | null } {
+    if (!consented) {
+        return { line: 'Sorting what you write needs AI turned on. Nothing you wrote is lost.', action: 'Turn it on' };
+    }
+
+    return {
+        line: `${count} ${count === 1 ? 'thing' : 'things'} you wrote could not be sorted. Nothing is lost.`,
+        action: null,
+    };
+}
+
+/** The read-back says what the app guessed, so no inferred kind becomes fact silently. */
+export function sortedLine(kind: CaptureKind, detail: string | null): string {
+    switch (kind) {
+        case 'waiting_for':
+            return detail ? `Saved as something you are waiting on from ${detail}.` : 'Saved as something you are waiting on.';
+        case 'promise':
+            return 'Saved as something you said you would do.';
+        case 'reminder':
+            return detail ? `Saved as a reminder for ${detail}.` : 'Saved as a reminder.';
+        case 'not_for_you':
+            return 'Nothing in this looks like it needs you.';
+        case 'thought':
+            return 'Saved as a thought.';
+    }
+}
+
+/** In the order offered when the person says the sort was wrong; not-for-you is never theirs to pick. */
+export const captureKindChoices: { value: Exclude<CaptureKind, 'not_for_you'>; label: string }[] = [
+    { value: 'thought', label: "It's a thought" },
+    { value: 'waiting_for', label: "I'm waiting on it" },
+    { value: 'promise', label: "I said I'd do it" },
+    { value: 'reminder', label: 'Remind me' },
+];
+
+export const sortedCopy = {
+    right: "That's right",
+    notRight: 'Not right?',
+    keep: 'Keep it anyway',
+} as const;
+
+/** Past three, the read-back is a count, never a longer list. */
+export function sortedMoreLine(count: number): string {
+    return count === 1
+        ? '1 more thing you wrote is waiting to be checked.'
+        : `${count} more things you wrote are waiting to be checked.`;
 }
 
 /** Coming back is welcomed, never timed: both frontends say it in these words. */
@@ -132,6 +182,7 @@ export const homeBands = {
     beforeYouGo: 'Before you go',
     needsAttention: 'Needs you',
     justFinished: 'Just finished',
+    sorted: 'What you just wrote',
 } as const;
 
 export const remindAfterCopy = {

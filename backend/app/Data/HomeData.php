@@ -12,7 +12,10 @@ use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 #[TypeScript]
 class HomeData extends Data
 {
-    /** @param  list<NeedsAttentionData>  $needsAttention */
+    /**
+     * @param  list<NeedsAttentionData>  $needsAttention
+     * @param  list<SortedCaptureData>  $sorted
+     */
     public function __construct(
         public ?NextActionData $rightNow,
         public bool $rightNowIsCommitment,
@@ -23,6 +26,10 @@ class HomeData extends Data
         public array $needsAttention,
         public int $restCount,
         public int $sortingCount,
+        public array $sorted,
+        public int $sortedMore,
+        public int $unsortedCount,
+        public bool $aiConsented,
         public bool $hasOpenCommitments,
         public ?CheckInTopic $checkIn,
     ) {}

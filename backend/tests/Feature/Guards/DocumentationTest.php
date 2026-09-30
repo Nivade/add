@@ -89,11 +89,9 @@ it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     // .ai/plans/ux-overhaul.md
     $planned = [
-        'backend/app/Actions/Home/BuildSortedCaptures.php',
         'backend/app/Actions/Intentions/CorrectDeadline.php',
         'backend/app/Actions/Sessions/BuildFinished.php',
         'backend/app/Data/FinishedData.php',
-        'backend/app/Data/SortedCaptureData.php',
         'backend/app/Http/Controllers/Api/V1/CorrectDeadlineController.php',
         'backend/app/Http/Controllers/Api/V1/ShowFinishedController.php',
         'backend/app/Http/Controllers/Web/CorrectDeadlineController.php',
@@ -102,7 +100,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Http/Requests/CorrectDeadlineRequest.php',
         'backend/app/Http/Requests/SessionControlRequest.php',
         'backend/resources/js/components/now-button.tsx',
-        'backend/resources/js/components/sorted-band.tsx',
         'backend/resources/js/hooks/use-minute-of-day.ts',
         'backend/resources/js/hooks/use-shortcuts.ts',
         'backend/resources/js/layouts/focus-frame.tsx',
