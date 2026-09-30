@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import git  # noqa: E402
+from _ledger import in_this_repo, toplevel  # noqa: E402
 
 # (path prefix or exact path, skills, rule files)
 MAP = [
@@ -66,14 +66,6 @@ def emit(payload):
     sys.exit(0)
 
 
-def checkout_of(target):
-    """The top level of the checkout holding `target`, so a worktree's paths read the same as the main checkout's."""
-    directory = os.path.dirname(os.path.realpath(target))
-    while directory != os.path.dirname(directory) and not os.path.isdir(directory):
-        directory = os.path.dirname(directory)
-    return git(directory, "rev-parse", "--show-toplevel")
-
-
 def seen(session, key):
     path = os.path.join(tempfile.gettempdir(), "claude-skill-gate-" + hashlib.sha256(session.encode()).hexdigest()[:16])
     fired = set()
@@ -95,8 +87,8 @@ def main():
         emit({})
 
     target = event.get("tool_input", {}).get("file_path") or ""
-    root = checkout_of(target) if target else None
-    if not target or not root:
+    root = toplevel(target)
+    if not root or not in_this_repo(root):
         emit({})
 
     try:

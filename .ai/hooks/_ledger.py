@@ -1,4 +1,4 @@
-"""Shared by review-ledger.py, merge-gate.py and skill-gate.py: git/gh plumbing, the ledger path, and the required skill order."""
+"""Git/gh plumbing and the review ledger the hooks share."""
 
 import json
 import os
@@ -24,10 +24,29 @@ def gh(root, *args):
     return _run(["gh", *args], root)
 
 
+def toplevel(path):
+    """The checkout holding `path`, walking up to the nearest existing directory so a file not yet written resolves too."""
+    if not path:
+        return None
+    directory = os.path.realpath(path)
+    while not os.path.isdir(directory) and directory != os.path.dirname(directory):
+        directory = os.path.dirname(directory)
+    return git(directory, "rev-parse", "--show-toplevel")
+
+
+def common_dir(root):
+    return git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+
+
+def in_this_repo(root):
+    """True when `root` is a checkout of the repo these hooks live in, so a sibling repo is left alone."""
+    return common_dir(root) == common_dir(toplevel(__file__))
+
+
 def session_root(event):
-    """The checkout the session works in, which is a worktree's own top level rather than CLAUDE_PROJECT_DIR."""
-    cwd = event.get("cwd") or os.environ.get("CLAUDE_PROJECT_DIR", "")
-    return git(cwd, "rev-parse", "--show-toplevel") if cwd else None
+    """The session's checkout of this repo, a worktree's included; CLAUDE_PROJECT_DIR only when cwd is outside any repo."""
+    root = toplevel(event.get("cwd")) or toplevel(os.environ.get("CLAUDE_PROJECT_DIR"))
+    return root if root and in_this_repo(root) else None
 
 
 def current_branch(root):
@@ -39,14 +58,19 @@ def fork_point(root, ref="HEAD"):
     return git(root, "merge-base", "origin/main", ref)
 
 
+def branch_fork_point(root, branch):
+    """The fork point `branch` has on the remote, after a fetch, since a local ref can lag GitHub's "Update branch"."""
+    git(root, "fetch", "--quiet", "origin", "main")
+    git(root, "fetch", "--quiet", "origin", branch)
+    return fork_point(root, "origin/" + branch) or fork_point(root, branch)
+
+
 def ledger_path(root, branch):
-    common_dir = git(root, "rev-parse", "--git-common-dir")
-    if not common_dir:
+    git_dir = common_dir(root)
+    if not git_dir:
         return None
-    if not os.path.isabs(common_dir):
-        common_dir = os.path.join(root, common_dir)
     safe_branch = re.sub(r"[^A-Za-z0-9_.-]", "__", branch)
-    return os.path.join(common_dir, "claude-review", safe_branch + ".json")
+    return os.path.join(git_dir, "claude-review", safe_branch + ".json")
 
 
 def load_entries(path):
@@ -74,6 +98,8 @@ def latest_at(entries, skill):
 
 def ran_in_order(entries, fork, sequence=REQUIRED_SEQUENCE):
     """True when every skill in `sequence` ran, at `fork`, each strictly after the one before it."""
+    if fork is None:
+        return False
     at_fork = [entry for entry in entries if entry.get("fork") == fork]
     previous = None
     for skill in sequence:
