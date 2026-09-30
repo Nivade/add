@@ -23,5 +23,7 @@ class ExecutionStateData extends Data
         public array $progress,
         public string $elapsed,
         public bool $currentStepIsCommitment,
+        public bool $returning,
+        public int $stepsDone,
     ) {}
 }

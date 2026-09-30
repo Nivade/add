@@ -66,6 +66,8 @@ intention: IntentionData,
 progress: string[],
 elapsed: string,
 currentStepIsCommitment: boolean,
+returning: boolean,
+stepsDone: number,
 };
 export type FutureReminderData = {
 id: string,

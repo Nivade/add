@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasonsFor } from '@add/shared';
+import { returnCopy, stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
@@ -86,13 +86,21 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     {intention.title}
                 </p>
 
-                {paused ? (
+                {state.returning || paused ? (
                     <div className="space-y-6">
-                        <OneThing>Welcome back.</OneThing>
-                        <Meta>
-                            you left off at{' '}
-                            {(step?.title ?? intention.title).toLowerCase()}
-                        </Meta>
+                        <OneThing>
+                            {state.returning
+                                ? returnCopy.welcome
+                                : returnCopy.paused}
+                        </OneThing>
+                        {state.returning ? (
+                            <Meta>
+                                {returnCopy.workingOn(intention.title)}{' '}
+                                {returnCopy.stepsDone(state.stepsDone)}
+                            </Meta>
+                        ) : (
+                            <Meta>{returnCopy.pausedMeta}</Meta>
+                        )}
                         <div className="pl-5">
                             <Form {...focusRoutes.resume.form(session.id)}>
                                 <Button type="submit">Continue</Button>

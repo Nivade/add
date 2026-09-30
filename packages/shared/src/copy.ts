@@ -25,6 +25,18 @@ export function sortingLine(count: number): string {
         : `Sorting the ${count} thoughts you just wrote down.`;
 }
 
+/** Coming back is welcomed, never timed: both frontends say it in these words. */
+export const returnCopy = {
+    welcome: 'Welcome back.',
+    paused: 'Paused.',
+    pausedMeta: 'Continue whenever you are ready.',
+    workingOn: (title: string): string => `You were working on ${title}.`,
+    stepsDone: (count: number): string | null =>
+        count === 0
+            ? null
+            : `You had done ${count} ${count === 1 ? 'step' : 'steps'}.`,
+};
+
 export const planRungLabels: Record<PlanRung, string> = {
     find_things: 'find what you need',
     get_ready: 'get ready',

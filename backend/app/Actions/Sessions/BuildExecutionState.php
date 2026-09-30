@@ -7,8 +7,10 @@ namespace App\Actions\Sessions;
 use App\Data\ExecutionSessionData;
 use App\Data\ExecutionStateData;
 use App\Data\IntentionData;
+use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\Commitment;
+use App\Models\ExecutionEvent;
 use App\Models\ExecutionSession;
 use App\Models\Step;
 use Carbon\CarbonInterval;
@@ -24,6 +26,10 @@ final class BuildExecutionState
     /** Below this, "a minute or two" is truer than a number. */
     private const int ELAPSED_FLOOR_SECONDS = 90;
 
+    private const int RETURNING_AFTER_PAUSE_MINUTES = 5;
+
+    private const int RETURNING_AFTER_IDLE_MINUTES = 20;
+
     public function handle(ExecutionSession $session): ExecutionStateData
     {
         $session->refresh()->load(['currentStep', 'intention.steps', 'user']);
@@ -34,7 +40,28 @@ final class BuildExecutionState
             $this->progressLines($session),
             $this->elapsedWords($session),
             $session->current_step_id !== null && Commitment::query()->open()->forStep($session->current_step_id)->exists(),
+            $this->returning($session),
+            $session->intention->steps->where('status', StepStatus::Done)->count(),
         );
+    }
+
+    /** Coming back after a distraction, a long pause or a long quiet gets a welcome, not a bare step. */
+    private function returning(ExecutionSession $session): bool
+    {
+        if (! $session->isRunning()) {
+            return false;
+        }
+
+        $latest = $session->events()->latest()->orderByDesc('id')->first();
+        $now = $session->user->now();
+
+        if ($session->paused_at !== null) {
+            return $latest?->type === ExecutionEventType::Distracted
+                || $session->paused_at->lt($now->subMinutes(self::RETURNING_AFTER_PAUSE_MINUTES));
+        }
+
+        return $latest instanceof ExecutionEvent
+            && $latest->created_at->lt($now->subMinutes(self::RETURNING_AFTER_IDLE_MINUTES));
     }
 
     /** @return list<string> */

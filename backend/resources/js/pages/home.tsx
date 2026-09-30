@@ -7,6 +7,7 @@ import {
     commitmentCopy,
     recurrenceLine,
     restCountLine,
+    returnCopy,
     sortingLine,
     waitingForResponses,
 } from '@add/shared';
@@ -162,11 +163,15 @@ function RightNow({ rightNow, session }: HomeData) {
         return (
             <div className="space-y-6">
                 <OneThing>
-                    {session.session.currentStep?.title ??
-                        session.intention.title}
+                    {session.returning
+                        ? returnCopy.welcome
+                        : (session.session.currentStep?.title ??
+                          session.intention.title)}
                 </OneThing>
                 <Meta>
-                    part-way through {session.intention.title.toLowerCase()}
+                    {session.returning
+                        ? returnCopy.workingOn(session.intention.title)
+                        : `Part-way through ${session.intention.title}.`}
                 </Meta>
                 <div className="pl-5">
                     <Button asChild>

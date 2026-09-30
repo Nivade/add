@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, returnCopy, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -83,11 +83,20 @@ export default function Focus() {
       <StaleNote problem={problem} />
       <Meta>{intention.title}</Meta>
 
-      {paused ? (
+      {data.returning || paused ? (
         <>
-          <OneThing>Welcome back.</OneThing>
+          <OneThing>
+            {data.returning ? returnCopy.welcome : returnCopy.paused}
+          </OneThing>
           <Meta>
-            you left off at {(step?.title ?? intention.title).toLowerCase()}
+            {data.returning
+              ? [
+                  returnCopy.workingOn(intention.title),
+                  returnCopy.stepsDone(data.stepsDone),
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              : returnCopy.pausedMeta}
           </Meta>
           <Button
             label="Continue"

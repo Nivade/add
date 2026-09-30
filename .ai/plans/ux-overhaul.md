@@ -93,7 +93,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - Mobile `mobile/app/index.tsx`: the same line; reload on screen focus with `useFocusEffect`, and every 3 seconds while the count is above zero.
   - Tests: `backend/tests/Feature/Home/HomeTest.php` counts unprocessed captures only; `backend/tests/Feature/Captures/CaptureToIntentionTest.php` asserts the flashed toast (find the assertion with `search-docs` query `inertia flash data testing`).
   - Check: both test files pass; `npm run types:generate` then `npm run typecheck`.
-- [ ] **1.5 "I got distracted" welcomes the person back.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`.
+- [x] **1.5 "I got distracted" welcomes the person back.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`.
   - `RecordDistraction`: inside the transition, sets `paused_at` when it is null, then records `Distracted`.
   - `ResumeSession`: a paused session clears `paused_at` and records `Resumed`; a running session records `Resumed` and changes nothing else (acknowledging a return is a valid transition). Replace its docblock with one line saying so.
   - `ExecutionStateData` gains `bool $returning` and `int $stepsDone` (the intention's done steps). `BuildExecutionState` constants `RETURNING_AFTER_PAUSE_MINUTES = 5` and `RETURNING_AFTER_IDLE_MINUTES = 20`: returning is paused with the latest event `Distracted` or `paused_at` older than 5 minutes, or running with the latest event older than 20 minutes.

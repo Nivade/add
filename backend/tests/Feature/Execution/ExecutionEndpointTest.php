@@ -73,7 +73,13 @@ it('answers 200 for each control that mutates an open session', function (): voi
     $this->actingAs($session->user)
         ->postJson("/api/v1/sessions/{$session->id}/distracted")
         ->assertOk()
-        ->assertJsonPath('session.endedAt', null);
+        ->assertJsonPath('session.endedAt', null)
+        ->assertJsonPath('returning', true);
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/resume")
+        ->assertOk()
+        ->assertJsonPath('returning', false);
 
     $this->actingAs($session->user)
         ->postJson("/api/v1/sessions/{$session->id}/pause")

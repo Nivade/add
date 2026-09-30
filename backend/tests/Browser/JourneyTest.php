@@ -73,17 +73,23 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     $page->assertSee('Open it.')
         ->assertSee('1 of 3 steps done.');
 
-    // Distracted.
+    // Distracted, and welcomed back.
     $page->keys('I got distracted', 'Enter');
     expect(focusedDescriptor($page))->toBe('I got distracted');
+    $page->assertSee('Welcome back.')
+        ->assertSee('You were working on');
+
+    $page->keys('Continue', 'Enter');
+
+    expect(focusedDescriptor($page))->toBe('Continue');
     $page->assertSee('Open it.');
 
+    // Paused, which is not a return.
     $page->keys('Pause', 'Enter');
 
     expect(focusedDescriptor($page))->toBe('Pause');
-    $page->assertSee('Welcome back.');
+    $page->assertSee('Paused.');
 
-    // Welcome back.
     $page->keys('Continue', 'Enter');
 
     expect(focusedDescriptor($page))->toBe('Continue');

@@ -63,6 +63,15 @@ it('carries one typed thought all the way to a finished intention', function ():
         ->assertRedirect(route('focus'));
 
     $this->actingAs($user)
+        ->get(route('focus'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.returning', true));
+
+    $this->actingAs($user)
+        ->from(route('focus'))
+        ->post(route('focus.resume', $session))
+        ->assertRedirect(route('focus'));
+
+    $this->actingAs($user)
         ->from(route('focus'))
         ->post(route('focus.pause', $session))
         ->assertRedirect(route('focus'));
@@ -94,6 +103,6 @@ it('carries one typed thought all the way to a finished intention', function ():
     expect(Intention::query()->sole()->status->value)->toBe('done')
         ->and($session->refresh()->outcome?->value)->toBe('completed')
         ->and(replay($session))->toBe([
-            'started', 'step_completed', 'distracted', 'paused', 'resumed', 'step_completed', 'stopped',
+            'started', 'step_completed', 'distracted', 'resumed', 'paused', 'resumed', 'step_completed', 'stopped',
         ]);
 });

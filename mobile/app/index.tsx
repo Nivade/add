@@ -12,6 +12,7 @@ import {
   notHereLabels,
   recurrenceLine,
   restCountLine,
+  returnCopy,
   sortingLine,
   waitingForResponses,
 } from '@add/shared';
@@ -235,9 +236,15 @@ export default function Home() {
       {session ? (
         <>
           <OneThing>
-            {session.session.currentStep?.title ?? session.intention.title}
+            {session.returning
+              ? returnCopy.welcome
+              : (session.session.currentStep?.title ?? session.intention.title)}
           </OneThing>
-          <Meta>part-way through {session.intention.title.toLowerCase()}</Meta>
+          <Meta>
+            {session.returning
+              ? returnCopy.workingOn(session.intention.title)
+              : `Part-way through ${session.intention.title}.`}
+          </Meta>
           <Button
             label="Continue"
             tone="primary"

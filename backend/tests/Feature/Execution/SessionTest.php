@@ -132,9 +132,6 @@ it('refuses a transition the session cannot make', function (): void {
     expect(fn (): mixed => PauseSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 
     ResumeSession::run($session->refresh());
-
-    expect(fn (): mixed => ResumeSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
-
     StopSession::run($session->refresh());
 
     expect(fn (): mixed => StopSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
@@ -207,15 +204,70 @@ it('refuses a skip or a stuck answer for a step the session has moved past', fun
         ->and(replay($session))->toBe(['started', 'step_completed']);
 });
 
-it('records a distraction without ending or scoring anything', function (): void {
+it('records a distraction as a pause, without ending or scoring anything', function (): void {
     $session = started();
 
     RecordDistraction::run($session);
 
-    expect($session->refresh()->ended_at)->toBeNull()
+    expect($session->refresh()->paused_at)->not->toBeNull()
+        ->and($session->ended_at)->toBeNull()
         ->and($session->outcome)->toBeNull()
         ->and($session->steps_completed)->toBe(0)
         ->and(replay($session))->toBe(['started', 'distracted']);
+});
+
+it('welcomes the person back after a distraction, with what they were doing', function (): void {
+    $session = started();
+    CompleteStep::run($session, $session->current_step_id);
+
+    RecordDistraction::run($session->refresh());
+    $state = BuildExecutionState::run($session);
+
+    expect($state->returning)->toBeTrue()
+        ->and($state->stepsDone)->toBe(1);
+});
+
+it('treats a pause a minute old as a pause, not a return', function (): void {
+    $session = started();
+    PauseSession::run($session);
+
+    $this->travel(1)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeFalse();
+});
+
+it('welcomes the person back once a pause is more than a few minutes old', function (): void {
+    $session = started();
+    PauseSession::run($session);
+
+    $this->travel(6)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeTrue();
+});
+
+it('welcomes the person back after a long quiet in a running session', function (): void {
+    $session = started();
+
+    $this->travel(19)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeFalse();
+
+    $this->travel(2)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeTrue();
+});
+
+it('acknowledges a return on a running session without changing anything else', function (): void {
+    $session = started();
+    $step = $session->current_step_id;
+    $this->travel(21)->minutes();
+
+    ResumeSession::run($session);
+
+    expect($session->refresh()->paused_at)->toBeNull()
+        ->and($session->current_step_id)->toBe($step)
+        ->and(replay($session))->toBe(['started', 'resumed'])
+        ->and(BuildExecutionState::run($session)->returning)->toBeFalse();
 });
 
 it('stops as a real answer rather than a failure', function (): void {
@@ -234,12 +286,13 @@ it('reconstructs the session from its events', function (): void {
     CompleteStep::run($session, $session->current_step_id);
     SkipCurrentStep::run($session->refresh(), $session->current_step_id);
     RecordDistraction::run($session->refresh());
+    ResumeSession::run($session->refresh());
     PauseSession::run($session->refresh());
     ResumeSession::run($session->refresh());
     StopSession::run($session->refresh());
 
     expect(replay($session))->toBe([
-        'started', 'step_completed', 'step_skipped', 'distracted', 'paused', 'resumed', 'stopped',
+        'started', 'step_completed', 'step_skipped', 'distracted', 'resumed', 'paused', 'resumed', 'stopped',
     ]);
 });
 
