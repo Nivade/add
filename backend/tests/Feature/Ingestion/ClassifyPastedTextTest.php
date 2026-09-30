@@ -7,7 +7,7 @@ use App\Models\User;
 it('classifies pasted text as actionable', function (): void {
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
 
-    fakeAi()->push([
+    fakeAi()->respondWith([
         'actionable' => true,
         'title' => 'Car insurance renewal',
         'why' => 'Policy expires 14 October',
@@ -30,7 +30,7 @@ it('classifies pasted text as actionable', function (): void {
 it('classifies pasted text as not actionable, with no title invented', function (): void {
     $user = User::factory()->create();
 
-    fakeAi()->push([
+    fakeAi()->respondWith([
         'actionable' => false,
         'title' => null,
         'why' => null,
@@ -64,7 +64,7 @@ it('requires authentication', function (): void {
 it('classifies from the web too, for the paste dialog', function (): void {
     $user = User::factory()->create();
 
-    fakeAi()->push([
+    fakeAi()->respondWith([
         'actionable' => true,
         'title' => 'Pay the water bill',
         'why' => null,
@@ -80,7 +80,7 @@ it('classifies from the web too, for the paste dialog', function (): void {
 
 it('says why it cannot read anything when AI consent is off', function (): void {
     $user = User::factory()->create(['ai_consented_at' => null]);
-    app()->instance(App\Contracts\AiProvider::class, new App\Support\Ai\Providers\ConsentGatedAiProvider(fakeAi()));
+    config()->set('ai-toolkit.driver', 'openai');
 
     $this->actingAs($user)
         ->postJson(route('ingestion.classify'), ['text' => 'Your water bill of 42 euro is due.'])

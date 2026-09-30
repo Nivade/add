@@ -223,9 +223,6 @@ it('renders no domain exception with its own render()', function (): void {
 // One name per adapter, read from #[Driver] rather than repeated in a service provider's match.
 it('gives every AI provider and calendar source one #[Driver] name, and no two share one', function (): void {
     $exempt = [
-        App\Support\Ai\Providers\LoggingAiProvider::class,
-        App\Support\Ai\Providers\ConsentGatedAiProvider::class,
-        App\Support\Ai\Providers\NullAiProvider::class,
         App\Support\Calendar\Sources\NullCalendarSource::class,
     ];
 

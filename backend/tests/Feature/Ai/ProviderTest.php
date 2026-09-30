@@ -2,96 +2,139 @@
 
 declare(strict_types=1);
 
-use App\Contracts\AiProvider;
 use App\Enums\Ai\AiOperation;
+use App\Exceptions\AiConsentRequired;
 use App\Models\User;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiFixtureMissing;
-use App\Support\Ai\Exceptions\AiProviderRequestFailed;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
-use App\Support\Ai\Exceptions\AiUnavailable;
-use App\Support\Ai\Prompts;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\Providers\CannedAiProvider;
-use App\Support\Ai\Providers\ConsentGatedAiProvider;
-use App\Support\Ai\Providers\FakeAiProvider;
-use App\Support\Ai\Providers\FixtureAiProvider;
-use App\Support\Ai\Providers\LoggingAiProvider;
-use App\Support\Ai\Providers\NullAiProvider;
-use App\Support\Ai\Providers\OpenAiProvider;
-use App\Support\Ai\Schemas\ParseCaptureSchema;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
-use Nvade\AiToolkit\Providers\OpenAiProvider as ToolkitOpenAiProvider;
+use Monolog\Handler\TestHandler;
+use Monolog\LogRecord;
+use Nvade\AiToolkit\AiRequest;
+use Nvade\AiToolkit\AiResponse;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiFixtureMissing;
+use Nvade\AiToolkit\Exceptions\AiProviderRequestFailed;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
+use Nvade\AiToolkit\Facades\AiToolkit;
+use Nvade\AiToolkit\Providers\DispatchingAiProvider;
+use Nvade\AiToolkit\Providers\FixtureAiProvider;
+use Nvade\AiToolkit\Providers\GatedAiProvider;
+use Nvade\AiToolkit\Providers\NullAiProvider;
+use Nvade\AiToolkit\Providers\OpenAiProvider;
 use Nvade\AiToolkit\Providers\StructuredAgent;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 
-function aiRequest(
-    AiOperation $operation = AiOperation::ParseCapture,
-    string $user = 'clean the apartment before Saturday',
-    string $promptVersion = Prompts::PARSE_CAPTURE_VERSION,
-    int $userId = 1,
-): AiRequest {
-    return new AiRequest(
-        operation: $operation,
-        system: Prompts::PARSE_CAPTURE,
-        user: $user,
-        schema: ParseCaptureSchema::builder(),
-        promptVersion: $promptVersion,
-        schemaVersion: ParseCaptureSchema::VERSION,
-        maxOutputTokens: 900,
-        userId: $userId,
-    );
+function aiRequest(string $capture = 'clean the apartment before Saturday', ?int $userId = 1): AiRequest
+{
+    return AiRequests::parseCapture($userId, $capture, CarbonImmutable::parse('2026-09-17 09:00', 'UTC'));
+}
+
+/** The driver the registry resolved, beneath the event dispatcher every driver is wrapped in. */
+function driverBeneath(AiProvider $provider): AiProvider
+{
+    while ($provider instanceof GatedAiProvider || $provider instanceof DispatchingAiProvider) {
+        $provider = $provider->inner;
+    }
+
+    return $provider;
+}
+
+function aiLog(): TestHandler
+{
+    config()->set('logging.channels.ai-test', ['driver' => 'monolog', 'handler' => TestHandler::class]);
+    config()->set('ai-toolkit.log.channel', 'ai-test');
+
+    /** @var TestHandler */
+    return Log::channel('ai-test')->getLogger()->getHandlers()[0];
 }
 
 it('resolves the provider named by the driver config', function (string $driver, string $expected): void {
-    config()->set('ai.driver', $driver);
+    config()->set('ai-toolkit.driver', $driver);
 
-    expect(aiProvider())->toBeInstanceOf($expected)
-        ->and(app(AiProvider::class))->toBeInstanceOf(LoggingAiProvider::class);
+    expect(driverBeneath(app(AiProvider::class)))->toBeInstanceOf($expected);
 })->with([
     ['canned', CannedAiProvider::class],
     ['fixture', FixtureAiProvider::class],
     ['fake', FakeAiProvider::class],
-    ['openai', ConsentGatedAiProvider::class],
+    ['openai', OpenAiProvider::class],
     ['null', NullAiProvider::class],
-    ['nonsense', NullAiProvider::class],
 ]);
 
-it('gates the openai driver on per-user consent, and reaches OpenAI underneath', function (): void {
-    config()->set('ai.driver', 'openai');
+it('refuses an unknown driver rather than quietly answering with none', function (): void {
+    config()->set('ai-toolkit.driver', 'nonsense');
 
-    $provider = aiProvider();
+    expect(fn (): AiProvider => app(AiProvider::class))->toThrow(InvalidArgumentException::class);
+});
 
-    expect($provider)->toBeInstanceOf(ConsentGatedAiProvider::class);
+it('gates only a driver that leaves the machine on per-user consent', function (string $driver, string $onMiss, bool $gated): void {
+    config()->set('ai-toolkit.driver', $driver);
+    config()->set('ai-toolkit.fixture.on_miss', $onMiss);
 
-    if ($provider instanceof ConsentGatedAiProvider) {
-        expect($provider->inner)->toBeInstanceOf(OpenAiProvider::class);
-    }
+    expect(app(AiProvider::class) instanceof GatedAiProvider)->toBe($gated);
+})->with([
+    'openai' => ['openai', 'dump', true],
+    'fixture recording through openai' => ['fixture', 'record:openai', true],
+    'fixture replaying' => ['fixture', 'dump', false],
+    'canned' => ['canned', 'dump', false],
+    'fake' => ['fake', 'dump', false],
+    'null' => ['null', 'dump', false],
+]);
+
+it('gates a driver nobody has said stays on the machine', function (): void {
+    AiToolkit::extend('elsewhere', fn (): AiProvider => new class implements AiProvider
+    {
+        public function name(): string
+        {
+            return 'elsewhere';
+        }
+
+        public function isAvailable(): bool
+        {
+            return true;
+        }
+
+        public function respond(AiRequest $request): AiResponse
+        {
+            return new AiResponse(payload: [], provider: 'elsewhere', model: 'elsewhere');
+        }
+    });
+    config()->set('ai-toolkit.driver', 'elsewhere');
+
+    expect(app(AiProvider::class))->toBeInstanceOf(GatedAiProvider::class);
 });
 
 it('refuses to answer when AI is disabled rather than returning an empty payload', function (): void {
-    expect(fn (): App\Data\Ai\AiResponseData => (new NullAiProvider)->complete(aiRequest()))
+    expect(fn (): AiResponse => (new NullAiProvider)->respond(aiRequest()))
         ->toThrow(AiUnavailable::class)
         ->and((new NullAiProvider)->isAvailable())->toBeFalse();
 });
 
 it('throws on a missing fixture instead of inventing an answer', function (): void {
-    config()->set('ai.fixture_path', storage_path('framework/testing/ai-fixtures'));
+    $directory = storage_path('framework/testing/ai-fixtures');
+    config()->set('ai-toolkit.fixture_path', $directory);
 
-    expect(fn (): App\Data\Ai\AiResponseData => (new FixtureAiProvider)->complete(aiRequest()))
+    expect(fn (): AiResponse => AiToolkit::driver('fixture')->respond(aiRequest()))
         ->toThrow(AiFixtureMissing::class);
+
+    File::deleteDirectory($directory);
 });
 
 it('serves a fixture keyed on the request cache key', function (): void {
     $directory = storage_path('framework/testing/ai-fixtures');
-    config()->set('ai.fixture_path', $directory);
+    config()->set('ai-toolkit.fixture_path', $directory);
 
     $request = aiRequest();
     File::ensureDirectoryExists($directory);
     File::put(FixtureAiProvider::path($request), json_encode(['title' => 'Clean the apartment']));
 
-    $response = (new FixtureAiProvider)->complete($request);
+    $response = AiToolkit::driver('fixture')->respond($request);
 
     File::deleteDirectory($directory);
 
@@ -101,87 +144,120 @@ it('serves a fixture keyed on the request cache key', function (): void {
 
 it('rejects a fixture that is not a JSON object', function (): void {
     $directory = storage_path('framework/testing/ai-fixtures');
-    config()->set('ai.fixture_path', $directory);
+    config()->set('ai-toolkit.fixture_path', $directory);
 
     $request = aiRequest();
     File::ensureDirectoryExists($directory);
     File::put(FixtureAiProvider::path($request), 'not json');
 
-    $complete = fn (): App\Data\Ai\AiResponseData => (new FixtureAiProvider)->complete($request);
-
-    expect($complete)->toThrow(AiResponseInvalid::class);
+    expect(fn (): AiResponse => AiToolkit::driver('fixture')->respond($request))->toThrow(AiResponseInvalid::class);
 
     File::deleteDirectory($directory);
 });
 
 it('invalidates stored answers when the prompt version moves', function (): void {
-    expect(aiRequest(promptVersion: '1')->cacheKey())
-        ->not->toBe(aiRequest(promptVersion: '2')->cacheKey());
+    $request = aiRequest();
+    $moved = new AiRequest(
+        system: $request->system,
+        user: $request->user,
+        schema: $request->schema,
+        promptVersion: $request->promptVersion.'-next',
+        schemaVersion: $request->schemaVersion,
+        maxOutputTokens: $request->maxOutputTokens,
+        operation: $request->operation,
+    );
+
+    expect($moved->cacheKey())->not->toBe($request->cacheKey());
 });
 
 it('answers every operation from the canned driver so the UI is clickable without credentials', function (AiOperation $operation): void {
-    $payload = (new CannedAiProvider)->complete(aiRequest($operation))->payload;
+    $payload = (new CannedAiProvider)->respond(aiRequest()->withOperation($operation->value))->payload;
 
     expect($payload)->not->toBeEmpty();
 })->with(AiOperation::cases());
 
 it("keeps the person's own words in the canned capture title", function (): void {
-    $payload = (new CannedAiProvider)->complete(aiRequest(user: "renew my passport\nand other noise"))->payload;
+    $payload = (new CannedAiProvider)->respond(aiRequest("renew my passport\nand other noise"))->payload;
 
     expect($payload['title'])->toBe('renew my passport')
         ->and($payload['clarifying_question'])->toBeNull();
 });
 
 it('gives back queued answers in order and then fails loudly', function (): void {
-    $provider = new FakeAiProvider;
-    $provider->push(['title' => 'first'])->push(['title' => 'second']);
+    $provider = fakeAi()->respondWith(['title' => 'first'])->respondWith(['title' => 'second']);
 
-    expect($provider->complete(aiRequest())->payload)->toBe(['title' => 'first'])
-        ->and($provider->complete(aiRequest())->payload)->toBe(['title' => 'second'])
-        ->and(fn (): App\Data\Ai\AiResponseData => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
+    expect($provider->respond(aiRequest())->payload)->toBe(['title' => 'first'])
+        ->and($provider->respond(aiRequest())->payload)->toBe(['title' => 'second'])
+        ->and(fn (): AiResponse => $provider->respond(aiRequest()))->toThrow(AiUnavailable::class);
 });
 
 it('logs the shape of every call and none of the text', function (): void {
-    Log::spy();
+    $log = aiLog();
+    fakeAi()->respondWith(['title' => 'Renew my passport']);
 
-    $answer = new LoggingAiProvider((new FakeAiProvider)->push(['title' => 'Renew my passport']))
-        ->complete(aiRequest(user: 'renew my passport'));
+    $answer = app(AiProvider::class)->respond(aiRequest('renew my passport'));
 
-    expect($answer->provider)->toBe('fake');
+    expect($answer->provider)->toBe('fake')
+        ->and($log->getRecords())->toHaveCount(1);
 
-    Log::shouldHaveReceived('info')
-        ->withArgs(function (string $message, array $context): bool {
-            expect($context)->toHaveKeys([
-                'operation', 'provider', 'prompt_version', 'schema_version', 'duration_ms', 'model',
-                'input_tokens', 'output_tokens', 'cached_input_tokens',
-            ]);
+    $context = $log->getRecords()[0]->context;
 
-            return $context['operation'] === 'parse_capture'
-                && $context['provider'] === 'fake'
-                && ! str_contains(json_encode($context, JSON_THROW_ON_ERROR), 'passport');
-        })
-        ->once();
+    expect($context)->toHaveKeys([
+        'operation', 'provider', 'prompt_version', 'schema_version', 'duration_ms', 'model',
+        'input_tokens', 'output_tokens', 'cached_input_tokens',
+    ])
+        ->and($context['operation'])->toBe('parse_capture')
+        ->and($context['provider'])->toBe('fake')
+        ->and(json_encode($context, JSON_THROW_ON_ERROR))->not->toContain('passport');
+});
+
+it('records the failed call and lets the failure through', function (): void {
+    $log = aiLog();
+
+    expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest()))->toThrow(AiUnavailable::class)
+        ->and($log->hasWarningThatPasses(fn (LogRecord $record): bool => $record->context['exception'] === AiUnavailable::class))->toBeTrue();
 });
 
 it('rate-limits the openai driver per user, so one burst cannot lock another person out', function (): void {
     config()->set('ai-toolkit.openai.rate_limit.max_attempts', 1);
-    RateLimiter::hit(ToolkitOpenAiProvider::rateLimitKey('1'), 60);
+    RateLimiter::hit(OpenAiProvider::rateLimitKey('1'), 60);
 
-    expect(RateLimiter::tooManyAttempts(ToolkitOpenAiProvider::rateLimitKey('1'), 1))->toBeTrue()
-        ->and(RateLimiter::tooManyAttempts(ToolkitOpenAiProvider::rateLimitKey('2'), 1))->toBeFalse();
+    expect(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey('1'), 1))->toBeTrue()
+        ->and(RateLimiter::tooManyAttempts(OpenAiProvider::rateLimitKey('2'), 1))->toBeFalse();
 });
 
-it("throttles the openai driver on the asking person's own key", function (): void {
+it("reaches the openai driver once consent is on record, throttled on the asking person's own key", function (): void {
+    config()->set('ai-toolkit.driver', 'openai');
     config()->set('ai.providers.openai.key', 'sk-test');
     StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
+    $user = User::factory()->create(['ai_consented_at' => now()]);
 
-    app(OpenAiProvider::class)->complete(aiRequest(userId: 7));
+    $answer = app(AiProvider::class)->respond(aiRequest(userId: $user->id));
 
-    expect(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey('7')))->toBe(1)
-        ->and(RateLimiter::attempts(ToolkitOpenAiProvider::rateLimitKey(null)))->toBe(0);
+    expect($answer->payload)->toBe(['title' => 'Renew my passport'])
+        ->and(RateLimiter::attempts(OpenAiProvider::rateLimitKey((string) $user->id)))->toBe(1)
+        ->and(RateLimiter::attempts(OpenAiProvider::rateLimitKey(null)))->toBe(0);
 });
 
-it('reports an openai answer cut off at the token limit as invalid', function (): void {
+it("refuses to reach a person's words off the machine without their consent, and logs the refusal", function (?bool $consented): void {
+    $log = aiLog();
+    config()->set('ai-toolkit.driver', 'openai');
+    config()->set('ai.providers.openai.key', 'sk-test');
+    StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
+    $userId = $consented === null ? null : User::factory()->create(['ai_consented_at' => null])->id;
+
+    expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest('renew my passport', $userId)))
+        ->toThrow(AiConsentRequired::class)
+        ->and($log->hasWarningThatPasses(fn (LogRecord $record): bool => $record->context['exception'] === AiConsentRequired::class
+            && $record->context['operation'] === 'parse_capture'
+            && $record->context['provider'] === 'openai'
+            && ! str_contains(json_encode($record->context, JSON_THROW_ON_ERROR), 'passport')))->toBeTrue();
+})->with([
+    'no consent on record' => [false],
+    'no person on the request' => [null],
+]);
+
+it('reports an openai answer cut off at the token limit as truncated', function (): void {
     config()->set('ai.providers.openai.key', 'sk-test');
     Http::fake(['*/responses' => Http::response([
         'id' => 'resp_1',
@@ -192,15 +268,15 @@ it('reports an openai answer cut off at the token limit as invalid', function ()
         'usage' => ['input_tokens' => 10, 'output_tokens' => 5],
     ])]);
 
-    expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
-        ->toThrow(AiResponseInvalid::class);
+    expect(fn (): AiResponse => app(OpenAiProvider::class)->respond(aiRequest(userId: 7)))
+        ->toThrow(AiResponseTruncated::class);
 });
 
 it('names a content-filter stop in the failure, never the provider text', function (int $status, array $body, string $expected): void {
     config()->set('ai.providers.openai.key', 'sk-test');
     Http::fake(['*/responses' => Http::response($body, $status)]);
 
-    expect(fn (): App\Data\Ai\AiResponseData => app(OpenAiProvider::class)->complete(aiRequest(userId: 7)))
+    expect(fn (): AiResponse => app(OpenAiProvider::class)->respond(aiRequest(userId: 7)))
         ->toThrow(function (AiProviderRequestFailed $failed) use ($expected): void {
             expect($failed->getMessage())->toContain($expected)->not->toContain('passport');
         });
@@ -215,32 +291,3 @@ it('names a content-filter stop in the failure, never the provider text', functi
     ], 'content filter'],
     'provider error echoing the prompt' => [400, ['error' => ['message' => 'Your passport renewal prompt was rejected.']], 'OpenAI request failed: '],
 ]);
-
-it("refuses to reach a person's words off the machine without their consent", function (): void {
-    $user = User::factory()->create(['ai_consented_at' => null]);
-    $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
-
-    expect(fn (): App\Data\Ai\AiResponseData => new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id)))
-        ->toThrow(AiUnavailable::class);
-});
-
-it('reaches the inner driver once consent is on record', function (): void {
-    $user = User::factory()->create(['ai_consented_at' => now()]);
-    $inner = (new FakeAiProvider)->push(['title' => 'Renew my passport']);
-
-    $answer = new ConsentGatedAiProvider($inner)->complete(aiRequest(userId: $user->id));
-
-    expect($answer->payload)->toBe(['title' => 'Renew my passport']);
-});
-
-it('records the failed call and lets the failure through', function (): void {
-    Log::spy();
-
-    $provider = new LoggingAiProvider(new FakeAiProvider);
-
-    expect(fn (): App\Data\Ai\AiResponseData => $provider->complete(aiRequest()))->toThrow(AiUnavailable::class);
-
-    Log::shouldHaveReceived('warning')
-        ->withArgs(fn (string $message, array $context): bool => $context['exception'] === AiUnavailable::class)
-        ->once();
-});

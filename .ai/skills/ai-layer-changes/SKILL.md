@@ -1,6 +1,6 @@
 ---
 name: ai-layer-changes
-description: Use when adding or changing anything that asks a model a question — a new `AiOperation`, a prompt edit, a JSON schema, a parser, a provider driver, or a fixture. Also use when a test fails with `AiFixtureMissing`, `AiResponseInvalid`, `AiUnavailable` or `AiRateLimited`, when deciding whether a feature should call a model at all, and before adding a field to an AI answer. Trigger on "prompt", "schema", "fixture", "decompose", "parse capture", "split step", "the model returned", "AiProvider", "openai driver", "ai.driver", `backend/app/Support/Ai/**`.
+description: Use when adding or changing anything that asks a model a question — a new `AiOperation`, a prompt edit, a JSON schema, a parser, a provider driver, or a fixture. Also use when a test fails with `AiFixtureMissing`, `AiResponseInvalid`, `AiUnavailable` or `AiRateLimited`, when deciding whether a feature should call a model at all, and before adding a field to an AI answer. Trigger on "prompt", "schema", "fixture", "decompose", "parse capture", "split step", "the model returned", "AiProvider", "openai driver", "ai-toolkit.driver", `backend/app/Support/Ai/**`.
 ---
 
 # Changing the AI layer
@@ -25,7 +25,7 @@ Adding an operation touches five places, all small:
 3. A schema class in `Schemas/` with a `VERSION` constant and a static
    `builder(): Closure`.
 4. A parser in `Parsers/`, which is the validator.
-5. A static factory on `AiRequest` tying those together.
+5. A static factory on `AiRequests` building the toolkit's `AiRequest`.
 
 Then the `match` in `CannedAiProvider` stops being exhaustive and PHPStan says
 so — that is the reminder to write a canned answer.
@@ -44,18 +44,21 @@ inside a driver.
 
 ## A missing fixture throws
 
-`FixtureAiProvider` fails when there is no file for the request; so do
-`NullAiProvider` and an exhausted `FakeAiProvider`. Returning an empty answer
-would enter something nobody said into the corpus and score it as a real
-response.
+The `fixture` driver fails when there is no file for the request; so do `null`
+and an unanswered fake. Returning an empty answer would enter something nobody
+said into the corpus and score it as a real response.
 
-The suite runs on the `fake` driver, so a test that reaches the AI path without
-queueing an answer fails rather than silently collecting a canned one. When a
-test fails that way, queue the answer — do not switch the test to `canned`.
+Every feature and browser test starts on `AiToolkit::fake()`, so a test that
+reaches the AI path without seeding an answer fails rather than silently
+collecting a canned one. When a test fails that way, seed the answer with
+`fakeAi()->respondWith()` or `respondFor()` — keep the test on the fake.
 
 `canned` is for clicking through the UI. It accepts any input and is never
-scored. `fixture` reads `config('ai.fixture_path')`, keyed by
-`AiRequest::cacheKey()`.
+scored. `fixture` reads `ai-toolkit.fixture_path`, keyed by
+`AiRequest::cacheKey()`. On a miss it dumps the request beside the missing
+answer; `AI_FIXTURE_ON_MISS=record:openai` records live answers instead, behind
+the same consent gate as `openai`, and
+`artisan ai-toolkit:fixtures` lists dumps still waiting for one.
 
 ## Editing a prompt means bumping its version
 
@@ -79,13 +82,13 @@ There is one schema definition, the fluent builder. A raw-array twin of every
 schema drifted from its builder in the sibling repo and the parser turned out to
 be the real validator both times. Do not reintroduce the second copy.
 
-## Consent is the driver, and the log holds no content
+## Consent is per person, and the log holds no content
 
 `canned`, `fixture`, `fake` and `null` never leave the machine; `openai` is the
-only one that does, and choosing it is the consent. Per-user consent needs a
-column and a screen and waits for the first real user.
+only one that does, and it is wrapped in `GatedAiProvider`, which refuses unless
+the person in the request's `rateLimitScope` has `ai_consented_at` set.
 
-`LoggingAiProvider` wraps whatever driver resolved and records operation,
+The toolkit logs every call's shape on `ai-toolkit.log.channel`: operation,
 provider, model, prompt and schema versions, duration and token counts — never
 the prompt and never the answer. A log holding the person's own sentences is a
 second copy of the thing being protected. Do not add a flag that claims to

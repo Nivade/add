@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Ai;
 
 use App\Actions\Concerns\ScoresAgainstACorpus;
-use App\Contracts\AiProvider;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\ParseCaptureExamples;
 use App\Support\Ai\Parsers\ParseCaptureParser;
-use App\Support\Ai\Providers\LoggingAiProvider;
-use App\Support\Ai\Providers\OpenAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
 
 /** Scores whether the live model asks when it should, and whether what it asks is the prompt's own example. */
 final class RunCaptureEval
@@ -28,12 +27,7 @@ final class RunCaptureEval
 
     public string $commandDescription = 'Score the clarifying questions the live capture parser asks against the corpus in storage/ai-eval.';
 
-    private readonly AiProvider $provider;
-
-    public function __construct(OpenAiProvider $provider, private readonly ParseCaptureParser $parser)
-    {
-        $this->provider = new LoggingAiProvider($provider);
-    }
+    public function __construct(private readonly AiProvider $provider, private readonly ParseCaptureParser $parser) {}
 
     /** @return list<array{id: string, expects_question: bool, question: ?string, copied: bool, invalid: ?string}> */
     public function handle(): array
@@ -82,10 +76,10 @@ final class RunCaptureEval
 
         try {
             $question = $this->parser->parse(
-                $this->provider->complete(AiRequest::parseCapture(0, $entry['capture'], $now))->payload,
+                $this->provider->respond(AiRequests::parseCapture(null, $entry['capture'], $now))->payload,
                 $now->getTimezone()->getName(),
             )->clarifyingQuestion;
-        } catch (AiResponseInvalid $aiResponseInvalid) {
+        } catch (AiResponseInvalid|AiResponseTruncated $aiResponseInvalid) {
             $invalid = $aiResponseInvalid->getMessage();
         }
 

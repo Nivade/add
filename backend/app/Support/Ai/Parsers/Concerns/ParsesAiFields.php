@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Ai\Parsers\Concerns;
 
-use App\Support\Ai\Exceptions\AiResponseInvalid;
 use Carbon\CarbonImmutable;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Throwable;
 
 trait ParsesAiFields

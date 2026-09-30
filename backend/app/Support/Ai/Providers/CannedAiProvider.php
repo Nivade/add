@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Support\Ai\Providers;
 
 use App\Attributes\Driver;
-use App\Contracts\AiProvider;
-use App\Data\Ai\AiResponseData;
 use App\Enums\Ai\AiOperation;
-use App\Support\Ai\AiRequest;
 use App\Support\Concerns\NamedByDriver;
 use Illuminate\Support\Str;
+use Nvade\AiToolkit\AiRequest;
+use Nvade\AiToolkit\AiResponse;
+use Nvade\AiToolkit\Contracts\AiProvider;
 
 /** Placeholder answers for any input, for clicking through the UI; never scored. */
 #[Driver('canned')]
@@ -23,10 +23,10 @@ final class CannedAiProvider implements AiProvider
         return true;
     }
 
-    public function complete(AiRequest $request): AiResponseData
+    public function respond(AiRequest $request): AiResponse
     {
-        return new AiResponseData(
-            payload: match ($request->operation) {
+        return new AiResponse(
+            payload: match (AiOperation::from((string) $request->operation)) {
                 AiOperation::ParseCapture => $this->parseCapture($request->user),
                 AiOperation::DecomposeIntention => $this->decompose(),
                 AiOperation::SplitStep => $this->split(),

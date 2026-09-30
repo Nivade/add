@@ -4,24 +4,17 @@ declare(strict_types=1);
 
 use App\Actions\Captures\RecordCapture;
 use App\Actions\Intentions\ConvertCaptureToIntention;
-use App\Contracts\AiProvider;
+use App\Enums\Ai\AiOperation;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Models\User;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
-use App\Support\Ai\Providers\FakeAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
-
-function useAiDriver(string $driver): AiProvider
-{
-    config()->set('ai.driver', $driver);
-    app()->forgetInstance(AiProvider::class);
-
-    return aiProvider();
-}
+use Nvade\AiToolkit\AiRequest;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 
 /**
  * @param  array<string, mixed>  $parse
@@ -30,12 +23,12 @@ function useAiDriver(string $driver): AiProvider
 function answeredAi(array $parse = [], ?array $decompose = null): FakeAiProvider
 {
     return fakeAi()
-        ->push(parsedCapture($parse))
-        ->push($decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
+        ->respondFor(AiOperation::ParseCapture->value, parsedCapture($parse))
+        ->respondFor(AiOperation::DecomposeIntention->value, $decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
 }
 
 it('turns one typed sentence into an intention with usable steps, with no API key set', function (): void {
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -58,7 +51,7 @@ it('turns one typed sentence into an intention with usable steps, with no API ke
 
 it('returns the capture before anything is parsed', function (): void {
     Queue::fake();
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
 
     $this->actingAs(User::factory()->create())
         ->postJson('/api/v1/captures', ['body' => 'buy dishwasher tablets'])
@@ -75,7 +68,7 @@ it('refuses an unauthenticated capture', function (): void {
 });
 
 it('requires something to capture and nothing else', function (): void {
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
 
     $this->actingAs(User::factory()->create())
         ->postJson('/api/v1/captures', ['body' => ''])
@@ -88,9 +81,11 @@ it('lets the deadline extractor beat the model when the two disagree', function 
 
     RecordCapture::run(User::factory()->create(), 'clean the apartment before Saturday');
 
-    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59')
-        ->and($provider->received[0]->user)->toContain('clean the apartment')
-        ->and($provider->received[0]->user)->not->toContain('before Saturday');
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59');
+
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::ParseCapture->value
+        && str_contains($request->user, 'clean the apartment')
+        && ! str_contains($request->user, 'before Saturday'));
 });
 
 it('tells the model what day it is and which zone to answer in', function (): void {
@@ -103,8 +98,9 @@ it('tells the model what day it is and which zone to answer in', function (): vo
     );
 
     // Half past midnight in Amsterdam, so the day the model is told is not the server's.
-    expect($provider->received[0]->user)->toContain('Thursday 17 September 2026')
-        ->and($provider->received[0]->user)->toContain('Europe/Amsterdam');
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::ParseCapture->value
+        && str_contains($request->user, 'Thursday 17 September 2026')
+        && str_contains($request->user, 'Europe/Amsterdam'));
 });
 
 it("reads a deadline only the model found on the person's clock", function (): void {
@@ -141,7 +137,7 @@ it("accepts the model's deadline only when the extractor found nothing", functio
 });
 
 it('leaves the capture intact and the intention uncreated when the parse throws', function (): void {
-    fakeAi()->push(['title' => '', 'clarifying_question' => null]);
+    fakeAi()->respondWith(['title' => '', 'clarifying_question' => null]);
 
     expect(fn (): mixed => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
         ->toThrow(AiResponseInvalid::class);
@@ -155,6 +151,8 @@ it('leaves the capture intact and the intention uncreated when the parse throws'
 });
 
 it('logs a decomposition quality violation against the intention it came from', function (): void {
+    // The spy answers channel() with null, which the AI call log would then write to.
+    config(['ai-toolkit.log.channel' => null]);
     Log::spy();
     answeredAi(decompose: ['steps' => [['title' => 'Sort out the paperwork.', 'estimated_seconds' => 900]]]);
 
@@ -189,5 +187,6 @@ it("states the deadline to the decomposer on the person's clock", function (): v
     );
 
     // 22:30 UTC is half past midnight on the 3rd where they are, and that is the day they hear.
-    expect($provider->received[1]->user)->toContain('Saturday 3 October 2026 00:30');
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::DecomposeIntention->value
+        && str_contains($request->user, 'Saturday 3 October 2026 00:30'));
 });

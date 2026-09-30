@@ -5,14 +5,14 @@ declare(strict_types=1);
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\User;
-use App\Support\Ai\Providers\FakeAiProvider;
 use Inertia\Testing\AssertableInertia;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 
 function answeredCapture(): FakeAiProvider
 {
     return fakeAi()
-        ->push(parsedCapture(['title' => 'Clean the kitchen', 'why' => 'Parents are coming']))
-        ->push(['steps' => [
+        ->respondWith(parsedCapture(['title' => 'Clean the kitchen', 'why' => 'Parents are coming']))
+        ->respondWith(['steps' => [
             ['title' => 'Grab a bin bag.', 'estimated_seconds' => 60],
             ['title' => 'Put the obvious rubbish in the bag.', 'estimated_seconds' => 300],
         ]]);

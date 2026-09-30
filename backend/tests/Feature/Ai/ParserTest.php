@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Parsers\DecomposeParser;
 use App\Support\Ai\Parsers\ParseCaptureParser;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 
 /** @return array<string, mixed> */
 function decomposePayload(array $steps): array

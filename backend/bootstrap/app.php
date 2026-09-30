@@ -12,7 +12,9 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
 use Sentry\Laravel\Integration;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -53,4 +55,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 $respondsWith->status,
             );
         });
+
+        // After the attribute renderer, so a consent refusal keeps its own sentence; never the exception's detail.
+        $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()
+            ? new JsonResponse(['message' => 'Reading this needs AI, which is not reachable right now. Try again in a while.'], Response::HTTP_SERVICE_UNAVAILABLE)
+            : null);
     })->create();

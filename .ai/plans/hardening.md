@@ -105,7 +105,7 @@ refused.
 ## The AI seam
 
 **8. The privacy claim is code or it is deleted.**
-`config/ai.php` carries `redact_input`, which nothing reads, and no AI call is
+The AI config carries `redact_input`, which nothing reads, and no AI call is
 logged anywhere, while the build plan claims the path is consented and logged.
 The dead flag goes. A logging decorator wraps whichever provider the driver
 resolves and records operation, provider, model and token counts per call —
@@ -117,7 +117,7 @@ Done when every provider call leaves one structured log line with no payload in
 it, asserted through the fake provider.
 
 **9. Confirm the model id before the first live run.** Confirmed as real, so
-`config/ai.php` keeps its default and no code moved.
+the AI config keeps its default and no code moved.
 
 **10. The chain offers a prerequisite before what follows it.**
 The open entry in [`findings.md`](../findings.md): `StartableNow` sits above
