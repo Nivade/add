@@ -8,7 +8,7 @@ import shlex
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import branch_fork_point, current_branch, gh, ledger_path, load_entries, ran_in_order, session_root  # noqa: E402
+from _ledger import fork_point, gh, ledger_path, load_entries, ran_in_order, session_root  # noqa: E402
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
 MERGE_WORDS = ["gh", "pr", "merge"]
@@ -36,8 +36,8 @@ def merge_args(command):
     for start in range(len(tokens) - 2):
         if tokens[start:start + 3] == MERGE_WORDS:
             args = tokens[start + 3:]
-            ends = [i for i, arg in enumerate(args) if set(arg) <= SHELL_OPERATORS]
-            return args[:ends[0]] if ends else args
+            end = next((i for i, arg in enumerate(args) if set(arg) <= SHELL_OPERATORS), len(args))
+            return args[:end]
     return None
 
 
@@ -49,7 +49,8 @@ def merge_target(args):
         name, has_value, value = arg.partition("=")
         if name in VALUE_FLAGS:
             value = value if has_value else next(remaining, None)
-            repo = value if name in ("-R", "--repo") else repo
+            if name in ("-R", "--repo"):
+                repo = value
         elif not arg.startswith("-") and selector is None:
             selector = arg
     return selector, repo
@@ -77,18 +78,18 @@ def main():
         allow()
 
     selector, repo = merge_target(args)
-    if selector:
-        repo_args = ["--repo", repo] if repo else []
-        branch = gh(root, "pr", "view", selector, *repo_args, "--json", "headRefName", "-q", ".headRefName") or selector
-    else:
-        branch = current_branch(root)
-    if not branch:
-        allow()
+    selector_args = [selector] if selector else []
+    repo_args = ["--repo", repo] if repo else []
+    pr = gh(root, "pr", "view", *selector_args, *repo_args, "--json", "headRefName,headRefOid", "-q", '.headRefName + " " + .headRefOid')
+    if not pr:
+        block(f"Could not resolve the PR '{selector or 'for this branch'}' with gh pr view, so its review ledger cannot be checked.")
 
-    fork = branch_fork_point(root, branch)
-    entries = load_entries(ledger_path(root, branch))
+    branch, head = pr.split(" ")
+    fork = fork_point(root, head)
+    if not fork:
+        block(f"The head of '{branch}' ({head[:7]}) is not in this checkout. Fetch it, then run finish-branch before merging.")
 
-    if ran_in_order(entries, fork):
+    if ran_in_order(load_entries(ledger_path(branch)), fork):
         allow()
 
     block(

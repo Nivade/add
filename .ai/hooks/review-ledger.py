@@ -32,11 +32,7 @@ def main():
     if not branch or not head:
         sys.exit(0)
 
-    path = ledger_path(root, branch)
-    if not path:
-        sys.exit(0)
-
-    append_entry(path, {
+    append_entry(ledger_path(branch), {
         "skill": skill,
         "args": (event.get("tool_input") or {}).get("args", ""),
         "head": head,

@@ -1,5 +1,6 @@
 """Git/gh plumbing and the review ledger the hooks share."""
 
+import functools
 import json
 import os
 import re
@@ -24,29 +25,35 @@ def gh(root, *args):
     return _run(["gh", *args], root)
 
 
-def toplevel(path):
-    """The checkout holding `path`, walking up to the nearest existing directory so a file not yet written resolves too."""
+def checkout(path):
+    """(top level, git common dir) of the checkout holding `path`; walks up so a file not yet written resolves too."""
     if not path:
-        return None
+        return None, None
     directory = os.path.realpath(path)
     while not os.path.isdir(directory) and directory != os.path.dirname(directory):
         directory = os.path.dirname(directory)
-    return git(directory, "rev-parse", "--show-toplevel")
+    found = git(directory, "rev-parse", "--path-format=absolute", "--show-toplevel", "--git-common-dir")
+    return tuple(found.split("\n")) if found else (None, None)
 
 
-def common_dir(root):
-    return git(root, "rev-parse", "--path-format=absolute", "--git-common-dir")
+@functools.cache
+def own_common_dir():
+    return checkout(__file__)[1]
 
 
-def in_this_repo(root):
-    """True when `root` is a checkout of the repo these hooks live in, so a sibling repo is left alone."""
-    return common_dir(root) == common_dir(toplevel(__file__))
+def repo_root(path):
+    """The checkout of this repo holding `path`, a worktree's included; None for a sibling repo or none at all."""
+    top, common_dir = checkout(path)
+    return top if top and common_dir == own_common_dir() else None
 
 
 def session_root(event):
-    """The session's checkout of this repo, a worktree's included; CLAUDE_PROJECT_DIR only when cwd is outside any repo."""
-    root = toplevel(event.get("cwd")) or toplevel(os.environ.get("CLAUDE_PROJECT_DIR"))
-    return root if root and in_this_repo(root) else None
+    """The session's checkout of this repo; CLAUDE_PROJECT_DIR only when cwd is outside any repo."""
+    for path in (event.get("cwd"), os.environ.get("CLAUDE_PROJECT_DIR")):
+        top, common_dir = checkout(path)
+        if top:
+            return top if common_dir == own_common_dir() else None
+    return None
 
 
 def current_branch(root):
@@ -58,19 +65,9 @@ def fork_point(root, ref="HEAD"):
     return git(root, "merge-base", "origin/main", ref)
 
 
-def branch_fork_point(root, branch):
-    """The fork point `branch` has on the remote, after a fetch, since a local ref can lag GitHub's "Update branch"."""
-    git(root, "fetch", "--quiet", "origin", "main")
-    git(root, "fetch", "--quiet", "origin", branch)
-    return fork_point(root, "origin/" + branch) or fork_point(root, branch)
-
-
-def ledger_path(root, branch):
-    git_dir = common_dir(root)
-    if not git_dir:
-        return None
+def ledger_path(branch):
     safe_branch = re.sub(r"[^A-Za-z0-9_.-]", "__", branch)
-    return os.path.join(git_dir, "claude-review", safe_branch + ".json")
+    return os.path.join(own_common_dir(), "claude-review", safe_branch + ".json")
 
 
 def load_entries(path):
@@ -98,8 +95,6 @@ def latest_at(entries, skill):
 
 def ran_in_order(entries, fork, sequence=REQUIRED_SEQUENCE):
     """True when every skill in `sequence` ran, at `fork`, each strictly after the one before it."""
-    if fork is None:
-        return False
     at_fork = [entry for entry in entries if entry.get("fork") == fork]
     previous = None
     for skill in sequence:

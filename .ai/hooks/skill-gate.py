@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import in_this_repo, toplevel  # noqa: E402
+from _ledger import repo_root  # noqa: E402
 
 # (path prefix or exact path, skills, rule files)
 MAP = [
@@ -86,17 +86,12 @@ def main():
     except (ValueError, OSError):
         emit({})
 
-    target = event.get("tool_input", {}).get("file_path") or ""
-    root = toplevel(target)
-    if not root or not in_this_repo(root):
+    target = event.get("tool_input", {}).get("file_path")
+    root = repo_root(target)
+    if not root:
         emit({})
 
-    try:
-        rel = os.path.relpath(os.path.realpath(target), os.path.realpath(root))
-    except ValueError:
-        emit({})
-    if rel.startswith(".."):
-        emit({})
+    rel = os.path.relpath(os.path.realpath(target), root)
 
     for path, generator in GENERATED.items():
         if rel == path or rel.startswith(path):
