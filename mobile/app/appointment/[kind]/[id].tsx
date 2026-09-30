@@ -1,5 +1,10 @@
 import type { AppointmentKind, ComingUpData, PlanRung } from '@add/shared';
-import { planRungLabels } from '@add/shared';
+import {
+  planRungLabels,
+  remindAfterCopy,
+  rungMinutesLabel,
+  rungMinutesNote,
+} from '@add/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -103,10 +108,10 @@ export default function Appointment() {
             }
             keyboardType="number-pad"
             inputMode="numeric"
-            accessibilityLabel={`Minutes to ${planRungLabels[rung.rung]}`}
+            accessibilityLabel={rungMinutesLabel(rung.rung)}
           />
           <Text style={styles.assumed}>
-            {rung.assumed ? 'min, assumed' : 'min, yours'}
+            {rungMinutesNote(rung.assumed)}
           </Text>
         </View>
       ))}
@@ -129,9 +134,9 @@ export default function Appointment() {
               setAfterMessage(text);
               setRemindSaved(false);
             }}
-            placeholder="What should future you hear?"
+            placeholder={remindAfterCopy.question}
             placeholderTextColor={theme.color.muted}
-            accessibilityLabel="What should future you hear"
+            accessibilityLabel={remindAfterCopy.question}
           />
           <View style={styles.rung}>
             <TextInput
@@ -145,7 +150,7 @@ export default function Appointment() {
             <Text style={styles.afterLabel}>min after it starts</Text>
           </View>
           {remindSaved && <Meta>future you will hear it then</Meta>}
-          <Button label="Remind me after" onPress={() => void remindAfter()} />
+          <Button label={remindAfterCopy.action} onPress={() => void remindAfter()} />
         </View>
       )}
 

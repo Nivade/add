@@ -1,9 +1,12 @@
+import { aiConsentCopy } from '@add/shared';
 import { Form, Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { update } from '@/routes/ai';
 
 export default function Ai({ consented }: { consented: boolean }) {
+    const consent = aiConsentCopy(consented);
+
     return (
         <>
             <Head title="AI settings" />
@@ -27,18 +30,14 @@ export default function Ai({ consented }: { consented: boolean }) {
                 >
                     {({ processing }) => (
                         <>
-                            <p className="text-sm">
-                                {consented
-                                    ? 'A model outside this server can read what you capture.'
-                                    : 'Nothing you write leaves this server.'}
-                            </p>
+                            <p className="text-sm">{consent.line}</p>
 
                             <Button
                                 variant={consented ? 'secondary' : 'default'}
                                 disabled={processing}
                                 data-test="ai-consent-button"
                             >
-                                {consented ? 'Turn off' : 'Turn on'}
+                                {consent.action}
                             </Button>
                         </>
                     )}

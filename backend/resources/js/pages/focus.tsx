@@ -1,8 +1,8 @@
 import type { ExecutionStateData } from '@add/shared';
-import { returnCopy, stuckReasonsFor } from '@add/shared';
+import { focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Meta, OneThing, stepMeta } from '@/components/one-thing';
+import { Meta, OneThing } from '@/components/one-thing';
 import { OneTapForm } from '@/components/one-tap-form';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
@@ -123,31 +123,31 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             <Control
-                                label="Done"
+                                label={focusCopy.done}
                                 form={focusRoutes.completeStep.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
-                                label="Skip"
+                                label={focusCopy.skip}
                                 form={focusRoutes.skipStep.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
-                                label="Pause"
+                                label={focusCopy.pause}
                                 form={focusRoutes.pause.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
-                                label="I'm stuck"
+                                label={focusCopy.stuck}
                                 onClick={() => setStuckOpen(true)}
                             />
                             <Control
-                                label="I got distracted"
+                                label={focusCopy.distracted}
                                 form={focusRoutes.distracted.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
-                                label="Stop"
+                                label={focusCopy.stop}
                                 form={focusRoutes.stop.form(session.id)}
                                 stepId={step?.id}
                             />
@@ -166,9 +166,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
             <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>What's blocking you?</DialogTitle>
+                        <DialogTitle>{focusCopy.stuckQuestion}</DialogTitle>
                         <DialogDescription>
-                            Every answer leads somewhere.
+                            {focusCopy.stuckMeta}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">

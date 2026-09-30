@@ -31,10 +31,8 @@ export default function Paste() {
             setResult(await api.classifyPasted(token as string, text));
             setPasted(text);
           } catch (error) {
-            if (error instanceof ApiError && error.status === 503) {
-              throw new ApiError(503, {
-                text: ['Reading this needs AI, which is off. It can be turned on in settings.'],
-              });
+            if (error instanceof ApiError && error.status === 503 && error.serverMessage) {
+              throw new ApiError(503, { text: [error.serverMessage] });
             }
 
             throw error;
@@ -47,8 +45,8 @@ export default function Paste() {
   if (!result.actionable) {
     return (
       <Screen>
-        <OneThing>Nothing in this needs you.</OneThing>
-        <Button label="Close" onPress={() => router.back()} />
+        <OneThing>{entryCopy.paste.nothingNeeded}</OneThing>
+        <Button label={entryCopy.paste.close} onPress={() => router.back()} />
       </Screen>
     );
   }
@@ -70,11 +68,11 @@ export default function Paste() {
       {result.why && <Text style={styles.line}>{result.why}</Text>}
       <Meta>add it and the app works out the first step</Meta>
       <Button
-        label={saving ? 'Adding' : 'Add it'}
+        label={saving ? 'Adding' : entryCopy.paste.add}
         disabled={saving}
         onPress={() => void add()}
       />
-      <Button label="Leave it" onPress={() => router.back()} />
+      <Button label={entryCopy.paste.leave} onPress={() => router.back()} />
     </Screen>
   );
 }

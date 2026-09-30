@@ -5,9 +5,15 @@ import type {
 } from '@add/shared';
 import {
     commitmentCopy,
+    homeBands,
+    homeCopy,
+    nothingNeedsYou,
+    partWayLine,
     recurrenceLine,
+    remindAfterCopy,
     restCountLine,
     returnCopy,
+    rightNowMeta,
     sortingLine,
     waitingForResponses,
 } from '@add/shared';
@@ -20,7 +26,7 @@ import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
-import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
+import { Meta, OneThing, StartStep } from '@/components/one-thing';
 import {
     quietButtonClassName,
     quietLineClassName,
@@ -107,7 +113,7 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
 
 function JustFinished({ finished }: { finished: JustFinishedData }) {
     return (
-        <Band label="Just finished">
+        <Band label={homeBands.justFinished}>
             <p>{finished.title}</p>
             {finished.recurrenceEveryDays ? (
                 <p className="text-muted-foreground mt-2 font-mono text-[13px]">
@@ -125,7 +131,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 htmlFor="repeat-every-days"
                                 className="text-muted-foreground font-mono text-[13px]"
                             >
-                                Repeat every
+                                {homeCopy.repeatEvery}
                             </label>
                             <input
                                 id="repeat-every-days"
@@ -171,7 +177,7 @@ function RightNow({ rightNow, session }: HomeData) {
                 <Meta>
                     {session.returning
                         ? returnCopy.workingOn(session.intention.title)
-                        : returnCopy.partWay(session.intention.title)}
+                        : partWayLine(session.intention.title)}
                 </Meta>
                 <div className="pl-5">
                     <Button asChild>
@@ -185,8 +191,8 @@ function RightNow({ rightNow, session }: HomeData) {
     if (!rightNow) {
         return (
             <div className="space-y-6">
-                <OneThing>Nothing needs you right now.</OneThing>
-                <Meta>that is the whole answer</Meta>
+                <OneThing>{nothingNeedsYou}</OneThing>
+                <Meta>{homeCopy.wholeAnswer}</Meta>
             </div>
         );
     }
@@ -194,10 +200,7 @@ function RightNow({ rightNow, session }: HomeData) {
     return (
         <div className="space-y-6">
             <OneThing>{rightNow.step.title}</OneThing>
-            <Meta>
-                {stepMeta(rightNow.step)} ·{' '}
-                {rightNow.intention.title.toLowerCase()}
-            </Meta>
+            <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
             <StartStep stepId={rightNow.step.id} />
         </div>
     );
@@ -252,7 +255,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 </p>
 
                 {!data.session && rightNow && rightNow.why.length > 0 && (
-                    <Band label="Why this one">
+                    <Band label={homeBands.why}>
                         <ul className="space-y-1">
                             {rightNow.why.map((line) => (
                                 <li key={line}>{line}</li>
@@ -277,7 +280,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 {justFinished && <JustFinished finished={justFinished} />}
 
                 {reminder && (
-                    <Band label="Before you go">
+                    <Band label={homeBands.beforeYouGo}>
                         <ul className="space-y-1">
                             {reminder.lines.map((line) => (
                                 <li key={line}>{line}</li>
@@ -340,8 +343,8 @@ export default function Home({ home: data }: { home: HomeData }) {
                             >
                                 <input
                                     name="message"
-                                    placeholder="What should future you hear?"
-                                    aria-label="What should future you hear"
+                                    placeholder={remindAfterCopy.question}
+                                    aria-label={remindAfterCopy.question}
                                     className={cn(
                                         captureFieldClassName,
                                         'w-auto min-w-0 flex-1',
@@ -362,7 +365,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     variant="outline"
                                     className={quietButtonClassName}
                                 >
-                                    Remind me after
+                                    {remindAfterCopy.action}
                                 </Button>
                             </Form>
                         )}
@@ -370,7 +373,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 )}
 
                 {needsAttention.length > 0 && (
-                    <Band label="Needs attention">
+                    <Band label={homeBands.needsAttention}>
                         <ul className="space-y-6">
                             {needsAttention.map((item) => (
                                 <li key={item.id}>

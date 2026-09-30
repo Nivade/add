@@ -8,6 +8,7 @@ import type {
     StuckReason,
     WaitingForResponse,
 } from './generated';
+import { formatEstimate } from './estimate';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
@@ -35,7 +36,6 @@ export const returnCopy = {
         stepsDone === 0
             ? returnCopy.workingOn(title)
             : `${returnCopy.workingOn(title)} You had done ${stepsDone} ${stepsDone === 1 ? 'step' : 'steps'}.`,
-    partWay: (title: string): string => `Part-way through ${title}.`,
 };
 
 export const planRungLabels: Record<PlanRung, string> = {
@@ -43,6 +43,75 @@ export const planRungLabels: Record<PlanRung, string> = {
     get_ready: 'get ready',
     leave: 'leave',
 };
+
+export function rungMinutesLabel(rung: PlanRung): string {
+    return `Minutes to ${planRungLabels[rung]}`;
+}
+
+export function rungMinutesNote(assumed: boolean): string {
+    return assumed ? 'min, assumed' : 'min, yours';
+}
+
+type EstimatedStep = { estimatedSeconds: number | null; generated: boolean };
+
+/** Going quiet on a missing estimate would read as zero minutes, and a guessed step must say who guessed. */
+export function stepMeta(step: EstimatedStep): string {
+    const estimate = formatEstimate(step.estimatedSeconds);
+
+    return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
+}
+
+export function rightNowMeta(step: EstimatedStep, intentionTitle: string): string {
+    return `${stepMeta(step)} · ${intentionTitle.toLowerCase()}`;
+}
+
+export function smallestStepMeta(step: EstimatedStep): string {
+    return `${stepMeta(step)} · that is all you have to do`;
+}
+
+export function partWayLine(intentionTitle: string): string {
+    return `Part-way through ${intentionTitle}.`;
+}
+
+export const nothingNeedsYou = 'Nothing needs you right now.';
+
+export const homeCopy = {
+    wholeAnswer: 'that is the whole answer',
+    repeatEvery: 'Repeat every',
+} as const;
+
+export const homeBands = {
+    why: 'Why this one',
+    beforeYouGo: 'Before you go',
+    needsAttention: 'Needs attention',
+    justFinished: 'Just finished',
+} as const;
+
+export const remindAfterCopy = {
+    action: 'Remind me after',
+    question: 'What should future you hear?',
+} as const;
+
+export const overwhelmedCopy = {
+    back: 'Back to home',
+} as const;
+
+export const focusCopy = {
+    done: 'Done',
+    skip: 'Skip',
+    pause: 'Pause',
+    stop: 'Stop',
+    stuck: "I'm stuck",
+    distracted: 'I got distracted',
+    stuckQuestion: "What's blocking you?",
+    stuckMeta: 'every answer leads somewhere',
+} as const;
+
+export function aiConsentCopy(consented: boolean): { line: string; action: string } {
+    return consented
+        ? { line: 'A model outside this server can read what you capture.', action: 'Turn off' }
+        : { line: 'Nothing you write leaves this server.', action: 'Turn on' };
+}
 
 /** In the order they are offered, which is part of the copy: the gentlest answers come first. */
 const stuckReasons: { value: StuckReason; label: string }[] = [
@@ -146,6 +215,13 @@ export const entryCopy = {
         meta: 'An email, a letter, a message. The app says whether it needs you.',
         placeholder: 'Your car insurance expires on 14 October.',
         label: 'What arrived',
+        nothingNeeded: 'Nothing in this needs you.',
+        add: 'Add it',
+        leave: 'Leave it',
+        close: 'Close',
+    },
+    thought: {
+        question: "What's on your mind?",
     },
 } as const;
 

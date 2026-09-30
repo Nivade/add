@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, returnCopy, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -103,6 +103,7 @@ export default function Focus() {
       ) : (
         <>
           <OneThing>{step?.title ?? intention.title}</OneThing>
+          {step && <Meta>{stepMeta(step)}</Meta>}
           {data.currentStepIsCommitment ? (
             <Meta>{commitmentCopy.promised}</Meta>
           ) : (
@@ -111,32 +112,32 @@ export default function Focus() {
 
           <View style={styles.controls}>
             <Button
-              label="Done"
+              label={focusCopy.done}
               disabled={busy}
               onPress={() => void control('complete-step')}
             />
             <Button
-              label="Skip"
+              label={focusCopy.skip}
               disabled={busy}
               onPress={() => void control('skip-step')}
             />
             <Button
-              label="Pause"
+              label={focusCopy.pause}
               disabled={busy}
               onPress={() => void control('pause')}
             />
             <Button
-              label="I'm stuck"
+              label={focusCopy.stuck}
               disabled={busy}
               onPress={() => setStuckOpen(true)}
             />
             <Button
-              label="I got distracted"
+              label={focusCopy.distracted}
               disabled={busy}
               onPress={() => void control('distracted')}
             />
             <Button
-              label="Stop"
+              label={focusCopy.stop}
               disabled={busy}
               onPress={() => void control('stop')}
             />
@@ -160,8 +161,8 @@ export default function Focus() {
         onRequestClose={() => setStuckOpen(false)}
       >
         <Screen>
-          <OneThing>What's blocking you?</OneThing>
-          <Meta>every answer leads somewhere</Meta>
+          <OneThing>{focusCopy.stuckQuestion}</OneThing>
+          <Meta>{focusCopy.stuckMeta}</Meta>
 
           <View style={styles.controls}>
             {stuckReasonsFor(step?.place ?? null).map((reason) => (
