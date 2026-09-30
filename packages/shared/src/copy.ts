@@ -8,6 +8,7 @@ import type {
     StuckReason,
     WaitingForResponse,
 } from './generated';
+import { formatEstimate } from './estimate';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
@@ -33,26 +34,39 @@ export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
+/** A step with no estimate says so instead of going quiet. */
+export function stepMeta(step: { estimatedSeconds: number | null; generated: boolean }): string {
+    const estimate = formatEstimate(step.estimatedSeconds);
+
+    return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
+}
+
+export const nothingNeedsYou = 'Nothing needs you right now.';
+
 export const homeCopy = {
-    nothingNeedsYou: 'Nothing needs you right now.',
     wholeAnswer: 'that is the whole answer',
+    repeatEvery: 'Repeat every',
+} as const;
+
+export const homeBands = {
     why: 'Why this one',
     beforeYouGo: 'Before you go',
     needsAttention: 'Needs attention',
     justFinished: 'Just finished',
-    repeatEvery: 'Repeat every',
 } as const;
 
 export const remindAfterCopy = {
     action: 'Remind me after',
-    placeholder: 'What should future you hear?',
-    label: 'What should future you hear',
+    question: 'What should future you hear?',
 } as const;
 
 export const focusCopy = {
     welcomeBack: 'Welcome back.',
+    leftOffAt: 'you left off at',
+    stuck: "I'm stuck",
     distracted: 'I got distracted',
-    stuck: "What's blocking you?",
+    stuckQuestion: "What's blocking you?",
+    stuckMeta: 'every answer leads somewhere',
 } as const;
 
 export function aiConsentCopy(consented: boolean): { line: string; action: string } {

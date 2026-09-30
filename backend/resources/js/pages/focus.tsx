@@ -60,7 +60,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     <div className="space-y-6">
                         <OneThing>{focusCopy.welcomeBack}</OneThing>
                         <Meta>
-                            you left off at{' '}
+                            {focusCopy.leftOffAt}{' '}
                             {(step?.title ?? intention.title).toLowerCase()}
                         </Meta>
                         <div className="pl-5">
@@ -100,7 +100,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 form={focusRoutes.pause.form(session.id)}
                             />
                             <Control
-                                label="I'm stuck"
+                                label={focusCopy.stuck}
                                 onClick={() => setStuckOpen(true)}
                             />
                             <Control
@@ -126,9 +126,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
             <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{focusCopy.stuck}</DialogTitle>
+                        <DialogTitle>{focusCopy.stuckQuestion}</DialogTitle>
                         <DialogDescription>
-                            Every answer leads somewhere.
+                            {focusCopy.stuckMeta}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">

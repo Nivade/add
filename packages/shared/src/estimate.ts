@@ -18,10 +18,3 @@ export function formatEstimate(seconds: number | null): string | null {
 
     return hours === 1 ? '1 hour' : `${hours} hours`;
 }
-
-/** An unestimated step says so rather than going quiet, and a guessed one says who guessed. */
-export function stepMeta(step: { estimatedSeconds: number | null; generated: boolean }): string {
-    const estimate = formatEstimate(step.estimatedSeconds);
-
-    return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
-}

@@ -1,9 +1,5 @@
 import type { BackwardsPlanData } from '@add/shared';
-import {
-    planRungLabels,
-    rungMinutesLabel,
-    rungMinutesNote,
-} from '@add/shared';
+import { planRungLabels, rungMinutesLabel, rungMinutesNote } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import calendarEvents from '@/routes/calendar-events';

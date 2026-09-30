@@ -134,9 +134,9 @@ export default function Appointment() {
               setAfterMessage(text);
               setRemindSaved(false);
             }}
-            placeholder={remindAfterCopy.placeholder}
+            placeholder={remindAfterCopy.question}
             placeholderTextColor={theme.color.muted}
-            accessibilityLabel={remindAfterCopy.label}
+            accessibilityLabel={remindAfterCopy.question}
           />
           <View style={styles.rung}>
             <TextInput

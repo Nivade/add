@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { update } from '@/routes/ai';
 
 export default function Ai({ consented }: { consented: boolean }) {
+    const consent = aiConsentCopy(consented);
+
     return (
         <>
             <Head title="AI settings" />
@@ -28,16 +30,14 @@ export default function Ai({ consented }: { consented: boolean }) {
                 >
                     {({ processing }) => (
                         <>
-                            <p className="text-sm">
-                                {aiConsentCopy(consented).line}
-                            </p>
+                            <p className="text-sm">{consent.line}</p>
 
                             <Button
                                 variant={consented ? 'secondary' : 'default'}
                                 disabled={processing}
                                 data-test="ai-consent-button"
                             >
-                                {aiConsentCopy(consented).action}
+                                {consent.action}
                             </Button>
                         </>
                     )}

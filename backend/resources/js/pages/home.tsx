@@ -5,7 +5,9 @@ import type {
 } from '@add/shared';
 import {
     commitmentCopy,
+    homeBands,
     homeCopy,
+    nothingNeedsYou,
     recurrenceLine,
     remindAfterCopy,
     restCountLine,
@@ -107,7 +109,7 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
 
 function JustFinished({ finished }: { finished: JustFinishedData }) {
     return (
-        <Band label={homeCopy.justFinished}>
+        <Band label={homeBands.justFinished}>
             <p>{finished.title}</p>
             {finished.recurrenceEveryDays ? (
                 <p className="text-muted-foreground mt-2 font-mono text-[13px]">
@@ -181,7 +183,7 @@ function RightNow({ rightNow, session }: HomeData) {
     if (!rightNow) {
         return (
             <div className="space-y-6">
-                <OneThing>{homeCopy.nothingNeedsYou}</OneThing>
+                <OneThing>{nothingNeedsYou}</OneThing>
                 <Meta>{homeCopy.wholeAnswer}</Meta>
             </div>
         );
@@ -227,7 +229,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 </section>
 
                 {!data.session && rightNow && rightNow.why.length > 0 && (
-                    <Band label={homeCopy.why}>
+                    <Band label={homeBands.why}>
                         <ul className="space-y-1">
                             {rightNow.why.map((line) => (
                                 <li key={line}>{line}</li>
@@ -252,7 +254,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 {justFinished && <JustFinished finished={justFinished} />}
 
                 {reminder && (
-                    <Band label={homeCopy.beforeYouGo}>
+                    <Band label={homeBands.beforeYouGo}>
                         <ul className="space-y-1">
                             {reminder.lines.map((line) => (
                                 <li key={line}>{line}</li>
@@ -315,8 +317,8 @@ export default function Home({ home: data }: { home: HomeData }) {
                             >
                                 <input
                                     name="message"
-                                    placeholder={remindAfterCopy.placeholder}
-                                    aria-label={remindAfterCopy.label}
+                                    placeholder={remindAfterCopy.question}
+                                    aria-label={remindAfterCopy.question}
                                     className={cn(
                                         captureFieldClassName,
                                         'w-auto min-w-0 flex-1',
@@ -345,7 +347,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                 )}
 
                 {needsAttention.length > 0 && (
-                    <Band label={homeCopy.needsAttention}>
+                    <Band label={homeBands.needsAttention}>
                         <ul className="space-y-6">
                             {needsAttention.map((item) => (
                                 <li key={item.id}>

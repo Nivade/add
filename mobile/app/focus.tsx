@@ -64,7 +64,7 @@ export default function Focus() {
         <>
           <OneThing>{focusCopy.welcomeBack}</OneThing>
           <Meta>
-            you left off at {(step?.title ?? intention.title).toLowerCase()}
+            {focusCopy.leftOffAt} {(step?.title ?? intention.title).toLowerCase()}
           </Meta>
           <Button
             label="Continue"
@@ -86,7 +86,7 @@ export default function Focus() {
             <Button label="Done" onPress={() => void control('complete-step')} />
             <Button label="Skip" onPress={() => void control('skip-step')} />
             <Button label="Pause" onPress={() => void control('pause')} />
-            <Button label="I'm stuck" onPress={() => setStuckOpen(true)} />
+            <Button label={focusCopy.stuck} onPress={() => setStuckOpen(true)} />
             <Button
               label={focusCopy.distracted}
               onPress={() => void control('distracted')}
@@ -112,8 +112,8 @@ export default function Focus() {
         onRequestClose={() => setStuckOpen(false)}
       >
         <Screen>
-          <OneThing>{focusCopy.stuck}</OneThing>
-          <Meta>every answer leads somewhere</Meta>
+          <OneThing>{focusCopy.stuckQuestion}</OneThing>
+          <Meta>{focusCopy.stuckMeta}</Meta>
 
           <View style={styles.controls}>
             {stuckReasonsFor(step?.place ?? null).map((reason) => (

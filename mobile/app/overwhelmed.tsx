@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { homeCopy, restCountLine, stepMeta } from '@add/shared';
+import { nothingNeedsYou, restCountLine, stepMeta } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -47,7 +47,7 @@ export default function Overwhelmed() {
           <Button label="Start" tone="primary" onPress={() => void start()} />
         </>
       ) : (
-        <OneThing>{homeCopy.nothingNeedsYou}</OneThing>
+        <OneThing>{nothingNeedsYou}</OneThing>
       )}
 
       <Meta>{restCountLine(data.restCount)}</Meta>

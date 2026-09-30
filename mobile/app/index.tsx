@@ -8,7 +8,9 @@ import {
   checkInQuestions,
   checkInResponses,
   commitmentCopy,
+  homeBands,
   homeCopy,
+  nothingNeedsYou,
   notHereLabels,
   recurrenceLine,
   restCountLine,
@@ -140,7 +142,7 @@ function JustFinished({
   };
 
   return (
-    <Band label={homeCopy.justFinished}>
+    <Band label={homeBands.justFinished}>
       <Text style={styles.line}>{finished.title}</Text>
       {finished.recurrenceEveryDays ? (
         <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
@@ -240,7 +242,7 @@ export default function Home() {
           </Meta>
           <Button label="Start" tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
-            <Band label={homeCopy.why}>
+            <Band label={homeBands.why}>
               {rightNow.why.map((line) => (
                 <Text key={line} style={styles.line}>
                   {line}
@@ -265,7 +267,7 @@ export default function Home() {
         </>
       ) : (
         <>
-          <OneThing>{homeCopy.nothingNeedsYou}</OneThing>
+          <OneThing>{nothingNeedsYou}</OneThing>
           <Meta>{homeCopy.wholeAnswer}</Meta>
         </>
       )}
@@ -275,7 +277,7 @@ export default function Home() {
       )}
 
       {reminder && (
-        <Band label={homeCopy.beforeYouGo}>
+        <Band label={homeBands.beforeYouGo}>
           {reminder.lines.map((line) => (
             <Text key={line} style={styles.line}>
               {line}
@@ -308,7 +310,7 @@ export default function Home() {
       )}
 
       {needsAttention.length > 0 && (
-        <Band label={homeCopy.needsAttention}>
+        <Band label={homeBands.needsAttention}>
           {needsAttention.map((item) => {
             switch (item.kind) {
               case 'waiting_for':

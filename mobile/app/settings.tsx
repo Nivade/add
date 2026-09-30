@@ -18,6 +18,7 @@ export default function Settings() {
   }
 
   const { data, problem, replace } = resource;
+  const consent = aiConsentCopy(data.consented);
 
   const toggle = async () => {
     setSaving(true);
@@ -34,10 +35,10 @@ export default function Settings() {
       <StaleNote problem={problem} />
       <OneThing>AI</OneThing>
       <Meta>
-        {aiConsentCopy(data.consented).line}
+        {consent.line}
       </Meta>
       <Button
-        label={aiConsentCopy(data.consented).action}
+        label={consent.action}
         onPress={() => void toggle()}
         disabled={saving}
       />
