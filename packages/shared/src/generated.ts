@@ -161,7 +161,7 @@ generated: boolean,
 place: Place | null,
 };
 export type StepStatus = 'pending' | 'done' | 'skipped';
-export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';
+export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_here' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';
 export type WaitingForData = {
 id: string,
 subject: string,

@@ -298,7 +298,7 @@ day, and `model:prune` runs daily.
   `npm run artisan -- test --compact tests/Feature/Overwhelm tests/Feature/Execution`
   passes.
 
-- [ ] **8. The stuck answer.** Invoke skills: `laravel-actions`,
+- [x] **8. The stuck answer.** Invoke skills: `laravel-actions`,
   `generated-artifacts`.
   - `StuckReason::NotHere = 'not_here'` goes after `NeedSomething`, and
     `resolution()` maps it to the new `StuckResolution::Elsewhere`.

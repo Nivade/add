@@ -11,4 +11,5 @@ enum StuckResolution
     case NextStep;
     case Stop;
     case StayPut;
+    case Elsewhere;
 }

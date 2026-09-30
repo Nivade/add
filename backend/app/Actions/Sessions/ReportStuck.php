@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Sessions;
 
 use App\Actions\Steps\SplitStep;
+use App\Actions\Whereabouts\ReportNotHere;
 use App\Enums\ExecutionEventType;
+use App\Enums\Place;
+use App\Enums\SessionOutcome;
 use App\Enums\StuckReason;
 use App\Enums\StuckResolution;
 use App\Models\ExecutionSession;
@@ -14,6 +17,7 @@ use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\NextAction\SmallestFirst;
+use Illuminate\Database\Eloquent\Builder;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Every answer leaves the person with something to start or a clean stop. */
@@ -36,6 +40,7 @@ final class ReportStuck
                 StuckResolution::NextStep => AdvanceSession::run($session, $step->id),
                 StuckResolution::Stop => StopSession::run($session),
                 StuckResolution::StayPut => $session,
+                StuckResolution::Elsewhere => $this->elsewhere($session, $step),
             };
         });
     }
@@ -53,6 +58,32 @@ final class ReportStuck
         }
 
         $session->update(['current_step_id' => $smallest->step->id]);
+
+        return $session;
+    }
+
+    /** Not a skip: being in the wrong place is not avoidance, so skip_count stays where it is. */
+    private function elsewhere(ExecutionSession $session, Step $step): ExecutionSession
+    {
+        $place = $step->place;
+
+        if (! $place instanceof Place) {
+            return AdvanceSession::run($session, $step->id);
+        }
+
+        ReportNotHere::run($session->user, $place);
+
+        $sibling = $session->intention->remainingSteps()
+            ->whereKeyNot($step->id)
+            ->where(fn (Builder $query) => $query->whereNull('place')->orWhere('place', '!=', $place))
+            ->orderBy('position')
+            ->first();
+
+        if (! $sibling instanceof Step) {
+            return LandSession::run($session, SessionOutcome::Continued);
+        }
+
+        $session->update(['current_step_id' => $sibling->id]);
 
         return $session;
     }

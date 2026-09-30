@@ -12,6 +12,7 @@ enum StuckReason: string
     case DontKnowWhatToDo = 'dont_know_what_to_do';
     case TooBig = 'too_big';
     case NeedSomething = 'need_something';
+    case NotHere = 'not_here';
     case NotEnoughInformation = 'not_enough_information';
     case Tired = 'tired';
     case DontWantTo = 'dont_want_to';
@@ -24,6 +25,7 @@ enum StuckReason: string
             self::TooBig, self::DontKnowWhatToDo => StuckResolution::Split,
             self::NeedSomething, self::NotEnoughInformation => StuckResolution::NextStep,
             self::Tired, self::DontWantTo => StuckResolution::Stop,
+            self::NotHere => StuckResolution::Elsewhere,
             self::SomethingElse => StuckResolution::StayPut,
         };
     }

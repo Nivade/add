@@ -201,3 +201,56 @@ it('advances rather than leaving them on the step they called too big', function
     expect($session->refresh()->current_step_id)->not->toBe($only->id)
         ->and($session->outcome)->toBe(SessionOutcome::Continued);
 });
+
+/** @param  list<Place|null>  $places */
+function startedWithPlaces(array $places): ExecutionSession
+{
+    $session = started(count($places));
+
+    foreach ($places as $index => $place) {
+        $session->intention->steps()->where('position', $index + 1)->update(['place' => $place]);
+    }
+
+    return $session;
+}
+
+it('moves on to a step somewhere else when the person is not in the right place', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out, Place::Home]);
+    $first = $session->currentStep()->sole();
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->currentStep()->sole()->position)->toBe(3)
+        ->and($session->ended_at)->toBeNull()
+        ->and($session->user->notHereReports()->sole()->place)->toBe(Place::Out)
+        ->and($first->refresh()->skip_count)->toBe(0)
+        ->and($first->status)->toBe(StepStatus::Pending);
+});
+
+it('counts a step with no place as somewhere else', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out, null]);
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->currentStep()->sole()->position)->toBe(3);
+});
+
+it('lands the session as continued when every other step needs the same place', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out]);
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->outcome)->toBe(SessionOutcome::Continued)
+        ->and($session->user->notHereReports()->count())->toBe(1);
+});
+
+it('just moves on from a step with no place, reporting nothing', function (): void {
+    $session = started();
+    $first = $session->currentStep()->sole();
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->current_step_id)->not->toBe($first->id)
+        ->and($session->user->notHereReports()->count())->toBe(0)
+        ->and($first->refresh()->skip_count)->toBe(0);
+});
