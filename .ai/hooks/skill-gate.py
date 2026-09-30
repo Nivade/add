@@ -7,6 +7,9 @@ import os
 import sys
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from _ledger import repo_root  # noqa: E402
+
 # (path prefix or exact path, skills, rule files)
 MAP = [
     ("backend/tests/", ["pest-testing", "testing-best-practices"], ["testing.md"]),
@@ -83,17 +86,12 @@ def main():
     except (ValueError, OSError):
         emit({})
 
-    root = os.environ.get("CLAUDE_PROJECT_DIR", "")
-    target = event.get("tool_input", {}).get("file_path") or ""
-    if not target or not root:
+    target = event.get("tool_input", {}).get("file_path")
+    root = repo_root(target)
+    if not root:
         emit({})
 
-    try:
-        rel = os.path.relpath(os.path.realpath(target), os.path.realpath(root))
-    except ValueError:
-        emit({})
-    if rel.startswith(".."):
-        emit({})
+    rel = os.path.relpath(os.path.realpath(target), root)
 
     for path, generator in GENERATED.items():
         if rel == path or rel.startswith(path):

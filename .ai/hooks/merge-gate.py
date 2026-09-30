@@ -4,13 +4,16 @@
 import json
 import os
 import re
+import shlex
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from _ledger import current_branch, fork_point, gh, ledger_path, load_entries, ran_in_order  # noqa: E402
+from _ledger import fork_point, gh, ledger_path, load_entries, ran_in_order, session_root  # noqa: E402
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
-PR_NUMBER_RE = re.compile(r"\bgh\s+pr\s+merge\s+(\d+)\b")
+MERGE_WORDS = ["gh", "pr", "merge"]
+VALUE_FLAGS = {"-A", "--author-email", "-b", "--body", "-F", "--body-file", "--match-head-commit", "-R", "--repo", "-t", "--subject"}
+SHELL_OPERATORS = set(";&|()")
 
 
 def allow():
@@ -20,6 +23,37 @@ def allow():
 def block(message):
     sys.stderr.write(message + "\n")
     sys.exit(2)
+
+
+def merge_args(command):
+    """The arguments of the first `gh pr merge` run as a command, None when it only appears inside a string; [] when unparseable."""
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=True)
+    lexer.whitespace_split = True
+    try:
+        tokens = list(lexer)
+    except ValueError:
+        return []
+    for start in range(len(tokens) - 2):
+        if tokens[start:start + 3] == MERGE_WORDS:
+            args = tokens[start + 3:]
+            end = next((i for i, arg in enumerate(args) if set(arg) <= SHELL_OPERATORS), len(args))
+            return args[:end]
+    return None
+
+
+def merge_target(args):
+    """The PR selector (number, URL or branch) and --repo, wherever they sit among the flags."""
+    selector, repo = None, None
+    remaining = iter(args)
+    for arg in remaining:
+        name, has_value, value = arg.partition("=")
+        if name in VALUE_FLAGS:
+            value = value if has_value else next(remaining, None)
+            if name in ("-R", "--repo"):
+                repo = value
+        elif not arg.startswith("-") and selector is None:
+            selector = arg
+    return selector, repo
 
 
 def main():
@@ -35,23 +69,27 @@ def main():
     if not MERGE_RE.search(command):
         allow()
 
-    root = os.environ.get("CLAUDE_PROJECT_DIR", "")
+    args = merge_args(command)
+    if args is None:
+        allow()
+
+    root = session_root(event)
     if not root:
         allow()
 
-    pr_match = PR_NUMBER_RE.search(command)
-    branch = None
-    if pr_match:
-        branch = gh(root, "pr", "view", pr_match.group(1), "--json", "headRefName", "-q", ".headRefName")
-    if not branch:
-        branch = current_branch(root)
-    if not branch:
-        allow()
+    selector, repo = merge_target(args)
+    selector_args = [selector] if selector else []
+    repo_args = ["--repo", repo] if repo else []
+    pr = gh(root, "pr", "view", *selector_args, *repo_args, "--json", "headRefName,headRefOid", "-q", '.headRefName + " " + .headRefOid')
+    if not pr:
+        block(f"Could not resolve the PR '{selector or 'for this branch'}' with gh pr view, so its review ledger cannot be checked.")
 
-    fork = fork_point(root)
-    entries = load_entries(ledger_path(root, branch))
+    branch, head = pr.split(" ")
+    fork = fork_point(root, head)
+    if not fork:
+        block(f"The head of '{branch}' ({head[:7]}) is not in this checkout. Fetch it, then run finish-branch before merging.")
 
-    if ran_in_order(entries, fork):
+    if ran_in_order(load_entries(ledger_path(branch)), fork):
         allow()
 
     block(

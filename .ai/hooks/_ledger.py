@@ -1,5 +1,6 @@
-"""Shared by review-ledger.py and merge-gate.py: git/gh plumbing, the ledger path, and the required skill order."""
+"""Git/gh plumbing and the review ledger the hooks share."""
 
+import functools
 import json
 import os
 import re
@@ -24,23 +25,49 @@ def gh(root, *args):
     return _run(["gh", *args], root)
 
 
+def checkout(path):
+    """(top level, git common dir) of the checkout holding `path`; walks up so a file not yet written resolves too."""
+    if not path:
+        return None, None
+    directory = os.path.realpath(path)
+    while not os.path.isdir(directory) and directory != os.path.dirname(directory):
+        directory = os.path.dirname(directory)
+    found = git(directory, "rev-parse", "--path-format=absolute", "--show-toplevel", "--git-common-dir")
+    return tuple(found.split("\n")) if found else (None, None)
+
+
+@functools.cache
+def own_common_dir():
+    return checkout(__file__)[1]
+
+
+def repo_root(path):
+    """The checkout of this repo holding `path`, a worktree's included; None for a sibling repo or none at all."""
+    top, common_dir = checkout(path)
+    return top if top and common_dir == own_common_dir() else None
+
+
+def session_root(event):
+    """The session's checkout of this repo; CLAUDE_PROJECT_DIR only when cwd is outside any repo."""
+    for path in (event.get("cwd"), os.environ.get("CLAUDE_PROJECT_DIR")):
+        top, common_dir = checkout(path)
+        if top:
+            return top if common_dir == own_common_dir() else None
+    return None
+
+
 def current_branch(root):
     branch = git(root, "rev-parse", "--abbrev-ref", "HEAD")
     return branch if branch and branch != "HEAD" else None
 
 
-def fork_point(root):
-    return git(root, "merge-base", "origin/main", "HEAD")
+def fork_point(root, ref="HEAD"):
+    return git(root, "merge-base", "origin/main", ref)
 
 
-def ledger_path(root, branch):
-    common_dir = git(root, "rev-parse", "--git-common-dir")
-    if not common_dir:
-        return None
-    if not os.path.isabs(common_dir):
-        common_dir = os.path.join(root, common_dir)
+def ledger_path(branch):
     safe_branch = re.sub(r"[^A-Za-z0-9_.-]", "__", branch)
-    return os.path.join(common_dir, "claude-review", safe_branch + ".json")
+    return os.path.join(own_common_dir(), "claude-review", safe_branch + ".json")
 
 
 def load_entries(path):
