@@ -341,7 +341,7 @@ gone on the next render, and that absence is the whole confirmation.
   *Check:* `npm run artisan -- route:list --path=check-ins` shows both routes,
   and `npm run artisan -- test --compact tests/Feature/CheckIns` passes.
 
-- [ ] **8. Shared copy.** Invoke skill: `generated-artifacts`. In
+- [x] **8. Shared copy.** Invoke skill: `generated-artifacts`. In
   `packages/shared/src/copy.ts`:
   - `checkInQuestions: Record<CheckInTopic, string>`, with the two questions
     from Decisions, verbatim.
