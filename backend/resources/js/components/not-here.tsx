@@ -12,10 +12,7 @@ export function NotHere({ place }: { place: Place }) {
             options={{ preserveScroll: true }}
         >
             <input type="hidden" name="place" value={place} />
-            <button
-                type="submit"
-                className={quietLineClassName}
-            >
+            <button type="submit" className={quietLineClassName}>
                 {notHereLabels[place]}
             </button>
         </Form>

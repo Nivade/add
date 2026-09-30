@@ -19,10 +19,7 @@ export function SaidIdDoThis({
 
     return (
         <Form {...form} options={{ preserveScroll: true }}>
-            <button
-                type="submit"
-                className={quietLineClassName}
-            >
+            <button type="submit" className={quietLineClassName}>
                 {commitmentCopy.promise}
             </button>
         </Form>
