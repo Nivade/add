@@ -15,15 +15,12 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
             className="mt-4 space-y-2"
         >
             {plan.rungs.map((rung) => (
-                <div
-                    key={rung.rung}
-                    className="flex items-baseline gap-3 font-mono text-[13px]"
-                >
+                <div key={rung.rung} className="flex items-baseline gap-3">
                     <span
                         className={
                             rung.alreadyPassed
-                                ? 'text-muted-foreground w-12 tabular-nums line-through'
-                                : 'text-foreground w-12 tabular-nums'
+                                ? 'text-muted-foreground text-numeric w-14 font-mono tabular-nums line-through'
+                                : 'text-foreground text-numeric w-14 font-mono tabular-nums'
                         }
                     >
                         {rung.clock}
@@ -41,27 +38,23 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                             min={0}
                             max={1440}
                             defaultValue={Math.round(rung.seconds / 60)}
-                            className="border-border focus-visible:ring-ring w-14 border-b bg-transparent py-0.5 text-right tabular-nums focus-visible:ring-1 focus-visible:outline-none"
+                            className="border-field focus-visible:ring-ring h-11 w-16 rounded-lg border bg-transparent px-2 text-right font-mono tabular-nums focus-visible:ring-2 focus-visible:outline-none"
                         />
-                        <span className="w-16">
+                        <span className="text-small w-20">
                             {rungMinutesNote(rung.assumed)}
                         </span>
                     </label>
                 </div>
             ))}
 
-            <div className="flex items-baseline gap-3 font-mono text-[13px]">
-                <span className="text-now w-12 tabular-nums">
+            <div className="flex items-baseline gap-3">
+                <span className="text-numeric w-14 font-mono font-semibold tabular-nums">
                     {plan.deadlineClock}
                 </span>
                 <span className="text-muted-foreground flex-1">
                     the appointment itself
                 </span>
-                <Button
-                    type="submit"
-                    variant="outline"
-                    className="h-8 font-mono text-[11px] tracking-[0.08em] uppercase"
-                >
+                <Button type="submit" variant="outline">
                     Save
                 </Button>
             </div>

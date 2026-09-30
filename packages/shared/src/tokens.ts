@@ -22,24 +22,24 @@ export const darkColors = {
 
 export type ColorToken = keyof typeof lightColors;
 
-export type DayStripStop = { minute: number; color: string };
+export type DayStripStop = { name: string; minute: number; color: string };
 
 export const dayStripLight: readonly DayStripStop[] = [
-    { minute: 6 * 60, color: '#F4D8C8' },
-    { minute: 9 * 60, color: '#F6EBC8' },
-    { minute: 13 * 60, color: '#F4F2E6' },
-    { minute: 17 * 60, color: '#EADFC2' },
-    { minute: 20 * 60, color: '#C9C1E6' },
-    { minute: 23 * 60, color: '#2E3A63' },
+    { name: 'dawn', minute: 6 * 60, color: '#F4D8C8' },
+    { name: 'morning', minute: 9 * 60, color: '#F6EBC8' },
+    { name: 'noon', minute: 13 * 60, color: '#F4F2E6' },
+    { name: 'afternoon', minute: 17 * 60, color: '#EADFC2' },
+    { name: 'dusk', minute: 20 * 60, color: '#C9C1E6' },
+    { name: 'night', minute: 23 * 60, color: '#2E3A63' },
 ];
 
 export const dayStripDark: readonly DayStripStop[] = [
-    { minute: 6 * 60, color: '#3B2B31' },
-    { minute: 9 * 60, color: '#3A3527' },
-    { minute: 13 * 60, color: '#25313A' },
-    { minute: 17 * 60, color: '#3A3326' },
-    { minute: 20 * 60, color: '#2E2946' },
-    { minute: 23 * 60, color: '#121A2E' },
+    { name: 'dawn', minute: 6 * 60, color: '#3B2B31' },
+    { name: 'morning', minute: 9 * 60, color: '#3A3527' },
+    { name: 'noon', minute: 13 * 60, color: '#25313A' },
+    { name: 'afternoon', minute: 17 * 60, color: '#3A3326' },
+    { name: 'dusk', minute: 20 * 60, color: '#2E2946' },
+    { name: 'night', minute: 23 * 60, color: '#121A2E' },
 ];
 
 /** Pixels, for React Native; the web reads the same values from app.css. */

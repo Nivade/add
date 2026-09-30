@@ -186,14 +186,14 @@ desktop                                          phone
   - `backend/resources/views/app.blade.php`: the inline `html` background becomes `#F2F4F5` and dark `#0F1B22`; add `<meta name="theme-color">` for both schemes.
   - `backend/resources/js/app.tsx`: the progress colour becomes `#0A6B80`.
   - Check: `npm run artisan -- test --compact tests/Feature/Guards/DesignTokensTest.php` passes except the class checks 2.4 clears.
-- [ ] **2.4 Every web component in the new identity.** Invoke skills: `frontend-design`, `inertia-react-development`, `tailwindcss-development`.
+- [x] **2.4 Every web component in the new identity.** Invoke skills: `frontend-design`, `inertia-react-development`, `tailwindcss-development`.
   - `backend/resources/js/components/one-thing.tsx`: `OneThing` is an `h1` with `tabIndex={-1}`, the one-thing size, no border stripe; `Meta` becomes lead-size muted sentences; `StartStep` uses the filled Start. The `stepMeta` helper moves to shared in 4.7.
   - `backend/resources/js/components/band.tsx`: no rule; an `h2` in the band-heading style; labels become questions: "Why this one?", "What's coming up", "Needs you", "Before you go", "Sorted for you", "A question for you" (the check-in).
   - `backend/resources/js/components/ui/button.tsx`: `default` variant is the filled `now` style; add `size: 'action'` (3.5rem) and `size: 'control'` (4rem); outline uses `border-field`; every size at least 2.75rem.
   - `backend/resources/js/components/responses.tsx`: `quietButtonClassName` and `quietLineClassName` become body-size text buttons, `min-h-11`, no mono, no uppercase.
   - `git mv backend/resources/js/components/rail.tsx backend/resources/js/components/day-strip.tsx`, export `DayStrip`, and draw it as specified above. `RailData` gains `?int $stepSeconds` and `list<RailMarkData> $marks`, replacing `leaveByMinute`/`leaveByClock`; new Data `RailMarkData(?PlanRung $rung, int $minute, string $clock)` in `backend/app/Data/RailMarkData.php`, where a null rung is the appointment itself. `BuildRail::handle(User $user, ?ResolutionContext $context = null, ?int $stepSeconds = null)` fills them; `ShowHomeController` passes the right-now step's estimate as the page prop `rail`, which overrides the shared one. Shared `railSummary(rail): string` in `packages/shared/src/copy.ts`.
   - `backend/resources/js/layouts/shell.tsx`: new layout per the wireframe; the strip is horizontal under `sm`.
-  - New `backend/resources/js/components/wordmark.tsx` ("add", weight 700, links home); delete `backend/resources/js/components/app-logo.tsx` and `backend/resources/js/components/app-logo-icon.tsx` and use the wordmark in the three auth layouts.
+  - New `backend/resources/js/components/wordmark.tsx` ("add", weight 700, links home); the app logo and its icon component are deleted, and the three auth layouts use the wordmark.
   - Every `text-[11px]`/`text-[13px]`/`font-mono`/`uppercase`/`tracking-[...]` under `backend/resources/js` outside `components/ui/` goes; mono stays only on clocks, durations and counts.
   - Tests: `backend/tests/Feature/Home/RailTest.php` covers `stepSeconds` and `marks`.
   - Check: `DesignTokensTest.php` passes; `npm run composer -- ci:check` passes; screenshots of `/home`, `/focus`, `/overwhelmed` in light and dark at 1440 and 390 match the wireframe.

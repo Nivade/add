@@ -1,4 +1,6 @@
-/** A band is a hairline, a mono label and its answer. No boxes: a box implies a list to work through. */
+import { useId } from 'react';
+
+/** A band is a question and its answer, set apart by space. No boxes: a box implies a list to work through. */
 export function Band({
     label,
     children,
@@ -6,13 +8,13 @@ export function Band({
     label: string;
     children: React.ReactNode;
 }) {
-    const id = `band-${label.replace(/\s+/g, '-').toLowerCase()}`;
+    const id = useId();
 
     return (
-        <section aria-labelledby={id} className="border-border border-t pt-5">
+        <section aria-labelledby={id}>
             <h2
                 id={id}
-                className="text-muted-foreground mb-4 font-mono text-[11px] tracking-[0.18em] uppercase"
+                className="text-muted-foreground text-body mb-3 leading-snug font-semibold"
             >
                 {label}
             </h2>

@@ -20,7 +20,7 @@ export function CommitmentRow({
             <p>
                 {description}
                 {provenance && (
-                    <span className="text-muted-foreground font-mono text-[13px]">
+                    <span className="text-muted-foreground">
                         {' '}
                         · {commitmentProvenanceLabels[provenance]}
                     </span>

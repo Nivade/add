@@ -15,9 +15,6 @@ import {
 } from '@/components/ui/dialog';
 import focusRoutes from '@/routes/focus';
 
-const CONTROL_CLASS =
-    'h-12 w-full font-mono text-[12px] tracking-[0.08em] uppercase';
-
 /** Six controls, one size, one weight: skipping weighs what finishing weighs. */
 function Control({
     label,
@@ -35,7 +32,8 @@ function Control({
             <Button
                 type="button"
                 variant="outline"
-                className={CONTROL_CLASS}
+                size="control"
+                className="w-full"
                 onClick={onClick}
             >
                 {label}
@@ -49,7 +47,8 @@ function Control({
                 <Button
                     type="submit"
                     variant="outline"
-                    className={CONTROL_CLASS}
+                    size="control"
+                    className="w-full"
                     aria-disabled={processing}
                 >
                     {label}
@@ -69,13 +68,11 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
         <>
             <Head title={intention.title} />
 
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 pt-6 pb-20 lg:mx-0 lg:ml-[8vw]">
-                <p className="text-muted-foreground font-mono text-[11px] tracking-[0.18em] uppercase">
-                    {intention.title}
-                </p>
+            <div className="flex flex-col gap-10">
+                <p className="text-muted-foreground">{intention.title}</p>
 
                 {state.returning || paused ? (
-                    <div className="space-y-6">
+                    <div className="flex flex-col items-start gap-5">
                         <OneThing>
                             {state.returning
                                 ? returnCopy.welcome
@@ -89,40 +86,37 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                   )
                                 : returnCopy.pausedMeta}
                         </Meta>
-                        <div className="pl-5">
-                            <OneTapForm
-                                form={focusRoutes.resume.form(session.id)}
-                                stepId={step?.id}
-                            >
-                                {(processing) => (
-                                    <Button
-                                        type="submit"
-                                        aria-disabled={processing}
-                                    >
-                                        {focusCopy.continue}
-                                    </Button>
-                                )}
-                            </OneTapForm>
-                        </div>
+                        <OneTapForm
+                            form={focusRoutes.resume.form(session.id)}
+                            stepId={step?.id}
+                        >
+                            {(processing) => (
+                                <Button
+                                    type="submit"
+                                    size="action"
+                                    aria-disabled={processing}
+                                >
+                                    {focusCopy.continue}
+                                </Button>
+                            )}
+                        </OneTapForm>
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-4">
+                        <div className="flex flex-col items-start gap-4">
                             <OneThing>{step?.title}</OneThing>
                             {step && <Meta>{stepMeta(step)}</Meta>}
                             {step && (
-                                <div className="pl-5">
-                                    <SaidIdDoThis
-                                        promised={state.currentStepIsCommitment}
-                                        form={focusRoutes.commitment.form(
-                                            session.id,
-                                        )}
-                                    />
-                                </div>
+                                <SaidIdDoThis
+                                    promised={state.currentStepIsCommitment}
+                                    form={focusRoutes.commitment.form(
+                                        session.id,
+                                    )}
+                                />
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                             <Control
                                 label={focusCopy.done}
                                 form={focusRoutes.completeStep.form(session.id)}
@@ -156,7 +150,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     </>
                 )}
 
-                <ul className="text-muted-foreground border-border space-y-1 border-t pt-5 font-mono text-[13px]">
+                <ul className="text-muted-foreground space-y-1">
                     <li>{elapsed.toLowerCase()}</li>
                     {progress.map((line) => (
                         <li key={line}>{line.toLowerCase()}</li>
@@ -177,7 +171,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Button
                                 key={reason.value}
                                 variant="outline"
-                                className="h-11 justify-start"
+                                className="justify-start font-normal"
                                 onClick={() => {
                                     setStuckOpen(false);
                                     router.post(

@@ -45,7 +45,7 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
         ->assertNoJavaScriptErrors();
 
     // Capture, via the global shortcut rather than a click.
-    $page->keys('nav[aria-label="Main"]', 'c');
+    $page->keys('header:first-of-type', 'c');
     $page->assertSee("What's on your mind?");
 
     expect(focusedDescriptor($page))->toBe("What's on your mind?");

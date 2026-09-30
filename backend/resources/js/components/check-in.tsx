@@ -9,9 +9,7 @@ export function CheckIn({ topic }: { topic: CheckInTopic }) {
     return (
         <Band label={checkInCopy.band}>
             <p>{checkInQuestions[topic]}</p>
-            <p className="text-muted-foreground mt-2 font-mono text-[13px]">
-                {checkInCopy.meta}
-            </p>
+            <p className="text-muted-foreground mt-2">{checkInCopy.meta}</p>
             <div className="mt-3">
                 <Responses
                     action={checkIns.store.form(topic)}

@@ -5,9 +5,12 @@ import type {
     CommitmentResponse,
     Place,
     PlanRung,
+    RailData,
+    RailMarkData,
     StuckReason,
     WaitingForResponse,
 } from './generated';
+import { clockOf, doneMinute } from './day';
 import { formatEstimate } from './estimate';
 
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
@@ -49,6 +52,44 @@ export const planRungLabels: Record<PlanRung, string> = {
     leave: 'leave',
 };
 
+/** Short enough to sit beside a tick on the day strip. */
+export const railRungLabels: Record<PlanRung, string> = {
+    find_things: 'find things',
+    get_ready: 'get ready',
+    leave: 'leave',
+};
+
+export function railMarkLabel(mark: RailMarkData, appointmentTitle: string | null): string {
+    return mark.rung === null ? (appointmentTitle ?? '') : railRungLabels[mark.rung];
+}
+
+/** Everything the strip draws, said once for a screen reader. */
+export function railSummary(rail: RailData, nowMinute: number = rail.nowMinute): string {
+    const sentences = [`It is ${clockOf(nowMinute)}.`];
+
+    if (rail.sessionStartedMinute !== null) {
+        sentences.push(`You started at ${clockOf(rail.sessionStartedMinute)}.`);
+    }
+
+    if (rail.stepSeconds !== null) {
+        sentences.push(`Started now, this step is done around ${clockOf(doneMinute(nowMinute, rail.stepSeconds))}.`);
+    }
+
+    const rungs = rail.marks.filter((mark) => mark.rung !== null);
+    const appointment = rail.marks.find((mark) => mark.rung === null);
+
+    if (rungs.length > 0) {
+        const said = rungs.map((mark) => `${railMarkLabel(mark, null)} at ${mark.clock}`).join(', ');
+        sentences.push(`${said.charAt(0).toUpperCase()}${said.slice(1)}.`);
+    }
+
+    if (appointment && rail.appointmentTitle !== null) {
+        sentences.push(`${rail.appointmentTitle} is at ${appointment.clock}.`);
+    }
+
+    return sentences.join(' ');
+}
+
 export function rungMinutesLabel(rung: PlanRung): string {
     return `Minutes to ${planRungLabels[rung]}`;
 }
@@ -81,14 +122,15 @@ export function partWayLine(intentionTitle: string): string {
 export const nothingNeedsYou = 'Nothing needs you right now.';
 
 export const homeCopy = {
-    wholeAnswer: 'that is the whole answer',
+    wholeAnswer: 'That is the whole answer.',
     repeatEvery: 'Repeat every',
 } as const;
 
 export const homeBands = {
-    why: 'Why this one',
+    why: 'Why this one?',
+    comingUp: "What's coming up",
     beforeYouGo: 'Before you go',
-    needsAttention: 'Needs attention',
+    needsAttention: 'Needs you',
     justFinished: 'Just finished',
 } as const;
 
@@ -187,7 +229,7 @@ export const checkInResponses: { value: CheckInAnswer; label: string }[] = [
 ];
 
 export const checkInCopy = {
-    band: 'Looking back',
+    band: 'A question for you',
     meta: 'Asked every two weeks, to tell whether this app is helping.',
 } as const;
 

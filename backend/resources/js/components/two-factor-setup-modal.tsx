@@ -25,7 +25,7 @@ import { confirm } from '@/routes/two-factor';
 
 function GridScanIcon() {
     return (
-        <div className="border-border bg-card mb-3 rounded-full border p-0.5 shadow-sm">
+        <div className="border-border bg-card mb-3 rounded-full border p-0.5">
             <div className="border-border bg-muted relative overflow-hidden rounded-full border p-2.5">
                 <div className="absolute inset-0 grid grid-cols-5 opacity-50">
                     {Array.from({ length: 5 }, (_, i) => (

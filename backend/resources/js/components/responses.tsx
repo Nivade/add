@@ -4,10 +4,9 @@ import type { RouteFormDefinition } from '@/wayfinder';
 
 /** A quiet line: off the one-tap path, and never competing with Start or Done. */
 export const quietLineClassName =
-    'text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline';
+    'text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center text-left underline-offset-4 hover:underline';
 
-export const quietButtonClassName =
-    'h-8 font-mono text-[11px] tracking-[0.08em] uppercase';
+export const quietButtonClassName = 'min-h-11 font-normal';
 
 /** Every answer posts to the same route and weighs the same: one row of equal buttons. */
 export function Responses({
