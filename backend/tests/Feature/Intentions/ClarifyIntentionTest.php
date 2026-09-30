@@ -15,7 +15,7 @@ use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
 it('holds an undecided thought in needs attention until it is answered, then offers its first step', function (): void {
-    $provider = fakeAi()->push(parsedCapture([
+    $provider = fakeAi()->respondWith(parsedCapture([
         'title' => 'Renew my passport',
         'clarifying_question' => 'Is there a trip you need it for, and when?',
     ]));
@@ -37,7 +37,7 @@ it('holds an undecided thought in needs attention until it is answered, then off
             ->where('home.needsAttention.0.clarifyingQuestion', 'Is there a trip you need it for, and when?')
         );
 
-    $provider->push(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
+    $provider->respondWith(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
 
     $this->actingAs($user)
         ->from(route('home'))
@@ -57,7 +57,7 @@ it('holds an undecided thought in needs attention until it is answered, then off
 });
 
 it('answers over the API too', function (): void {
-    fakeAi()->push(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
+    fakeAi()->respondWith(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
     $user = User::factory()->create();
     $intention = Intention::factory()->unclear()->for($user)->create();
 
@@ -73,7 +73,7 @@ it('answers over the API too', function (): void {
 
 it('reads a date in the answer as a deadline to confirm, and ranks on it', function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-09-16 10:00:00', 'Europe/Amsterdam'));
-    fakeAi()->push(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
+    fakeAi()->respondWith(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
     $passport = Intention::factory()->unclear('Is there a trip you need it for, and when?')->for($user)->create();
     $socks = Intention::factory()->decomposed()->for($user)->create(['created_at' => now()->subWeek()]);
@@ -93,7 +93,7 @@ it('reads a date in the answer as a deadline to confirm, and ranks on it', funct
 });
 
 it('never lets an answer move a date the person already gave', function (): void {
-    fakeAi()->push(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
+    fakeAi()->respondWith(['steps' => [['title' => 'Find the old passport.', 'estimated_seconds' => 240]]]);
     $user = User::factory()->create();
     $deadline = CarbonImmutable::parse('2026-12-01 12:00:00');
     $intention = Intention::factory()->unclear()->for($user)->create(['deadline_at' => $deadline]);

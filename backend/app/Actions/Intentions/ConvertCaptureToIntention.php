@@ -6,13 +6,11 @@ namespace App\Actions\Intentions;
 
 use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Attributes\FailOn;
-use App\Contracts\AiProvider;
 use App\Contracts\DeadlineExtractor;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiUnavailable;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\Parsers\ParseCaptureParser;
 use App\Support\Time\ExtractedDeadline;
 use Carbon\CarbonImmutable;
@@ -21,6 +19,8 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
 /** The extractor answers first and its answer wins; the model is asked only about what it left behind. */
 #[Tries(3)]
@@ -50,7 +50,7 @@ final class ConvertCaptureToIntention
         $extracted = $this->extractor->extract($capture->body, $now);
 
         $parsed = $this->parser->parse(
-            $this->provider->complete(AiRequest::parseCapture(
+            $this->provider->respond(AiRequests::parseCapture(
                 $capture->user_id,
                 $extracted?->remainderOf($capture->body) ?? $capture->body,
                 $now,

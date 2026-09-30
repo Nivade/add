@@ -3,15 +3,15 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\StartSession;
-use App\Contracts\AiProvider;
 use App\Enums\ExecutionEventType;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
-use App\Support\Ai\Providers\FakeAiProvider;
-use App\Support\Ai\Providers\LoggingAiProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Nvade\AiToolkit\Facades\AiToolkit;
+use Nvade\AiToolkit\Providers\DispatchingAiProvider;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 use Pest\Preset;
 use Tests\TestCase;
 
@@ -119,13 +119,11 @@ Preset::custom('laravelMinusAttributes', fn (): array => [
 |
 */
 
+// A test that reaches the AI path without seeding an answer fails rather than collecting a canned one.
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature');
-
-pest()->extend(TestCase::class)
-    ->use(RefreshDatabase::class)
-    ->in('Browser');
+    ->beforeEach(fn (): FakeAiProvider => AiToolkit::fake())
+    ->in('Feature', 'Browser');
 
 /*
 |--------------------------------------------------------------------------
@@ -193,22 +191,15 @@ function replay(ExecutionSession $session): array
         ->all();
 }
 
-/** The container hands out the logging wrapper, and a test wants the driver inside it. */
-function aiProvider(): AiProvider
-{
-    $provider = app(AiProvider::class);
-
-    return $provider instanceof LoggingAiProvider ? $provider->inner : $provider;
-}
-
 function fakeAi(): FakeAiProvider
 {
-    $provider = aiProvider();
+    $provider = AiToolkit::driver('fake');
+    $fake = $provider instanceof DispatchingAiProvider ? $provider->inner : $provider;
 
-    expect($provider)->toBeInstanceOf(FakeAiProvider::class);
+    expect($fake)->toBeInstanceOf(FakeAiProvider::class);
 
-    /** @var FakeAiProvider $provider */
-    return $provider;
+    /** @var FakeAiProvider $fake */
+    return $fake;
 }
 
 /**

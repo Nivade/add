@@ -6,12 +6,10 @@ namespace App\Actions\Intentions;
 
 use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Attributes\FailOn;
-use App\Contracts\AiProvider;
 use App\Enums\IntentionStatus;
 use App\Models\Intention;
 use App\Models\Step;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiUnavailable;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\Parsers\DecomposeParser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Queue\Attributes\Backoff;
@@ -20,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
 #[Tries(3)]
 #[Backoff(30, 120, 300)]
@@ -47,7 +47,7 @@ final class DecomposeIntention
         }
 
         $steps = $this->parser->parse(
-            $this->provider->complete(AiRequest::decomposeIntention($intention->user_id, $this->describe($intention)))->payload
+            $this->provider->respond(AiRequests::decomposeIntention($intention->user_id, $this->describe($intention)))->payload
         );
 
         foreach ($this->parser->violations($steps) as $violation) {

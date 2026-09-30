@@ -7,14 +7,11 @@ namespace App\Actions\Steps;
 use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Actions\Sessions\RecordExecutionEvent;
 use App\Attributes\FailOn;
-use App\Contracts\AiProvider;
 use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
-use App\Support\Ai\Exceptions\AiUnavailable;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\Parsers\DecomposeParser;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Queue\Attributes\Backoff;
@@ -22,6 +19,9 @@ use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
 /** Replaces one step with smaller ones. Queued, because the person already moved on to something they can start. */
 #[Tries(3)]
@@ -47,7 +47,7 @@ final class SplitStep
         }
 
         $smaller = $this->parser->parse(
-            $this->provider->complete(AiRequest::splitStep($step->intention->user_id, $this->describe($step)))->payload
+            $this->provider->respond(AiRequests::splitStep($step->intention->user_id, $this->describe($step)))->payload
         );
 
         return DB::transaction(function () use ($step, $smaller): Collection {

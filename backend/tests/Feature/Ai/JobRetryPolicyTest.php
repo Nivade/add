@@ -35,7 +35,7 @@ it('fails a decomposition job immediately when the AI layer is unavailable', fun
 });
 
 it('leaves a decomposition job for the worker to retry on an invalid AI answer', function (): void {
-    fakeAi()->push(['steps' => []]);
+    fakeAi()->respondWith(['steps' => []]);
     $intention = Intention::factory()->create();
 
     $job = DecomposeIntention::makeJob($intention);

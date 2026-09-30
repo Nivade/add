@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Contracts\AiProvider;
 use App\Models\User;
 
 beforeEach(function (): void {
     // The canned driver, not the queued fake: this walks a real browser against
     // the same deterministic answers a person with no API key gets.
-    config()->set('ai.driver', 'canned');
-    app()->forgetInstance(AiProvider::class);
+    config()->set('ai-toolkit.driver', 'canned');
 });
 
 /**

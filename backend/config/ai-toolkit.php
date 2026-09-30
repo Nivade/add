@@ -2,11 +2,25 @@
 
 declare(strict_types=1);
 
-// Drivers and fixtures are chosen in config/ai.php. Env names are this app's own.
+// Env names are this app's own.
 return [
+
+    // canned answers every prompt deterministically and needs no credentials.
+    'driver' => env('AI_DRIVER', 'canned'),
+
+    'fixture_path' => storage_path('ai-fixtures'),
+
+    'fixture' => [
+        'on_miss' => env('AI_FIXTURE_ON_MISS', 'dump'),
+    ],
 
     // Messages carry the cause's class only; provider text can echo a person's words.
     'expose_provider_errors' => false,
+
+    // Every call's shape is logged, never its text.
+    'log' => [
+        'channel' => env('AI_LOG_CHANNEL', env('LOG_CHANNEL', 'stack')),
+    ],
 
     'openai' => [
         'model' => env('AI_MODEL', 'gpt-5.6-luna'),

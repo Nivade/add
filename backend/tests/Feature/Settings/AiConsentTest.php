@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\Intentions\ConvertCaptureToIntention;
 use App\Models\Capture;
 use App\Models\User;
-use App\Support\Ai\Exceptions\AiUnavailable;
 use Inertia\Testing\AssertableInertia;
+use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
 it('reads off by default', function (): void {
     $this->actingAs(User::factory()->create())
@@ -59,7 +59,7 @@ it('serves the same consent switch to the API', function (): void {
 });
 
 it('never reaches a live model for a person who has not consented, even when the driver is openai', function (): void {
-    config()->set('ai.driver', 'openai');
+    config()->set('ai-toolkit.driver', 'openai');
     $user = User::factory()->create(['ai_consented_at' => null]);
     $capture = Capture::factory()->for($user)->create();
 

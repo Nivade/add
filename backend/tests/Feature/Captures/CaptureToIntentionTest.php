@@ -4,24 +4,15 @@ declare(strict_types=1);
 
 use App\Actions\Captures\RecordCapture;
 use App\Actions\Intentions\ConvertCaptureToIntention;
-use App\Contracts\AiProvider;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Models\User;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
-use App\Support\Ai\Providers\FakeAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
-
-function useAiDriver(string $driver): AiProvider
-{
-    config()->set('ai.driver', $driver);
-    app()->forgetInstance(AiProvider::class);
-
-    return aiProvider();
-}
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 
 /**
  * @param  array<string, mixed>  $parse
@@ -30,12 +21,12 @@ function useAiDriver(string $driver): AiProvider
 function answeredAi(array $parse = [], ?array $decompose = null): FakeAiProvider
 {
     return fakeAi()
-        ->push(parsedCapture($parse))
-        ->push($decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
+        ->respondWith(parsedCapture($parse))
+        ->respondWith($decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
 }
 
 it('turns one typed sentence into an intention with usable steps, with no API key set', function (): void {
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -58,7 +49,7 @@ it('turns one typed sentence into an intention with usable steps, with no API ke
 
 it('returns the capture before anything is parsed', function (): void {
     Queue::fake();
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
 
     $this->actingAs(User::factory()->create())
         ->postJson('/api/v1/captures', ['body' => 'buy dishwasher tablets'])
@@ -75,7 +66,7 @@ it('refuses an unauthenticated capture', function (): void {
 });
 
 it('requires something to capture and nothing else', function (): void {
-    useAiDriver('canned');
+    config()->set('ai-toolkit.driver', 'canned');
 
     $this->actingAs(User::factory()->create())
         ->postJson('/api/v1/captures', ['body' => ''])
@@ -141,7 +132,7 @@ it("accepts the model's deadline only when the extractor found nothing", functio
 });
 
 it('leaves the capture intact and the intention uncreated when the parse throws', function (): void {
-    fakeAi()->push(['title' => '', 'clarifying_question' => null]);
+    fakeAi()->respondWith(['title' => '', 'clarifying_question' => null]);
 
     expect(fn (): mixed => RecordCapture::run(User::factory()->create(), 'sort the thing out'))
         ->toThrow(AiResponseInvalid::class);
@@ -155,6 +146,8 @@ it('leaves the capture intact and the intention uncreated when the parse throws'
 });
 
 it('logs a decomposition quality violation against the intention it came from', function (): void {
+    // The spy answers channel() with null, which the AI call log would then write to.
+    config(['ai-toolkit.log.channel' => null]);
     Log::spy();
     answeredAi(decompose: ['steps' => [['title' => 'Sort out the paperwork.', 'estimated_seconds' => 900]]]);
 

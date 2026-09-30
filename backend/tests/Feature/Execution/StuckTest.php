@@ -10,13 +10,13 @@ use App\Enums\StepStatus;
 use App\Enums\StuckReason;
 use App\Models\ExecutionSession;
 use App\Models\Step;
-use App\Support\Ai\Providers\FakeAiProvider;
 use Illuminate\Support\Facades\Queue;
 use Lorisleiva\Actions\Decorators\JobDecorator;
+use Nvade\AiToolkit\Testing\FakeAiProvider;
 
 function answeredSplit(array $steps): FakeAiProvider
 {
-    return fakeAi()->push(['steps' => $steps]);
+    return fakeAi()->respondWith(['steps' => $steps]);
 }
 
 it('moves to the shortest sibling and queues the split when the step is too big', function (): void {

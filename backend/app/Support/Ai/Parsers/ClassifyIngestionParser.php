@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Ai\Parsers;
 
 use App\Data\Ai\IngestionClassificationData;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
 use App\Support\Ai\Parsers\Concerns\ParsesAiFields;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 
 /** The parser is the validator: the provider hands over decoded JSON and forms no opinion about it. */
 final class ClassifyIngestionParser

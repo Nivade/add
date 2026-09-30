@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Ai\Parsers;
 
 use App\Data\Ai\ParsedStepData;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 
 /** Bad structure is rejected, weak quality only reported: a flawed plan beats no plan. */
 final class DecomposeParser

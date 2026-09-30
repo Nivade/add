@@ -11,7 +11,7 @@
     "require": {
         "php": "^8.5",
         "inertiajs/inertia-laravel": "^3.0",
-        "laravel/ai": "^0.11.2",
+        "laravel/ai": "^1.0",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
@@ -20,7 +20,7 @@
         "laravel/wayfinder": "^0.1.14",
         "lorisleiva/laravel-actions": "^2.12",
         "lorisleiva/lody": "^0.7",
-        "nvade/ai-toolkit": "^0.4",
+        "nvade/ai-toolkit": "^0.10",
         "sabre/vobject": "^5.0",
         "sentry/sentry-laravel": "^4.28",
         "spatie/laravel-data": "^4.23"

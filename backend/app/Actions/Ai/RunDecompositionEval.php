@@ -6,18 +6,20 @@ namespace App\Actions\Ai;
 
 use App\Actions\Concerns\ReadsCommandAttributes;
 use App\Actions\Concerns\ScoresAgainstACorpus;
-use App\Contracts\AiProvider;
 use App\Data\Ai\ParsedStepData;
-use App\Support\Ai\AiRequest;
-use App\Support\Ai\Exceptions\AiResponseInvalid;
+use App\Support\Ai\AiRequests;
 use App\Support\Ai\Parsers\DecomposeParser;
-use App\Support\Ai\Providers\LoggingAiProvider;
-use App\Support\Ai\Providers\OpenAiProvider;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Container\Container;
 use Lorisleiva\Actions\Concerns\AsCommand;
 use Lorisleiva\Actions\Concerns\AsObject;
+use Nvade\AiToolkit\Contracts\AiProvider;
+use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
+use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
+use Nvade\AiToolkit\Providers\DispatchingAiProvider;
+use Nvade\AiToolkit\Providers\OpenAiProvider;
 
 /** Scores a seed corpus on what `DecomposeParser::violations()` checks, and writes it as a baseline. */
 #[Signature('ai:eval')]
@@ -31,9 +33,10 @@ final class RunDecompositionEval
 
     private readonly AiProvider $provider;
 
-    public function __construct(OpenAiProvider $provider, private readonly DecomposeParser $parser)
+    /** The corpus is nobody's words, so no consent gate; the dispatcher keeps each call in the log. */
+    public function __construct(OpenAiProvider $provider, Container $container, private readonly DecomposeParser $parser)
     {
-        $this->provider = new LoggingAiProvider($provider);
+        $this->provider = new DispatchingAiProvider($provider, $container);
     }
 
     /** @return list<array{id: string, shape: string, steps: list<array{title: string, estimated_seconds: int}>, violations: list<string>}> */
@@ -83,8 +86,8 @@ final class RunDecompositionEval
     private function score(array $task): array
     {
         try {
-            $steps = $this->parser->parse($this->provider->complete(AiRequest::decomposeIntention(userId: 0, user: 'Intention: '.$task['task']))->payload);
-        } catch (AiResponseInvalid $aiResponseInvalid) {
+            $steps = $this->parser->parse($this->provider->respond(AiRequests::decomposeIntention(userId: null, user: 'Intention: '.$task['task']))->payload);
+        } catch (AiResponseInvalid|AiResponseTruncated $aiResponseInvalid) {
             return ['id' => $task['id'], 'shape' => $task['shape'], 'steps' => [], 'violations' => ['invalid response: '.$aiResponseInvalid->getMessage()]];
         }
 
