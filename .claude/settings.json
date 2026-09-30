@@ -80,6 +80,7 @@
       "Bash(composer types:check *)",
       "Bash(composer refactor *)",
       "Bash(composer refactor:check *)",
+      "Bash(composer deps:check *)",
       "Bash(php artisan test *)",
       "Bash(php artisan route:list *)",
       "Bash(php artisan about *)",
@@ -94,6 +95,7 @@
       "Bash(vendor/bin/sail composer types:check *)",
       "Bash(vendor/bin/sail composer refactor *)",
       "Bash(vendor/bin/sail composer refactor:check *)",
+      "Bash(vendor/bin/sail composer deps:check *)",
       "Bash(vendor/bin/sail artisan test *)",
       "Bash(vendor/bin/sail artisan route:list *)",
       "Bash(vendor/bin/sail artisan about *)",
@@ -108,6 +110,7 @@
       "Bash(./vendor/bin/sail composer types:check *)",
       "Bash(./vendor/bin/sail composer refactor *)",
       "Bash(./vendor/bin/sail composer refactor:check *)",
+      "Bash(./vendor/bin/sail composer deps:check *)",
       "Bash(./vendor/bin/sail artisan test *)",
       "Bash(./vendor/bin/sail artisan route:list *)",
       "Bash(./vendor/bin/sail artisan about *)"

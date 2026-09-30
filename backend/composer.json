@@ -19,14 +19,15 @@
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14",
         "lorisleiva/laravel-actions": "^2.12",
+        "lorisleiva/lody": "^0.7",
         "nvade/ai-toolkit": "^0.4",
         "sabre/vobject": "^5.0",
         "sentry/sentry-laravel": "^4.28",
         "spatie/laravel-data": "^4.23"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^4.4",
         "fakerphp/faker": "^1.24",
+        "fruitcake/laravel-debugbar": "^4.4",
         "heyosseus/sloppy": "^1.0",
         "larastan/larastan": "^3.9",
         "laravel/boost": "^2.9",
@@ -43,7 +44,9 @@
         "pestphp/pest-plugin-drift": "^5.0",
         "pestphp/pest-plugin-laravel": "^5.0",
         "pestphp/pest-plugin-type-coverage": "^3.0||^4.0||^5.0",
-        "spatie/laravel-typescript-transformer": "^3.3"
+        "pragmarx/google2fa": "^9.1",
+        "spatie/laravel-typescript-transformer": "^3.3",
+        "spatie/typescript-transformer": "^3.3"
     },
     "autoload": {
         "psr-4": {
@@ -90,6 +93,7 @@
             "@lint:check",
             "@types:check",
             "@refactor:check",
+            "@deps:check",
             "@php -d memory_limit=1G artisan test --parallel"
         ],
         "post-autoload-dump": [
@@ -139,6 +143,9 @@
         ],
         "types:coverage": [
             "pest --type-coverage --min=100"
+        ],
+        "deps:check": [
+            "devtools-deps"
         ]
     },
     "extra": {
@@ -155,7 +162,7 @@
                 "ci",
                 "claude",
                 "commits",
-                "compose",
+                "dependencies",
                 "editorconfig",
                 "gitattributes",
                 "npm",
@@ -249,6 +256,11 @@
                             "types:coverage": null
                         }
                     }
+                },
+                "dependencies": {
+                    "packages": [],
+                    "gitignore": [],
+                    "entries": []
                 }
             }
         }
