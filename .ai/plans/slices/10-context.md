@@ -374,7 +374,7 @@ day, and `model:prune` runs daily.
   *Check:* `npm run typecheck` passes, and the home page renders the line only
   after a completed placed step.
 
-- [ ] **12. Mobile.** Invoke skills: `expo-react-native`, `frontend-design`.
+- [x] **12. Mobile.** Invoke skills: `expo-react-native`, `frontend-design`.
   - `mobile/src/api/endpoints.ts` gains
     `notHere: (token: string, place: Place) => request<void>('/whereabouts/not-here', { method: 'POST', body: { place } })`.
     Copy the shape of the existing `promoteToCommitment` call.

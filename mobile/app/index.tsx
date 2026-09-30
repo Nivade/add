@@ -6,6 +6,7 @@ import type {
 import {
   commitmentCopy,
   formatEstimate,
+  notHereLabels,
   recurrenceLine,
   restCountLine,
   waitingForResponses,
@@ -194,6 +195,13 @@ export default function Home() {
     }
   };
 
+  const notHere = async () => {
+    if (rightNow?.assumedPlace) {
+      await api.notHere(token as string, rightNow.assumedPlace);
+      await reload();
+    }
+  };
+
   const start = async () => {
     if (!rightNow) {
       return;
@@ -233,6 +241,12 @@ export default function Home() {
                   {line}
                 </Text>
               ))}
+              {rightNow.assumedPlace && (
+                <QuietAction
+                  label={notHereLabels[rightNow.assumedPlace]}
+                  onPress={() => void notHere()}
+                />
+              )}
               {rightNowIsCommitment ? (
                 <Text style={styles.line}>{commitmentCopy.promised}</Text>
               ) : (
