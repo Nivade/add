@@ -26,7 +26,7 @@ final class DueCheckIn
             return null;
         }
 
-        $latest = $user->checkIns()->latest('created_at')->latest('id')->first();
+        $latest = $user->latestCheckIn()->first();
 
         if ($latest instanceof CheckIn && $latest->created_at->greaterThan($since)) {
             return null;

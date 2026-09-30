@@ -45,11 +45,11 @@ function monthOfUse(): User
     $user = User::factory()->create();
 
     clockAt('2026-08-01 10:00:00');
-    kitchenFor($user, 2);
+    kitchen(2, $user);
 
     clockAt('2026-09-10 10:00:00');
-    $finished = kitchenFor($user, 2);
-    $resumed = kitchenFor($user, 2);
+    $finished = kitchen(2, $user);
+    $resumed = kitchen(2, $user);
     Intention::factory()->for($user)->create(['status' => IntentionStatus::SetAside]);
 
     clockAt('2026-09-10 10:30:00');
@@ -122,7 +122,7 @@ it('counts check-in answers per topic', function (): void {
 
 it('judges each rung by what happened to the step it started, and ignores starts from before attribution', function (): void {
     $user = User::factory()->create();
-    $intention = kitchenFor($user, 3);
+    $intention = kitchen(3, $user);
 
     clockAt('2026-09-20 10:00:00');
     $session = StartSession::run($user, $intention->steps()->where('position', 1)->sole());
@@ -160,7 +160,7 @@ it('narrows the report to one person', function (): void {
     $user = monthOfUse();
     $other = User::factory()->create();
     clockAt('2026-09-15 10:00:00');
-    kitchenFor($other, 2);
+    kitchen(2, $other);
     clockAt('2026-09-30 12:00:00');
 
     $theirs = reportFor($other);

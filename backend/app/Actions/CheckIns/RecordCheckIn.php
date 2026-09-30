@@ -17,12 +17,10 @@ final class RecordCheckIn
 
     public function handle(User $user, CheckInTopic $topic, CheckInAnswer $answer): CheckIn
     {
-        $recent = $user->checkIns()
-            ->where('created_at', '>', now()->toImmutable()->subDays(DueCheckIn::EVERY_DAYS))
-            ->latest('created_at')
-            ->latest('id')
-            ->first();
+        $latest = $user->latestCheckIn()->first();
 
-        return $recent ?? $user->checkIns()->create(['topic' => $topic, 'answer' => $answer]);
+        return $latest instanceof CheckIn && $latest->created_at->greaterThan(now()->subDays(DueCheckIn::EVERY_DAYS))
+            ? $latest
+            : $user->checkIns()->create(['topic' => $topic, 'answer' => $answer]);
     }
 }

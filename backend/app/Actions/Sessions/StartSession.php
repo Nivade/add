@@ -23,8 +23,13 @@ final class StartSession
     public function handle(User $user, Step $step): ExecutionSession
     {
         return Cache::lock($user->sessionLockKey(), 10)->block(5, function () use ($user, $step): ExecutionSession {
-            $attribution = $this->attribution($user, $step);
             $running = $user->runningSession()->getResults();
+
+            if ($running?->current_step_id === $step->id) {
+                return $running;
+            }
+
+            $attribution = $this->attribution($user, $step);
 
             return $running instanceof ExecutionSession
                 ? $this->retarget($running, $user, $step, $attribution)
@@ -40,10 +45,6 @@ final class StartSession
     private function retarget(ExecutionSession $running, User $user, Step $step, array $attribution): ExecutionSession
     {
         return $running->transition(function () use ($running, $user, $step, $attribution): ExecutionSession {
-            if ($running->current_step_id === $step->id) {
-                return $running;
-            }
-
             // A session belongs to one intention, so moving to another one closes this stretch and opens the next.
             if ($running->intention_id !== $step->intention_id) {
                 StopSession::run($running);

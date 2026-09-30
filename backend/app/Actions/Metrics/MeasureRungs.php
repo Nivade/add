@@ -30,7 +30,9 @@ final class MeasureRungs
         $endings = ExecutionEvent::query()
             ->whereIn('type', [ExecutionEventType::StepCompleted, ExecutionEventType::StepSkipped])
             ->whereIn('execution_session_id', $starts->pluck('execution_session_id')->unique()->values())
-            ->get(['id', 'execution_session_id', 'step_id', 'type', 'created_at']);
+            ->get(['id', 'execution_session_id', 'step_id', 'type', 'created_at'])
+            ->groupBy('execution_session_id')
+            ->all();
 
         return array_values($starts
             ->groupBy(fn (ExecutionEvent $start): string => (string) ($start->payload['rung'] ?? ''))
@@ -46,13 +48,12 @@ final class MeasureRungs
 
     /**
      * @param  Collection<int, ExecutionEvent>  $starts
-     * @param  EloquentCollection<int, ExecutionEvent>  $endings
+     * @param  array<array-key, EloquentCollection<int, ExecutionEvent>>  $endings
      */
-    private function endedAs(Collection $starts, EloquentCollection $endings, ExecutionEventType $type): int
+    private function endedAs(Collection $starts, array $endings, ExecutionEventType $type): int
     {
-        return $starts->filter(fn (ExecutionEvent $start): bool => $endings->contains(
+        return $starts->filter(fn (ExecutionEvent $start): bool => ($endings[$start->execution_session_id] ?? new EloquentCollection)->contains(
             fn (ExecutionEvent $ending): bool => $ending->type === $type
-                && $ending->execution_session_id === $start->execution_session_id
                 && $ending->step_id === $start->step_id
                 && $ending->happenedAfter($start)
         ))->count();

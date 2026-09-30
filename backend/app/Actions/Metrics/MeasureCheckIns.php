@@ -25,12 +25,14 @@ final class MeasureCheckIns
             ->get()
             ->mapWithKeys(fn (object $row): array => [$row->topic.':'.$row->answer => (int) $row->answers]);
 
+        $count = fn (CheckInTopic $topic, CheckInAnswer $answer): int => $counts->get($topic->value.':'.$answer->value, 0);
+
         return array_map(fn (CheckInTopic $topic): CheckInOutcomeData => new CheckInOutcomeData(
             topic: $topic,
-            less: $counts->get($topic->value.':'.CheckInAnswer::Less->value, 0),
-            same: $counts->get($topic->value.':'.CheckInAnswer::Same->value, 0),
-            more: $counts->get($topic->value.':'.CheckInAnswer::More->value, 0),
-            notNow: $counts->get($topic->value.':'.CheckInAnswer::NotNow->value, 0),
+            less: $count($topic, CheckInAnswer::Less),
+            same: $count($topic, CheckInAnswer::Same),
+            more: $count($topic, CheckInAnswer::More),
+            notNow: $count($topic, CheckInAnswer::NotNow),
         ), CheckInTopic::cases());
     }
 }

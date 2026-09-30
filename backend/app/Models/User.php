@@ -81,6 +81,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->ai_consented_at !== null;
     }
 
+    /** @return HasOne<CheckIn, $this> */
+    public function latestCheckIn(): HasOne
+    {
+        return $this->hasOne(CheckIn::class)->ofMany(['created_at' => 'max', 'id' => 'max']);
+    }
+
     /** @return HasOne<ExecutionSession, $this> */
     public function runningSession(): HasOne
     {

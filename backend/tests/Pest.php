@@ -158,11 +158,11 @@ function repoPath(string $relative): string
 }
 
 /** A decomposed intention whose steps get longer as they go, so "shortest" and "next" differ. */
-function kitchen(int $steps = 3): Intention
+function kitchen(int $steps = 3, ?User $user = null): Intention
 {
     $intention = Intention::factory()
         ->decomposed()
-        ->for(User::factory())
+        ->for($user ?? User::factory())
         ->create(['title' => 'Clean the kitchen']);
 
     foreach (range(1, $steps) as $position) {
@@ -172,14 +172,6 @@ function kitchen(int $steps = 3): Intention
             'estimated_seconds' => $position * 60,
         ]);
     }
-
-    return $intention;
-}
-
-function kitchenFor(User $user, int $steps = 3): Intention
-{
-    $intention = kitchen($steps);
-    $intention->update(['user_id' => $user->id]);
 
     return $intention;
 }
@@ -202,7 +194,7 @@ function finishStepAt(User $user, Place $place): void
 
 function workedOn(User $user): void
 {
-    StopSession::run(StartSession::run($user, kitchenFor($user)->steps()->first()));
+    StopSession::run(StartSession::run($user, kitchen(user: $user)->steps()->first()));
 }
 
 /** An account opened some days ago that stopped a session yesterday, with the clock left at 2026-09-30 10:00. */
