@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Captures\RecordCapture;
 use App\Actions\Intentions\ConvertCaptureToIntention;
+use App\Enums\Ai\AiOperation;
 use App\Enums\IntentionStatus;
 use App\Models\Capture;
 use App\Models\Intention;
@@ -11,6 +12,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Nvade\AiToolkit\AiRequest;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Nvade\AiToolkit\Testing\FakeAiProvider;
 
@@ -21,8 +23,8 @@ use Nvade\AiToolkit\Testing\FakeAiProvider;
 function answeredAi(array $parse = [], ?array $decompose = null): FakeAiProvider
 {
     return fakeAi()
-        ->respondWith(parsedCapture($parse))
-        ->respondWith($decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
+        ->respondFor(AiOperation::ParseCapture->value, parsedCapture($parse))
+        ->respondFor(AiOperation::DecomposeIntention->value, $decompose ?? ['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 60]]]);
 }
 
 it('turns one typed sentence into an intention with usable steps, with no API key set', function (): void {
@@ -79,9 +81,11 @@ it('lets the deadline extractor beat the model when the two disagree', function 
 
     RecordCapture::run(User::factory()->create(), 'clean the apartment before Saturday');
 
-    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59')
-        ->and($provider->received[0]->user)->toContain('clean the apartment')
-        ->and($provider->received[0]->user)->not->toContain('before Saturday');
+    expect(Intention::query()->sole()->deadline_at?->toDateTimeString())->toBe('2026-09-19 23:59:59');
+
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::ParseCapture->value
+        && str_contains($request->user, 'clean the apartment')
+        && ! str_contains($request->user, 'before Saturday'));
 });
 
 it('tells the model what day it is and which zone to answer in', function (): void {
@@ -94,8 +98,9 @@ it('tells the model what day it is and which zone to answer in', function (): vo
     );
 
     // Half past midnight in Amsterdam, so the day the model is told is not the server's.
-    expect($provider->received[0]->user)->toContain('Thursday 17 September 2026')
-        ->and($provider->received[0]->user)->toContain('Europe/Amsterdam');
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::ParseCapture->value
+        && str_contains($request->user, 'Thursday 17 September 2026')
+        && str_contains($request->user, 'Europe/Amsterdam'));
 });
 
 it("reads a deadline only the model found on the person's clock", function (): void {
@@ -182,5 +187,6 @@ it("states the deadline to the decomposer on the person's clock", function (): v
     );
 
     // 22:30 UTC is half past midnight on the 3rd where they are, and that is the day they hear.
-    expect($provider->received[1]->user)->toContain('Saturday 3 October 2026 00:30');
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::DecomposeIntention->value
+        && str_contains($request->user, 'Saturday 3 October 2026 00:30'));
 });

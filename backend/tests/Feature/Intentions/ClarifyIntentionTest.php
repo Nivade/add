@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Intentions\ClarifyIntention;
 use App\Contracts\DeadlineExtractor;
 use App\Contracts\NextActionResolver;
+use App\Enums\Ai\AiOperation;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Models\Step;
@@ -13,6 +14,7 @@ use App\Support\NextAction\ResolutionContext;
 use App\Support\Time\ExtractedDeadline;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
+use Nvade\AiToolkit\AiRequest;
 
 it('holds an undecided thought in needs attention until it is answered, then offers its first step', function (): void {
     $provider = fakeAi()->respondWith(parsedCapture([
@@ -44,8 +46,10 @@ it('holds an undecided thought in needs attention until it is answered, then off
         ->post(route('intentions.clarification', $intention), ['answer' => 'Lisbon in March'])
         ->assertRedirect(route('home'));
 
-    expect($provider->received[1]->user)->toContain('They answered: Lisbon in March')
-        ->and(Capture::query()->sole()->intention_id)->toBe($intention->id)
+    $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::DecomposeIntention->value
+        && str_contains($request->user, 'They answered: Lisbon in March'));
+
+    expect(Capture::query()->sole()->intention_id)->toBe($intention->id)
         ->and(Intention::query()->count())->toBe(1);
 
     $this->actingAs($user)
