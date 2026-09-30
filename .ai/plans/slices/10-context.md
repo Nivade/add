@@ -338,7 +338,7 @@ day, and `model:prune` runs daily.
   *Check:* `npm run artisan -- route:list --path=whereabouts` shows both routes,
   and `npm run artisan -- test --compact tests/Feature/NextAction` passes.
 
-- [ ] **10. Shared copy.** Invoke skill: `generated-artifacts`. In
+- [x] **10. Shared copy.** Invoke skill: `generated-artifacts`. In
   `packages/shared/src/copy.ts`:
   - add `{ value: 'not_here', label: "I'm not in the right place for this" }`
     to `stuckReasons`, after `need_something`;
