@@ -146,12 +146,12 @@ day, and `model:prune` runs daily.
 
 ## Steps
 
-- [ ] **1. Orient.** Invoke skill: `slice-workflow`. Read the rule files listed
+- [x] **1. Orient.** Invoke skill: `slice-workflow`. Read the rule files listed
   under the spec line. Set this file's state to `building, <date>` and the
   spine's row to `building`. Branch `feature/slice-10-context`.
   *Check:* `npm run artisan -- test --compact tests/Feature/Guards` passes.
 
-- [ ] **2. `Place` on steps.** Invoke skills: `laravel-data`,
+- [x] **2. `Place` on steps.** Invoke skills: `laravel-data`,
   `laravel-attributes`, `generated-artifacts`.
   - Create `backend/app/Enums/Place.php`:
     - backed string enum with `#[TypeScript]`, cases `Home`, `Work`, `Out`,

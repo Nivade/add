@@ -125,6 +125,7 @@ export type OverwhelmedData = {
 smallestStep: NextActionData | null,
 restCount: number,
 };
+export type Place = 'home' | 'work' | 'out' | 'computer';
 export type PlanRung = 'find_things' | 'get_ready' | 'leave';
 export type PlanRungData = {
 rung: PlanRung,
@@ -156,6 +157,7 @@ estimatedSeconds: number | null,
 status: StepStatus,
 skipCount: number,
 generated: boolean,
+place: Place | null,
 };
 export type StepStatus = 'pending' | 'done' | 'skipped';
 export type StuckReason = 'dont_know_what_to_do' | 'too_big' | 'need_something' | 'not_enough_information' | 'tired' | 'dont_want_to' | 'something_else';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\Ai\ParsedStepData;
+use App\Enums\Place;
 use App\Enums\StepStatus;
 use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $title
  * @property int $position
  * @property int|null $estimated_seconds
+ * @property Place|null $place
  * @property StepStatus $status
  * @property int $skip_count
  * @property bool $generated
@@ -72,6 +74,7 @@ class Step extends Model
     {
         return [
             'status' => StepStatus::class,
+            'place' => Place::class,
             'generated' => 'boolean',
             'completed_at' => 'immutable_datetime',
             'last_skipped_at' => 'immutable_datetime',

@@ -89,7 +89,6 @@ it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     $planned = [
         'backend/app/Actions/Whereabouts/ReportNotHere.php',
-        'backend/app/Enums/Place.php',
         'backend/app/Http/Controllers/Api/V1/ReportNotHereController.php',
         'backend/app/Http/Controllers/Web/ReportNotHereController.php',
         'backend/app/Http/Requests/ReportNotHereRequest.php',
