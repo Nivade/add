@@ -20,6 +20,7 @@ final readonly class ResolutionContext
         public ?int $availableSeconds = null,
         public ?Appointment $appointment = null,
         public ?BackwardsPlanData $plan = null,
+        public Whereabouts $whereabouts = new Whereabouts,
     ) {}
 
     public static function forUser(User $user): self
@@ -28,7 +29,7 @@ final readonly class ResolutionContext
         $appointment = NextAppointment::forUser($user, $now);
         $plan = $appointment instanceof Appointment ? BackwardsPlan::for($appointment, $now) : null;
 
-        return new self($now, self::untilLeaving($plan, $now), $appointment, $plan);
+        return new self($now, self::untilLeaving($plan, $now), $appointment, $plan, Whereabouts::forUser($user, $now));
     }
 
     public function availableInWords(): ?string

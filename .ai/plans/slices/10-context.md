@@ -223,7 +223,7 @@ day, and `model:prune` runs daily.
   *Check:* `npm run artisan -- test --compact tests/Feature/Guards` passes,
   because `ConventionsTest` covers the new model.
 
-- [ ] **5. `Whereabouts`.** Invoke skills: `next-action-resolver`,
+- [x] **5. `Whereabouts`.** Invoke skills: `next-action-resolver`,
   `laravel-best-practices`.
   - Create `backend/app/Support/NextAction/Whereabouts.php`, a `final readonly`
     class with:
