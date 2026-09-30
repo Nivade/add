@@ -1,82 +1,4 @@
 <laravel-boost-guidelines>
-=== .ai/conventional-branches rules ===
-
-## Branch names
-
-This project follows [Conventional Branches](https://conventionalbranch.org), with the Conventional Commits
-types added as documented custom types. A husky `pre-push` hook checks the name; a CI job checks it again
-on the merge request or pull request, since `--no-verify` skips the hook.
-
-- Format: `type/description`, e.g. `feature/issue-123-new-login`. Ticket numbers are part of the description.
-- Trunk branches `main`, `master`, `develop` always pass, unchecked.
-- Spec types: `feature`, `feat`, `bugfix`, `fix`, `hotfix`, `release`, `chore`.
-- Commit types added as custom types: `refactor`, `docs`, `style`, `perf`, `test`, `build`, `ci`, `revert`.
-- Description: lower case `[a-z0-9]` segments joined by single hyphens, e.g. `new-login`. `release/` also
-  allows dots: `release/1.2.0`.
-- Rejected: underscores, uppercase, spaces, `--`, `.-`, a leading or trailing `-`/`.`, an empty description,
-  a nested `/`.
-- Deviation from the spec: no AI agent source prefixes — `ai/`, `claude/`, `codex/`, `copilot/`, `cursor/`
-  are all rejected. Pick a real type instead, e.g. `feature/add-search` rather than `claude/add-search`.
-- `.husky/branch-names` lists this project's own extra types and allowed patterns, if any — read it before
-  assuming a name is invalid; the FAQ requires custom types be documented there, not just used.
-- When the hook rejects a name, rename with `git branch -m <new-name>`. Never bypass it with `--no-verify`.
-
-### Bot and web-UI branches
-
-Only branches pushed from a clone hit the local hook; bot and web-UI branches reach CI only.
-
-- `dependabot/*` and `renovate/*` are allowed by default in CI.
-- A GitHub or GitLab web-UI branch (`<user>-patch-<n>`, `revert-<pr>-<branch>`, `<user>-<branch>-patch-<n>`,
-  `revert-<sha>`, `cherry-pick-<sha>`) is not allowed by default: rename it in the "Create a branch" or MR/PR
-  dialog before it reaches CI.
-- A GitLab issue branch (`<iid>-<title>`) is not allowed by default either: the fix is at the source — set
-  Settings > Repository > Branch defaults > Branch name template to `feature/%{id}-%{title}`, or add
-  `allow [0-9]*-*` to `.husky/branch-names` for branches created before that change.
-- GitHub issue branches (`<n>-<title>`) have no equivalent template setting: edit the name in the
-  "Create a branch" dialog instead.
-
-=== .ai/conventional-commits rules ===
-
-## Commit messages
-
-This project follows [Conventional Commits](https://www.conventionalcommits.org). A husky `commit-msg` hook runs
-commitlint with `@commitlint/config-conventional` and rejects anything else.
-
-- Header: `type(optional-scope): subject`, at most 100 characters.
-- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
-- Subject in the imperative, lower case start, no trailing period: `fix(auth): reject expired tokens`.
-- Breaking change: `!` before the colon (`feat(api)!: drop v1 routes`) and a `BREAKING CHANGE:` footer.
-- Blank line between header, body and footers; body and footer lines at most 100 characters.
-- When the hook rejects a message, fix the message. Never bypass it with `--no-verify`.
-
-=== .ai/devtools rules ===
-
-## Running the checks
-
-The Composer scripts are the entry points. Call them rather than the tools underneath, since they carry the flags
-this project relies on.
-
-- While working: `composer lint:dirty` formats only the files git sees as changed.
-- For a quick test run: `composer test:impact` runs just the tests the changes can affect.
-- Before pushing: `composer test`. It checks Pint, PHPStan and Rector, then runs the full suite: the same as CI.
-- `composer refactor` applies Rector's changes and `composer lint` formats everything. Both rewrite files, so read
-  the diff afterwards.
-- A Claude Code hook already runs Pint on each PHP file an agent edits, so formatting a single file by hand is
-  unnecessary.
-
-## Where the app runs
-
-With a `compose.yaml` in the app root, the app runs in Sail containers. Run PHP through Sail
-(`vendor/bin/sail artisan …`, `vendor/bin/sail composer …`): the host PHP cannot reach the database or the other
-services. Without one, use the host's `php` and `composer` directly.
-
-Behind Traefik, with `APP_SLUG` and `BASE_DOMAIN` taken from `.env`:
-
-- The app: `https://<APP_SLUG>.<BASE_DOMAIN>`
-- Mail the app sends is caught by Mailpit: `https://mailpit.<APP_SLUG>.<BASE_DOMAIN>`
-- If `compose.yaml` has a `laravel.debug` service, it serves `https://debug.<APP_SLUG>.<BASE_DOMAIN>`. Debugbar and
-  Telescope only run there, so inspect queries and requests on that host.
-
 === .ai/sloppy rules ===
 
 # Sloppy: code rules for this repository
@@ -496,5 +418,116 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 # Inertia + React
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
+
+=== nvade/devtools/bugsink rules ===
+
+## Bugsink is the error tracker, and its DSN host is not the browser's
+
+`bugsink.<APP_SLUG>.<BASE_DOMAIN>` serves the UI, reachable through Traefik. The
+DSN that page shows cannot be pasted into `.env` as-is: that host resolves to
+Traefik from outside Docker, but the app itself sits inside the `sail` network, where
+the container is addressed by its Compose service name instead. Rewrite the DSN's host
+to `bugsink:8000` before saving it:
+
+```
+SENTRY_LARAVEL_DSN=http://<key>@bugsink:8000/<project-id>
+```
+
+It speaks the Sentry SDK protocol, so `sentry/sentry-laravel` stays stock.
+
+An error is handed over by its friendly id, not by pasting a traceback in.
+`BUGSINK_API_TOKEN` in `.env` reads the issue and renders its latest stacktrace,
+source context and local variables as Markdown:
+
+```bash
+curl -sH "Authorization: Bearer $BUGSINK_API_TOKEN" -H 'Accept: text/markdown' \
+  "$BUGSINK_URL/api/canonical/0/events/<event-id>/stacktrace/"
+```
+
+The token is read-only (`issues:read`, `events:read`) and revocable from Bugsink's
+Tokens page. Local variables ride along in that output, so it carries whatever they
+held.
+
+=== nvade/devtools/conventional-branches rules ===
+
+## Branch names
+
+This project follows [Conventional Branches](https://conventionalbranch.org), with the Conventional Commits
+types added as documented custom types. A husky `pre-push` hook checks the name; a CI job checks it again
+on the merge request or pull request, since `--no-verify` skips the hook.
+
+- Format: `type/description`, e.g. `feature/issue-123-new-login`. Ticket numbers are part of the description.
+- Trunk branches `main`, `master`, `develop` always pass, unchecked.
+- Spec types: `feature`, `feat`, `bugfix`, `fix`, `hotfix`, `release`, `chore`.
+- Commit types added as custom types: `refactor`, `docs`, `style`, `perf`, `test`, `build`, `ci`, `revert`.
+- Description: lower case `[a-z0-9]` segments joined by single hyphens, e.g. `new-login`. `release/` also
+  allows dots: `release/1.2.0`.
+- Rejected: underscores, uppercase, spaces, `--`, `.-`, a leading or trailing `-`/`.`, an empty description,
+  a nested `/`.
+- Deviation from the spec: no AI agent source prefixes — `ai/`, `claude/`, `codex/`, `copilot/`, `cursor/`
+  are all rejected. Pick a real type instead, e.g. `feature/add-search` rather than `claude/add-search`.
+- `.husky/branch-names` lists this project's own extra types and allowed patterns, if any — read it before
+  assuming a name is invalid; the FAQ requires custom types be documented there, not just used.
+- When the hook rejects a name, rename with `git branch -m <new-name>`. Never bypass it with `--no-verify`.
+
+### Bot and web-UI branches
+
+Only branches pushed from a clone hit the local hook; a branch a bot or the web UI creates reaches CI only.
+
+- `dependabot/*` and `renovate/*` are allowed by default in CI.
+- A fix-up pushed from a clone onto a bot branch the remote already has passes the local hook; a new bot
+  branch made by hand doesn't.
+- A GitHub or GitLab web-UI branch (`<user>-patch-<n>`, `revert-<pr>-<branch>`, `<user>-<branch>-patch-<n>`,
+  `revert-<sha>`, `cherry-pick-<sha>`) is not allowed by default: rename it in the "Create a branch" or MR/PR
+  dialog before it reaches CI.
+- A GitLab issue branch (`<iid>-<title>`) is not allowed by default either: the fix is at the source — set
+  Settings > Repository > Branch defaults > Branch name template to `feature/%{id}-%{title}`, or add
+  `allow [0-9]*-*` to `.husky/branch-names` for branches created before that change.
+- GitHub issue branches (`<n>-<title>`) have no equivalent template setting: edit the name in the
+  "Create a branch" dialog instead.
+
+=== nvade/devtools/conventional-commits rules ===
+
+## Commit messages
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org). A husky `commit-msg` hook runs
+commitlint with `@commitlint/config-conventional` and rejects anything else.
+
+- Header: `type(optional-scope): subject`, at most 100 characters.
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- Subject in the imperative, lower case start, no trailing period: `fix(auth): reject expired tokens`.
+- Breaking change: `!` before the colon (`feat(api)!: drop v1 routes`) and a `BREAKING CHANGE:` footer.
+- Blank line between header, body and footers; body and footer lines at most 100 characters.
+- When the hook rejects a message, fix the message. Never bypass it with `--no-verify`.
+
+=== nvade/devtools/devtools rules ===
+
+## Running the checks
+
+The composer scripts are the entry points. Call them rather than the tools underneath, since they carry the flags
+this project relies on.
+
+- While working: `composer lint:dirty` formats only the files git sees as changed.
+- For a quick test run: `composer test:impact` runs just the tests the changes can affect.
+- Before pushing: `composer test`. It checks Pint, PHPStan, Rector and the Composer dependencies, then runs the full
+  suite: the same as CI.
+- `composer deps:check` fails on a package the code uses without requiring it: require it rather than ignoring it.
+- `composer refactor` applies Rector's changes and `composer lint` formats everything. Both rewrite files, so read
+  the diff afterwards.
+- A Claude Code hook already runs Pint on each PHP file an agent edits, so formatting a single file by hand is
+  unnecessary.
+
+## Where the app runs
+
+With a `compose.yaml` in the app root, the app runs in Sail containers. Run PHP through Sail
+(`vendor/bin/sail artisan …`, `vendor/bin/sail composer …`): the host PHP cannot reach the database or the other
+services. Without one, use the host's `php` and `composer` directly.
+
+Behind Traefik, with `APP_SLUG` and `BASE_DOMAIN` taken from `.env`:
+
+- The app: `https://<APP_SLUG>.<BASE_DOMAIN>`
+- Mail the app sends is caught by Mailpit: `https://mailpit.<APP_SLUG>.<BASE_DOMAIN>`
+- If `compose.yaml` has a `laravel.debug` service, it serves `https://debug.<APP_SLUG>.<BASE_DOMAIN>`. Debugbar and
+  Telescope only run there, so inspect queries and requests on that host.
 
 </laravel-boost-guidelines>
