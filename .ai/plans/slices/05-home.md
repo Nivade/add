@@ -7,6 +7,8 @@
 
 ## The visual direction, and why it is not the starter kit's
 
+Superseded 2026-09-30 by the visual identity in the UX overhaul plan.
+
 Chosen against eight alternatives, and it binds every screen built after this
 one.
 

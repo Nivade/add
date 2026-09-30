@@ -203,7 +203,7 @@ desktop                                          phone
   - `backend/resources/js/pages/auth/register.tsx`: description "It takes a minute. Nothing else is asked of you."
   - `backend/resources/js/layouts/settings/layout.tsx`: heading "Settings" with no description; the nav is text links, the current one ink weight 600 with `aria-current="page"`.
   - Check: `npm run test:browser` passes; screenshots of `/`, `/login`, `/settings/profile` in both themes.
-- [ ] **2.6 Slice 5 points here.** Add one line under slice 5's "The visual direction" heading in [`slices/05-home.md`](slices/05-home.md): "Superseded 2026-09-30 by the visual identity in the UX overhaul plan."
+- [x] **2.6 Slice 5 points here.** Add one line under slice 5's "The visual direction" heading in [`slices/05-home.md`](slices/05-home.md): "Superseded 2026-09-30 by the visual identity in the UX overhaul plan."
   - Check: `npm run artisan -- test --compact tests/Feature/Guards/DocumentationTest.php` passes.
 - [ ] **2.7 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
 
