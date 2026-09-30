@@ -249,7 +249,7 @@ gone on the next render, and that absence is the whole confirmation.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/Execution` passes.
 
-- [ ] **4. `check_ins`.** Invoke skills: `laravel-attributes`, `laravel-data`,
+- [x] **4. `check_ins`.** Invoke skills: `laravel-attributes`, `laravel-data`,
   `generated-artifacts`.
   - Create `backend/app/Enums/CheckInTopic.php`: a backed string enum with
     `#[TypeScript]`, cases `Overwhelm = 'overwhelm'` and

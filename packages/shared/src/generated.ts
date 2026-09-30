@@ -20,6 +20,8 @@ intentionId: string | null,
 createdAt: string,
 };
 export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 'url';
+export type CheckInAnswer = 'less' | 'same' | 'more' | 'not_now';
+export type CheckInTopic = 'overwhelm' | 'remembering';
 export type ComingUpData = {
 kind: AppointmentKind,
 id: string,

@@ -64,6 +64,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    /** @return HasMany<CheckIn, $this> */
+    public function checkIns(): HasMany
+    {
+        return $this->hasMany(CheckIn::class);
+    }
+
     /** @return HasMany<NotHereReport, $this> */
     public function notHereReports(): HasMany
     {
