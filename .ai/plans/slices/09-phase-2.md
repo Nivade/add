@@ -19,6 +19,8 @@ Ingestion is last because it is where the privacy surface grows fastest (risk
 
 ## The capture question, settled
 
+Reversed 2026-09-30 by the UX overhaul plan: the model sorts, the read-back marks it inferred, and one tap changes it.
+
 Captures stay intention-only. `ParseCaptureSchema` does not grow a `kind`
 field, and `ConvertCaptureToIntention` does not branch. Classifying a sentence
 as an intention, a waiting-for, or a commitment automatically is itself a form

@@ -45,8 +45,8 @@ not use-cases themselves.
 ## Immutability
 
 `captures` have `created_at` only — `public const ?string UPDATED_AT = null`. A
-capture is raw input and is never edited; conversion writes an intention and
-leaves the capture alone.
+capture's body is raw input and is never edited; sorting writes its routing
+columns once, and changing the kind rewrites them.
 
 `check_ins` are immutable and kept until the account goes: they are the
 person's own answers and the metric.
