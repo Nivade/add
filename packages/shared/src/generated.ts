@@ -152,7 +152,6 @@ appointmentTitle: string | null,
 export type RailMarkData = {
 rung: PlanRung | null,
 minute: number,
-clock: string,
 };
 export type ReminderData = {
 id: string,

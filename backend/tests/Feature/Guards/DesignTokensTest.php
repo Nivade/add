@@ -171,6 +171,31 @@ it('declares every role of the type scale in the stylesheet at the size the shar
     }
 });
 
+it('paints the page before the stylesheet loads with the paper of both themes, and nothing else', function (): void {
+    $blade = (string) file_get_contents(resource_path('views/app.blade.php'));
+
+    preg_match_all('/#[0-9A-Fa-f]{6}\b/', $blade, $hexes);
+
+    expect(array_values(array_unique(array_map(strtoupper(...), $hexes[0]))))
+        ->toEqualCanonicalizing([designTokenColors('light')['paper'], designTokenColors('dark')['paper']]);
+});
+
+it('declares every radius in the stylesheet at the size the shared tokens give it', function (): void {
+    $source = (string) file_get_contents(repoPath('packages/shared/src/tokens.ts'));
+    $css = (string) file_get_contents(base_path('resources/css/app.css'));
+
+    preg_match('/export const radius = \{(.*?)\} as const;/', $source, $block);
+    preg_match_all('/(\w+): (\d+)/', $block[1] ?? '', $radii, PREG_SET_ORDER);
+
+    expect($radii)->toHaveCount(3);
+
+    foreach ($radii as [, $name, $pixels]) {
+        preg_match('/--radius-'.$name.':\s*([^;]+);/', $css, $value);
+
+        expect($value[1] ?? null)->toBe(designTokenRem((int) $pixels), "--radius-{$name}");
+    }
+});
+
 it('keeps shouting labels and pixel type sizes out of the web components', function (): void {
     $root = base_path('resources/js');
     $skipped = ['components/ui/', 'actions/', 'routes/', 'wayfinder/'];

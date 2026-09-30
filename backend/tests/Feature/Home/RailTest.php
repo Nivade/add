@@ -42,10 +42,10 @@ it('marks every rung of the plan and the appointment itself', function (): void 
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('rail.marks', [
-                ['rung' => 'find_things', 'minute' => 13 * 60 + 15, 'clock' => '13:15'],
-                ['rung' => 'get_ready', 'minute' => 13 * 60 + 20, 'clock' => '13:20'],
-                ['rung' => 'leave', 'minute' => 13 * 60 + 30, 'clock' => '13:30'],
-                ['rung' => null, 'minute' => 14 * 60, 'clock' => '14:00'],
+                ['rung' => 'find_things', 'minute' => 13 * 60 + 15],
+                ['rung' => 'get_ready', 'minute' => 13 * 60 + 20],
+                ['rung' => 'leave', 'minute' => 13 * 60 + 30],
+                ['rung' => null, 'minute' => 14 * 60],
             ])
             ->where('rail.appointmentTitle', 'Dentist')
         );
@@ -69,8 +69,8 @@ it('leaves a rung that falls before midnight off the strip', function (): void {
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('rail.marks', [
-                ['rung' => 'leave', 'minute' => 5, 'clock' => '00:05'],
-                ['rung' => null, 'minute' => 35, 'clock' => '00:35'],
+                ['rung' => 'leave', 'minute' => 5],
+                ['rung' => null, 'minute' => 35],
             ])
         );
 });

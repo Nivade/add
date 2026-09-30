@@ -1,10 +1,10 @@
 import { Form } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { RouteFormDefinition } from '@/wayfinder';
 
 /** A quiet line: off the one-tap path, and never competing with Start or Done. */
-export const quietLineClassName =
-    'text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center text-left underline-offset-4 hover:underline';
+export const quietLineClassName = cn(buttonVariants({ variant: 'quiet' }));
 
 /** Every answer posts to the same route and weighs the same: one row of equal buttons. */
 export function Responses({

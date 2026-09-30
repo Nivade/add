@@ -15,6 +15,5 @@ class RailMarkData extends Data
     public function __construct(
         public ?PlanRung $rung,
         public int $minute,
-        public string $clock,
     ) {}
 }

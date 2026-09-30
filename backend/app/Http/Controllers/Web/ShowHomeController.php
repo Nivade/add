@@ -8,6 +8,7 @@ use App\Actions\Home\BuildHome;
 use App\Actions\Home\BuildRail;
 use App\Data\RailData;
 use App\Http\Controllers\Controller;
+use App\Support\NextAction\ResolutionContext;
 use Illuminate\Http\Request;
 use Inertia\Response;
 
@@ -16,12 +17,13 @@ final class ShowHomeController extends Controller
     public function __invoke(Request $request): Response
     {
         $user = $this->user($request);
-        $home = BuildHome::run($user);
+        $context = ResolutionContext::forUser($user);
+        $home = BuildHome::run($user, $context);
 
         return inertia('home', [
             'home' => $home,
             // Overrides the shared strip, so the step on offer is drawn from now to when it would be done.
-            'rail' => fn (): RailData => BuildRail::run($user, stepSeconds: $home->startableStepSeconds()),
+            'rail' => fn (): RailData => BuildRail::run($user, $context, $home->startableStepSeconds()),
         ]);
     }
 }

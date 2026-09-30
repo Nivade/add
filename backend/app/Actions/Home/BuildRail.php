@@ -53,12 +53,12 @@ final class BuildRail
             $local = $rung->instant()->setTimezone($context->now->getTimezone());
 
             if ($local->isSameDay($context->now)) {
-                $marks[] = new RailMarkData($rung->rung, $this->minuteOf($local), $rung->clock);
+                $marks[] = new RailMarkData($rung->rung, $this->minuteOf($local));
             }
         }
 
         // A plan only exists for an appointment today, so the appointment itself always has a mark.
-        $marks[] = new RailMarkData(null, $this->minuteOf($at->setTimezone($context->now->getTimezone())), $plan->deadlineClock);
+        $marks[] = new RailMarkData(null, $this->minuteOf($at->setTimezone($context->now->getTimezone())));
 
         return $marks;
     }

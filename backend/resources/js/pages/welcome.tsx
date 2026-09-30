@@ -1,5 +1,11 @@
 import type { RailData } from '@add/shared';
-import { clockOf, doneMinute, focusCopy, homeBands } from '@add/shared';
+import {
+    clockOf,
+    doneMinute,
+    focusCopy,
+    formatEstimate,
+    homeBands,
+} from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
 import { Button } from '@/components/ui/button';
@@ -24,7 +30,7 @@ function SampleHome() {
         <figure className="flex flex-col gap-3">
             <div
                 inert
-                className="bg-paper flex flex-col overflow-hidden rounded-2xl border sm:h-80 sm:flex-row"
+                className="bg-paper rounded-panel flex flex-col overflow-hidden border sm:h-80 sm:flex-row"
             >
                 <div aria-hidden="true" className="shrink-0 sm:w-30 sm:py-4">
                     <DayStrip
@@ -45,8 +51,8 @@ function SampleHome() {
                         Put the laundry in the washing machine.
                     </p>
                     <p className="text-muted-foreground">
-                        About 3 minutes, so done around {sampleDoneAt} if you
-                        start now.
+                        About {formatEstimate(sampleRail.stepSeconds)}, so done
+                        around {sampleDoneAt} if you start now.
                     </p>
                     <Button
                         variant="now"

@@ -18,6 +18,10 @@
     /* The one reading column: shell, overwhelmed and anything else that holds a single thread. */
     --container-content: 40rem;
 
+    --radius-control: 0.75rem;
+    --radius-field: 0.5rem;
+    --radius-panel: 1rem;
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -63,7 +67,6 @@
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
 
-    --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
 
     --color-accent: var(--accent);

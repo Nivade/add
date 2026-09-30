@@ -44,9 +44,9 @@ final class BuildHome
         private readonly CountOpenThings $countOpenThings,
     ) {}
 
-    public function handle(User $user): HomeData
+    public function handle(User $user, ?ResolutionContext $context = null): HomeData
     {
-        $context = ResolutionContext::forUser($user);
+        $context ??= ResolutionContext::forUser($user);
         $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
         $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->first(fn (Commitment $commitment): bool => $commitment->isStandalone()));
         $rightNow = $this->resolver->resolve($user, $context);

@@ -1,7 +1,9 @@
 import type { BackwardsPlanData } from '@add/shared';
 import { planRungLabels, rungMinutesLabel, rungMinutesNote } from '@add/shared';
 import { Form } from '@inertiajs/react';
+import { captureFieldClassName } from '@/components/capture-dialog';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import calendarEvents from '@/routes/calendar-events';
 import intentions from '@/routes/intentions';
 
@@ -38,7 +40,10 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                             min={0}
                             max={1440}
                             defaultValue={Math.round(rung.seconds / 60)}
-                            className="border-field focus-visible:ring-ring bg-surface h-11 w-16 rounded-lg border px-2 text-right font-mono tabular-nums focus-visible:ring-2 focus-visible:outline-none"
+                            className={cn(
+                                captureFieldClassName,
+                                'w-16 px-2 text-right font-mono tabular-nums',
+                            )}
                         />
                         <span className="text-small w-20">
                             {rungMinutesNote(rung.assumed)}

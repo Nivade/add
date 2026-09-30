@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
+import { quietLineClassName } from '@/components/responses';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import { edit as editAi } from '@/routes/ai';
@@ -13,27 +14,22 @@ const settingsNavItems: NavItem[] = [
     {
         title: 'Profile',
         href: edit(),
-        icon: null,
     },
     {
         title: 'Security',
         href: editSecurity(),
-        icon: null,
     },
     {
         title: 'Calendar',
         href: editCalendar(),
-        icon: null,
     },
     {
         title: 'AI',
         href: editAi(),
-        icon: null,
     },
     {
         title: 'Appearance',
         href: editAppearance(),
-        icon: null,
     },
 ];
 
@@ -55,10 +51,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 href={item.href}
                                 aria-current={current ? 'page' : undefined}
                                 className={cn(
-                                    'inline-flex min-h-11 items-center underline-offset-4 hover:underline',
-                                    current
-                                        ? 'text-ink font-semibold'
-                                        : 'text-muted-foreground',
+                                    quietLineClassName,
+                                    current && 'text-ink font-semibold',
                                 )}
                             >
                                 {item.title}

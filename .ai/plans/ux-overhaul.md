@@ -192,7 +192,7 @@ desktop                                          phone
   - `backend/resources/js/components/band.tsx`: no rule; an `h2` in the band-heading style; labels become questions: "Why this one?", "What's coming up", "Needs you", "Before you go", "Sorted for you", "A question for you" (the check-in).
   - `backend/resources/js/components/ui/button.tsx`: `default` is outlined ink, and a `now` variant, the filled `now` style, is used by Start and Continue alone; a `quiet` variant is the text button; add `size: 'action'` (3.5rem) and `size: 'control'` (4rem); outline uses `border-field`; every size at least 2.75rem.
   - `backend/resources/js/components/responses.tsx`: `quietButtonClassName` and `quietLineClassName` become body-size text buttons, `min-h-11`, no mono, no uppercase.
-  - `git mv backend/resources/js/components/rail.tsx backend/resources/js/components/day-strip.tsx`, export `DayStrip`, and draw it as specified above. `RailData` gains `?int $stepSeconds` and `list<RailMarkData> $marks`, replacing `leaveByMinute`/`leaveByClock`; new Data `RailMarkData(?PlanRung $rung, int $minute, string $clock)` in `backend/app/Data/RailMarkData.php`, where a null rung is the appointment itself. `BuildRail::handle(User $user, ?ResolutionContext $context = null, ?int $stepSeconds = null)` fills them; `ShowHomeController` passes the right-now step's estimate as the page prop `rail`, which overrides the shared one. Shared `railSummary(rail): string` in `packages/shared/src/copy.ts`.
+  - `git mv backend/resources/js/components/rail.tsx backend/resources/js/components/day-strip.tsx`, export `DayStrip`, and draw it as specified above. `RailData` gains `?int $stepSeconds` and `list<RailMarkData> $marks`, replacing `leaveByMinute`/`leaveByClock`; new Data `RailMarkData(?PlanRung $rung, int $minute)` in `backend/app/Data/RailMarkData.php`, where a null rung is the appointment itself. `BuildRail::handle(User $user, ?ResolutionContext $context = null, ?int $stepSeconds = null)` fills them; `ShowHomeController` passes the right-now step's estimate as the page prop `rail`, which overrides the shared one. Shared `railSummary(rail): string` in `packages/shared/src/copy.ts`.
   - `backend/resources/js/layouts/shell.tsx`: new layout per the wireframe; the strip is horizontal under `sm`.
   - New `backend/resources/js/components/wordmark.tsx` ("add", weight 700, links home); the app logo and its icon component are deleted, and the three auth layouts use the wordmark.
   - Every `text-[11px]`/`text-[13px]`/`font-mono`/`uppercase`/`tracking-[...]` under `backend/resources/js` outside `components/ui/` goes; mono stays only on clocks, durations and counts.
@@ -206,7 +206,7 @@ desktop                                          phone
   - Check: `npm run test:browser` passes; screenshots of `/`, `/login`, `/settings/profile` in both themes.
 - [x] **2.6 Slice 5 points here.** Add one line under slice 5's "The visual direction" heading in [`slices/05-home.md`](slices/05-home.md): "Superseded 2026-09-30 by the visual identity in the UX overhaul plan."
   - Check: `npm run artisan -- test --compact tests/Feature/Guards/DocumentationTest.php` passes.
-- [ ] **2.7 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
+- [x] **2.7 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
 
 ## Phase 3 — one capture box (`feature/unified-capture`)
 

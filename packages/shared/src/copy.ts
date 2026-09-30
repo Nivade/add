@@ -64,7 +64,7 @@ export function railMarkLabel(mark: RailMarkData, appointmentTitle: string | nul
 }
 
 /** Everything the strip draws, said once for a screen reader. */
-export function railSummary(rail: RailData, nowMinute: number = rail.nowMinute): string {
+export function railSummary(rail: RailData, nowMinute: number): string {
     const sentences = [`It is ${clockOf(nowMinute)}.`];
 
     if (rail.sessionStartedMinute !== null) {
@@ -79,12 +79,12 @@ export function railSummary(rail: RailData, nowMinute: number = rail.nowMinute):
     const appointment = rail.marks.find((mark) => mark.rung === null);
 
     if (rungs.length > 0) {
-        const said = rungs.map((mark) => `${railMarkLabel(mark, null)} at ${mark.clock}`).join(', ');
+        const said = rungs.map((mark) => `${railMarkLabel(mark, null)} at ${clockOf(mark.minute)}`).join(', ');
         sentences.push(`${said.charAt(0).toUpperCase()}${said.slice(1)}.`);
     }
 
     if (appointment && rail.appointmentTitle !== null) {
-        sentences.push(`${rail.appointmentTitle} is at ${appointment.clock}.`);
+        sentences.push(`${rail.appointmentTitle} is at ${clockOf(appointment.minute)}.`);
     }
 
     return sentences.join(' ');

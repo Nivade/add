@@ -212,7 +212,7 @@ function Column(drawing: Drawing) {
                         >
                             {railMarkLabel(mark, rail.appointmentTitle)}{' '}
                             <span className="font-mono tabular-nums">
-                                {mark.clock}
+                                {clockOf(mark.minute)}
                             </span>
                         </p>
                     ))}

@@ -33,7 +33,7 @@ export default function Ai({ consented }: { consented: boolean }) {
                             <p className="text-small">{consent.line}</p>
 
                             <Button
-                                variant={consented ? 'secondary' : 'default'}
+                                variant={consented ? 'secondary' : 'outline'}
                                 disabled={processing}
                                 data-test="ai-consent-button"
                             >
