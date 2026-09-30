@@ -9,6 +9,7 @@ arch()->preset()->security();
 
 // tests/Pest.php: the framework's own preset minus a rule its ->ignoring() cannot reach.
 arch()->preset()->laravelMinusAttributes()->ignoring([
+    'App\Http\Requests\Concerns',
     'App\Notifications\Channels',
     'App\Support\Calendar\Exceptions',
 ]);
