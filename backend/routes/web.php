@@ -5,8 +5,10 @@ declare(strict_types=1);
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\ClassifyPastedTextController;
 use App\Http\Controllers\Web\AdjustPlanController;
+use App\Http\Controllers\Web\ChangeCaptureKindController;
 use App\Http\Controllers\Web\ClarifyIntentionController;
 use App\Http\Controllers\Web\CompleteStepController;
+use App\Http\Controllers\Web\ConfirmCaptureKindController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
 use App\Http\Controllers\Web\DismissReminderController;
 use App\Http\Controllers\Web\PauseFocusController;
@@ -41,6 +43,8 @@ Route::get('/', ShowWelcomeController::class)->name('welcome');
 Route::middleware(['auth', 'verified', RecordTimezone::class])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
+    Route::post('captures/{capture}/kind', ChangeCaptureKindController::class)->name('captures.kind');
+    Route::post('captures/{capture}/confirm', ConfirmCaptureKindController::class)->name('captures.confirm');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');
     Route::post('reminders/{notification}/dismiss', DismissReminderController::class)->name('reminders.dismiss');
     Route::post('intentions/{appointment}/plan', AdjustPlanController::class)

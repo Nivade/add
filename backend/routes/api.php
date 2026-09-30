@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\AppointmentKind;
 use App\Http\Controllers\Api\V1\AdjustPlanController;
+use App\Http\Controllers\Api\V1\ChangeCaptureKindController;
 use App\Http\Controllers\Api\V1\ClarifyIntentionController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
+use App\Http\Controllers\Api\V1\ConfirmCaptureKindController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
@@ -57,6 +59,8 @@ Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('
     Route::get('home', ShowHomeController::class)->name('home.show');
     Route::get('appointments/{kind}/{id}', ShowAppointmentController::class)->name('appointments.show');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
+    Route::post('captures/{capture}/kind', ChangeCaptureKindController::class)->name('captures.kind');
+    Route::post('captures/{capture}/confirm', ConfirmCaptureKindController::class)->name('captures.confirm');
     Route::post('reminders/{notification}/dismiss', DismissReminderController::class)->name('reminders.dismiss');
     Route::get('next-action', ShowNextActionController::class)->name('next-action.show');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed.show');

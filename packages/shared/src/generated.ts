@@ -17,6 +17,8 @@ id: string,
 body: string,
 source: CaptureSource,
 intentionId: string | null,
+kind: CaptureKind | null,
+kindConfirmedAt: string | null,
 createdAt: string,
 };
 export type CaptureKind = 'thought' | 'waiting_for' | 'promise' | 'reminder' | 'not_for_you';
