@@ -11,6 +11,8 @@ use App\Data\StepData;
 use App\Models\User;
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
+use App\Support\NextAction\Comparators\FitsWhereYouAre;
+use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\NextAction\SmallestFirst;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -35,20 +37,27 @@ final class ReduceToOneStep
             new NextActionData(
                 StepData::from($smallest->step),
                 IntentionData::from($smallest->intention),
-                $this->why($smallest, count($candidates) - 1, $context),
+                $this->why($smallest, array_slice($candidates, 1), $context),
             ),
             count($candidates) - 1,
         );
     }
 
-    /** @return list<string> */
-    private function why(Candidate $candidate, int $restCount, ResolutionContext $context): array
+    /**
+     * @param  list<Candidate>  $rest
+     * @return list<string>
+     */
+    private function why(Candidate $candidate, array $rest, ResolutionContext $context): array
     {
         $estimate = $candidate->estimateInWords();
 
         $why = [
             $estimate === null ? 'Nobody has estimated this one.' : "This takes about {$estimate}.",
-            $restCount === 0 ? 'It is the only thing left.' : 'Nothing else left is shorter.',
+            match (true) {
+                $rest === [] => 'It is the only thing left.',
+                $this->placeKeptShorterBack($candidate, $rest, $context) => 'Nothing shorter can be done where you seem to be.',
+                default => 'Nothing else left is shorter.',
+            },
         ];
 
         $available = $context->availableInWords();
@@ -58,5 +67,20 @@ final class ReduceToOneStep
         }
 
         return $why;
+    }
+
+    /** @param  list<Candidate>  $rest */
+    private function placeKeptShorterBack(Candidate $candidate, array $rest, ResolutionContext $context): bool
+    {
+        if (! $context->whereabouts->isKnown()) {
+            return false;
+        }
+
+        $coolOff = new NotRecentlySkipped;
+        $fit = new FitsWhereYouAre;
+
+        return array_any($rest, fn (Candidate $other): bool => $other->cost() < $candidate->cost()
+            && $coolOff->compare($candidate, $other, $context) === 0
+            && $fit->compare($candidate, $other, $context) < 0);
     }
 }

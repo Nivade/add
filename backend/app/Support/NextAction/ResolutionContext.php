@@ -20,9 +20,18 @@ final readonly class ResolutionContext
         public ?int $availableSeconds = null,
         public ?Appointment $appointment = null,
         public ?BackwardsPlanData $plan = null,
+        public Whereabouts $whereabouts = new Whereabouts,
     ) {}
 
     public static function forUser(User $user): self
+    {
+        $clock = self::onTheClock($user);
+
+        return new self($clock->now, $clock->availableSeconds, $clock->appointment, $clock->plan, Whereabouts::forUser($user, $clock->now));
+    }
+
+    /** The day without where the person is, for what draws time and never ranks a step. */
+    public static function onTheClock(User $user): self
     {
         $now = $user->now();
         $appointment = NextAppointment::forUser($user, $now);

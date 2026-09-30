@@ -9,7 +9,7 @@ final class Prompts
 {
     public const string PARSE_CAPTURE_VERSION = '3';
 
-    public const string DECOMPOSE_VERSION = '1';
+    public const string DECOMPOSE_VERSION = '2';
 
     public const string SPLIT_STEP_VERSION = '1';
 
@@ -45,13 +45,14 @@ final class Prompts
         - Never write a step containing "and", "organise", "sort out", "deal with", "figure out" or "plan".
         - Six steps at most. Fewer is better. They will see exactly one of them at a time.
         - Do not add steps for tidying up, celebrating, or reviewing the work.
+        - Set place only when the step cannot be done anywhere else; most steps are null.
 
         Example, "Clean the kitchen":
-        1. Grab a bin bag. (30s)
-        2. Put the obvious rubbish in the bag. (300s)
-        3. Move every dirty dish to one side of the sink. (180s)
-        4. Fill the dishwasher. (300s)
-        5. Wipe one worktop. (120s)
+        1. Grab a bin bag. (30s, home)
+        2. Put the obvious rubbish in the bag. (300s, home)
+        3. Move every dirty dish to one side of the sink. (180s, home)
+        4. Fill the dishwasher. (300s, home)
+        5. Wipe one worktop. (120s, home)
         PROMPT;
 
     public const string SPLIT_STEP = <<<'PROMPT'

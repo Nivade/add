@@ -1,5 +1,6 @@
 import { commitmentCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
+import { quietLineClassName } from '@/components/responses';
 import type { RouteFormDefinition } from '@/wayfinder';
 
 /** Off the one-tap path on purpose: a quiet line, never a button that competes with Start or Done. */
@@ -18,10 +19,7 @@ export function SaidIdDoThis({
 
     return (
         <Form {...form} options={{ preserveScroll: true }}>
-            <button
-                type="submit"
-                className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
-            >
+            <button type="submit" className={quietLineClassName}>
                 {commitmentCopy.promise}
             </button>
         </Form>

@@ -15,17 +15,12 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 9 is done** — see [`09-phase-2.md`](plans/slices/09-phase-2.md) for
-what each phase built. Phase 5 (solo body doubling) closed with no code:
-execution mode (slice 4) already answers §17's solo requirement. Slice 10
-(Phase 3) is recorded only, not planned — it carries §17's Friend mode, the
-`Context` model, and §19's real ingestion sources (email, documents, receipts,
-bank/gov correspondence), none of which any built slice claims. The hardening
-pass over slices 1–6 is finished — [`hardening.md`](plans/hardening.md) carries
-what it settled and what it deliberately left open. The custom-attributes pass
-is finished too — [`custom-attributes.md`](plans/custom-attributes.md) carries
-what it settled and its one open question. Triage [`findings.md`](findings.md)
-before planning slice 10.
+**Slice 10 is done.** Slice 11 (measuring it)
+is next and has no file in `.ai/plans/slices/` yet: design it first with
+`slice-workflow`. Slices 12–14 have no files either. The Open section of
+[`10-context.md`](plans/slices/10-context.md) carries what slice 10 left:
+`place` cannot be corrected on a step, and the eval corpus scores no
+`expected_place`. Triage `findings.md` before planning slice 11.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera

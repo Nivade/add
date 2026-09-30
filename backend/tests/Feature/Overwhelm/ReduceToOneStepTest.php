@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Overwhelm\ReduceToOneStep;
 use App\Actions\Steps\SkipStep;
 use App\Data\OverwhelmedData;
+use App\Enums\Place;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
@@ -88,4 +89,46 @@ it('leaves work that belongs to somebody else alone', function (): void {
     Step::factory()->for($stranger)->create(['position' => 1, 'estimated_seconds' => 60]);
 
     expect(overwhelmed($user)->smallestStep)->toBeNull();
+});
+
+function overwhelmedWhereYouAre(User $user): OverwhelmedData
+{
+    return ReduceToOneStep::run($user, ResolutionContext::forUser($user));
+}
+
+it('offers the smallest thing that can be done where the person seems to be, and says why', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    $errands = Intention::factory()->decomposed()->for($user)->create();
+    Step::factory()->for($errands)->create(['title' => 'Buy bin bags.', 'position' => 1, 'place' => Place::Out, 'estimated_seconds' => 60]);
+
+    $kitchen = Intention::factory()->decomposed()->for($user)->create();
+    Step::factory()->for($kitchen)->create(['title' => 'Wipe one worktop.', 'position' => 1, 'place' => Place::Home, 'estimated_seconds' => 120]);
+
+    finishStepAt($user, Place::Home);
+
+    $answer = overwhelmedWhereYouAre($user);
+
+    expect($answer->smallestStep?->step->title)->toBe('Wipe one worktop.')
+        ->and($answer->smallestStep?->why)->toBe([
+            'This takes about 2 minutes.',
+            'Nothing shorter can be done where you seem to be.',
+        ]);
+});
+
+it('keeps saying nothing is shorter when place held nothing shorter back', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    $kitchen = Intention::factory()->decomposed()->for($user)->create();
+    Step::factory()->for($kitchen)->create(['title' => 'Wipe one worktop.', 'position' => 1, 'place' => Place::Home, 'estimated_seconds' => 120]);
+    Step::factory()->for($kitchen)->create(['title' => 'Buy bin bags.', 'position' => 2, 'place' => Place::Out, 'estimated_seconds' => 600]);
+
+    finishStepAt($user, Place::Home);
+
+    expect(overwhelmedWhereYouAre($user)->smallestStep?->why)->toBe([
+        'This takes about 2 minutes.',
+        'Nothing else left is shorter.',
+    ]);
 });

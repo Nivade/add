@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\NextAction;
 
+use App\Enums\Place;
+
 /** The first rung that separates two candidates decides; the ones below never override it. */
 abstract class Rung
 {
@@ -11,6 +13,12 @@ abstract class Rung
 
     /** Stated when this rung is what separated the winner from the runner-up. */
     public function decides(Candidate $candidate, ResolutionContext $context): ?string
+    {
+        return null;
+    }
+
+    /** A guess this rung's line states about the person, which they can take back. */
+    public function assumes(Candidate $candidate, ResolutionContext $context): ?Place
     {
         return null;
     }

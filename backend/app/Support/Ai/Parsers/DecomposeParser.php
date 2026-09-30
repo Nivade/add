@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Ai\Parsers;
 
 use App\Data\Ai\ParsedStepData;
+use App\Enums\Place;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 
 /** Bad structure is rejected, weak quality only reported: a flawed plan beats no plan. */
@@ -98,7 +99,17 @@ final class DecomposeParser
             throw new AiResponseInvalid('decompose_intention step '.$position.' estimates zero seconds.');
         }
 
-        return new ParsedStepData(title: trim($title), estimatedSeconds: (int) $seconds);
+        return new ParsedStepData(title: trim($title), estimatedSeconds: (int) $seconds, place: $this->place($row['place'] ?? null, $position));
+    }
+
+    private function place(mixed $place, int $position): ?Place
+    {
+        if ($place === null) {
+            return null;
+        }
+
+        return (is_string($place) ? Place::tryFrom($place) : null)
+            ?? throw new AiResponseInvalid('decompose_intention step '.$position.' has an unknown place.');
     }
 
     private function opensWithAnInstruction(string $title): bool

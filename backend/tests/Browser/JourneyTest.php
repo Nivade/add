@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Place;
+use App\Models\Intention;
+use App\Models\Step;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -94,5 +97,30 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     $page->keys('Done', 'Enter');
     $page->assertPathIs('/home')
         ->assertSee('Nothing needs you right now.')
+        ->assertNoJavaScriptErrors();
+});
+
+it('takes back a guess about where the person is in one tap', function (): void {
+    $user = User::factory()->create();
+
+    $errands = Intention::factory()->decomposed()->for($user)->create(['title' => 'Run the errands']);
+    Step::factory()->for($errands)->create(['title' => 'Buy bin bags.', 'position' => 1, 'place' => Place::Out, 'estimated_seconds' => 60]);
+
+    $kitchen = Intention::factory()->decomposed()->for($user)->create(['title' => 'Clean the kitchen']);
+    Step::factory()->for($kitchen)->create(['title' => 'Wipe one worktop.', 'position' => 1, 'place' => Place::Home, 'estimated_seconds' => 120]);
+
+    finishStepAt($user, Place::Home);
+
+    $this->actingAs($user);
+
+    $page = visit('/home');
+    $page->assertSee('Wipe one worktop.')
+        ->assertSee('You seem to be at home, where this gets done.');
+
+    $page->click("I'm not at home");
+
+    $page->assertSee('Buy bin bags.')
+        ->assertDontSee('You seem to be at home')
+        ->assertDontSee("I'm not at home")
         ->assertNoJavaScriptErrors();
 });

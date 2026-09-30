@@ -68,6 +68,18 @@ it('turns a decoded decomposition into ordered typed steps', function (): void {
         ->and($steps[1]->estimatedSeconds)->toBe(300);
 });
 
+it('reads where a step has to happen, and treats an absent place as anywhere', function (): void {
+    $steps = (new DecomposeParser)->parse(decomposePayload([
+        ['title' => 'Buy bin bags.', 'estimated_seconds' => 600, 'place' => 'out'],
+        ['title' => 'Grab a bin bag.', 'estimated_seconds' => 30, 'place' => null],
+        ['title' => 'Fill the dishwasher.', 'estimated_seconds' => 300],
+    ]));
+
+    expect($steps[0]->place)->toBe(App\Enums\Place::Out)
+        ->and($steps[1]->place)->toBeNull()
+        ->and($steps[2]->place)->toBeNull();
+});
+
 it('rejects a decomposition with no usable structure', function (array $payload): void {
     expect(fn (): array => (new DecomposeParser)->parse($payload))->toThrow(AiResponseInvalid::class);
 })->with([
@@ -77,6 +89,7 @@ it('rejects a decomposition with no usable structure', function (array $payload)
     'step has no title' => [['steps' => [['estimated_seconds' => 30]]]],
     'step has no estimate' => [['steps' => [['title' => 'Grab a bin bag.']]]],
     'step estimates nothing' => [['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 0]]]],
+    'step has an unknown place' => [['steps' => [['title' => 'Grab a bin bag.', 'estimated_seconds' => 30, 'place' => 'garden']]]],
 ]);
 
 it('keeps a flawed plan and reports the flaws instead of rejecting it', function (): void {

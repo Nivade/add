@@ -19,7 +19,7 @@ final class BuildRail
 
     public function handle(User $user, ?ResolutionContext $context = null): RailData
     {
-        $context ??= ResolutionContext::forUser($user);
+        $context ??= ResolutionContext::onTheClock($user);
         $now = $context->now;
 
         $session = $user->runningSession()->getResults();

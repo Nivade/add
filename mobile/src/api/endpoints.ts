@@ -17,6 +17,7 @@ import type {
   IntentionData,
   NextActionData,
   OverwhelmedData,
+  Place,
   PlanRung,
   StuckReason,
   WaitingForData,
@@ -154,6 +155,13 @@ export const api = {
     request<CommitmentData>(`/intentions/${intentionId}/commitment`, {
       method: 'POST',
       token,
+    }),
+
+  notHere: (token: string, place: Place) =>
+    request<void>('/whereabouts/not-here', {
+      method: 'POST',
+      token,
+      body: { place },
     }),
 
   promoteCurrentStep: (token: string, sessionId: string) =>

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\PauseSessionController;
 use App\Http\Controllers\Api\V1\PromoteCurrentStepToCommitmentController;
 use App\Http\Controllers\Api\V1\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Api\V1\RecordDistractionController;
+use App\Http\Controllers\Api\V1\ReportNotHereController;
 use App\Http\Controllers\Api\V1\ReportStuckController;
 use App\Http\Controllers\Api\V1\RespondToCommitmentController;
 use App\Http\Controllers\Api\V1\RespondToWaitingForController;
@@ -75,6 +76,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
     Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
+    Route::post('whereabouts/not-here', ReportNotHereController::class)->name('whereabouts.not-here');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

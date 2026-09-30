@@ -64,6 +64,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    /** @return HasMany<NotHereReport, $this> */
+    public function notHereReports(): HasMany
+    {
+        return $this->hasMany(NotHereReport::class);
+    }
+
     public function hasConsentedToAi(): bool
     {
         return $this->ai_consented_at !== null;

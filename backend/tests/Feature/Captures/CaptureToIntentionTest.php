@@ -6,6 +6,7 @@ use App\Actions\Captures\RecordCapture;
 use App\Actions\Intentions\ConvertCaptureToIntention;
 use App\Enums\Ai\AiOperation;
 use App\Enums\IntentionStatus;
+use App\Enums\Place;
 use App\Models\Capture;
 use App\Models\Intention;
 use App\Models\User;
@@ -166,6 +167,18 @@ it('logs a decomposition quality violation against the intention it came from', 
         ->once();
 
     expect($intention->steps)->toHaveCount(1);
+});
+
+it('keeps where the decomposer said a step has to happen', function (): void {
+    answeredAi(decompose: ['steps' => [
+        ['title' => 'Buy bin bags.', 'estimated_seconds' => 600, 'place' => 'out'],
+        ['title' => 'Grab a bin bag.', 'estimated_seconds' => 30, 'place' => null],
+    ]]);
+
+    RecordCapture::run(User::factory()->create(), 'clean the kitchen');
+
+    expect(Intention::query()->sole()->steps()->orderBy('position')->pluck('place')->all())
+        ->toBe([Place::Out, null]);
 });
 
 it('converts a capture once, however many times the job runs', function (): void {

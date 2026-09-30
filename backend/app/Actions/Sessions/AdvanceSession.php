@@ -10,6 +10,7 @@ use App\Enums\SessionOutcome;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Step;
+use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
@@ -18,11 +19,12 @@ final class AdvanceSession
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session, ?string $exceptStepId = null): ExecutionSession
+    /** @param  (Closure(Step): bool)|null  $passOver  steps not to offer next, which still count as left */
+    public function handle(ExecutionSession $session, ?Closure $passOver = null): ExecutionSession
     {
-        return $session->transition(function () use ($session, $exceptStepId): ExecutionSession {
+        return $session->transition(function () use ($session, $passOver): ExecutionSession {
             $pending = $session->intention->remainingSteps()->orderBy('position')->get();
-            $offerable = $pending->reject(fn (Step $step): bool => $step->id === $exceptStepId);
+            $offerable = $passOver instanceof Closure ? $pending->reject($passOver) : $pending;
             $next = $this->next($offerable, $session);
 
             if (! $next instanceof Step) {

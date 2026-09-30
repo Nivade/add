@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\Place;
 use App\Enums\StepStatus;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -23,5 +24,6 @@ class StepData extends Data
         public StepStatus $status,
         public int $skipCount,
         public bool $generated,
+        public ?Place $place,
     ) {}
 }

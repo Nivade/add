@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\StartSession;
 use App\Enums\ExecutionEventType;
+use App\Enums\Place;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
@@ -177,6 +179,15 @@ function started(int $steps = 3): ExecutionSession
     $intention = kitchen($steps);
 
     return StartSession::run($intention->user, $intention->steps()->first());
+}
+
+/** Evidence of where the person is, laid down the way the app lays it down. */
+function finishStepAt(User $user, Place $place): void
+{
+    $intention = Intention::factory()->decomposed()->for($user)->create();
+    $step = Step::factory()->for($intention)->create(['position' => 1, 'place' => $place]);
+
+    CompleteStep::run(StartSession::run($user, $step));
 }
 
 /** @return list<string> */

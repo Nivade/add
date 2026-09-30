@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Sessions;
 
 use App\Actions\Steps\SplitStep;
+use App\Actions\Whereabouts\ReportNotHere;
 use App\Enums\ExecutionEventType;
+use App\Enums\Place;
 use App\Enums\StuckReason;
 use App\Enums\StuckResolution;
 use App\Models\ExecutionSession;
@@ -33,9 +35,10 @@ final class ReportStuck
 
             return match ($reason->resolution()) {
                 StuckResolution::Split => $this->makeItSmaller($session, $step),
-                StuckResolution::NextStep => AdvanceSession::run($session, $step->id),
+                StuckResolution::NextStep => AdvanceSession::run($session, $step->is(...)),
                 StuckResolution::Stop => StopSession::run($session),
                 StuckResolution::StayPut => $session,
+                StuckResolution::Elsewhere => $this->elsewhere($session, $step),
             };
         });
     }
@@ -49,12 +52,26 @@ final class ReportStuck
 
         if (! $smallest instanceof Candidate) {
             // Nothing shorter to offer, so advance rather than leave them on the step they just refused.
-            return AdvanceSession::run($session, $step->id);
+            return AdvanceSession::run($session, $step->is(...));
         }
 
         $session->update(['current_step_id' => $smallest->step->id]);
 
         return $session;
+    }
+
+    /** Not a skip: being in the wrong place is not avoidance, so skip_count stays where it is. */
+    private function elsewhere(ExecutionSession $session, Step $step): ExecutionSession
+    {
+        $place = $step->place;
+
+        if (! $place instanceof Place) {
+            return AdvanceSession::run($session, $step->is(...));
+        }
+
+        ReportNotHere::run($session->user, $place);
+
+        return AdvanceSession::run($session, fn (Step $pending): bool => $pending->place === $place);
     }
 
     private function shortestSibling(ExecutionSession $session, Step $step): ?Candidate

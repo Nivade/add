@@ -7,6 +7,7 @@ namespace App\Actions\Steps;
 use App\Actions\Concerns\ConfiguresJobByAttribute;
 use App\Actions\Sessions\RecordExecutionEvent;
 use App\Attributes\FailOn;
+use App\Data\Ai\ParsedStepData;
 use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
 use App\Models\ExecutionSession;
@@ -56,7 +57,9 @@ final class SplitStep
             $written = [];
 
             foreach ($smaller as $index => $parsed) {
-                $written[] = Step::generate($step->intention, $parsed, $step->position + $index);
+                // A smaller piece of a step happens where the step happens.
+                $inherited = new ParsedStepData($parsed->title, $parsed->estimatedSeconds, $step->place);
+                $written[] = Step::generate($step->intention, $inherited, $step->position + $index);
             }
 
             $first = $written[0] ?? null;

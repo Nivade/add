@@ -102,6 +102,14 @@ answer "whose is this" would need a second ownership path for one table.
 offered it. Do not add `user_id` to it; `ConventionsTest` fails if the column
 appears.
 
+## The spec's Context is not a table
+
+It is `Place`, a nullable enum on a step saying where it has to happen, and
+`Whereabouts`, computed on each resolve from recent evidence. Nothing about
+where the person is gets stored except what they said themselves:
+`not_here_reports`, pruned after a day because §28 asks for minimal retention
+and a report is worthless after two hours.
+
 ## Migrations stay SQLite-compatible
 
 Dev and the suite both run SQLite:

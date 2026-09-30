@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\ReportStuck;
+use App\Actions\Sessions\StartSession;
 use App\Actions\Steps\SkipStep;
 use App\Actions\Steps\SplitStep;
+use App\Enums\Place;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Enums\StuckReason;
@@ -132,6 +134,21 @@ it('replaces the step it was asked to split and keeps the session pointing at wo
         ->and($session->refresh()->currentStep()->sole()->title)->toBe('Pick up one thing.');
 });
 
+it('splits a step into pieces that happen where the step happens', function (): void {
+    $session = started();
+    $big = $session->currentStep()->sole();
+    $big->update(['place' => Place::Home]);
+
+    answeredSplit([
+        ['title' => 'Pick up one thing.', 'estimated_seconds' => 20, 'place' => 'out'],
+        ['title' => 'Put it where it belongs.', 'estimated_seconds' => 40, 'place' => null],
+    ]);
+
+    $pieces = SplitStep::run($big->refresh());
+
+    expect($pieces->pluck('place')->all())->toBe([Place::Home, Place::Home]);
+});
+
 it('leaves a step alone when the person finished it before the split ran', function (): void {
     $session = started();
     $step = $session->currentStep()->sole();
@@ -184,4 +201,70 @@ it('advances rather than leaving them on the step they called too big', function
 
     expect($session->refresh()->current_step_id)->not->toBe($only->id)
         ->and($session->outcome)->toBe(SessionOutcome::Continued);
+});
+
+/** @param  list<Place|null>  $places */
+function startedWithPlaces(array $places, int $at = 1): ExecutionSession
+{
+    $intention = kitchen(count($places));
+
+    foreach ($places as $index => $place) {
+        $intention->steps()->where('position', $index + 1)->update(['place' => $place]);
+    }
+
+    return StartSession::run($intention->user, $intention->steps()->where('position', $at)->sole());
+}
+
+it('moves on to a step somewhere else when the person is not in the right place', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out, Place::Home]);
+    $first = $session->currentStep()->sole();
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->currentStep()->sole()->position)->toBe(3)
+        ->and($session->ended_at)->toBeNull()
+        ->and($session->user->notHereReports()->sole()->place)->toBe(Place::Out)
+        ->and($first->refresh()->skip_count)->toBe(0)
+        ->and($first->status)->toBe(StepStatus::Pending);
+});
+
+it('moves onwards before wrapping to the front, like any other move on', function (): void {
+    $onwards = startedWithPlaces([Place::Home, Place::Out, Place::Home], at: 2);
+
+    ReportStuck::run($onwards, StuckReason::NotHere);
+
+    $wrapped = startedWithPlaces([Place::Home, Place::Out, Place::Out], at: 2);
+
+    ReportStuck::run($wrapped, StuckReason::NotHere);
+
+    expect($onwards->refresh()->currentStep()->sole()->position)->toBe(3)
+        ->and($wrapped->refresh()->currentStep()->sole()->position)->toBe(1);
+});
+
+it('counts a step with no place as somewhere else', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out, null]);
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->currentStep()->sole()->position)->toBe(3);
+});
+
+it('lands the session as continued when every other step needs the same place', function (): void {
+    $session = startedWithPlaces([Place::Out, Place::Out]);
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->outcome)->toBe(SessionOutcome::Continued)
+        ->and($session->user->notHereReports()->count())->toBe(1);
+});
+
+it('just moves on from a step with no place, reporting nothing', function (): void {
+    $session = started();
+    $first = $session->currentStep()->sole();
+
+    ReportStuck::run($session, StuckReason::NotHere);
+
+    expect($session->refresh()->current_step_id)->not->toBe($first->id)
+        ->and($session->user->notHereReports()->count())->toBe(0)
+        ->and($first->refresh()->skip_count)->toBe(0);
 });

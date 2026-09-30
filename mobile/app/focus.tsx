@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, stuckReasons } from '@add/shared';
+import { commitmentCopy, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -115,7 +115,7 @@ export default function Focus() {
           <Meta>every answer leads somewhere</Meta>
 
           <View style={styles.controls}>
-            {stuckReasons.map((reason) => (
+            {stuckReasonsFor(step?.place ?? null).map((reason) => (
               <Button
                 key={reason.value}
                 label={reason.label}

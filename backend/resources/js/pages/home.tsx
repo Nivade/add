@@ -15,8 +15,13 @@ import { captureFieldClassName } from '@/components/capture-dialog';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
+import { NotHere } from '@/components/not-here';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
-import { quietButtonClassName, Responses } from '@/components/responses';
+import {
+    quietButtonClassName,
+    quietLineClassName,
+    Responses,
+} from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -224,6 +229,11 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <li key={line}>{line}</li>
                             ))}
                         </ul>
+                        {rightNow.assumedPlace && (
+                            <div className="mt-2">
+                                <NotHere place={rightNow.assumedPlace} />
+                            </div>
+                        )}
                         <div className="mt-3">
                             <SaidIdDoThis
                                 promised={rightNowIsCommitment}
@@ -364,7 +374,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                     {hasOpenCommitments && (
                         <Link
                             href={commitments.index()}
-                            className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
+                            className={quietLineClassName}
                         >
                             {commitmentCopy.list}
                         </Link>
