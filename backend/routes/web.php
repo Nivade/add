@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\PauseFocusController;
 use App\Http\Controllers\Web\PromoteCurrentStepToCommitmentController;
 use App\Http\Controllers\Web\PromoteIntentionToCommitmentController;
 use App\Http\Controllers\Web\RecordDistractionController;
+use App\Http\Controllers\Web\ReportNotHereController;
 use App\Http\Controllers\Web\ReportStuckController;
 use App\Http\Controllers\Web\RespondToCommitmentController;
 use App\Http\Controllers\Web\RespondToWaitingForController;
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('future-reminders', StoreFutureReminderController::class)->name('future-reminders.store');
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
     Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
+    Route::post('whereabouts/not-here', ReportNotHereController::class)->name('whereabouts.not-here');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

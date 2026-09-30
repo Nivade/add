@@ -319,7 +319,7 @@ day, and `model:prune` runs daily.
 
   *Check:* `npm run artisan -- test --compact tests/Feature/Execution` passes.
 
-- [ ] **9. The correction endpoint.** Invoke skills: `laravel-actions`,
+- [x] **9. The correction endpoint.** Invoke skills: `laravel-actions`,
   `laravel-attributes`, `laravel-best-practices`, `wayfinder-development`.
   - Create `backend/app/Http/Requests/ReportNotHereRequest.php`. It validates
     `'place' => ['required', Rule::enum(Place::class)]` and exposes
