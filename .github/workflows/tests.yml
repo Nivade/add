@@ -49,7 +49,6 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: package-lock.json
 
       # Composer uses ~/.cache/composer where /etc/xdg exists, as on Ubuntu runners; ask it rather than guess.
       - name: Get Composer cache directory
@@ -63,9 +62,9 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('backend/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      # Keyed per commit: an entry never changes once saved, so a fixed key would stop picking up new results.
-      - name: Cache PHPStan and Rector results
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      # Saved from main only: a per-commit entry from every push would evict the other caches.
+      - name: Restore PHPStan and Rector results
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             backend/storage/phpstan
@@ -76,7 +75,6 @@ jobs:
       - name: Audit Composer dependencies
         run: composer audit --locked --abandoned=report
 
-      # One lockfile for every workspace, at the root.
       - name: Audit npm dependencies
         working-directory: .
         run: npm audit --omit=dev --audit-level=high
@@ -87,21 +85,25 @@ jobs:
       - name: Run CI Checks
         run: composer ci:check
 
+      - name: Save PHPStan and Rector results
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            backend/storage/phpstan
+            backend/storage/rector
+          key: analysis-${{ runner.os }}-${{ github.sha }}
+
       - name: Install Playwright's browser
         run: node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run the §39 journey test in a real browser
         run: composer test:browser
 
-      - name: Check the Rector rewrites have landed
-        run: composer refactor:check
-
       # Both frontends read packages/shared, and ci:check only typechecks backend's own tree.
       - name: Typecheck every workspace
         working-directory: .
-        run: |
-          npm install
-          npm run typecheck
+        run: npm run typecheck
 
       # A stale generated.ts breaks both frontends at once and nothing else notices.
       - name: Check the generated types match the PHP they come from
