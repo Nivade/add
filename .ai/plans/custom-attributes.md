@@ -87,7 +87,7 @@ the same `render()`; `AiUnavailable` has its own closure in `bootstrap/app.php`.
 
 ## 3. `#[FailOn]` — a retry policy on the AI jobs
 
-`DecomposeIntention`, `ConvertCaptureToIntention` and `SplitStep` run queued with no policy, so the
+`DecomposeIntention`, `SortCapture` and `SplitStep` run queued with no policy, so the
 worker default decides. `AiRateLimited` and `AiProviderRequestFailed` are transient;
 `AiUnavailable` (consent off, no key) never heals by retrying.
 

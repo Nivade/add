@@ -41,7 +41,7 @@ it('scores the kind each capture was sorted into against the kind the corpus exp
         'kind' => str_contains($request->user, 'waiting') ? 'waiting_for' : 'thought',
     ]));
 
-    $scored = collect((new RunCaptureEval($provider, new ParseCaptureParser))->handle())->keyBy('id');
+    $scored = collect(new RunCaptureEval($provider, new ParseCaptureParser)->handle())->keyBy('id');
 
     expect($scored['waiting-contract'])->toMatchArray(['expects_kind' => 'waiting_for', 'kind' => 'waiting_for', 'kind_matches' => true])
         ->and($scored['remind-dentist'])->toMatchArray(['expects_kind' => 'reminder', 'kind' => 'thought', 'kind_matches' => false])

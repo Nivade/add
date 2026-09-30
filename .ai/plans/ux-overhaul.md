@@ -99,7 +99,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - `packages/shared/src/copy.ts`: `sortingLine(count: number): string` → "Sorting the thought you just wrote down." for one, "Sorting the {n} thoughts you just wrote down." for more.
   - Web `backend/resources/js/pages/home.tsx`: when `sortingCount > 0`, a `<p role="status">` with `sortingLine`, and `usePoll(3000, { only: ['home'] }, { autoStart: false })` started while the count is above zero and stopped when it reaches zero.
   - Mobile `mobile/app/index.tsx`: the same line; reload on screen focus with `useFocusEffect`, and every 3 seconds while the count is above zero.
-  - Tests: `backend/tests/Feature/Home/HomeTest.php` counts unprocessed captures only; `backend/tests/Feature/Captures/CaptureToIntentionTest.php` asserts the flashed toast (find the assertion with `search-docs` query `inertia flash data testing`).
+  - Tests: `backend/tests/Feature/Home/HomeTest.php` counts unprocessed captures only; `backend/tests/Feature/Captures/SortCaptureTest.php` asserts the flashed toast (find the assertion with `search-docs` query `inertia flash data testing`).
   - Check: both test files pass; `npm run types:generate` then `npm run typecheck`.
 - [x] **1.5 "I got distracted" welcomes the person back.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`.
   - `RecordDistraction`: inside the transition, sets `paused_at` when it is null, then records `Distracted`.
@@ -226,7 +226,7 @@ desktop                                          phone
   - `storage/ai-eval/capture-corpus.json`: every entry gains `expects_kind`; add entries "waiting for John to send the contract", "waiting on the insurance company about the claim", "I'll send Sarah the photos tomorrow", "told mum I'd call her on Sunday", "remind me tomorrow at 9 to call the dentist", "remind me on Friday to water the plants", "need to call the dentist", "I'll probably need a new phone at some point" (thought). `RunCaptureEval` scores the kind and prints expected, actual and match.
   - Tests: `backend/tests/Feature/Ai/CaptureEvalTest.php` covers kind scoring; parser tests for each kind and an invalid kind.
   - Check: `npm run artisan -- test --compact tests/Feature/Ai tests/Feature/Captures` passes.
-- [ ] **3.2 Sorting replaces converting.** Invoke skills: `laravel-actions`, `ai-layer-changes`.
+- [x] **3.2 Sorting replaces converting.** Invoke skills: `laravel-actions`, `ai-layer-changes`.
   - Migration: `npm run artisan -- make:migration add_kind_to_captures_table --table=captures --no-interaction`: `kind` string(32) nullable, `routed_id` ulid nullable (no foreign key; the kind says which table), `kind_confirmed_at` timestamp nullable, `parsed` json nullable, `failed_at` timestamp nullable. `Capture` casts `kind` to `CaptureKind` and `parsed` to `ParsedCaptureData`. The body stays immutable; the routing columns are written by sorting, as `intention_id` is today.
   - `git mv backend/app/Actions/Intentions/ConvertCaptureToIntention.php backend/app/Actions/Captures/SortCapture.php`; class `SortCapture`, `handle(Capture $capture, ?CaptureKind $chosen = null): Capture`, same job attributes.
     - Returns early when `kind` is set and nothing was chosen.

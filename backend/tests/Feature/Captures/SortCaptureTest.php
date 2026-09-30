@@ -2,14 +2,22 @@
 
 declare(strict_types=1);
 
+use App\Actions\Ai\UpdateAiConsent;
 use App\Actions\Captures\RecordCapture;
-use App\Actions\Intentions\ConvertCaptureToIntention;
+use App\Actions\Captures\SortCapture;
+use App\Actions\Home\BuildHome;
 use App\Enums\Ai\AiOperation;
+use App\Enums\CaptureKind;
+use App\Enums\CommitmentProvenance;
 use App\Enums\IntentionStatus;
 use App\Enums\Place;
+use App\Exceptions\AiConsentRequired;
 use App\Models\Capture;
+use App\Models\Commitment;
+use App\Models\FutureReminder;
 use App\Models\Intention;
 use App\Models\User;
+use App\Models\WaitingFor;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
@@ -181,13 +189,13 @@ it('keeps where the decomposer said a step has to happen', function (): void {
         ->toBe([Place::Out, null]);
 });
 
-it('converts a capture once, however many times the job runs', function (): void {
+it('sorts a capture once, however many times the job runs', function (): void {
     answeredAi();
     $capture = RecordCapture::run(User::factory()->create(), 'clean the apartment')->refresh();
 
-    $again = ConvertCaptureToIntention::run($capture);
+    $again = SortCapture::run($capture);
 
-    expect($again->id)->toBe($capture->intention_id)
+    expect($again->intention_id)->toBe($capture->intention_id)
         ->and(Intention::query()->count())->toBe(1);
 });
 
@@ -213,4 +221,130 @@ it('tells the person on the web that the capture landed', function (): void {
         ->assertRedirect(route('home'))
         ->assertInertiaFlash('toast.type', 'success')
         ->assertInertiaFlash('toast.message', 'Got it. Sorting it out.');
+});
+
+it('sorts something owed by someone else into a waiting-for, naming who', function (): void {
+    answeredAi(['kind' => 'waiting_for', 'title' => 'The contract', 'waiting_on' => 'John']);
+
+    $capture = RecordCapture::run(User::factory()->create(), 'waiting for John to send the contract')->refresh();
+    $waitingFor = WaitingFor::query()->sole();
+
+    expect($capture->kind)->toBe(CaptureKind::WaitingFor)
+        ->and($capture->routed_id)->toBe($waitingFor->id)
+        ->and($capture->processed_at)->not->toBeNull()
+        ->and($capture->kind_confirmed_at)->toBeNull()
+        ->and($waitingFor->subject)->toBe('John')
+        ->and($waitingFor->note)->toBe('The contract')
+        ->and(Intention::query()->count())->toBe(0);
+});
+
+it('sorts something they said they would do into an inferred commitment', function (): void {
+    answeredAi(['kind' => 'promise', 'title' => 'Send Sarah the photos']);
+
+    $capture = RecordCapture::run(User::factory()->create(), "I'll send Sarah the photos tomorrow")->refresh();
+    $commitment = Commitment::query()->sole();
+
+    expect($capture->kind)->toBe(CaptureKind::Promise)
+        ->and($capture->routed_id)->toBe($commitment->id)
+        ->and($commitment->description)->toBe('Send Sarah the photos')
+        ->and($commitment->provenance)->toBe(CommitmentProvenance::SystemInferred)
+        ->and($commitment->confirmed_at)->toBeNull();
+});
+
+it('sorts an ask to be reminded into a reminder at the time it names', function (): void {
+    answeredAi(['kind' => 'reminder', 'title' => 'Call the dentist']);
+    $this->travelTo(CarbonImmutable::parse('2026-09-16 10:00:00', 'UTC'));
+
+    $capture = RecordCapture::run(User::factory()->create(), 'remind me tomorrow at 9 to call the dentist')->refresh();
+    $reminder = FutureReminder::query()->sole();
+
+    expect($capture->kind)->toBe(CaptureKind::Reminder)
+        ->and($capture->routed_id)->toBe($reminder->id)
+        ->and($reminder->trigger_at->toDateTimeString())->toBe('2026-09-17 09:00:00');
+});
+
+it('keeps a reminder with no time in it as a thought', function (): void {
+    answeredAi(['kind' => 'reminder', 'title' => 'Call the dentist']);
+
+    $capture = RecordCapture::run(User::factory()->create(), 'remind me to call the dentist')->refresh();
+
+    expect($capture->kind)->toBe(CaptureKind::Thought)
+        ->and($capture->intention_id)->toBe(Intention::query()->sole()->id)
+        ->and($capture->routed_id)->toBe($capture->intention_id)
+        ->and(FutureReminder::query()->count())->toBe(0);
+});
+
+it('reads long text with the classifier and never asks the parse', function (bool $actionable, CaptureKind $kind, int $intentions): void {
+    $provider = fakeAi()
+        ->respondFor(AiOperation::ClassifyIngestion->value, [
+            'actionable' => $actionable,
+            'title' => $actionable ? 'Car insurance renewal' : null,
+            'why' => $actionable ? 'Policy expires 14 October' : null,
+            'deadline_at' => null,
+            'estimated_seconds' => $actionable ? 600 : null,
+        ])
+        ->respondFor(AiOperation::DecomposeIntention->value, ['steps' => [['title' => 'Open the renewal letter.', 'estimated_seconds' => 60]]]);
+
+    $capture = RecordCapture::run(User::factory()->create(), "Dear customer,\n\nYour car insurance policy expires on 14 October.")->refresh();
+
+    expect($capture->kind)->toBe($kind)
+        ->and($capture->processed_at)->not->toBeNull()
+        ->and($capture->parsed?->title)->toBe($actionable ? 'Car insurance renewal' : "Dear customer,\n\nYour car insurance policy expires on 14 October.")
+        ->and(Intention::query()->count())->toBe($intentions);
+
+    $provider->assertNotSent(fn (AiRequest $request): bool => $request->operation === AiOperation::ParseCapture->value);
+})->with([
+    'actionable' => [true, CaptureKind::Thought, 1],
+    'not actionable' => [false, CaptureKind::NotForYou, 0],
+]);
+
+it('stores a promise the person chose as stated by them, and confirmed', function (): void {
+    answeredAi(['title' => 'Call mum on Sunday']);
+    Queue::fake();
+    $capture = RecordCapture::run(User::factory()->create(), 'told mum I would call her on Sunday');
+
+    SortCapture::run($capture, CaptureKind::Promise);
+
+    expect($capture->refresh()->kind)->toBe(CaptureKind::Promise)
+        ->and($capture->kind_confirmed_at)->not->toBeNull()
+        ->and(Commitment::query()->sole()->provenance)->toBe(CommitmentProvenance::UserStated);
+});
+
+it('routes again from the stored parse without asking the model', function (): void {
+    $provider = answeredAi(['kind' => 'waiting_for', 'title' => 'The contract', 'waiting_on' => 'John']);
+    $capture = RecordCapture::run(User::factory()->create(), 'waiting for John to send the contract')->refresh();
+    $capture->update(['kind' => null, 'routed_id' => null]);
+
+    SortCapture::run($capture, CaptureKind::Promise);
+
+    expect($capture->refresh()->kind)->toBe(CaptureKind::Promise)
+        ->and(Commitment::query()->count())->toBe(1);
+
+    $provider->assertSentCount(1);
+});
+
+it('marks a capture it cannot sort without consent, and stops counting it as sorting', function (): void {
+    config()->set('ai-toolkit.driver', 'openai');
+    $user = User::factory()->create(['ai_consented_at' => null]);
+
+    // The sync queue rethrows after failing the job; a worker would only record it.
+    expect(fn (): Capture => RecordCapture::run($user, 'call the dentist'))->toThrow(AiConsentRequired::class);
+
+    $capture = Capture::query()->sole();
+
+    expect($capture->failed_at)->not->toBeNull()
+        ->and($capture->processed_at)->toBeNull()
+        ->and(BuildHome::run($user)->sortingCount)->toBe(0);
+});
+
+it('sorts what waited once consent is turned on', function (): void {
+    answeredAi();
+    $user = User::factory()->create(['ai_consented_at' => null]);
+    $capture = Capture::factory()->for($user)->create(['body' => 'clean the apartment', 'failed_at' => now()]);
+
+    UpdateAiConsent::run($user, true);
+
+    expect($capture->refresh()->failed_at)->toBeNull()
+        ->and($capture->kind)->toBe(CaptureKind::Thought)
+        ->and($capture->intention_id)->toBe(Intention::query()->sole()->id);
 });

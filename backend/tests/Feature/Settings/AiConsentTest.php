@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Intentions\ConvertCaptureToIntention;
+use App\Actions\Captures\SortCapture;
 use App\Models\Capture;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
@@ -63,5 +63,5 @@ it('never reaches a live model for a person who has not consented, even when the
     $user = User::factory()->create(['ai_consented_at' => null]);
     $capture = Capture::factory()->for($user)->create();
 
-    expect(fn (): mixed => ConvertCaptureToIntention::run($capture))->toThrow(AiUnavailable::class);
+    expect(fn (): mixed => SortCapture::run($capture))->toThrow(AiUnavailable::class);
 });

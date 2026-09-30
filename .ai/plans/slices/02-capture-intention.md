@@ -14,7 +14,7 @@ AI layer underneath it is written; nothing calls it yet.
 ```
 RecordCapture ──▶ capture row, returned immediately
       │
-      └─▶ ConvertCaptureToIntention (queued)
+      └─▶ SortCapture (queued)
                 │  DeadlineExtractor  ── deterministic, runs first
                 │  ParseCaptureParser ── AI, only for what was not extracted
                 └─▶ intention row
@@ -49,7 +49,7 @@ Provider, request, prompts, schemas and providers exist. Outstanding:
 | `Parsers/ParseCaptureParser` | decoded JSON → `ParsedCaptureData`, or throw `AiResponseInvalid` |
 | `Parsers/DecomposeParser` | decoded JSON → `list<ParsedStepData>`, enforcing the step rules |
 | `Actions/Captures/RecordCapture` | write, dispatch, return |
-| `Actions/Intentions/ConvertCaptureToIntention` | extractor, then parser, then intention |
+| `Actions/Captures/SortCapture` | extractor, then parser, then the row its kind names |
 | `Actions/Intentions/DecomposeIntention` | parser, then steps, then `decomposed_at` |
 
 The parser is the validator. The provider hands over decoded JSON and forms no

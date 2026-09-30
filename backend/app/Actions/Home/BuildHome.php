@@ -85,6 +85,7 @@ final class BuildHome
         return Capture::query()
             ->where('user_id', $user->id)
             ->whereNull('processed_at')
+            ->whereNull('failed_at')
             ->where('created_at', '>=', $now->subHours(self::SORTING_WITHIN_HOURS))
             ->count();
     }

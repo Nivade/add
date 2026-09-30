@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Ai;
 
+use App\Actions\Captures\SortCapture;
+use App\Models\Capture;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -17,5 +19,20 @@ final class UpdateAiConsent
     {
         $user->ai_consented_at = $consented ? Carbon::now() : null;
         $user->save();
+
+        if ($consented) {
+            $this->sortWhatWaited($user);
+        }
+    }
+
+    private function sortWhatWaited(User $user): void
+    {
+        Capture::query()
+            ->where('user_id', $user->id)
+            ->whereNull('processed_at')
+            ->each(function (Capture $capture): void {
+                $capture->update(['failed_at' => null]);
+                SortCapture::dispatch($capture);
+            });
     }
 }
