@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Sessions\ReportStuck;
 use App\Actions\Steps\SkipStep;
 use App\Actions\Steps\SplitStep;
+use App\Enums\Place;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
 use App\Enums\StuckReason;
@@ -130,6 +131,21 @@ it('replaces the step it was asked to split and keeps the session pointing at wo
         ])
         ->and($steps->pluck('position')->all())->toBe([1, 2, 3, 4])
         ->and($session->refresh()->currentStep()->sole()->title)->toBe('Pick up one thing.');
+});
+
+it('splits a step into pieces that happen where the step happens', function (): void {
+    $session = started();
+    $big = $session->currentStep()->sole();
+    $big->update(['place' => Place::Home]);
+
+    answeredSplit([
+        ['title' => 'Pick up one thing.', 'estimated_seconds' => 20, 'place' => 'out'],
+        ['title' => 'Put it where it belongs.', 'estimated_seconds' => 40, 'place' => null],
+    ]);
+
+    $pieces = SplitStep::run($big->refresh());
+
+    expect($pieces->pluck('place')->all())->toBe([Place::Home, Place::Home]);
 });
 
 it('leaves a step alone when the person finished it before the split ran', function (): void {

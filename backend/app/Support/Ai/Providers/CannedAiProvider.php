@@ -60,9 +60,9 @@ final class CannedAiProvider implements AiProvider
     {
         return [
             'steps' => [
-                ['title' => 'Put the thing you need on the desk.', 'estimated_seconds' => 60],
-                ['title' => 'Open it.', 'estimated_seconds' => 30],
-                ['title' => 'Write the first line.', 'estimated_seconds' => 300],
+                ['title' => 'Put the thing you need on the desk.', 'estimated_seconds' => 60, 'place' => null],
+                ['title' => 'Open it.', 'estimated_seconds' => 30, 'place' => null],
+                ['title' => 'Write the first line.', 'estimated_seconds' => 300, 'place' => 'computer'],
             ],
         ];
     }

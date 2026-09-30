@@ -170,7 +170,7 @@ day, and `model:prune` runs daily.
   *Check:* `npm run artisan -- migrate` succeeds. `npm run typecheck` passes.
   `packages/shared/src/generated.ts` contains `export type Place`.
 
-- [ ] **3. Decomposition infers the place.** Invoke skills: `ai-layer-changes`,
+- [x] **3. Decomposition infers the place.** Invoke skills: `ai-layer-changes`,
   `laravel-actions`.
   - **Schema.** `DecomposeIntentionSchema`: add `'place' => $schema->string()->enum([...array_column(Place::cases(), 'value'), null])->nullable()->description('Where this has to happen, only when it cannot happen anywhere else: home, work, out (shops, outside, errands) or computer. Null when it can be done anywhere.')->required()`.
     Bump `VERSION` to `'2'`.

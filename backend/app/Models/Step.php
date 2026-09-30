@@ -58,6 +58,7 @@ class Step extends Model
             'title' => $parsed->title,
             'position' => $position,
             'estimated_seconds' => $parsed->estimatedSeconds,
+            'place' => $parsed->place,
             'status' => StepStatus::Pending,
             'generated' => true,
         ]);
