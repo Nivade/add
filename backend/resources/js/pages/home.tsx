@@ -244,7 +244,10 @@ export default function Home({ home: data }: { home: HomeData }) {
                     <RightNow {...data} />
                 </section>
 
-                <p role="status" className="text-muted-foreground empty:sr-only">
+                <p
+                    role="status"
+                    className="text-muted-foreground empty:sr-only"
+                >
                     {sortingCount > 0 && sortingLine(sortingCount)}
                 </p>
 
