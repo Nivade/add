@@ -8,10 +8,11 @@ import {
     homeBands,
     homeCopy,
     nothingNeedsYou,
+    partWayLine,
     recurrenceLine,
     remindAfterCopy,
     restCountLine,
-    stepMeta,
+    rightNowMeta,
     waitingForResponses,
 } from '@add/shared';
 import { Form, Head, Link } from '@inertiajs/react';
@@ -168,9 +169,7 @@ function RightNow({ rightNow, session }: HomeData) {
                     {session.session.currentStep?.title ??
                         session.intention.title}
                 </OneThing>
-                <Meta>
-                    part-way through {session.intention.title.toLowerCase()}
-                </Meta>
+                <Meta>{partWayLine(session.intention.title)}</Meta>
                 <div className="pl-5">
                     <Button asChild>
                         <Link href={focus()}>Continue</Link>
@@ -192,10 +191,7 @@ function RightNow({ rightNow, session }: HomeData) {
     return (
         <div className="space-y-6">
             <OneThing>{rightNow.step.title}</OneThing>
-            <Meta>
-                {stepMeta(rightNow.step)} ·{' '}
-                {rightNow.intention.title.toLowerCase()}
-            </Meta>
+            <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
             <StartStep stepId={rightNow.step.id} />
         </div>
     );

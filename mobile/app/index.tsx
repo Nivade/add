@@ -12,9 +12,10 @@ import {
   homeCopy,
   nothingNeedsYou,
   notHereLabels,
+  partWayLine,
   recurrenceLine,
   restCountLine,
-  stepMeta,
+  rightNowMeta,
   waitingForResponses,
 } from '@add/shared';
 import { router } from 'expo-router';
@@ -226,7 +227,7 @@ export default function Home() {
           <OneThing>
             {session.session.currentStep?.title ?? session.intention.title}
           </OneThing>
-          <Meta>part-way through {session.intention.title.toLowerCase()}</Meta>
+          <Meta>{partWayLine(session.intention.title)}</Meta>
           <Button
             label="Continue"
             tone="primary"
@@ -236,10 +237,7 @@ export default function Home() {
       ) : rightNow ? (
         <>
           <OneThing>{rightNow.step.title}</OneThing>
-          <Meta>
-            {stepMeta(rightNow.step)} ·{' '}
-            {rightNow.intention.title.toLowerCase()}
-          </Meta>
+          <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
           <Button label="Start" tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
             <Band label={homeBands.why}>

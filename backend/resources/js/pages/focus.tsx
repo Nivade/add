@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { focusCopy, stepMeta, stuckReasonsFor } from '@add/shared';
+import { focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing } from '@/components/one-thing';
@@ -60,8 +60,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     <div className="space-y-6">
                         <OneThing>{focusCopy.welcomeBack}</OneThing>
                         <Meta>
-                            {focusCopy.leftOffAt}{' '}
-                            {(step?.title ?? intention.title).toLowerCase()}
+                            {leftOffLine(step?.title ?? intention.title)}
                         </Meta>
                         <div className="pl-5">
                             <Form {...focusRoutes.resume.form(session.id)}>

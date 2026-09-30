@@ -33,11 +33,29 @@ export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
+type EstimatedStep = { estimatedSeconds: number | null; generated: boolean };
+
 /** Going quiet on a missing estimate would read as zero minutes, and a guessed step must say who guessed. */
-export function stepMeta(step: { estimatedSeconds: number | null; generated: boolean }): string {
+export function stepMeta(step: EstimatedStep): string {
     const estimate = formatEstimate(step.estimatedSeconds);
 
     return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
+}
+
+export function rightNowMeta(step: EstimatedStep, intentionTitle: string): string {
+    return `${stepMeta(step)} · ${intentionTitle.toLowerCase()}`;
+}
+
+export function smallestStepMeta(step: EstimatedStep): string {
+    return `${stepMeta(step)} · that is all you have to do`;
+}
+
+export function partWayLine(intentionTitle: string): string {
+    return `part-way through ${intentionTitle.toLowerCase()}`;
+}
+
+export function leftOffLine(title: string): string {
+    return `you left off at ${title.toLowerCase()}`;
 }
 
 export const nothingNeedsYou = 'Nothing needs you right now.';
@@ -60,7 +78,6 @@ export const remindAfterCopy = {
 } as const;
 
 export const overwhelmedCopy = {
-    allYouHaveToDo: 'that is all you have to do',
     back: 'Back to home',
 } as const;
 
@@ -70,7 +87,6 @@ export const focusCopy = {
     pause: 'Pause',
     stop: 'Stop',
     welcomeBack: 'Welcome back.',
-    leftOffAt: 'you left off at',
     stuck: "I'm stuck",
     distracted: 'I got distracted',
     stuckQuestion: "What's blocking you?",

@@ -3,7 +3,7 @@ import {
     nothingNeedsYou,
     overwhelmedCopy,
     restCountLine,
-    stepMeta,
+    smallestStepMeta,
 } from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
@@ -33,10 +33,7 @@ export default function Overwhelmed({
 
                     {smallestStep && (
                         <>
-                            <Meta>
-                                {stepMeta(smallestStep.step)} ·{' '}
-                                {overwhelmedCopy.allYouHaveToDo}
-                            </Meta>
+                            <Meta>{smallestStepMeta(smallestStep.step)}</Meta>
 
                             <ul className="text-muted-foreground space-y-1 pl-5 font-mono text-[13px]">
                                 {smallestStep.why.map((line) => (

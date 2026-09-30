@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { nothingNeedsYou, overwhelmedCopy, restCountLine, stepMeta } from '@add/shared';
+import { nothingNeedsYou, overwhelmedCopy, restCountLine, smallestStepMeta } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -38,9 +38,7 @@ export default function Overwhelmed() {
       {step ? (
         <>
           <OneThing>{step.step.title}</OneThing>
-          <Meta>
-            {stepMeta(step.step)} · {overwhelmedCopy.allYouHaveToDo}
-          </Meta>
+          <Meta>{smallestStepMeta(step.step)}</Meta>
           {step.why.map((line) => (
             <Meta key={line}>{line}</Meta>
           ))}

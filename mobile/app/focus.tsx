@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, focusCopy, stepMeta, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -63,9 +63,7 @@ export default function Focus() {
       {paused ? (
         <>
           <OneThing>{focusCopy.welcomeBack}</OneThing>
-          <Meta>
-            {focusCopy.leftOffAt} {(step?.title ?? intention.title).toLowerCase()}
-          </Meta>
+          <Meta>{leftOffLine(step?.title ?? intention.title)}</Meta>
           <Button
             label="Continue"
             tone="primary"
