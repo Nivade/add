@@ -173,7 +173,7 @@ desktop                                          phone
 
 ## Phase 2 — identity (`feature/visual-identity`)
 
-- [ ] **2.1 Tokens in one place.** Invoke skills: `frontend-design`, `expo-react-native`.
+- [x] **2.1 Tokens in one place.** Invoke skills: `frontend-design`, `expo-react-native`.
   - New `packages/shared/src/tokens.ts`: `export const lightColors = {...} as const`, `export const darkColors = {...} as const`, `export const dayStripLight`, `export const dayStripDark` (the stops above, each `{ minute, color }`), `export const radius = { control: 12, field: 8, panel: 16 } as const` (px, for React Native), `export const typeScale` (the table above, in px at a 16px root). One flat `key: '#RRGGBB'` per line, which the guard test parses. Export it from `packages/shared/src/index.ts`.
   - Check: `npm run typecheck` passes.
 - [ ] **2.2 A guard holds the palette.** Invoke skills: `pest-testing`, `testing-best-practices`.
