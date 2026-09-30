@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "768fa6e988aadb7f42bdb3446a419b71",
+    "content-hash": "52c7d89572333324a0777eafbd9800fa",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3022,16 +3022,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "3.12.0",
+            "version": "3.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "72c534fc0ab181ef52d92a68382318631e301608"
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/72c534fc0ab181ef52d92a68382318631e301608",
-                "reference": "72c534fc0ab181ef52d92a68382318631e301608",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/d7059e4c691d05ea1222b5124bed0f961be46e15",
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15",
                 "shasum": ""
             },
             "require": {
@@ -3111,7 +3111,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Seldaek/monolog/issues",
-                "source": "https://github.com/Seldaek/monolog/tree/3.12.0"
+                "source": "https://github.com/Seldaek/monolog/tree/3.12.1"
             },
             "funding": [
                 {
@@ -3123,7 +3123,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-09T08:34:20+00:00"
+            "time": "2026-09-29T19:21:12+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -11216,16 +11216,16 @@
         },
         {
             "name": "fidry/cpu-core-counter",
-            "version": "1.4.0",
+            "version": "1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theofidry/cpu-core-counter.git",
-                "reference": "7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d"
+                "reference": "d384a7d0d6e67aa497327260ca95023e92dc2032"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theofidry/cpu-core-counter/zipball/7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d",
-                "reference": "7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d",
+                "url": "https://api.github.com/repos/theofidry/cpu-core-counter/zipball/d384a7d0d6e67aa497327260ca95023e92dc2032",
+                "reference": "d384a7d0d6e67aa497327260ca95023e92dc2032",
                 "shasum": ""
             },
             "require": {
@@ -11266,7 +11266,7 @@
             ],
             "support": {
                 "issues": "https://github.com/theofidry/cpu-core-counter/issues",
-                "source": "https://github.com/theofidry/cpu-core-counter/tree/1.4.0"
+                "source": "https://github.com/theofidry/cpu-core-counter/tree/1.4.1"
             },
             "funding": [
                 {
@@ -11274,7 +11274,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-27T17:40:20+00:00"
+            "time": "2026-09-29T22:11:39+00:00"
         },
         {
             "name": "filp/whoops",
@@ -12819,38 +12819,45 @@
         },
         {
             "name": "nvade/devtools",
-            "version": "v0.16.0",
+            "version": "v0.31.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/nvade-packages/devtools.git",
-                "reference": "366cf508c449eafa3fb155b2d67b15f010e6437a"
+                "reference": "51190765d24772e1246f00768fe2b70d70003211"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=366cf508c449eafa3fb155b2d67b15f010e6437a",
-                "reference": "366cf508c449eafa3fb155b2d67b15f010e6437a",
+                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=51190765d24772e1246f00768fe2b70d70003211",
+                "reference": "51190765d24772e1246f00768fe2b70d70003211",
                 "shasum": ""
             },
             "require": {
                 "brianium/paratest": "^7.8",
-                "driftingly/rector-laravel": "^2.0",
+                "composer/semver": "^3.4",
+                "driftingly/rector-laravel": "^2.6.1",
                 "illuminate/console": "^11.0||^12.0||^13.0",
                 "illuminate/filesystem": "^11.0||^12.0||^13.0",
                 "illuminate/process": "^11.0||^12.0||^13.0",
                 "illuminate/support": "^11.0||^12.0||^13.0",
                 "larastan/larastan": "^3.0",
+                "laravel/boost": "^2.7",
                 "laravel/pint": "^1.30",
                 "laravel/sail": "^1.31",
                 "php": "^8.4",
-                "rector/rector": "^2.5.9",
-                "sebastian/diff": "^7.0 || ^8.0 || ^9.0"
+                "phpstan/phpstan-deprecation-rules": "^2.0.5",
+                "rector/rector": "^2.6.4",
+                "sebastian/diff": "^7.0 || ^8.0 || ^9.0",
+                "shipmonk/composer-dependency-analyser": "^1.8.4",
+                "symfony/yaml": "^7.0||^8.0"
             },
             "require-dev": {
                 "heyosseus/sloppy": "^1.0",
                 "orchestra/testbench": "^9.0||^10.0||^11.0",
-                "pestphp/pest": "^3.0||^4.0",
-                "symfony/yaml": "^8.1"
+                "pestphp/pest": "^3.0||^4.0||^5.0"
             },
+            "bin": [
+                "bin/devtools-deps"
+            ],
             "type": "library",
             "extra": {
                 "laravel": {
@@ -12888,6 +12895,9 @@
                 "refactor:check": [
                     "rector process --dry-run"
                 ],
+                "deps:check": [
+                    "@php bin/devtools-deps"
+                ],
                 "slop:check": [
                     "sloppy scan"
                 ],
@@ -12898,8 +12908,9 @@
                     "@lint:check",
                     "@types:check",
                     "@refactor:check",
+                    "@deps:check",
                     "@slop:check",
-                    "pest"
+                    "pest --parallel"
                 ],
                 "ci:check": [
                     "Composer\\Config::disableProcessTimeout",
@@ -12917,9 +12928,10 @@
             ],
             "description": "Shared Pint, PHPStan, Rector and Sail/Traefik configuration for Laravel projects.",
             "support": {
-                "source": "https://gitlab.com/nvade-packages/devtools/-/tree/v0.16.0"
+                "issues": "https://gitlab.com/nvade-packages/devtools/-/issues",
+                "source": "https://gitlab.com/nvade-packages/devtools"
             },
-            "time": "2026-09-28T19:41:26+00:00"
+            "time": "2026-09-29T22:06:30+00:00"
         },
         {
             "name": "pestphp/pest",
@@ -13978,6 +13990,57 @@
                 }
             ],
             "time": "2026-09-25T09:31:51+00:00"
+        },
+        {
+            "name": "phpstan/phpstan-deprecation-rules",
+            "version": "2.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpstan/phpstan-deprecation-rules.git",
+                "reference": "67bedd65c24bc72840afc45aed48b1059dd44bec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/67bedd65c24bc72840afc45aed48b1059dd44bec",
+                "reference": "67bedd65c24bc72840afc45aed48b1059dd44bec",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0",
+                "phpstan/phpstan": "^2.1.39"
+            },
+            "require-dev": {
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^9.6",
+                "shipmonk/name-collision-detector": "^2.1"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PHPStan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPStan rules for detecting usage of deprecated classes, methods, properties, constants and traits.",
+            "keywords": [
+                "static analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
+                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.5"
+            },
+            "time": "2026-07-22T06:50:43+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -15759,6 +15822,72 @@
             "time": "2026-02-06T04:52:52+00:00"
         },
         {
+            "name": "shipmonk/composer-dependency-analyser",
+            "version": "1.8.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shipmonk-rnd/composer-dependency-analyser.git",
+                "reference": "975e5873b519d5180b1017a5dfb43d80781abd45"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shipmonk-rnd/composer-dependency-analyser/zipball/975e5873b519d5180b1017a5dfb43d80781abd45",
+                "reference": "975e5873b519d5180b1017a5dfb43d80781abd45",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-tokenizer": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "editorconfig-checker/editorconfig-checker": "^10.7.0",
+                "ergebnis/composer-normalize": "^2.19.0",
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "phpcompatibility/php-compatibility": "^9.3.5",
+                "phpstan/phpstan": "^1.12.26",
+                "phpstan/phpstan-phpunit": "^1.4.2",
+                "phpstan/phpstan-strict-rules": "^1.6.2",
+                "phpunit/phpunit": "^8.5.42 || ^9.6.23",
+                "shipmonk/name-collision-detector": "^2.1.1",
+                "slevomat/coding-standard": "^8.15.0"
+            },
+            "bin": [
+                "bin/composer-dependency-analyser"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ShipMonk\\ComposerDependencyAnalyser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Fast detection of composer dependency issues (dead dependencies, shadow dependencies, misplaced dependencies)",
+            "keywords": [
+                "analyser",
+                "composer",
+                "composer dependency",
+                "dead code",
+                "dead dependency",
+                "detector",
+                "dev",
+                "misplaced dependency",
+                "shadow dependency",
+                "static analysis",
+                "unused code",
+                "unused dependency"
+            ],
+            "support": {
+                "issues": "https://github.com/shipmonk-rnd/composer-dependency-analyser/issues",
+                "source": "https://github.com/shipmonk-rnd/composer-dependency-analyser/tree/1.8.4"
+            },
+            "time": "2025-11-25T14:38:16+00:00"
+        },
+        {
             "name": "spatie/file-system-watcher",
             "version": "1.2.1",
             "source": {
@@ -16016,16 +16145,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v8.1.6",
+            "version": "v8.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "0b4aa53a67f9fece88c665f1a1dadcfd25d93fe5"
+                "reference": "030e96eed0303223bfca3af9109e9e64830b6ec3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/0b4aa53a67f9fece88c665f1a1dadcfd25d93fe5",
-                "reference": "0b4aa53a67f9fece88c665f1a1dadcfd25d93fe5",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/030e96eed0303223bfca3af9109e9e64830b6ec3",
+                "reference": "030e96eed0303223bfca3af9109e9e64830b6ec3",
                 "shasum": ""
             },
             "require": {
@@ -16068,7 +16197,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v8.1.6"
+                "source": "https://github.com/symfony/yaml/tree/v8.1.8"
             },
             "funding": [
                 {
@@ -16088,7 +16217,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-30T01:03:44+00:00"
+            "time": "2026-09-26T06:33:49+00:00"
         },
         {
             "name": "symplify/rule-doc-generator-contracts",
@@ -16147,6 +16276,7 @@
                     "type": "github"
                 }
             ],
+            "abandoned": true,
             "time": "2024-03-18T22:02:54+00:00"
         },
         {
@@ -16339,5 +16469,5 @@
         "php": "^8.5"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
