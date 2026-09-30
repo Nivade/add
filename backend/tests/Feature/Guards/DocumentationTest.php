@@ -88,7 +88,6 @@ it('resolves every relative link in an agent document', function (): void {
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     $planned = [
-        'backend/resources/js/components/not-here.tsx',
     ];
 
     foreach ($planned as $path) {

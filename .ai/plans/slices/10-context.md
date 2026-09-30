@@ -349,7 +349,7 @@ day, and `model:prune` runs daily.
 
   *Check:* `npm run typecheck` passes.
 
-- [ ] **11. Web.** Invoke skills: `frontend-design`, `inertia-react-development`,
+- [x] **11. Web.** Invoke skills: `frontend-design`, `inertia-react-development`,
   `wayfinder-development`, `tailwindcss-development`.
   - Create `backend/resources/js/components/not-here.tsx`. Copy
     `SaidIdDoThis`'s quiet-line shape: an Inertia `<Form>` from the Wayfinder

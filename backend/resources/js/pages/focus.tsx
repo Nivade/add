@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasons } from '@add/shared';
+import { stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing, stepMeta } from '@/components/one-thing';
@@ -132,7 +132,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">
-                        {stuckReasons.map((reason) => (
+                        {stuckReasonsFor(step ?? { place: null }).map((reason) => (
                             <Button
                                 key={reason.value}
                                 variant="outline"

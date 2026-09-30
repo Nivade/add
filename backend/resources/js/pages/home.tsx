@@ -15,6 +15,7 @@ import { captureFieldClassName } from '@/components/capture-dialog';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
+import { NotHere } from '@/components/not-here';
 import { Meta, OneThing, StartStep, stepMeta } from '@/components/one-thing';
 import { quietButtonClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
@@ -224,6 +225,11 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 <li key={line}>{line}</li>
                             ))}
                         </ul>
+                        {rightNow.assumedPlace && (
+                            <div className="mt-2">
+                                <NotHere place={rightNow.assumedPlace} />
+                            </div>
+                        )}
                         <div className="mt-3">
                             <SaidIdDoThis
                                 promised={rightNowIsCommitment}
