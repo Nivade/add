@@ -85,7 +85,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - `backend/resources/js/pages/settings/profile.tsx` shows "Times are read in {zone}, taken from this device." from `auth.user.timezone` (add `timezone: string` to the `User` type in `backend/resources/js/types/auth.ts`). `mobile/app/settings.tsx` shows the same line from `Intl`.
   - New `backend/tests/Feature/Auth/TimezoneTest.php`: the cookie updates the zone; the header updates it on the API; an unknown zone is ignored; a guest request is untouched.
   - Check: the test file passes; after login in the browser, the rail clock shows local time.
-- [ ] **1.4 A capture says it landed.** Invoke skills: `inertia-react-development`, `laravel-data`, `expo-data-fetching`.
+- [x] **1.4 A capture says it landed.** Invoke skills: `inertia-react-development`, `laravel-data`, `expo-data-fetching`.
   - Web `StoreCaptureController`: replace `->with('captured', true)` with `Inertia::flash('toast', ['type' => 'success', 'message' => 'Got it. Sorting it out.'])` and `back()`.
   - `HomeData` gains `int $sortingCount`: the person's captures with `processed_at` null created in the last 24 hours, counted in `BuildHome`.
   - `packages/shared/src/copy.ts`: `sortingLine(count: number): string` → "Sorting the thought you just wrote down." for one, "Sorting the {n} thoughts you just wrote down." for more.

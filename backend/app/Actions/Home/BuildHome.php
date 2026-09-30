@@ -16,6 +16,7 @@ use App\Data\NextActionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
 use App\Enums\IntentionStatus;
+use App\Models\Capture;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
@@ -33,6 +34,9 @@ final class BuildHome
 
     /** Long enough to come back from a break and still see what you finished. */
     private const int JUST_FINISHED_WITHIN_MINUTES = 60;
+
+    /** Past a day, an unsorted capture is stuck rather than being sorted. */
+    private const int SORTING_WITHIN_HOURS = 24;
 
     public function __construct(private readonly NextActionResolver $resolver) {}
 
@@ -54,9 +58,19 @@ final class BuildHome
             justFinished: $this->justFinished($user, $context->now),
             needsAttention: $needsAttention->items,
             restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
+            sortingCount: $this->sorting($user, $context->now),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
             checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
         );
+    }
+
+    private function sorting(User $user, CarbonImmutable $now): int
+    {
+        return Capture::query()
+            ->where('user_id', $user->id)
+            ->whereNull('processed_at')
+            ->where('created_at', '>=', $now->subHours(self::SORTING_WITHIN_HOURS))
+            ->count();
     }
 
     private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData

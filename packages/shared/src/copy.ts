@@ -18,6 +18,13 @@ export function restCountLine(count: number): string {
     return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about`;
 }
 
+/** Said while a capture is still with the model, so it never looks lost. */
+export function sortingLine(count: number): string {
+    return count === 1
+        ? 'Sorting the thought you just wrote down.'
+        : `Sorting the ${count} thoughts you just wrote down.`;
+}
+
 export const planRungLabels: Record<PlanRung, string> = {
     find_things: 'find what you need',
     get_ready: 'get ready',

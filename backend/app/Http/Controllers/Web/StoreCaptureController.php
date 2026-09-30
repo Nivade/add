@@ -8,6 +8,7 @@ use App\Actions\Captures\RecordCapture;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCaptureRequest;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 
 final class StoreCaptureController extends Controller
 {
@@ -17,6 +18,8 @@ final class StoreCaptureController extends Controller
 
         RecordCapture::run($user, $request->string('body')->toString(), $request->source());
 
-        return back()->with('captured', true);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Got it. Sorting it out.']);
+
+        return back();
     }
 }

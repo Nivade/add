@@ -7,9 +7,11 @@ import {
     commitmentCopy,
     recurrenceLine,
     restCountLine,
+    sortingLine,
     waitingForResponses,
 } from '@add/shared';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePoll } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { captureFieldClassName } from '@/components/capture-dialog';
 import { CheckIn } from '@/components/check-in';
@@ -206,7 +208,21 @@ export default function Home({ home: data }: { home: HomeData }) {
         justFinished,
         needsAttention,
         restCount,
+        sortingCount,
     } = data;
+    const { start, stop } = usePoll(
+        3000,
+        { only: ['home'] },
+        { autoStart: false },
+    );
+
+    useEffect(() => {
+        if (sortingCount > 0) {
+            start();
+
+            return stop;
+        }
+    }, [sortingCount, start, stop]);
 
     return (
         <>
@@ -222,6 +238,12 @@ export default function Home({ home: data }: { home: HomeData }) {
                     </h2>
                     <RightNow {...data} />
                 </section>
+
+                {sortingCount > 0 && (
+                    <p role="status" className="text-muted-foreground">
+                        {sortingLine(sortingCount)}
+                    </p>
+                )}
 
                 {!data.session && rightNow && rightNow.why.length > 0 && (
                     <Band label="Why this one">

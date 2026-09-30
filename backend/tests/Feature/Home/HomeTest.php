@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Reminders\SendDueReminders;
 use App\Actions\Sessions\StartSession;
 use App\Models\CalendarEvent;
+use App\Models\Capture;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
@@ -108,6 +109,19 @@ it('counts everything else without listing it', function (): void {
             ->where('home.restCount', 6)
             ->has('home.needsAttention', 0)
         );
+});
+
+it('counts the captures still being sorted, and only those', function (): void {
+    $user = User::factory()->create();
+    Capture::factory()->count(2)->for($user)->create();
+    Capture::factory()->for($user)->create(['processed_at' => CarbonImmutable::now()]);
+    Capture::factory()->for($user)->create(['created_at' => CarbonImmutable::now()->subDays(2)]);
+    Capture::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.sortingCount', 2));
 });
 
 it('counts open commitments beyond the one on show', function (): void {

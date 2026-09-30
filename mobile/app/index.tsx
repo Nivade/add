@@ -12,10 +12,11 @@ import {
   notHereLabels,
   recurrenceLine,
   restCountLine,
+  sortingLine,
   waitingForResponses,
 } from '@add/shared';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
 import { api } from '@/api/endpoints';
@@ -172,6 +173,19 @@ export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
+  const sortingCount =
+    resource.status === 'ready' ? resource.data.sortingCount : 0;
+  const { reload: reloadHome } = resource;
+
+  useEffect(() => {
+    if (sortingCount === 0) {
+      return;
+    }
+
+    const poll = setInterval(() => void reloadHome(), 3000);
+
+    return () => clearInterval(poll);
+  }, [sortingCount, reloadHome]);
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;
@@ -356,6 +370,11 @@ export default function Home() {
         </Band>
       )}
 
+      {sortingCount > 0 && (
+        <Text accessibilityLiveRegion="polite" style={styles.line}>
+          {sortingLine(sortingCount)}
+        </Text>
+      )}
       <Meta>{restCountLine(restCount)}</Meta>
       {hasOpenCommitments && (
         <QuietAction

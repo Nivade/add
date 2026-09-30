@@ -83,6 +83,7 @@ reminder: ReminderData | null,
 justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
+sortingCount: number,
 hasOpenCommitments: boolean,
 checkIn: CheckInTopic | null,
 };

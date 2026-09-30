@@ -22,6 +22,7 @@ class HomeData extends Data
         public ?JustFinishedData $justFinished,
         public array $needsAttention,
         public int $restCount,
+        public int $sortingCount,
         public bool $hasOpenCommitments,
         public ?CheckInTopic $checkIn,
     ) {}
