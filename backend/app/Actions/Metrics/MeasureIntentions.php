@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Metrics;
 
 use App\Data\Metrics\IntentionOutcomesData;
-use App\Enums\ExecutionEventType;
 use App\Enums\IntentionStatus;
 use App\Models\ExecutionEvent;
 use App\Models\Intention;
@@ -52,9 +51,7 @@ final class MeasureIntentions
     private function firstStarts(EloquentCollection $cohort): Collection
     {
         return ExecutionEvent::query()
-            ->join('execution_sessions', 'execution_sessions.id', '=', 'execution_events.execution_session_id')
-            ->where('execution_events.type', ExecutionEventType::Started)
-            ->whereIn('execution_sessions.intention_id', $cohort->modelKeys())
+            ->startsOn($cohort->modelKeys())
             ->groupBy('execution_sessions.intention_id')
             ->toBase()
             ->selectRaw('execution_sessions.intention_id as intention_id, min(execution_events.created_at) as first_start')

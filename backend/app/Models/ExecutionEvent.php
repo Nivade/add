@@ -8,8 +8,10 @@ use App\Enums\ExecutionEventType;
 use App\Models\Concerns\StoresDatesInUtc;
 use Carbon\CarbonImmutable;
 use Database\Factories\ExecutionEventFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +47,20 @@ class ExecutionEvent extends Model
     public function step(): BelongsTo
     {
         return $this->belongsTo(Step::class);
+    }
+
+    /**
+     * Joined through the session, so each row also carries `intention_id`.
+     *
+     * @param  Builder<self>  $query
+     * @param  iterable<mixed>  $intentionIds
+     */
+    #[Scope]
+    protected function startsOn(Builder $query, iterable $intentionIds): void
+    {
+        $query->join('execution_sessions', 'execution_sessions.id', '=', 'execution_events.execution_session_id')
+            ->where('execution_events.type', ExecutionEventType::Started)
+            ->whereIn('execution_sessions.intention_id', $intentionIds);
     }
 
     /** Two events can share a second; the ULID still orders them. */

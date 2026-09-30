@@ -176,6 +176,14 @@ function kitchen(int $steps = 3): Intention
     return $intention;
 }
 
+function kitchenFor(User $user, int $steps = 3): Intention
+{
+    $intention = kitchen($steps);
+    $intention->update(['user_id' => $user->id]);
+
+    return $intention;
+}
+
 function started(int $steps = 3): ExecutionSession
 {
     $intention = kitchen($steps);
@@ -194,10 +202,7 @@ function finishStepAt(User $user, Place $place): void
 
 function workedOn(User $user): void
 {
-    $intention = kitchen();
-    $intention->update(['user_id' => $user->id]);
-
-    StopSession::run(StartSession::run($user, $intention->steps()->first()));
+    StopSession::run(StartSession::run($user, kitchenFor($user)->steps()->first()));
 }
 
 /** An account opened some days ago that stopped a session yesterday, with the clock left at 2026-09-30 10:00. */

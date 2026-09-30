@@ -8,7 +8,7 @@ description: Use when touching how the single next step is chosen or explained â
 The engine is the product. A bad recommendation is worse than a list, because a
 list at least does not claim to have thought about it.
 
-`NextActionResolver` has two methods, and neither writes. `resolve()` returns
+Neither of `NextActionResolver`'s methods writes. `resolve()` returns
 the single most useful step or `null`, with the `why` populated whenever a step
 is. `decide()` returns the same answer wrapped in a `Decision`, which also names
 the rung that decided it â€” `continuation` when a running session short-circuited
@@ -49,7 +49,8 @@ nothing until everything above it ties.
 
 A rung's key is the snake case of its class basename, and `StartSession` stores
 it in every `started` event's payload. Renaming a rung class splits its history
-in `metrics:report`.
+in `metrics:report`. `continuation` never reaches a payload: starting the step a
+running session is already on writes no event.
 
 ## How the `why` is built
 

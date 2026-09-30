@@ -32,8 +32,11 @@ final class StartSession
         });
     }
 
-    /** Pressing start on something else is an answer to "what now", so the session follows rather than ignoring it. */
-    /** @param  array{recommended: bool, rung: string|null}  $attribution */
+    /**
+     * Pressing start on something else is an answer to "what now", so the session follows rather than ignoring it.
+     *
+     * @param  array{recommended: bool, rung: string|null}  $attribution
+     */
     private function retarget(ExecutionSession $running, User $user, Step $step, array $attribution): ExecutionSession
     {
         return $running->transition(function () use ($running, $user, $step, $attribution): ExecutionSession {

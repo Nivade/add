@@ -235,9 +235,7 @@ it('asks the due check-in on home', function (): void {
 
 it('holds the check-in back while a session is running', function (): void {
     $user = activeFor();
-    $intention = kitchen();
-    $intention->update(['user_id' => $user->id]);
-    StartSession::run($user, $intention->steps()->first());
+    StartSession::run($user, kitchenFor($user)->steps()->first());
 
     $this->actingAs($user)
         ->get(route('home'))

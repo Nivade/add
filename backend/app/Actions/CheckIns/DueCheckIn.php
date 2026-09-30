@@ -34,7 +34,7 @@ final class DueCheckIn
 
         $active = ExecutionSession::query()
             ->where('user_id', $user->id)
-            ->where('ended_at', '>=', $since)
+            ->where('ended_at', '>', $since)
             ->exists();
 
         if (! $active) {

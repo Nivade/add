@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Metrics;
 
 use App\Data\Metrics\RecoveryOutcomesData;
-use App\Enums\ExecutionEventType;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
 use App\Enums\StepStatus;
@@ -68,9 +67,7 @@ final class MeasureRecovery
     private function startsOn(EloquentCollection $landed): Collection
     {
         return ExecutionEvent::query()
-            ->join('execution_sessions', 'execution_sessions.id', '=', 'execution_events.execution_session_id')
-            ->where('execution_events.type', ExecutionEventType::Started)
-            ->whereIn('execution_sessions.intention_id', $landed->pluck('intention_id')->unique())
+            ->startsOn($landed->pluck('intention_id')->unique())
             ->get(['execution_sessions.intention_id', 'execution_events.created_at'])
             ->groupBy('intention_id')
             ->map(fn (Collection $starts): array => $starts->map(fn (ExecutionEvent $start): CarbonImmutable => $start->created_at)->values()->all());
