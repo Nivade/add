@@ -1,5 +1,9 @@
 import type { BackwardsPlanData } from '@add/shared';
-import { planRungLabels } from '@add/shared';
+import {
+    planRungLabels,
+    rungMinutesLabel,
+    rungMinutesNote,
+} from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import calendarEvents from '@/routes/calendar-events';
@@ -33,7 +37,7 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                     </span>
                     <label className="text-muted-foreground flex items-baseline gap-2">
                         <span className="sr-only">
-                            Minutes to {planRungLabels[rung.rung]}
+                            {rungMinutesLabel(rung.rung)}
                         </span>
                         <input
                             type="number"
@@ -44,7 +48,7 @@ export function BackwardsPlan({ plan }: { plan: BackwardsPlanData }) {
                             className="border-border focus-visible:ring-ring w-14 border-b bg-transparent py-0.5 text-right tabular-nums focus-visible:ring-1 focus-visible:outline-none"
                         />
                         <span className="w-16">
-                            {rung.assumed ? 'min, assumed' : 'min, yours'}
+                            {rungMinutesNote(rung.assumed)}
                         </span>
                     </label>
                 </div>

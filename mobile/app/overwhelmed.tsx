@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { formatEstimate } from '@add/shared';
+import { homeCopy, restCountLine, stepMeta } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -39,17 +39,18 @@ export default function Overwhelmed() {
         <>
           <OneThing>{step.step.title}</OneThing>
           <Meta>
-            {formatEstimate(step.step.estimatedSeconds) ?? 'a small one'} · that
-            is all you have to do
+            {stepMeta(step.step)} · that is all you have to do
           </Meta>
+          {step.why.map((line) => (
+            <Meta key={line}>{line}</Meta>
+          ))}
           <Button label="Start" tone="primary" onPress={() => void start()} />
         </>
       ) : (
-        <>
-          <OneThing>There is nothing small left.</OneThing>
-          <Meta>that is allowed</Meta>
-        </>
+        <OneThing>{homeCopy.nothingNeedsYou}</OneThing>
       )}
+
+      <Meta>{restCountLine(data.restCount)}</Meta>
 
       <Button label="Back" onPress={() => router.replace('/')} />
     </Screen>

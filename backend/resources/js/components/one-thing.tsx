@@ -1,4 +1,3 @@
-import { formatEstimate } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import focusRoutes from '@/routes/focus';
@@ -18,19 +17,6 @@ export function Meta({ children }: { children: React.ReactNode }) {
         <p className="text-muted-foreground pl-5 font-mono text-[13px]">
             {children}
         </p>
-    );
-}
-
-/** An unestimated step says so rather than going quiet, and a guessed one says who guessed. */
-export function stepMeta(step: {
-    estimatedSeconds: number | null;
-    generated: boolean;
-}): string {
-    const estimate = formatEstimate(step.estimatedSeconds);
-
-    return (
-        (estimate ? `~${estimate}` : 'unestimated') +
-        (step.generated ? ' · suggested' : '')
     );
 }
 

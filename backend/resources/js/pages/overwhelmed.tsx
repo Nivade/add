@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { restCountLine } from '@add/shared';
+import { homeCopy, restCountLine } from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { OneThing, StartStep } from '@/components/one-thing';
 import { home } from '@/routes';
@@ -23,7 +23,7 @@ export default function Overwhelmed({
                     <OneThing>
                         {smallestStep
                             ? smallestStep.step.title
-                            : 'Nothing needs you right now.'}
+                            : homeCopy.nothingNeedsYou}
                     </OneThing>
 
                     {smallestStep && (

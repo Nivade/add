@@ -129,7 +129,7 @@ function Classification({
     if (!result.actionable) {
         return (
             <div className="flex flex-col gap-3">
-                <p>Nothing in this needs you.</p>
+                <p>{entryCopy.paste.nothingNeeded}</p>
                 <Button variant="outline" onClick={onDone} className="self-end">
                     Close
                 </Button>

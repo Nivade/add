@@ -24,6 +24,43 @@ export const planRungLabels: Record<PlanRung, string> = {
     leave: 'leave',
 };
 
+export function rungMinutesLabel(rung: PlanRung): string {
+    return `Minutes to ${planRungLabels[rung]}`;
+}
+
+/** Whose number a rung's minutes are: the app's guess or the person's own. */
+export function rungMinutesNote(assumed: boolean): string {
+    return assumed ? 'min, assumed' : 'min, yours';
+}
+
+export const homeCopy = {
+    nothingNeedsYou: 'Nothing needs you right now.',
+    wholeAnswer: 'that is the whole answer',
+    why: 'Why this one',
+    beforeYouGo: 'Before you go',
+    needsAttention: 'Needs attention',
+    justFinished: 'Just finished',
+    repeatEvery: 'Repeat every',
+} as const;
+
+export const remindAfterCopy = {
+    action: 'Remind me after',
+    placeholder: 'What should future you hear?',
+    label: 'What should future you hear',
+} as const;
+
+export const focusCopy = {
+    welcomeBack: 'Welcome back.',
+    distracted: 'I got distracted',
+    stuck: "What's blocking you?",
+} as const;
+
+export function aiConsentCopy(consented: boolean): { line: string; action: string } {
+    return consented
+        ? { line: 'A model outside this server can read what you capture.', action: 'Turn off' }
+        : { line: 'Nothing you write leaves this server.', action: 'Turn on' };
+}
+
 /** In the order they are offered, which is part of the copy: the gentlest answers come first. */
 const stuckReasons: { value: StuckReason; label: string }[] = [
     { value: 'dont_know_what_to_do', label: "I don't know what to do" },
@@ -126,6 +163,10 @@ export const entryCopy = {
         meta: 'An email, a letter, a message. The app says whether it needs you.',
         placeholder: 'Your car insurance expires on 14 October.',
         label: 'What arrived',
+        nothingNeeded: 'Nothing in this needs you.',
+    },
+    thought: {
+        question: "What's on your mind?",
     },
 } as const;
 

@@ -4,6 +4,7 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     readonly errors: Record<string, string[]> = {},
+    readonly serverMessage: string | null = null,
   ) {
     super(`The API answered ${status}.`);
   }
@@ -67,7 +68,11 @@ export async function request<T>(
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
 
-    throw new ApiError(response.status, payload?.errors ?? {});
+    throw new ApiError(
+      response.status,
+      payload?.errors ?? {},
+      typeof payload?.message === 'string' ? payload.message : null,
+    );
   }
 
   if (response.status === 204) {

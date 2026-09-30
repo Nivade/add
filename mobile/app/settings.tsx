@@ -1,3 +1,4 @@
+import { aiConsentCopy } from '@add/shared';
 import { useCallback, useState } from 'react';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
@@ -33,12 +34,10 @@ export default function Settings() {
       <StaleNote problem={problem} />
       <OneThing>AI</OneThing>
       <Meta>
-        {data.consented
-          ? "A model outside this server can read what you capture."
-          : 'Nothing you write leaves this server.'}
+        {aiConsentCopy(data.consented).line}
       </Meta>
       <Button
-        label={data.consented ? 'Turn off' : 'Turn on'}
+        label={aiConsentCopy(data.consented).action}
         onPress={() => void toggle()}
         disabled={saving}
       />

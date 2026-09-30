@@ -1,8 +1,8 @@
 import type { ExecutionStateData } from '@add/shared';
-import { stuckReasonsFor } from '@add/shared';
+import { focusCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Form, Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Meta, OneThing, stepMeta } from '@/components/one-thing';
+import { Meta, OneThing } from '@/components/one-thing';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import {
@@ -58,7 +58,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
 
                 {paused ? (
                     <div className="space-y-6">
-                        <OneThing>Welcome back.</OneThing>
+                        <OneThing>{focusCopy.welcomeBack}</OneThing>
                         <Meta>
                             you left off at{' '}
                             {(step?.title ?? intention.title).toLowerCase()}
@@ -104,7 +104,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 onClick={() => setStuckOpen(true)}
                             />
                             <Control
-                                label="I got distracted"
+                                label={focusCopy.distracted}
                                 form={focusRoutes.distracted.form(session.id)}
                             />
                             <Control
@@ -126,7 +126,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
             <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>What's blocking you?</DialogTitle>
+                        <DialogTitle>{focusCopy.stuck}</DialogTitle>
                         <DialogDescription>
                             Every answer leads somewhere.
                         </DialogDescription>

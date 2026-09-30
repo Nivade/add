@@ -8,10 +8,11 @@ import {
   checkInQuestions,
   checkInResponses,
   commitmentCopy,
-  formatEstimate,
+  homeCopy,
   notHereLabels,
   recurrenceLine,
   restCountLine,
+  stepMeta,
   waitingForResponses,
 } from '@add/shared';
 import { router } from 'expo-router';
@@ -139,14 +140,14 @@ function JustFinished({
   };
 
   return (
-    <Band label="Just finished">
+    <Band label={homeCopy.justFinished}>
       <Text style={styles.line}>{finished.title}</Text>
       {finished.recurrenceEveryDays ? (
         <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
       ) : (
         <>
           <View style={styles.repeat}>
-            <Meta>Repeat every</Meta>
+            <Meta>{homeCopy.repeatEvery}</Meta>
             <TextInput
               style={[styles.input, styles.days]}
               value={everyDays}
@@ -234,12 +235,12 @@ export default function Home() {
         <>
           <OneThing>{rightNow.step.title}</OneThing>
           <Meta>
-            {formatEstimate(rightNow.step.estimatedSeconds) ?? 'no guess yet'} ·{' '}
+            {stepMeta(rightNow.step)} ·{' '}
             {rightNow.intention.title.toLowerCase()}
           </Meta>
           <Button label="Start" tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
-            <Band label="Why this one">
+            <Band label={homeCopy.why}>
               {rightNow.why.map((line) => (
                 <Text key={line} style={styles.line}>
                   {line}
@@ -264,8 +265,8 @@ export default function Home() {
         </>
       ) : (
         <>
-          <OneThing>Nothing needs you right now.</OneThing>
-          <Meta>that is the whole answer</Meta>
+          <OneThing>{homeCopy.nothingNeedsYou}</OneThing>
+          <Meta>{homeCopy.wholeAnswer}</Meta>
         </>
       )}
 
@@ -274,7 +275,7 @@ export default function Home() {
       )}
 
       {reminder && (
-        <Band label="Before you go">
+        <Band label={homeCopy.beforeYouGo}>
           {reminder.lines.map((line) => (
             <Text key={line} style={styles.line}>
               {line}
@@ -307,7 +308,7 @@ export default function Home() {
       )}
 
       {needsAttention.length > 0 && (
-        <Band label="Needs attention">
+        <Band label={homeCopy.needsAttention}>
           {needsAttention.map((item) => {
             switch (item.kind) {
               case 'waiting_for':
