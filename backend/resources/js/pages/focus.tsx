@@ -132,7 +132,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-2">
-                        {stuckReasonsFor(step ?? { place: null }).map((reason) => (
+                        {stuckReasonsFor(step?.place ?? null).map((reason) => (
                             <Button
                                 key={reason.value}
                                 variant="outline"

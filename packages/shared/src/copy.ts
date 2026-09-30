@@ -23,7 +23,7 @@ export const planRungLabels: Record<PlanRung, string> = {
 };
 
 /** In the order they are offered, which is part of the copy: the gentlest answers come first. */
-export const stuckReasons: { value: StuckReason; label: string }[] = [
+const stuckReasons: { value: StuckReason; label: string }[] = [
     { value: 'dont_know_what_to_do', label: "I don't know what to do" },
     { value: 'too_big', label: 'This is too much' },
     { value: 'need_something', label: 'I need something' },
@@ -35,8 +35,8 @@ export const stuckReasons: { value: StuckReason; label: string }[] = [
 ];
 
 /** Being in the wrong place only makes sense for a step that has a place. */
-export function stuckReasonsFor(step: { place: Place | null }): { value: StuckReason; label: string }[] {
-    return step.place === null ? stuckReasons.filter((reason) => reason.value !== 'not_here') : stuckReasons;
+export function stuckReasonsFor(place: Place | null): { value: StuckReason; label: string }[] {
+    return place === null ? stuckReasons.filter((reason) => reason.value !== 'not_here') : stuckReasons;
 }
 
 /** The one-tap answer to a guess the why states out loud. */

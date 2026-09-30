@@ -26,15 +26,11 @@ final class ChainedNextActionResolver implements NextActionResolver
     /** @var list<Rung> */
     private array $chain;
 
-    private FitsWhereYouAre $fitsWhereYouAre;
-
     public function __construct()
     {
-        $this->fitsWhereYouAre = new FitsWhereYouAre;
-
         $this->chain = [
             new DeadlineWithinReach,
-            $this->fitsWhereYouAre,
+            new FitsWhereYouAre,
             new HasDeadline,
             new NotRecentlySkipped,
             new PrerequisiteFirst,
@@ -55,16 +51,15 @@ final class ChainedNextActionResolver implements NextActionResolver
         $continued = $this->continuation($user, $candidates);
 
         if ($continued instanceof Candidate) {
-            return $this->answer($continued, ['You are part-way through this one.'], null);
+            return $this->answer($continued, ['You are part-way through this one.']);
         }
 
         usort($candidates, fn (Candidate $a, Candidate $b): int => $this->rank($a, $b, $context));
 
         $winner = $candidates[0];
         $separator = $this->separator($candidates, $context);
-        $assumedPlace = $this->speaks($this->fitsWhereYouAre, $separator) ? $this->fitsWhereYouAre->assumedPlace($winner, $context) : null;
 
-        return $this->answer($winner, $this->why($candidates, $separator, $context), $assumedPlace);
+        return $this->answer($winner, $this->why($winner, $separator, $context), $this->assumption($winner, $separator, $context));
     }
 
     /** @param  list<Candidate>  $candidates */
@@ -98,14 +93,9 @@ final class ChainedNextActionResolver implements NextActionResolver
         return 0;
     }
 
-    /**
-     * @param  list<Candidate>  $ranked
-     * @return list<string>
-     */
-    private function why(array $ranked, int $separator, ResolutionContext $context): array
+    /** @return list<string> */
+    private function why(Candidate $winner, int $separator, ResolutionContext $context): array
     {
-        $winner = $ranked[0];
-
         $why = $separator >= 0 ? [$this->chain[$separator]->decides($winner, $context)] : [];
 
         foreach (array_slice($this->chain, $separator + 1) as $comparator) {
@@ -117,12 +107,18 @@ final class ChainedNextActionResolver implements NextActionResolver
         return $why === [] ? [(string) $this->chain[count($this->chain) - 1]->decides($winner, $context)] : $why;
     }
 
-    /** Rungs above the separator stay silent in the why; the separator and everything below it speak. */
-    private function speaks(Rung $rung, int $separator): bool
+    /** Rungs above the separator stay silent in the why, so only a guess one below it states can be taken back. */
+    private function assumption(Candidate $winner, int $separator, ResolutionContext $context): ?Place
     {
-        $position = array_search($rung, $this->chain, true);
+        foreach (array_slice($this->chain, max($separator, 0)) as $rung) {
+            $assumed = $rung->assumes($winner, $context);
 
-        return $position !== false && $separator <= $position;
+            if ($assumed instanceof Place) {
+                return $assumed;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -147,7 +143,7 @@ final class ChainedNextActionResolver implements NextActionResolver
     }
 
     /** @param  list<string>  $why */
-    private function answer(Candidate $candidate, array $why, ?Place $assumedPlace): NextActionData
+    private function answer(Candidate $candidate, array $why, ?Place $assumedPlace = null): NextActionData
     {
         return new NextActionData(
             StepData::from($candidate->step),

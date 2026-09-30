@@ -25,11 +25,19 @@ final readonly class ResolutionContext
 
     public static function forUser(User $user): self
     {
+        $clock = self::onTheClock($user);
+
+        return new self($clock->now, $clock->availableSeconds, $clock->appointment, $clock->plan, Whereabouts::forUser($user, $clock->now));
+    }
+
+    /** The day without where the person is, for what draws time and never ranks a step. */
+    public static function onTheClock(User $user): self
+    {
         $now = $user->now();
         $appointment = NextAppointment::forUser($user, $now);
         $plan = $appointment instanceof Appointment ? BackwardsPlan::for($appointment, $now) : null;
 
-        return new self($now, self::untilLeaving($plan, $now), $appointment, $plan, Whereabouts::forUser($user, $now));
+        return new self($now, self::untilLeaving($plan, $now), $appointment, $plan);
     }
 
     public function availableInWords(): ?string

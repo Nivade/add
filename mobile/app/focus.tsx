@@ -115,7 +115,7 @@ export default function Focus() {
           <Meta>every answer leads somewhere</Meta>
 
           <View style={styles.controls}>
-            {stuckReasonsFor(step ?? { place: null }).map((reason) => (
+            {stuckReasonsFor(step?.place ?? null).map((reason) => (
               <Button
                 key={reason.value}
                 label={reason.label}

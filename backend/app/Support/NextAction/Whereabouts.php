@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\NextAction;
 
 use App\Enums\Place;
+use App\Enums\StepStatus;
 use App\Models\Step;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -36,6 +37,7 @@ final readonly class Whereabouts
     {
         // Oldest first, so the latest per place is the one pluck keeps.
         $completed = Step::query()
+            ->where('status', StepStatus::Done)
             ->whereNotNull('place')
             ->where('completed_at', '>=', $now->subMinutes(self::LIKELY_MINUTES))
             ->whereHas('intention', fn (Builder $query) => $query->where('user_id', $user->id))
@@ -53,7 +55,6 @@ final readonly class Whereabouts
     public function fit(?Place $place): int
     {
         return match (true) {
-            ! $place instanceof Place => self::UNKNOWN,
             in_array($place, $this->likely, true) => self::FITS,
             in_array($place, $this->unlikely, true) => self::DOES_NOT_FIT,
             default => self::UNKNOWN,

@@ -23,7 +23,7 @@ final class SkipCurrentStep
 
             RecordExecutionEvent::run($session, ExecutionEventType::StepSkipped, $step->id);
 
-            return AdvanceSession::run($session, $step->id);
+            return AdvanceSession::run($session, $step->is(...));
         });
     }
 }

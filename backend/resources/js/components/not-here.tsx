@@ -1,6 +1,7 @@
 import { notHereLabels } from '@add/shared';
 import type { Place } from '@add/shared';
 import { Form } from '@inertiajs/react';
+import { quietLineClassName } from '@/components/responses';
 import whereabouts from '@/routes/whereabouts';
 
 /** Answers the guess the why just stated; the page re-ranks, so no confirmation follows. */
@@ -13,7 +14,7 @@ export function NotHere({ place }: { place: Place }) {
             <input type="hidden" name="place" value={place} />
             <button
                 type="submit"
-                className="text-muted-foreground hover:text-foreground font-mono text-[13px] underline-offset-4 hover:underline"
+                className={quietLineClassName}
             >
                 {notHereLabels[place]}
             </button>

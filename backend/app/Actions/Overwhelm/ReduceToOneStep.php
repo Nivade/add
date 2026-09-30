@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\NextAction\Candidate;
 use App\Support\NextAction\CandidatePool;
 use App\Support\NextAction\Comparators\FitsWhereYouAre;
+use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\ResolutionContext;
 use App\Support\NextAction\SmallestFirst;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -75,10 +76,13 @@ final class ReduceToOneStep
             return false;
         }
 
+        $coolOff = new NotRecentlySkipped;
         $fit = new FitsWhereYouAre;
 
         foreach ($rest as $other) {
-            if ($other->cost() < $candidate->cost() && $fit->compare($candidate, $other, $context) < 0) {
+            if ($other->cost() < $candidate->cost()
+                && $coolOff->compare($candidate, $other, $context) === 0
+                && $fit->compare($candidate, $other, $context) < 0) {
                 return true;
             }
         }

@@ -308,10 +308,9 @@ day, and `model:prune` runs daily.
   - `ReportStuck` matches `Elsewhere` to a private `elsewhere($session, $step)`:
     - if the step's place is null, it runs `AdvanceSession::run($session, $step->id)`;
     - otherwise it runs `ReportNotHere::run($session->user, $step->place)`,
-      then takes the next remaining sibling with a different place (null counts
-      as different), onwards from the step's position and then from the front;
-    - with no such sibling, it runs
-      `LandSession::run($session, SessionOutcome::Continued)`.
+      then runs `AdvanceSession` passing over every step in that place, so it
+      moves onwards and then from the front, and lands `continued` when
+      nothing is left elsewhere;
   - Add tests to `backend/tests/Feature/Execution/StuckTest.php`:
     - the report is written;
     - the sibling is chosen, or the session lands `continued`;
@@ -343,8 +342,8 @@ day, and `model:prune` runs daily.
   `packages/shared/src/copy.ts`:
   - add `{ value: 'not_here', label: "I'm not in the right place for this" }`
     to `stuckReasons`, after `need_something`;
-  - add `stuckReasonsFor(step: { place: Place | null })`, which drops
-    `not_here` when `place` is null;
+  - add `stuckReasonsFor(place: Place | null)`, which drops `not_here` when
+    `place` is null;
   - add `notHereLabels: Record<Place, string>` = home "I'm not at home", work
     "I'm not at work", out "I'm not out", computer "I'm not at a computer".
 
