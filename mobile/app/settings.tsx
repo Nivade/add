@@ -1,5 +1,6 @@
-import { aiConsentCopy } from '@add/shared';
+import { aiConsentCopy, timezoneLine } from '@add/shared';
 import { useCallback, useState } from 'react';
+import { deviceTimezone } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
@@ -42,6 +43,9 @@ export default function Settings() {
         onPress={() => void toggle()}
         disabled={saving}
       />
+      <Meta>
+        {timezoneLine(deviceTimezone())}
+      </Meta>
     </Screen>
   );
 }

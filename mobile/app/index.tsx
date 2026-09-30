@@ -8,6 +8,7 @@ import {
   checkInQuestions,
   checkInResponses,
   commitmentCopy,
+  focusCopy,
   homeBands,
   homeCopy,
   nothingNeedsYou,
@@ -15,10 +16,12 @@ import {
   partWayLine,
   recurrenceLine,
   restCountLine,
+  returnCopy,
   rightNowMeta,
+  sortingLine,
   waitingForResponses,
 } from '@add/shared';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
@@ -176,6 +179,37 @@ export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
+  const sortingCount =
+    resource.status === 'ready' ? resource.data.sortingCount : 0;
+  const { reload: reloadHome } = resource;
+
+  /** One read at a time, and only while home is on screen. */
+  useFocusEffect(
+    useCallback(() => {
+      if (sortingCount === 0) {
+        return;
+      }
+
+      let stopped = false;
+      let timer: ReturnType<typeof setTimeout>;
+      const next = () => {
+        timer = setTimeout(async () => {
+          await reloadHome();
+
+          if (!stopped) {
+            next();
+          }
+        }, 3000);
+      };
+
+      next();
+
+      return () => {
+        stopped = true;
+        clearTimeout(timer);
+      };
+    }, [sortingCount, reloadHome]),
+  );
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;
@@ -225,11 +259,17 @@ export default function Home() {
       {session ? (
         <>
           <OneThing>
-            {session.session.currentStep?.title ?? session.intention.title}
+            {session.returning
+              ? returnCopy.welcome
+              : (session.session.currentStep?.title ?? session.intention.title)}
           </OneThing>
-          <Meta>{partWayLine(session.intention.title)}</Meta>
+          <Meta>
+            {session.returning
+              ? returnCopy.workingOn(session.intention.title)
+              : partWayLine(session.intention.title)}
+          </Meta>
           <Button
-            label="Continue"
+            label={focusCopy.continue}
             tone="primary"
             onPress={() => router.push('/focus')}
           />
@@ -238,7 +278,7 @@ export default function Home() {
         <>
           <OneThing>{rightNow.step.title}</OneThing>
           <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
-          <Button label="Start" tone="primary" onPress={() => void start()} />
+          <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
             <Band label={homeBands.why}>
               {rightNow.why.map((line) => (
@@ -357,6 +397,9 @@ export default function Home() {
         </Band>
       )}
 
+      <Text accessibilityLiveRegion="polite" style={styles.line}>
+        {sortingCount > 0 ? sortingLine(sortingCount) : ''}
+      </Text>
       <Meta>{restCountLine(restCount)}</Meta>
       {hasOpenCommitments && (
         <QuietAction

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Home;
 
-use App\Data\NeedsAttentionBand;
 use App\Data\NeedsAttentionData;
 use App\Models\Commitment;
 use App\Models\Intention;
 use App\Models\User;
 use App\Models\WaitingFor;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsObject;
 
 /** Each source offers at most its most pressing row, so the band never turns into a list. */
@@ -25,24 +23,19 @@ final class BuildNeedsAttention
     /** How long a waiting-for goes untouched before it is worth a nudge. */
     private const int WAITING_FOR_STALE_AFTER_DAYS = 4;
 
-    /** @param  Collection<int, Commitment>  $standaloneCommitments  open, most pressing first */
-    public function handle(User $user, CarbonImmutable $now, Collection $standaloneCommitments): NeedsAttentionBand
+    /** @return list<NeedsAttentionData> */
+    public function handle(User $user, CarbonImmutable $now, ?Commitment $mostPressingStandalone): array
     {
-        $openWaitingFors = WaitingFor::query()->where('user_id', $user->id)->open();
-        $staleWaitingFor = (clone $openWaitingFors)
+        $staleWaitingFor = WaitingFor::query()->where('user_id', $user->id)->open()
             ->whereRaw('coalesce(last_answered_at, created_at) <= ?', [$now->subDays(self::WAITING_FOR_STALE_AFTER_DAYS)])
             ->orderByRaw('coalesce(last_answered_at, created_at)')
             ->first();
-        $commitment = $standaloneCommitments->first();
 
-        return new NeedsAttentionBand(
-            items: [
-                ...$this->awaitingClarification($user),
-                ...($staleWaitingFor instanceof WaitingFor ? [NeedsAttentionData::forWaitingFor($staleWaitingFor)] : []),
-                ...($commitment instanceof Commitment ? [NeedsAttentionData::forCommitment($commitment)] : []),
-            ],
-            openBesidesIntentions: $openWaitingFors->count() + $standaloneCommitments->count(),
-        );
+        return [
+            ...$this->awaitingClarification($user),
+            ...($staleWaitingFor instanceof WaitingFor ? [NeedsAttentionData::forWaitingFor($staleWaitingFor)] : []),
+            ...($mostPressingStandalone instanceof Commitment ? [NeedsAttentionData::forCommitment($mostPressingStandalone)] : []),
+        ];
     }
 
     /** @return list<NeedsAttentionData> */

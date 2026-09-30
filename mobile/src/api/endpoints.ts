@@ -112,17 +112,28 @@ export const api = {
       body: { step_id: stepId },
     }),
 
-  control: (token: string, sessionId: string, control: SessionControl) =>
+  control: (
+    token: string,
+    sessionId: string,
+    control: SessionControl,
+    stepId: string | null,
+  ) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/${control}`, {
       method: 'POST',
       token,
+      body: { step_id: stepId },
     }),
 
-  stuck: (token: string, sessionId: string, reason: StuckReason) =>
+  stuck: (
+    token: string,
+    sessionId: string,
+    stepId: string | null,
+    reason: StuckReason,
+  ) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/stuck`, {
       method: 'POST',
       token,
-      body: { reason },
+      body: { step_id: stepId, reason },
     }),
 
   createWaitingFor: (token: string, subject: string, note: string) =>

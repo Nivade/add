@@ -33,11 +33,12 @@ use App\Http\Controllers\Web\StoreCommitmentController;
 use App\Http\Controllers\Web\StoreFutureReminderController;
 use App\Http\Controllers\Web\StoreRelativeFutureReminderController;
 use App\Http\Controllers\Web\StoreWaitingForController;
+use App\Http\Middleware\RecordTimezone;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', ShowWelcomeController::class)->name('welcome');
 
-Route::middleware(['auth', 'verified'])->group(function (): void {
+Route::middleware(['auth', 'verified', RecordTimezone::class])->group(function (): void {
     Route::get('home', ShowHomeController::class)->name('home');
     Route::post('captures', StoreCaptureController::class)->name('captures.store');
     Route::get('overwhelmed', ShowOverwhelmedController::class)->name('overwhelmed');

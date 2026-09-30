@@ -1,3 +1,4 @@
+import { focusCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import focusRoutes from '@/routes/focus';
@@ -25,7 +26,7 @@ export function StartStep({ stepId }: { stepId: string }) {
         <div className="pl-5">
             <Form {...focusRoutes.start.form()}>
                 <input type="hidden" name="step_id" value={stepId} />
-                <Button type="submit">Start</Button>
+                <Button type="submit">{focusCopy.start}</Button>
             </Form>
         </div>
     );

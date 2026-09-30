@@ -1,8 +1,9 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
+import { ApiError } from '@/api/client';
 import { api, type SessionControl } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
@@ -17,6 +18,8 @@ export default function Focus() {
   const load = useCallback(() => api.currentSession(token as string), [token]);
   const resource = useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;
@@ -52,21 +55,55 @@ export default function Focus() {
     await reload();
   };
 
-  const control = async (name: SessionControl): Promise<void> =>
-    take(await api.control(token as string, session.id, name));
+  /** A 409 means another tap already moved the session on, so the screen catches up instead. */
+  const send = async (
+    write: () => Promise<ExecutionStateData>,
+  ): Promise<void> => {
+    if (inFlight.current) {
+      return;
+    }
+
+    inFlight.current = true;
+    setBusy(true);
+
+    try {
+      take(await write());
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 409)) {
+        throw error;
+      }
+
+      await reload();
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
+  };
+
+  const control = (name: SessionControl): Promise<void> =>
+    send(() =>
+      api.control(token as string, session.id, name, step?.id ?? null),
+    );
 
   return (
     <Screen>
       <StaleNote problem={problem} />
       <Meta>{intention.title}</Meta>
 
-      {paused ? (
+      {data.returning || paused ? (
         <>
-          <OneThing>{focusCopy.welcomeBack}</OneThing>
-          <Meta>{leftOffLine(step?.title ?? intention.title)}</Meta>
+          <OneThing>
+            {data.returning ? returnCopy.welcome : returnCopy.paused}
+          </OneThing>
+          <Meta>
+            {data.returning
+              ? returnCopy.meta(intention.title, data.stepsDone)
+              : returnCopy.pausedMeta}
+          </Meta>
           <Button
-            label="Continue"
+            label={focusCopy.continue}
             tone="primary"
+            disabled={busy}
             onPress={() => void control('resume')}
           />
         </>
@@ -81,15 +118,36 @@ export default function Focus() {
           )}
 
           <View style={styles.controls}>
-            <Button label={focusCopy.done} onPress={() => void control('complete-step')} />
-            <Button label={focusCopy.skip} onPress={() => void control('skip-step')} />
-            <Button label={focusCopy.pause} onPress={() => void control('pause')} />
-            <Button label={focusCopy.stuck} onPress={() => setStuckOpen(true)} />
+            <Button
+              label={focusCopy.done}
+              disabled={busy}
+              onPress={() => void control('complete-step')}
+            />
+            <Button
+              label={focusCopy.skip}
+              disabled={busy}
+              onPress={() => void control('skip-step')}
+            />
+            <Button
+              label={focusCopy.pause}
+              disabled={busy}
+              onPress={() => void control('pause')}
+            />
+            <Button
+              label={focusCopy.stuck}
+              disabled={busy}
+              onPress={() => setStuckOpen(true)}
+            />
             <Button
               label={focusCopy.distracted}
+              disabled={busy}
               onPress={() => void control('distracted')}
             />
-            <Button label={focusCopy.stop} onPress={() => void control('stop')} />
+            <Button
+              label={focusCopy.stop}
+              disabled={busy}
+              onPress={() => void control('stop')}
+            />
           </View>
         </>
       )}
@@ -120,9 +178,14 @@ export default function Focus() {
                 label={reason.label}
                 onPress={() => {
                   setStuckOpen(false);
-                  void api
-                    .stuck(token as string, session.id, reason.value)
-                    .then(take);
+                  void send(() =>
+                    api.stuck(
+                      token as string,
+                      session.id,
+                      step?.id ?? null,
+                      reason.value,
+                    ),
+                  );
                 }}
               />
             ))}

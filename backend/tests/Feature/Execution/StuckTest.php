@@ -27,7 +27,7 @@ it('moves to the shortest sibling and queues the split when the step is too big'
     $session = started();
     $big = $session->currentStep()->sole();
 
-    ReportStuck::run($session, StuckReason::TooBig);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::TooBig);
 
     expect($session->refresh()->currentStep()->sole()->position)->toBe(2)
         ->and($session->ended_at)->toBeNull();
@@ -43,7 +43,7 @@ it('trades a step too big for the shortest one, not for one nobody estimated', f
 
     $session->intention->steps()->where('position', 2)->sole()->update(['estimated_seconds' => null]);
 
-    ReportStuck::run($session, StuckReason::TooBig);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::TooBig);
 
     // Position 3 is the shortest of what is left once the unestimated one stops sorting first.
     expect($session->refresh()->currentStep()->sole()->position)->toBe(3);
@@ -57,7 +57,7 @@ it('does not hand back a step that was skipped minutes ago', function (): void {
 
     SkipStep::run($shortest);
 
-    ReportStuck::run($session, StuckReason::TooBig);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::TooBig);
 
     expect($session->refresh()->current_step_id)->not->toBe($shortest->id);
 });
@@ -68,7 +68,7 @@ it('records the blocker and moves to another step when something is missing', fu
     $session = started();
     $blocked = $session->current_step_id;
 
-    ReportStuck::run($session, StuckReason::NeedSomething, 'The drill is at my mother-in-law.');
+    ReportStuck::run($session, $session->current_step_id, StuckReason::NeedSomething, 'The drill is at my mother-in-law.');
 
     $event = $session->events()->where('type', 'stuck')->sole();
 
@@ -80,7 +80,7 @@ it('records the blocker and moves to another step when something is missing', fu
 it('ends the session cleanly when the answer is tired or unwilling', function (StuckReason $reason): void {
     $session = started();
 
-    ReportStuck::run($session, $reason);
+    ReportStuck::run($session, $session->current_step_id, $reason);
 
     expect($session->refresh()->outcome)->toBe(SessionOutcome::Stopped)
         ->and(replay($session))->toBe(['started', 'stuck', 'stopped']);
@@ -90,7 +90,7 @@ it('stores free text and stays where it was for anything else', function (): voi
     $session = started();
     $step = $session->current_step_id;
 
-    ReportStuck::run($session, StuckReason::SomethingElse, 'The cat is on the keyboard.');
+    ReportStuck::run($session, $session->current_step_id, StuckReason::SomethingElse, 'The cat is on the keyboard.');
 
     expect($session->refresh()->current_step_id)->toBe($step)
         ->and($session->ended_at)->toBeNull()
@@ -103,7 +103,7 @@ it('leaves every stuck answer with something to start or a clean stop', function
 
     $session = started();
 
-    ReportStuck::run($session, $reason);
+    ReportStuck::run($session, $session->current_step_id, $reason);
 
     $session->refresh();
 
@@ -164,7 +164,7 @@ it('does not open a second session while splitting', function (): void {
 
     $session = started();
 
-    ReportStuck::run($session, StuckReason::DontKnowWhatToDo);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::DontKnowWhatToDo);
 
     expect(ExecutionSession::query()->count())->toBe(1);
 });
@@ -197,7 +197,7 @@ it('advances rather than leaving them on the step they called too big', function
     $session = started(1);
     $only = $session->currentStep()->sole();
 
-    ReportStuck::run($session, StuckReason::TooBig);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::TooBig);
 
     expect($session->refresh()->current_step_id)->not->toBe($only->id)
         ->and($session->outcome)->toBe(SessionOutcome::Continued);
@@ -219,7 +219,7 @@ it('moves on to a step somewhere else when the person is not in the right place'
     $session = startedWithPlaces([Place::Out, Place::Out, Place::Home]);
     $first = $session->currentStep()->sole();
 
-    ReportStuck::run($session, StuckReason::NotHere);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::NotHere);
 
     expect($session->refresh()->currentStep()->sole()->position)->toBe(3)
         ->and($session->ended_at)->toBeNull()
@@ -231,11 +231,11 @@ it('moves on to a step somewhere else when the person is not in the right place'
 it('moves onwards before wrapping to the front, like any other move on', function (): void {
     $onwards = startedWithPlaces([Place::Home, Place::Out, Place::Home], at: 2);
 
-    ReportStuck::run($onwards, StuckReason::NotHere);
+    ReportStuck::run($onwards, $onwards->current_step_id, StuckReason::NotHere);
 
     $wrapped = startedWithPlaces([Place::Home, Place::Out, Place::Out], at: 2);
 
-    ReportStuck::run($wrapped, StuckReason::NotHere);
+    ReportStuck::run($wrapped, $wrapped->current_step_id, StuckReason::NotHere);
 
     expect($onwards->refresh()->currentStep()->sole()->position)->toBe(3)
         ->and($wrapped->refresh()->currentStep()->sole()->position)->toBe(1);
@@ -244,7 +244,7 @@ it('moves onwards before wrapping to the front, like any other move on', functio
 it('counts a step with no place as somewhere else', function (): void {
     $session = startedWithPlaces([Place::Out, Place::Out, null]);
 
-    ReportStuck::run($session, StuckReason::NotHere);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::NotHere);
 
     expect($session->refresh()->currentStep()->sole()->position)->toBe(3);
 });
@@ -252,7 +252,7 @@ it('counts a step with no place as somewhere else', function (): void {
 it('lands the session as continued when every other step needs the same place', function (): void {
     $session = startedWithPlaces([Place::Out, Place::Out]);
 
-    ReportStuck::run($session, StuckReason::NotHere);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::NotHere);
 
     expect($session->refresh()->outcome)->toBe(SessionOutcome::Continued)
         ->and($session->user->notHereReports()->count())->toBe(1);
@@ -262,7 +262,7 @@ it('just moves on from a step with no place, reporting nothing', function (): vo
     $session = started();
     $first = $session->currentStep()->sole();
 
-    ReportStuck::run($session, StuckReason::NotHere);
+    ReportStuck::run($session, $session->current_step_id, StuckReason::NotHere);
 
     expect($session->refresh()->current_step_id)->not->toBe($first->id)
         ->and($session->user->notHereReports()->count())->toBe(0)

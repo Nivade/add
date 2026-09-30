@@ -91,7 +91,8 @@ around one step, so pausing and resuming does not open a second session.
 
 `StartSession` returns the running session rather than opening a second one.
 Actions throw on invalid transitions instead of silently no-opping — a landed
-session cannot be landed twice.
+session cannot be landed twice. Resume on a running session is not one: it
+records that the person came back, which clears the welcome.
 
 ## `execution_sessions` carries `user_id`; nothing else does
 

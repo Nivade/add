@@ -55,17 +55,18 @@ function monthOfUse(): User
     clockAt('2026-09-10 10:30:00');
     $first = StartSession::run($user, $finished->steps()->where('position', 1)->sole());
     RecordDistraction::run($first);
-    CompleteStep::run($first);
-    CompleteStep::run($first);
+    CompleteStep::run($first, $first->current_step_id);
+    CompleteStep::run($first, $first->current_step_id);
 
     clockAt('2026-09-10 11:30:00');
     $stopped = StartSession::run($user, $resumed->steps()->where('position', 1)->sole());
-    SkipCurrentStep::run($stopped);
+    SkipCurrentStep::run($stopped, $stopped->current_step_id);
     RecordDistraction::run($stopped);
     StopSession::run($stopped);
 
     clockAt('2026-09-12 09:00:00');
-    CompleteStep::run(StartSession::run($user, $resumed->steps()->where('position', 1)->sole()));
+    $resumedStep = $resumed->steps()->where('position', 1)->sole();
+    CompleteStep::run(StartSession::run($user, $resumedStep), $resumedStep->id);
 
     $kept = CreateCommitment::run($user, 'Send the form back.', CommitmentProvenance::UserStated);
     RespondToCommitment::run($kept, CommitmentResponse::Keep);
@@ -126,11 +127,11 @@ it('judges each rung by what happened to the step it started, and ignores starts
 
     clockAt('2026-09-20 10:00:00');
     $session = StartSession::run($user, $intention->steps()->where('position', 1)->sole());
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     clockAt('2026-09-20 10:10:00');
     StartSession::run($user, $intention->steps()->where('position', 3)->sole());
-    SkipCurrentStep::run($session->refresh());
+    SkipCurrentStep::run($session->refresh(), $session->current_step_id);
     RecordExecutionEvent::run($session->refresh(), ExecutionEventType::Started);
 
     clockAt('2026-09-30 12:00:00');

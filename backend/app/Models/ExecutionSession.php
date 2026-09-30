@@ -114,7 +114,7 @@ class ExecutionSession extends Model
         }
     }
 
-    public function currentStepOrFail(): Step
+    public function currentStepOrFail(?string $expectedStepId = null): Step
     {
         $this->assertOpen();
 
@@ -122,6 +122,10 @@ class ExecutionSession extends Model
 
         if (! $step instanceof Step) {
             throw new InvalidSessionTransition("Session {$this->id} is not pointing at a step.");
+        }
+
+        if ($expectedStepId !== null && $step->id !== $expectedStepId) {
+            throw new InvalidSessionTransition("Session {$this->id} has moved past step {$expectedStepId}.");
         }
 
         return $step;

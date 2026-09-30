@@ -19,6 +19,30 @@ export function restCountLine(count: number): string {
     return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about`;
 }
 
+/** Settings names the zone every clock is read in, and where it came from. */
+export function timezoneLine(zone: string): string {
+    return `Times are read in ${zone}, taken from this device.`;
+}
+
+/** Said while a capture is still with the model, so it never looks lost. */
+export function sortingLine(count: number): string {
+    return count === 1
+        ? 'Sorting the thought you just wrote down.'
+        : `Sorting the ${count} thoughts you just wrote down.`;
+}
+
+/** Coming back is welcomed, never timed: both frontends say it in these words. */
+export const returnCopy = {
+    welcome: 'Welcome back.',
+    paused: 'Paused.',
+    pausedMeta: 'Continue whenever you are ready.',
+    workingOn: (title: string): string => `You were working on ${title}.`,
+    meta: (title: string, stepsDone: number): string =>
+        stepsDone === 0
+            ? returnCopy.workingOn(title)
+            : `${returnCopy.workingOn(title)} You had done ${stepsDone} ${stepsDone === 1 ? 'step' : 'steps'}.`,
+};
+
 export const planRungLabels: Record<PlanRung, string> = {
     find_things: 'find what you need',
     get_ready: 'get ready',
@@ -51,11 +75,7 @@ export function smallestStepMeta(step: EstimatedStep): string {
 }
 
 export function partWayLine(intentionTitle: string): string {
-    return `part-way through ${intentionTitle.toLowerCase()}`;
-}
-
-export function leftOffLine(title: string): string {
-    return `you left off at ${title.toLowerCase()}`;
+    return `Part-way through ${intentionTitle}.`;
 }
 
 export const nothingNeedsYou = 'Nothing needs you right now.';
@@ -82,11 +102,12 @@ export const overwhelmedCopy = {
 } as const;
 
 export const focusCopy = {
+    start: 'Start',
+    continue: 'Continue',
     done: 'Done',
     skip: 'Skip',
     pause: 'Pause',
     stop: 'Stop',
-    welcomeBack: 'Welcome back.',
     stuck: "I'm stuck",
     distracted: 'I got distracted',
     stuckQuestion: "What's blocking you?",

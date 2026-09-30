@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Overwhelm;
 
+use App\Actions\Home\CountOpenThings;
 use App\Data\IntentionData;
 use App\Data\NextActionData;
 use App\Data\OverwhelmedData;
@@ -22,12 +23,14 @@ final class ReduceToOneStep
 {
     use AsObject;
 
+    public function __construct(private readonly CountOpenThings $countOpenThings) {}
+
     public function handle(User $user, ResolutionContext $context): OverwhelmedData
     {
         $candidates = CandidatePool::forUser($user);
 
         if ($candidates === []) {
-            return new OverwhelmedData(null, 0);
+            return new OverwhelmedData(null, $this->countOpenThings->handle($user));
         }
 
         $candidates = SmallestFirst::sort($candidates, $context);
@@ -39,7 +42,7 @@ final class ReduceToOneStep
                 IntentionData::from($smallest->intention),
                 $this->why($smallest, array_slice($candidates, 1), $context),
             ),
-            count($candidates) - 1,
+            $this->countOpenThings->handle($user) - 1,
         );
     }
 

@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { nothingNeedsYou, overwhelmedCopy, restCountLine, smallestStepMeta } from '@add/shared';
+import { focusCopy, nothingNeedsYou, overwhelmedCopy, restCountLine, smallestStepMeta } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -42,7 +42,7 @@ export default function Overwhelmed() {
           {step.why.map((line) => (
             <Meta key={line}>{line}</Meta>
           ))}
-          <Button label="Start" tone="primary" onPress={() => void start()} />
+          <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
         </>
       ) : (
         <OneThing>{nothingNeedsYou}</OneThing>

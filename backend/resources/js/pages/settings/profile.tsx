@@ -1,3 +1,4 @@
+import { timezoneLine } from '@add/shared';
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
@@ -35,6 +36,10 @@ export default function Profile({
                     title="Profile"
                     description="Update your name and email address"
                 />
+
+                <p className="text-muted-foreground text-sm">
+                    {timezoneLine(auth.user.timezone)}
+                </p>
 
                 <Form
                     {...ProfileController.update.form()}

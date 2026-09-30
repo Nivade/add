@@ -14,10 +14,10 @@ final class SkipCurrentStep
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session): ExecutionSession
+    public function handle(ExecutionSession $session, string $stepId): ExecutionSession
     {
-        return $session->transition(function () use ($session): ExecutionSession {
-            $step = $session->currentStepOrFail();
+        return $session->transition(function () use ($session, $stepId): ExecutionSession {
+            $step = $session->currentStepOrFail($stepId);
 
             SkipStep::run($step);
 

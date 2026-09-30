@@ -5,11 +5,13 @@ declare(strict_types=1);
 use App\Actions\Reminders\SendDueReminders;
 use App\Actions\Sessions\StartSession;
 use App\Models\CalendarEvent;
+use App\Models\Capture;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use App\Models\WaitingFor;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
@@ -110,6 +112,38 @@ it('counts everything else without listing it', function (): void {
         );
 });
 
+it('counts the captures still being sorted, and only those', function (): void {
+    $user = User::factory()->create();
+    Capture::factory()->count(2)->for($user)->create();
+    Capture::factory()->for($user)->create(['processed_at' => CarbonImmutable::now()]);
+    Capture::factory()->for($user)->create(['created_at' => CarbonImmutable::now()->subDays(2)]);
+    Capture::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.sortingCount', 2));
+});
+
+it('answers the same count on home and when overwhelmed', function (): void {
+    $user = User::factory()->create();
+    kitchen(user: $user);
+    kitchen(user: $user);
+    kitchen(user: $user);
+    WaitingFor::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->whereNot('home.rightNow', null)
+            ->where('home.restCount', 3));
+
+    $this->actingAs($user)
+        ->getJson('/api/v1/overwhelmed')
+        ->assertOk()
+        ->assertJsonPath('restCount', 3);
+});
+
 it('counts open commitments beyond the one on show', function (): void {
     $user = User::factory()->create();
     Commitment::factory()->count(3)->for($user)->create();
@@ -198,7 +232,7 @@ it('keeps the person on focus while the session is open', function (): void {
 
     $this->actingAs($session->user)
         ->from(route('focus'))
-        ->post(route('focus.complete-step', $session))
+        ->post(route('focus.complete-step', $session), ['step_id' => $session->current_step_id])
         ->assertRedirect(route('focus'));
 
     expect($session->refresh()->steps_completed)->toBe(1);

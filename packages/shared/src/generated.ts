@@ -66,6 +66,8 @@ intention: IntentionData,
 progress: string[],
 elapsed: string,
 currentStepIsCommitment: boolean,
+returning: boolean,
+stepsDone: number,
 };
 export type FutureReminderData = {
 id: string,
@@ -83,6 +85,7 @@ reminder: ReminderData | null,
 justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
+sortingCount: number,
 hasOpenCommitments: boolean,
 checkIn: CheckInTopic | null,
 };

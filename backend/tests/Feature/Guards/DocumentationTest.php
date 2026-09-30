@@ -87,7 +87,47 @@ it('resolves every relative link in an agent document', function (): void {
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
 it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
-    $planned = [];
+    // .ai/plans/ux-overhaul.md
+    $planned = [
+        'backend/app/Actions/Captures/ChangeCaptureKind.php',
+        'backend/app/Actions/Captures/ConfirmCaptureKind.php',
+        'backend/app/Actions/Home/BuildSortedCaptures.php',
+        'backend/app/Actions/Intentions/CorrectDeadline.php',
+        'backend/app/Actions/Sessions/BuildFinished.php',
+        'backend/app/Data/FinishedData.php',
+        'backend/app/Data/RailMarkData.php',
+        'backend/app/Data/SortedCaptureData.php',
+        'backend/app/Enums/CaptureKind.php',
+        'backend/app/Exceptions/CaptureAlreadyActedOn.php',
+        'backend/app/Http/Controllers/Api/V1/ChangeCaptureKindController.php',
+        'backend/app/Http/Controllers/Api/V1/ConfirmCaptureKindController.php',
+        'backend/app/Http/Controllers/Api/V1/CorrectDeadlineController.php',
+        'backend/app/Http/Controllers/Api/V1/ShowFinishedController.php',
+        'backend/app/Http/Controllers/Web/ChangeCaptureKindController.php',
+        'backend/app/Http/Controllers/Web/ConfirmCaptureKindController.php',
+        'backend/app/Http/Controllers/Web/CorrectDeadlineController.php',
+        'backend/app/Http/Controllers/Web/ShowAppointmentController.php',
+        'backend/app/Http/Controllers/Web/ShowFinishedController.php',
+        'backend/app/Http/Requests/ChangeCaptureKindRequest.php',
+        'backend/app/Http/Requests/CorrectDeadlineRequest.php',
+        'backend/resources/js/components/sorted-band.tsx',
+        'backend/resources/js/components/wordmark.tsx',
+        'backend/resources/js/hooks/use-shortcuts.ts',
+        'backend/resources/js/layouts/focus-frame.tsx',
+        'backend/resources/js/pages/appointment.tsx',
+        'backend/resources/js/pages/finished.tsx',
+        'backend/tests/Feature/Captures/CaptureKindTest.php',
+        'backend/tests/Feature/Captures/SortCaptureTest.php',
+        'backend/tests/Feature/Execution/FinishedTest.php',
+        'backend/tests/Feature/Guards/DesignTokensTest.php',
+        'backend/tests/Feature/Intentions/CorrectDeadlineTest.php',
+        'mobile/app/finished/[session].tsx',
+        'mobile/src/capture/pending-captures.ts',
+        'mobile/src/components/bottom-bar.tsx',
+        'mobile/src/components/day-strip.tsx',
+        'mobile/src/components/sorted-band.tsx',
+        'packages/shared/src/tokens.ts',
+    ];
 
     foreach ($planned as $path) {
         expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');

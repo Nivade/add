@@ -1,8 +1,9 @@
 import type { ExecutionStateData } from '@add/shared';
-import { focusCopy, leftOffLine, stepMeta, stuckReasonsFor } from '@add/shared';
-import { Form, Head, router } from '@inertiajs/react';
+import { focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Meta, OneThing } from '@/components/one-thing';
+import { OneTapForm } from '@/components/one-tap-form';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,24 +22,41 @@ const CONTROL_CLASS =
 function Control({
     label,
     form,
+    stepId,
     onClick,
 }: {
     label: string;
     form?: { action: string; method: 'post' };
+    stepId?: string;
     onClick?: () => void;
 }) {
-    const button = (
-        <Button
-            type={form ? 'submit' : 'button'}
-            variant="outline"
-            className={CONTROL_CLASS}
-            onClick={onClick}
-        >
-            {label}
-        </Button>
-    );
+    if (!form) {
+        return (
+            <Button
+                type="button"
+                variant="outline"
+                className={CONTROL_CLASS}
+                onClick={onClick}
+            >
+                {label}
+            </Button>
+        );
+    }
 
-    return form ? <Form {...form}>{button}</Form> : button;
+    return (
+        <OneTapForm form={form} stepId={stepId}>
+            {(processing) => (
+                <Button
+                    type="submit"
+                    variant="outline"
+                    className={CONTROL_CLASS}
+                    aria-disabled={processing}
+                >
+                    {label}
+                </Button>
+            )}
+        </OneTapForm>
+    );
 }
 
 export default function Focus({ state }: { state: ExecutionStateData }) {
@@ -56,16 +74,35 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     {intention.title}
                 </p>
 
-                {paused ? (
+                {state.returning || paused ? (
                     <div className="space-y-6">
-                        <OneThing>{focusCopy.welcomeBack}</OneThing>
+                        <OneThing>
+                            {state.returning
+                                ? returnCopy.welcome
+                                : returnCopy.paused}
+                        </OneThing>
                         <Meta>
-                            {leftOffLine(step?.title ?? intention.title)}
+                            {state.returning
+                                ? returnCopy.meta(
+                                      intention.title,
+                                      state.stepsDone,
+                                  )
+                                : returnCopy.pausedMeta}
                         </Meta>
                         <div className="pl-5">
-                            <Form {...focusRoutes.resume.form(session.id)}>
-                                <Button type="submit">Continue</Button>
-                            </Form>
+                            <OneTapForm
+                                form={focusRoutes.resume.form(session.id)}
+                                stepId={step?.id}
+                            >
+                                {(processing) => (
+                                    <Button
+                                        type="submit"
+                                        aria-disabled={processing}
+                                    >
+                                        {focusCopy.continue}
+                                    </Button>
+                                )}
+                            </OneTapForm>
                         </div>
                     </div>
                 ) : (
@@ -89,14 +126,17 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Control
                                 label={focusCopy.done}
                                 form={focusRoutes.completeStep.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.skip}
                                 form={focusRoutes.skipStep.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.pause}
                                 form={focusRoutes.pause.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.stuck}
@@ -105,10 +145,12 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Control
                                 label={focusCopy.distracted}
                                 form={focusRoutes.distracted.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.stop}
                                 form={focusRoutes.stop.form(session.id)}
+                                stepId={step?.id}
                             />
                         </div>
                     </>
@@ -140,7 +182,10 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                     setStuckOpen(false);
                                     router.post(
                                         focusRoutes.stuck.url(session.id),
-                                        { reason: reason.value },
+                                        {
+                                            step_id: step?.id,
+                                            reason: reason.value,
+                                        },
                                     );
                                 }}
                             >

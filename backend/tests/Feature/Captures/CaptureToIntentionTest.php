@@ -203,3 +203,14 @@ it("states the deadline to the decomposer on the person's clock", function (): v
     $provider->assertSent(fn (AiRequest $request): bool => $request->operation === AiOperation::DecomposeIntention->value
         && str_contains($request->user, 'Saturday 3 October 2026 00:30'));
 });
+
+it('tells the person on the web that the capture landed', function (): void {
+    Queue::fake();
+
+    $this->actingAs(User::factory()->create())
+        ->from(route('home'))
+        ->post(route('captures.store'), ['body' => 'call the dentist'])
+        ->assertRedirect(route('home'))
+        ->assertInertiaFlash('toast.type', 'success')
+        ->assertInertiaFlash('toast.message', 'Got it. Sorting it out.');
+});

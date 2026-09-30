@@ -20,6 +20,7 @@ it('returns one step, its why and the count of everything else', function (): vo
     $intention = Intention::factory()->decomposed()->for($user)->create(['title' => 'Clear the garage']);
     $small = Step::factory()->for($intention)->create(['title' => 'Empty the first shelf.', 'position' => 1, 'estimated_seconds' => 300]);
     Step::factory()->for($intention)->create(['title' => 'Hire a skip.', 'position' => 2, 'estimated_seconds' => 1800]);
+    Step::factory()->for(Intention::factory()->decomposed()->for($user))->create(['position' => 1, 'estimated_seconds' => 3600]);
 
     $this->actingAs($user)
         ->getJson('/api/v1/overwhelmed')
@@ -38,6 +39,7 @@ it('shows the web screen one step and never a second', function (): void {
     $intention = Intention::factory()->decomposed()->for($user)->create();
     Step::factory()->for($intention)->create(['title' => 'Empty the first shelf.', 'position' => 1, 'estimated_seconds' => 300]);
     Step::factory()->for($intention)->create(['title' => 'Hire a skip.', 'position' => 2, 'estimated_seconds' => 1800]);
+    Step::factory()->for(Intention::factory()->decomposed()->for($user))->create(['position' => 1, 'estimated_seconds' => 3600]);
 
     $this->actingAs($user)
         ->get(route('overwhelmed'))

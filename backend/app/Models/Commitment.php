@@ -61,6 +61,19 @@ class Commitment extends Model
         $query->where('status', CommitmentStatus::Open);
     }
 
+    /** Tied to neither an intention nor a step, so nothing else already counts or shows it. */
+    public function isStandalone(): bool
+    {
+        return $this->intention_id === null && $this->step_id === null;
+    }
+
+    /** @param  Builder<static>  $query */
+    #[Scope]
+    protected function standalone(Builder $query): void
+    {
+        $query->whereNull('intention_id')->whereNull('step_id');
+    }
+
     /** @param  Builder<static>  $query */
     #[Scope]
     protected function forIntention(Builder $query, string $intentionId): void

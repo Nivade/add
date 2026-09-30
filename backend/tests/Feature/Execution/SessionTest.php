@@ -50,7 +50,7 @@ it('advances to the next step when one is done', function (): void {
     $session = started();
     $first = $session->currentStep()->sole();
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect($first->refresh()->status)->toBe(StepStatus::Done)
         ->and($first->completed_at)->not->toBeNull()
@@ -62,7 +62,7 @@ it('advances to the next step when one is done', function (): void {
 it('completes the session and the intention when the last step is done', function (): void {
     $session = started(1);
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect($session->refresh()->outcome)->toBe(SessionOutcome::Completed)
         ->and($session->ended_at)->not->toBeNull()
@@ -75,7 +75,7 @@ it('moves past a skipped step and leaves it pending', function (): void {
     $session = started();
     $first = $session->currentStep()->sole();
 
-    SkipCurrentStep::run($session);
+    SkipCurrentStep::run($session, $session->current_step_id);
 
     expect($first->refresh()->status)->toBe(StepStatus::Pending)
         ->and($first->skip_count)->toBe(1)
@@ -87,7 +87,7 @@ it('moves past a skipped step and leaves it pending', function (): void {
 it('ends the session as continued when the only step left is the one just skipped', function (): void {
     $session = started(1);
 
-    SkipCurrentStep::run($session);
+    SkipCurrentStep::run($session, $session->current_step_id);
 
     expect($session->refresh()->outcome)->toBe(SessionOutcome::Continued)
         ->and($session->intention->refresh()->status)->toBe(IntentionStatus::Active)
@@ -97,8 +97,8 @@ it('ends the session as continued when the only step left is the one just skippe
 it('wraps to the front rather than stranding the steps after a skip', function (): void {
     $session = started(2);
 
-    SkipCurrentStep::run($session);
-    CompleteStep::run($session->refresh());
+    SkipCurrentStep::run($session, $session->current_step_id);
+    CompleteStep::run($session->refresh(), $session->current_step_id);
 
     expect($session->refresh()->currentStep()->sole()->position)->toBe(1);
 });
@@ -125,20 +125,18 @@ it('pauses without writing an outcome and resumes the same session a day later',
 
 it('refuses a transition the session cannot make', function (): void {
     $session = started();
+    $step = $session->current_step_id;
 
     PauseSession::run($session);
 
     expect(fn (): mixed => PauseSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 
     ResumeSession::run($session->refresh());
-
-    expect(fn (): mixed => ResumeSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
-
     StopSession::run($session->refresh());
 
     expect(fn (): mixed => StopSession::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
-        ->and(fn (): mixed => CompleteStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
-        ->and(fn (): mixed => SkipCurrentStep::run($session->refresh()))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => CompleteStep::run($session->refresh(), $step))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => SkipCurrentStep::run($session->refresh(), $step))->toThrow(InvalidSessionTransition::class)
         ->and(fn (): mixed => RecordDistraction::run($session->refresh()))->toThrow(InvalidSessionTransition::class);
 });
 
@@ -151,9 +149,10 @@ it('refuses to land a session a second time even when advanced directly', functi
         ->and(replay($session))->toBe(['started', 'stopped']);
 });
 
-it('refuses a transition on a copy read before the session ended elsewhere', function (string $action, array $arguments): void {
+it('refuses a transition on a copy read before the session ended elsewhere', function (string $action, array $arguments, bool $onStep = false): void {
     $session = started();
     $stale = ExecutionSession::query()->findOrFail($session->id);
+    $arguments = $onStep ? [$stale->current_step_id, ...$arguments] : $arguments;
 
     StopSession::run($session);
 
@@ -163,9 +162,9 @@ it('refuses a transition on a copy read before the session ended elsewhere', fun
     'pause' => [PauseSession::class, []],
     'resume' => [ResumeSession::class, []],
     'distraction' => [RecordDistraction::class, []],
-    'complete' => [CompleteStep::class, []],
-    'skip' => [SkipCurrentStep::class, []],
-    'stuck' => [ReportStuck::class, [StuckReason::Tired]],
+    'complete' => [CompleteStep::class, [], true],
+    'skip' => [SkipCurrentStep::class, [], true],
+    'stuck' => [ReportStuck::class, [StuckReason::Tired], true],
     'advance' => [AdvanceSession::class, []],
     'stop' => [StopSession::class, []],
 ]);
@@ -180,28 +179,95 @@ it('refuses a second pause from a copy read before the first', function (): void
         ->and(replay($session))->toBe(['started', 'paused']);
 });
 
-it('keeps the count true when a second done lands from a copy read before the first', function (): void {
+it('refuses a second done for the step a double tap already finished', function (): void {
     $session = started();
-    $stale = ExecutionSession::query()->findOrFail($session->id);
+    $first = $session->current_step_id;
 
-    CompleteStep::run($session);
-    CompleteStep::run($stale);
+    CompleteStep::run($session, $first);
+    $next = $session->currentStep()->sole();
 
-    $done = $session->intention->steps()->where('status', StepStatus::Done)->count();
-
-    expect($done)->toBe(2)
-        ->and($session->refresh()->steps_completed)->toBe($done);
+    expect(fn (): mixed => CompleteStep::run($session->refresh(), $first))
+        ->toThrow(InvalidSessionTransition::class, "has moved past step {$first}")
+        ->and($next->refresh()->status)->toBe(StepStatus::Pending)
+        ->and($session->refresh()->steps_completed)->toBe(1)
+        ->and($session->current_step_id)->toBe($next->id);
 });
 
-it('records a distraction without ending or scoring anything', function (): void {
+it('refuses a skip or a stuck answer for a step the session has moved past', function (): void {
+    $session = started();
+    $first = $session->current_step_id;
+
+    CompleteStep::run($session, $first);
+
+    expect(fn (): mixed => SkipCurrentStep::run($session->refresh(), $first))->toThrow(InvalidSessionTransition::class)
+        ->and(fn (): mixed => ReportStuck::run($session->refresh(), $first, StuckReason::Tired))->toThrow(InvalidSessionTransition::class)
+        ->and(replay($session))->toBe(['started', 'step_completed']);
+});
+
+it('records a distraction as a pause, without ending or scoring anything', function (): void {
     $session = started();
 
     RecordDistraction::run($session);
 
-    expect($session->refresh()->ended_at)->toBeNull()
+    expect($session->refresh()->paused_at)->not->toBeNull()
+        ->and($session->ended_at)->toBeNull()
         ->and($session->outcome)->toBeNull()
         ->and($session->steps_completed)->toBe(0)
         ->and(replay($session))->toBe(['started', 'distracted']);
+});
+
+it('welcomes the person back after a distraction, with what they were doing', function (): void {
+    $session = started();
+    CompleteStep::run($session, $session->current_step_id);
+
+    RecordDistraction::run($session->refresh());
+    $state = BuildExecutionState::run($session);
+
+    expect($state->returning)->toBeTrue()
+        ->and($state->stepsDone)->toBe(1);
+});
+
+it('treats a pause a minute old as a pause, not a return', function (): void {
+    $session = started();
+    PauseSession::run($session);
+
+    $this->travel(1)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeFalse();
+});
+
+it('welcomes the person back once a pause is more than a few minutes old', function (): void {
+    $session = started();
+    PauseSession::run($session);
+
+    $this->travel(6)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeTrue();
+});
+
+it('welcomes the person back after a long quiet in a running session', function (): void {
+    $session = started();
+
+    $this->travel(19)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeFalse();
+
+    $this->travel(2)->minutes();
+
+    expect(BuildExecutionState::run($session)->returning)->toBeTrue();
+});
+
+it('acknowledges a return on a running session without changing anything else', function (): void {
+    $session = started();
+    $step = $session->current_step_id;
+    $this->travel(21)->minutes();
+
+    ResumeSession::run($session);
+
+    expect($session->refresh()->paused_at)->toBeNull()
+        ->and($session->current_step_id)->toBe($step)
+        ->and(replay($session))->toBe(['started', 'resumed'])
+        ->and(BuildExecutionState::run($session)->returning)->toBeFalse();
 });
 
 it('stops as a real answer rather than a failure', function (): void {
@@ -217,22 +283,23 @@ it('stops as a real answer rather than a failure', function (): void {
 it('reconstructs the session from its events', function (): void {
     $session = started();
 
-    CompleteStep::run($session);
-    SkipCurrentStep::run($session->refresh());
+    CompleteStep::run($session, $session->current_step_id);
+    SkipCurrentStep::run($session->refresh(), $session->current_step_id);
     RecordDistraction::run($session->refresh());
+    ResumeSession::run($session->refresh());
     PauseSession::run($session->refresh());
     ResumeSession::run($session->refresh());
     StopSession::run($session->refresh());
 
     expect(replay($session))->toBe([
-        'started', 'step_completed', 'step_skipped', 'distracted', 'paused', 'resumed', 'stopped',
+        'started', 'step_completed', 'step_skipped', 'distracted', 'resumed', 'paused', 'resumed', 'stopped',
     ]);
 });
 
 it('counts progress rather than writing it', function (): void {
     $session = started();
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect(BuildExecutionState::run($session->refresh())->progress)
         ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
@@ -268,7 +335,7 @@ it('says it finished the hardest part once the largest estimate in the intention
 
     expect(BuildExecutionState::run($session)->progress)->not->toContain('You finished the hardest part.');
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect(BuildExecutionState::run($session->refresh())->progress)->toContain('You finished the hardest part.');
 });
@@ -276,7 +343,7 @@ it('says it finished the hardest part once the largest estimate in the intention
 it('never claims the hardest part is finished while it is still pending', function (): void {
     $session = started();
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect(BuildExecutionState::run($session->refresh())->progress)->not->toContain('You finished the hardest part.');
 });

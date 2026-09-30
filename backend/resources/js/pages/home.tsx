@@ -5,6 +5,7 @@ import type {
 } from '@add/shared';
 import {
     commitmentCopy,
+    focusCopy,
     homeBands,
     homeCopy,
     nothingNeedsYou,
@@ -12,10 +13,13 @@ import {
     recurrenceLine,
     remindAfterCopy,
     restCountLine,
+    returnCopy,
     rightNowMeta,
+    sortingLine,
     waitingForResponses,
 } from '@add/shared';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePoll } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { captureFieldClassName } from '@/components/capture-dialog';
 import { CheckIn } from '@/components/check-in';
@@ -166,13 +170,19 @@ function RightNow({ rightNow, session }: HomeData) {
         return (
             <div className="space-y-6">
                 <OneThing>
-                    {session.session.currentStep?.title ??
-                        session.intention.title}
+                    {session.returning
+                        ? returnCopy.welcome
+                        : (session.session.currentStep?.title ??
+                          session.intention.title)}
                 </OneThing>
-                <Meta>{partWayLine(session.intention.title)}</Meta>
+                <Meta>
+                    {session.returning
+                        ? returnCopy.workingOn(session.intention.title)
+                        : partWayLine(session.intention.title)}
+                </Meta>
                 <div className="pl-5">
                     <Button asChild>
-                        <Link href={focus()}>Continue</Link>
+                        <Link href={focus()}>{focusCopy.continue}</Link>
                     </Button>
                 </div>
             </div>
@@ -207,7 +217,21 @@ export default function Home({ home: data }: { home: HomeData }) {
         justFinished,
         needsAttention,
         restCount,
+        sortingCount,
     } = data;
+    const { start, stop } = usePoll(
+        3000,
+        { only: ['home'] },
+        { autoStart: false },
+    );
+
+    useEffect(() => {
+        if (sortingCount > 0) {
+            start();
+
+            return stop;
+        }
+    }, [sortingCount, start, stop]);
 
     return (
         <>
@@ -223,6 +247,13 @@ export default function Home({ home: data }: { home: HomeData }) {
                     </h2>
                     <RightNow {...data} />
                 </section>
+
+                <p
+                    role="status"
+                    className="text-muted-foreground empty:sr-only"
+                >
+                    {sortingCount > 0 && sortingLine(sortingCount)}
+                </p>
 
                 {!data.session && rightNow && rightNow.why.length > 0 && (
                     <Band label={homeBands.why}>

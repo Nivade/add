@@ -15,10 +15,10 @@ final class CompleteStep
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session): ExecutionSession
+    public function handle(ExecutionSession $session, string $stepId): ExecutionSession
     {
-        return $session->transition(function () use ($session): ExecutionSession {
-            $step = $session->currentStepOrFail();
+        return $session->transition(function () use ($session, $stepId): ExecutionSession {
+            $step = $session->currentStepOrFail($stepId);
 
             $step->update(['status' => StepStatus::Done, 'completed_at' => now()]);
 
