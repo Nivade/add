@@ -19,7 +19,7 @@ return [
 
     // Every call's shape is logged, never its text.
     'log' => [
-        'channel' => env('AI_LOG_CHANNEL', env('LOG_CHANNEL', 'stack')),
+        'channel' => env('AI_LOG_CHANNEL') ?: env('LOG_CHANNEL', 'stack'),
     ],
 
     'openai' => [

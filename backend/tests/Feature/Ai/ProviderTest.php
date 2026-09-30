@@ -73,15 +73,17 @@ it('refuses an unknown driver rather than quietly answering with none', function
     expect(fn (): AiProvider => app(AiProvider::class))->toThrow(InvalidArgumentException::class);
 });
 
-it('gates only the driver that leaves the machine on per-user consent', function (string $driver, bool $gated): void {
+it('gates only a driver that leaves the machine on per-user consent', function (string $driver, string $onMiss, bool $gated): void {
     config()->set('ai-toolkit.driver', $driver);
+    config()->set('ai-toolkit.fixture.on_miss', $onMiss);
 
     expect(app(AiProvider::class) instanceof GatedAiProvider)->toBe($gated);
 })->with([
-    ['openai', true],
-    ['canned', false],
-    ['fixture', false],
-    ['fake', false],
+    'openai' => ['openai', 'dump', true],
+    'fixture recording through openai' => ['fixture', 'record:openai', true],
+    'fixture replaying' => ['fixture', 'dump', false],
+    'canned' => ['canned', 'dump', false],
+    'fake' => ['fake', 'dump', false],
 ]);
 
 it('refuses to answer when AI is disabled rather than returning an empty payload', function (): void {
@@ -213,14 +215,19 @@ it("reaches the openai driver once consent is on record, throttled on the asking
         ->and(RateLimiter::attempts(OpenAiProvider::rateLimitKey(null)))->toBe(0);
 });
 
-it("refuses to reach a person's words off the machine without their consent", function (?bool $consented): void {
+it("refuses to reach a person's words off the machine without their consent, and logs the refusal", function (?bool $consented): void {
+    $log = aiLog();
     config()->set('ai-toolkit.driver', 'openai');
     config()->set('ai.providers.openai.key', 'sk-test');
     StructuredAgent::fake(fn (): array => ['title' => 'Renew my passport']);
     $userId = $consented === null ? null : User::factory()->create(['ai_consented_at' => null])->id;
 
-    expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest(userId: $userId)))
-        ->toThrow(AiUnavailable::class, AiConsent::REFUSAL);
+    expect(fn (): AiResponse => app(AiProvider::class)->respond(aiRequest('renew my passport', $userId)))
+        ->toThrow(AiUnavailable::class, AiConsent::REFUSAL)
+        ->and($log->hasWarningThatPasses(fn (LogRecord $record): bool => $record->message === 'AI call refused'
+            && $record->context['operation'] === 'parse_capture'
+            && $record->context['provider'] === 'openai'
+            && ! str_contains(json_encode($record->context, JSON_THROW_ON_ERROR), 'passport')))->toBeTrue();
 })->with([
     'no consent on record' => [false],
     'no person on the request' => [null],

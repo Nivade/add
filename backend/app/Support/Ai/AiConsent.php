@@ -5,24 +5,48 @@ declare(strict_types=1);
 namespace App\Support\Ai;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Nvade\AiToolkit\AiRequest;
+use Nvade\AiToolkit\Contracts\AiProvider;
 use Nvade\AiToolkit\Exceptions\AiUnavailable;
 
-/** Without consent the openai driver answers exactly as it would with no key, never a degraded try. */
+/** Without consent a driver that leaves the machine answers exactly as it would with no key, never a degraded try. */
 final class AiConsent
 {
     public const string REFUSAL = 'Reading this needs AI, which is off. It can be turned on in settings.';
 
-    public const string UNREACHABLE = 'Reading this needs AI, which is not reachable right now. Try again in a while.';
-
-    public static function refusal(AiRequest $request): ?string
+    /** A recording fixture driver asks a live driver on a miss, and the toolkit builds that one unwrapped. */
+    public static function leavesTheMachine(AiProvider $provider): bool
     {
-        return User::query()->whereKey($request->rateLimitScope)->value('ai_consented_at') === null ? self::REFUSAL : null;
+        return $provider->name() === 'openai'
+            || ($provider->name() === 'fixture' && str_starts_with((string) config('ai-toolkit.fixture.on_miss'), 'record:'));
     }
 
-    /** A question asked synchronously gets one of these sentences back, never the exception's own detail. */
-    public static function messageFor(AiUnavailable $exception): string
+    public static function refusal(AiRequest $request, string $provider): ?string
     {
-        return $exception->getMessage() === self::REFUSAL ? self::REFUSAL : self::UNREACHABLE;
+        if (User::query()->find($request->rateLimitScope)?->hasConsentedToAi() === true) {
+            return null;
+        }
+
+        self::logRefusal($request, $provider);
+
+        return self::REFUSAL;
+    }
+
+    private static function logRefusal(AiRequest $request, string $provider): void
+    {
+        $channel = config('ai-toolkit.log.channel');
+
+        if (! is_string($channel) || $channel === '') {
+            return;
+        }
+
+        Log::channel($channel)->warning('AI call refused', [
+            'operation' => $request->operation,
+            'provider' => $provider,
+            'prompt_version' => $request->promptVersion,
+            'schema_version' => $request->schemaVersion,
+            'exception' => AiUnavailable::class,
+        ]);
     }
 }

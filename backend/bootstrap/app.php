@@ -44,8 +44,11 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );
 
+        // A question asked synchronously gets one of two sentences back, never the exception's own detail.
         $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()
-            ? new JsonResponse(['message' => AiConsent::messageFor($e)], Response::HTTP_SERVICE_UNAVAILABLE)
+            ? new JsonResponse(['message' => $e->getMessage() === AiConsent::REFUSAL
+                ? AiConsent::REFUSAL
+                : 'Reading this needs AI, which is not reachable right now. Try again in a while.'], Response::HTTP_SERVICE_UNAVAILABLE)
             : null);
 
         $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
