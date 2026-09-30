@@ -17,7 +17,7 @@ it('knows nothing until the person does or says something', function (): void {
     $where = whereabouts(User::factory()->create());
 
     expect($where->isKnown())->toBeFalse()
-        ->and(array_map(fn (Place $place): int => $where->fit($place), Place::cases()))->toBe([1, 1, 1, 1]);
+        ->and(array_map($where->fit(...), Place::cases()))->toBe([1, 1, 1, 1]);
 });
 
 it('takes a home step finished minutes ago to mean home, and not work or out', function (): void {

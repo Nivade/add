@@ -79,14 +79,8 @@ final class ReduceToOneStep
         $coolOff = new NotRecentlySkipped;
         $fit = new FitsWhereYouAre;
 
-        foreach ($rest as $other) {
-            if ($other->cost() < $candidate->cost()
-                && $coolOff->compare($candidate, $other, $context) === 0
-                && $fit->compare($candidate, $other, $context) < 0) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($rest, fn (Candidate $other): bool => $other->cost() < $candidate->cost()
+            && $coolOff->compare($candidate, $other, $context) === 0
+            && $fit->compare($candidate, $other, $context) < 0);
     }
 }
