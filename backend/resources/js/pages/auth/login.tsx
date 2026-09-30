@@ -53,7 +53,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="text-small ml-auto"
                                             tabIndex={5}
                                         >
                                             Forgot your password?
@@ -76,6 +76,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
+                                    defaultChecked
                                 />
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
@@ -92,7 +93,7 @@ export default function Login({ status, canResetPassword }: Props) {
                             </Button>
                         </div>
 
-                        <div className="text-muted-foreground text-center text-sm">
+                        <div className="text-muted-foreground text-small text-center">
                             Don't have an account?{' '}
                             <TextLink href={register()} tabIndex={5}>
                                 Sign up
@@ -103,7 +104,7 @@ export default function Login({ status, canResetPassword }: Props) {
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="text-small mb-4 text-center font-medium text-green-600">
                     {status}
                 </div>
             )}
@@ -112,6 +113,6 @@ export default function Login({ status, canResetPassword }: Props) {
 }
 
 Login.layout = {
-    title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    title: 'Log in',
+    description: 'Pick up where you left off.',
 };

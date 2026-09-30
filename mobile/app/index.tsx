@@ -333,7 +333,7 @@ export default function Home() {
       )}
 
       {comingUp && (
-        <Band label="Coming up">
+        <Band label={homeBands.comingUp}>
           <Text style={styles.line}>
             {comingUp.title} · {comingUp.inWords}
             {comingUp.kind === 'calendar_event' ? ' · from your calendar' : ''}

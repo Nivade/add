@@ -25,8 +25,8 @@ import { confirm } from '@/routes/two-factor';
 
 function GridScanIcon() {
     return (
-        <div className="border-border bg-card mb-3 rounded-full border p-0.5 shadow-sm">
-            <div className="border-border bg-muted relative overflow-hidden rounded-full border p-2.5">
+        <div className="border-border bg-card mb-3 rounded-full border p-0.5">
+            <div className="border-border bg-accent relative overflow-hidden rounded-full border p-2.5">
                 <div className="absolute inset-0 grid grid-cols-5 opacity-50">
                     {Array.from({ length: 5 }, (_, i) => (
                         <div
@@ -111,7 +111,7 @@ function TwoFactorSetupStep({
                     <div className="flex w-full space-x-2">
                         <div className="border-border flex w-full items-stretch overflow-hidden rounded-xl border">
                             {!manualSetupKey ? (
-                                <div className="bg-muted flex h-full w-full items-center justify-center p-3">
+                                <div className="bg-accent flex h-full w-full items-center justify-center p-3">
                                     <Spinner />
                                 </div>
                             ) : (
@@ -124,7 +124,7 @@ function TwoFactorSetupStep({
                                     />
                                     <button
                                         onClick={() => copy(manualSetupKey)}
-                                        className="border-border hover:bg-muted border-l px-3"
+                                        className="border-border hover:bg-accent border-l px-3"
                                     >
                                         <IconComponent className="w-4" />
                                     </button>

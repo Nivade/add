@@ -28,11 +28,7 @@ import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
-import {
-    quietButtonClassName,
-    quietLineClassName,
-    Responses,
-} from '@/components/responses';
+import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -71,13 +67,15 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
                             aria-describedby={
                                 errors.answer ? `${fieldId}-error` : undefined
                             }
-                            className="border-border focus-visible:ring-ring min-w-0 flex-1 border-b bg-transparent py-1 focus-visible:ring-1 focus-visible:outline-none"
+                            className={cn(
+                                captureFieldClassName,
+                                'min-w-0 flex-1',
+                            )}
                         />
                         <Button
                             type="submit"
-                            variant="outline"
+                            variant="quiet"
                             disabled={processing}
-                            className={quietButtonClassName}
                         >
                             Answer
                         </Button>
@@ -117,7 +115,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
         <Band label={homeBands.justFinished}>
             <p>{finished.title}</p>
             {finished.recurrenceEveryDays ? (
-                <p className="text-muted-foreground mt-2 font-mono text-[13px]">
+                <p className="text-muted-foreground mt-2">
                     {recurrenceLine(finished.recurrenceEveryDays)}
                 </p>
             ) : (
@@ -130,7 +128,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                         <>
                             <label
                                 htmlFor="repeat-every-days"
-                                className="text-muted-foreground font-mono text-[13px]"
+                                className="text-muted-foreground"
                             >
                                 {homeCopy.repeatEvery}
                             </label>
@@ -143,14 +141,8 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 defaultValue={7}
                                 className={cn(captureFieldClassName, 'w-20')}
                             />
-                            <span className="text-muted-foreground font-mono text-[13px]">
-                                days
-                            </span>
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className={quietButtonClassName}
-                            >
+                            <span className="text-muted-foreground">days</span>
+                            <Button type="submit" variant="quiet">
                                 Repeat
                             </Button>
                             <InputError
@@ -168,7 +160,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
 function RightNow({ rightNow, session }: HomeData) {
     if (session) {
         return (
-            <div className="space-y-6">
+            <div className="flex flex-col items-start gap-5">
                 <OneThing>
                     {session.returning
                         ? returnCopy.welcome
@@ -180,18 +172,16 @@ function RightNow({ rightNow, session }: HomeData) {
                         ? returnCopy.workingOn(session.intention.title)
                         : partWayLine(session.intention.title)}
                 </Meta>
-                <div className="pl-5">
-                    <Button asChild>
-                        <Link href={focus()}>{focusCopy.continue}</Link>
-                    </Button>
-                </div>
+                <Button asChild variant="now" size="action">
+                    <Link href={focus()}>{focusCopy.continue}</Link>
+                </Button>
             </div>
         );
     }
 
     if (!rightNow) {
         return (
-            <div className="space-y-6">
+            <div className="flex flex-col items-start gap-5">
                 <OneThing>{nothingNeedsYou}</OneThing>
                 <Meta>{homeCopy.wholeAnswer}</Meta>
             </div>
@@ -199,7 +189,7 @@ function RightNow({ rightNow, session }: HomeData) {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="flex flex-col items-start gap-5">
             <OneThing>{rightNow.step.title}</OneThing>
             <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
             <StartStep stepId={rightNow.step.id} />
@@ -237,14 +227,8 @@ export default function Home({ home: data }: { home: HomeData }) {
         <>
             <Head title="Home" />
 
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-10 px-6 pt-6 pb-20 lg:mx-0 lg:ml-[8vw]">
-                <section aria-labelledby="right-now">
-                    <h2
-                        id="right-now"
-                        className="text-now mb-5 font-mono text-[11px] tracking-[0.18em] uppercase"
-                    >
-                        Right now
-                    </h2>
+            <div className="flex flex-col gap-10 sm:gap-12">
+                <section aria-label="Right now">
                     <RightNow {...data} />
                 </section>
 
@@ -291,11 +275,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {...reminders.dismiss.form(reminder.id)}
                             className="mt-3"
                         >
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className={quietButtonClassName}
-                            >
+                            <Button type="submit" variant="quiet">
                                 Got it
                             </Button>
                         </Form>
@@ -303,10 +283,10 @@ export default function Home({ home: data }: { home: HomeData }) {
                 )}
 
                 {comingUp && (
-                    <Band label="Coming up">
+                    <Band label={homeBands.comingUp}>
                         <p>
                             {comingUp.title}
-                            <span className="text-muted-foreground font-mono text-[13px]">
+                            <span className="text-muted-foreground">
                                 {' '}
                                 · {comingUp.inWords}
                                 {comingUp.kind === 'calendar_event' &&
@@ -318,14 +298,10 @@ export default function Home({ home: data }: { home: HomeData }) {
                                 {...intentions.deadline.form(comingUp.id)}
                                 className="mt-2 flex flex-wrap items-baseline gap-3"
                             >
-                                <span className="text-muted-foreground font-mono text-[13px]">
+                                <span className="text-muted-foreground">
                                     read from what you wrote
                                 </span>
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className={quietButtonClassName}
-                                >
+                                <Button type="submit" variant="quiet">
                                     That{"'"}s right
                                 </Button>
                             </Form>
@@ -361,11 +337,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                         'w-20',
                                     )}
                                 />
-                                <Button
-                                    type="submit"
-                                    variant="outline"
-                                    className={quietButtonClassName}
-                                >
+                                <Button type="submit" variant="quiet">
                                     {remindAfterCopy.action}
                                 </Button>
                             </Form>
@@ -402,8 +374,8 @@ export default function Home({ home: data }: { home: HomeData }) {
 
                 {data.checkIn && <CheckIn topic={data.checkIn} />}
 
-                <div className="border-border flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-5">
-                    <p className="text-muted-foreground font-mono text-[13px]">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <p className="text-muted-foreground">
                         {restCountLine(restCount)}
                     </p>
                     {hasOpenCommitments && (
@@ -416,7 +388,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                     )}
                     <Link
                         href={overwhelmed()}
-                        className="text-muted-foreground hover:text-foreground ml-auto font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"
+                        className={cn(quietLineClassName, 'ml-auto')}
                     >
                         {"I'm overwhelmed"}
                     </Link>

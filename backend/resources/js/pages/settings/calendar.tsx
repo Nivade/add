@@ -32,7 +32,7 @@ export default function Calendar({
                     >
                         {({ processing }) => (
                             <>
-                                <p className="text-sm">
+                                <p className="text-small">
                                     Reading from {connectedHost}.
                                 </p>
 

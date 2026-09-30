@@ -28,21 +28,19 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
     return (
         <div className="flex items-center justify-between border-b p-4 last:border-b-0">
             <div className="flex items-center gap-4">
-                <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                     <KeyRound className="text-muted-foreground h-5 w-5" />
                 </div>
                 <div className="space-y-1">
                     <div className="flex items-center gap-2.5">
-                        <p className="font-medium tracking-tight">
-                            {passkey.name}
-                        </p>
+                        <p className="font-medium">{passkey.name}</p>
                         {passkey.authenticator && (
-                            <span className="bg-muted text-muted-foreground ring-border inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase ring-1 ring-inset">
+                            <span className="text-muted-foreground ring-field text-small inline-flex items-center gap-1 rounded-md px-2 py-0.5 ring-1 ring-inset">
                                 {passkey.authenticator}
                             </span>
                         )}
                     </div>
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-small">
                         Added {passkey.created_at_diff}
                         {passkey.last_used_at_diff && (
                             <>

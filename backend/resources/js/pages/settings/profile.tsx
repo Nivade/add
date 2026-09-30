@@ -37,7 +37,7 @@ export default function Profile({
                     description="Update your name and email address"
                 />
 
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-small">
                     {timezoneLine(auth.user.timezone)}
                 </p>
 
@@ -92,7 +92,7 @@ export default function Profile({
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (
                                     <div>
-                                        <p className="text-muted-foreground -mt-4 text-sm">
+                                        <p className="text-muted-foreground text-small -mt-4">
                                             Your email address is unverified.{' '}
                                             <Link
                                                 href={send()}
@@ -106,7 +106,7 @@ export default function Profile({
 
                                         {status ===
                                             'verification-link-sent' && (
-                                            <div className="mt-2 text-sm font-medium text-green-600">
+                                            <div className="text-small mt-2 font-medium text-green-600">
                                                 A new verification link has been
                                                 sent to your email address.
                                             </div>

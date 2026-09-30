@@ -24,7 +24,7 @@ export function UserMenu() {
                     variant="outline"
                     size="sm"
                     aria-label={`Account and settings for ${auth.user.name}`}
-                    className="gap-1.5 font-mono text-[11px] tracking-[0.12em] uppercase"
+                    className="gap-1.5"
                 >
                     {initials(auth.user.name)}
                     <ChevronDown className="size-3 opacity-60" />

@@ -13,7 +13,7 @@ import type { RouteFormDefinition } from '@/wayfinder';
 
 /** Shared by every text input across the capture dialogs, so they stay visually identical. */
 export const captureFieldClassName =
-    'border-input focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-[3px]';
+    'border-input focus-visible:border-ring focus-visible:ring-ring/50 text-body min-h-11 w-full rounded-field border bg-surface px-3 py-2 outline-none focus-visible:ring-[3px]';
 
 /** The trigger button + dialog shell every capture flow shares; the form body is the only thing that differs between them. */
 export function CaptureDialog({

@@ -34,6 +34,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
 - Long text (over 280 characters, or containing a blank line) goes through the existing ingestion classifier from the same box; there is no Paste button anywhere.
 - The visual identity is reopened in full, superseding slice 5's visual direction. The identity below is the decision.
 - New mobile dependencies approved as part of the audit: `expo-haptics`, `expo-file-system`, `expo-font`, `@expo-google-fonts/atkinson-hyperlegible-next`, `@expo-google-fonts/atkinson-hyperlegible-mono`.
+- Only Start and Continue are filled with `now`; every other button is outlined or quiet, and shadcn's `primary` is ink (phase 2 review).
 - Deleting the feature tests of the four explicit-entry endpoints (3.5) and of the home "Just finished" band (4.4): approved by the person.
 
 ## Rejected, one line each
@@ -173,39 +174,39 @@ desktop                                          phone
 
 ## Phase 2 — identity (`feature/visual-identity`)
 
-- [ ] **2.1 Tokens in one place.** Invoke skills: `frontend-design`, `expo-react-native`.
+- [x] **2.1 Tokens in one place.** Invoke skills: `frontend-design`, `expo-react-native`.
   - New `packages/shared/src/tokens.ts`: `export const lightColors = {...} as const`, `export const darkColors = {...} as const`, `export const dayStripLight`, `export const dayStripDark` (the stops above, each `{ minute, color }`), `export const radius = { control: 12, field: 8, panel: 16 } as const` (px, for React Native), `export const typeScale` (the table above, in px at a 16px root). One flat `key: '#RRGGBB'` per line, which the guard test parses. Export it from `packages/shared/src/index.ts`.
   - Check: `npm run typecheck` passes.
-- [ ] **2.2 A guard holds the palette.** Invoke skills: `pest-testing`, `testing-best-practices`.
+- [x] **2.2 A guard holds the palette.** Invoke skills: `pest-testing`, `testing-best-practices`.
   - New `backend/tests/Feature/Guards/DesignTokensTest.php`: parses `lightColors` and `darkColors` from `packages/shared/src/tokens.ts`; asserts ink/paper, ink/surface ≥ 7; muted/paper, muted/surface, now/paper, now/surface, on-now/now ≥ 4.5; field/paper, field/surface ≥ 3, in both themes (WCAG relative luminance, written in the test file as `designTokenContrast()`); asserts `backend/resources/css/app.css` declares `--paper`, `--surface`, `--ink`, `--muted`, `--line`, `--field`, `--now`, `--on-now` with the same hex in `:root` and `.dark`; asserts no `uppercase` class and no `text-[<n>px]` under `backend/resources/js` outside `components/ui/`.
   - Verify the guard by breaking one hex in `app.css` and watching it fail.
   - Check: the test fails until 2.3 and 2.4 land, then passes.
-- [ ] **2.3 The stylesheet and the fonts.** Invoke skills: `tailwindcss-development`, `vite`.
-  - `backend/vite.config.ts`: replace the two Plex `bunny()` calls with `bunny('Atkinson Hyperlegible Next', { weights: [400, 500, 600, 700] })` and `bunny('Atkinson Hyperlegible Mono', { weights: [400, 500] })`.
-  - `backend/resources/css/app.css`: the eight tokens as CSS variables in `:root` and `.dark`; map the shadcn variables onto them (`--background: var(--paper)`, `--foreground: var(--ink)`, `--muted-foreground: var(--muted)`, `--border: var(--line)`, `--input: var(--field)`, `--ring: var(--now)`, `--primary: var(--now)`, `--primary-foreground: var(--on-now)`, `--card`/`--popover: var(--surface)`); `--radius: 0.5rem`; `@theme` text sizes `--text-one-thing`, `--text-lead`, `--text-body`, `--text-small`, `--text-numeric` with their line heights; the day-strip stops as `--strip-*`. Remove `--chart-*` and `--sidebar-*` and their uses in `backend/resources/js/types/ui.ts` and `backend/resources/js/layouts/settings/layout.tsx`.
+- [x] **2.3 The stylesheet and the fonts.** Invoke skills: `tailwindcss-development`, `vite`.
+  - `backend/vite.config.ts`: replace the two Plex `bunny()` calls with `bunny('Atkinson Hyperlegible Next', { weights: [400, 500, 600, 700] })` and `bunny('Atkinson Hyperlegible Mono', { weights: [400, 500, 600] })`.
+  - `backend/resources/css/app.css`: the eight tokens as CSS variables in `:root` and `.dark`; map the shadcn variables onto them (`--background: var(--paper)`, `--foreground: var(--ink)`, `--muted-foreground: var(--muted)`, `--border: var(--line)`, `--input: var(--field)`, `--ring: var(--now)`, `--primary: var(--ink)`, `--primary-foreground: var(--paper)`, `--card`/`--popover: var(--surface)`); `--radius: 0.5rem`; `@theme` text sizes `--text-one-thing`, `--text-lead`, `--text-body`, `--text-small`, `--text-numeric` with their line heights; the day-strip stops as `--strip-*`. Remove `--chart-*` and `--sidebar-*` and their uses in `backend/resources/js/types/ui.ts` and `backend/resources/js/layouts/settings/layout.tsx`.
   - `backend/resources/views/app.blade.php`: the inline `html` background becomes `#F2F4F5` and dark `#0F1B22`; add `<meta name="theme-color">` for both schemes.
   - `backend/resources/js/app.tsx`: the progress colour becomes `#0A6B80`.
   - Check: `npm run artisan -- test --compact tests/Feature/Guards/DesignTokensTest.php` passes except the class checks 2.4 clears.
-- [ ] **2.4 Every web component in the new identity.** Invoke skills: `frontend-design`, `inertia-react-development`, `tailwindcss-development`.
+- [x] **2.4 Every web component in the new identity.** Invoke skills: `frontend-design`, `inertia-react-development`, `tailwindcss-development`.
   - `backend/resources/js/components/one-thing.tsx`: `OneThing` is an `h1` with `tabIndex={-1}`, the one-thing size, no border stripe; `Meta` becomes lead-size muted sentences; `StartStep` uses the filled Start. The `stepMeta` helper moves to shared in 4.7.
   - `backend/resources/js/components/band.tsx`: no rule; an `h2` in the band-heading style; labels become questions: "Why this one?", "What's coming up", "Needs you", "Before you go", "Sorted for you", "A question for you" (the check-in).
-  - `backend/resources/js/components/ui/button.tsx`: `default` variant is the filled `now` style; add `size: 'action'` (3.5rem) and `size: 'control'` (4rem); outline uses `border-field`; every size at least 2.75rem.
+  - `backend/resources/js/components/ui/button.tsx`: `default` is outlined ink, and a `now` variant, the filled `now` style, is used by Start and Continue alone; a `quiet` variant is the text button; add `size: 'action'` (3.5rem) and `size: 'control'` (4rem); outline uses `border-field`; every size at least 2.75rem.
   - `backend/resources/js/components/responses.tsx`: `quietButtonClassName` and `quietLineClassName` become body-size text buttons, `min-h-11`, no mono, no uppercase.
-  - `git mv backend/resources/js/components/rail.tsx backend/resources/js/components/day-strip.tsx`, export `DayStrip`, and draw it as specified above. `RailData` gains `?int $stepSeconds` and `list<RailMarkData> $marks`, replacing `leaveByMinute`/`leaveByClock`; new Data `RailMarkData(?PlanRung $rung, int $minute, string $clock)` in `backend/app/Data/RailMarkData.php`, where a null rung is the appointment itself. `BuildRail::handle(User $user, ?ResolutionContext $context = null, ?int $stepSeconds = null)` fills them; `ShowHomeController` passes the right-now step's estimate as the page prop `rail`, which overrides the shared one. Shared `railSummary(rail): string` in `packages/shared/src/copy.ts`.
+  - `git mv backend/resources/js/components/rail.tsx backend/resources/js/components/day-strip.tsx`, export `DayStrip`, and draw it as specified above. `RailData` gains `?int $stepSeconds` and `list<RailMarkData> $marks`, replacing `leaveByMinute`/`leaveByClock`; new Data `RailMarkData(?PlanRung $rung, int $minute)` in `backend/app/Data/RailMarkData.php`, where a null rung is the appointment itself. `BuildRail::handle(User $user, ?ResolutionContext $context = null, ?int $stepSeconds = null)` fills them; `ShowHomeController` passes the right-now step's estimate as the page prop `rail`, which overrides the shared one. Shared `railSummary(rail): string` in `packages/shared/src/copy.ts`.
   - `backend/resources/js/layouts/shell.tsx`: new layout per the wireframe; the strip is horizontal under `sm`.
-  - New `backend/resources/js/components/wordmark.tsx` ("add", weight 700, links home); delete `backend/resources/js/components/app-logo.tsx` and `backend/resources/js/components/app-logo-icon.tsx` and use the wordmark in the three auth layouts.
+  - New `backend/resources/js/components/wordmark.tsx` ("add", weight 700, links home); the app logo and its icon component are deleted, and the three auth layouts use the wordmark.
   - Every `text-[11px]`/`text-[13px]`/`font-mono`/`uppercase`/`tracking-[...]` under `backend/resources/js` outside `components/ui/` goes; mono stays only on clocks, durations and counts.
   - Tests: `backend/tests/Feature/Home/RailTest.php` covers `stepSeconds` and `marks`.
   - Check: `DesignTokensTest.php` passes; `npm run composer -- ci:check` passes; screenshots of `/home`, `/focus`, `/overwhelmed` in light and dark at 1440 and 390 match the wireframe.
-- [ ] **2.5 The doors in.** Invoke skills: `fortify-development`, `frontend-design`.
+- [x] **2.5 The doors in.** Invoke skills: `fortify-development`, `frontend-design`.
   - `backend/resources/js/pages/welcome.tsx`: headline kept; beside it, a `<figure>` with a static, non-interactive sample of home (the strip, "Put the laundry in the washing machine.", "About 3 minutes, so done around 19:08 if you start now.", a disabled Start with `tabIndex={-1}`, "Why this one? Your parents arrive Saturday."), captioned "What opening the app looks like."; the footer line becomes "Built for the days when starting is the hard part."
   - `backend/resources/js/pages/auth/login.tsx`: title "Log in", description "Pick up where you left off.", the remember checkbox `defaultChecked`.
   - `backend/resources/js/pages/auth/register.tsx`: description "It takes a minute. Nothing else is asked of you."
   - `backend/resources/js/layouts/settings/layout.tsx`: heading "Settings" with no description; the nav is text links, the current one ink weight 600 with `aria-current="page"`.
   - Check: `npm run test:browser` passes; screenshots of `/`, `/login`, `/settings/profile` in both themes.
-- [ ] **2.6 Slice 5 points here.** Add one line under slice 5's "The visual direction" heading in [`slices/05-home.md`](slices/05-home.md): "Superseded 2026-09-30 by the visual identity in the UX overhaul plan."
+- [x] **2.6 Slice 5 points here.** Add one line under slice 5's "The visual direction" heading in [`slices/05-home.md`](slices/05-home.md): "Superseded 2026-09-30 by the visual identity in the UX overhaul plan."
   - Check: `npm run artisan -- test --compact tests/Feature/Guards/DocumentationTest.php` passes.
-- [ ] **2.7 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
+- [x] **2.7 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
 
 ## Phase 3 — one capture box (`feature/unified-capture`)
 

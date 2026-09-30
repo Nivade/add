@@ -145,7 +145,7 @@ function Classification({
             onSuccess={onDone}
             className="flex flex-col gap-3"
         >
-            <p className="text-lg">{result.title}</p>
+            <p className="text-lead">{result.title}</p>
             {result.why && (
                 <p className="text-muted-foreground">{result.why}</p>
             )}

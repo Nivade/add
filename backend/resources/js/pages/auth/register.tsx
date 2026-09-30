@@ -101,7 +101,7 @@ export default function Register({ passwordRules }: Props) {
                             </Button>
                         </div>
 
-                        <div className="text-muted-foreground text-center text-sm">
+                        <div className="text-muted-foreground text-small text-center">
                             Already have an account?{' '}
                             <TextLink href={login()} tabIndex={6}>
                                 Log in
@@ -116,5 +116,5 @@ export default function Register({ passwordRules }: Props) {
 
 Register.layout = {
     title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    description: 'It takes a minute. Nothing else is asked of you.',
 };

@@ -95,7 +95,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Actions/Intentions/CorrectDeadline.php',
         'backend/app/Actions/Sessions/BuildFinished.php',
         'backend/app/Data/FinishedData.php',
-        'backend/app/Data/RailMarkData.php',
         'backend/app/Data/SortedCaptureData.php',
         'backend/app/Enums/CaptureKind.php',
         'backend/app/Exceptions/CaptureAlreadyActedOn.php',
@@ -111,7 +110,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Http/Requests/ChangeCaptureKindRequest.php',
         'backend/app/Http/Requests/CorrectDeadlineRequest.php',
         'backend/resources/js/components/sorted-band.tsx',
-        'backend/resources/js/components/wordmark.tsx',
         'backend/resources/js/hooks/use-shortcuts.ts',
         'backend/resources/js/layouts/focus-frame.tsx',
         'backend/resources/js/pages/appointment.tsx',
@@ -119,14 +117,12 @@ it('names only paths that exist', function (): void {
         'backend/tests/Feature/Captures/CaptureKindTest.php',
         'backend/tests/Feature/Captures/SortCaptureTest.php',
         'backend/tests/Feature/Execution/FinishedTest.php',
-        'backend/tests/Feature/Guards/DesignTokensTest.php',
         'backend/tests/Feature/Intentions/CorrectDeadlineTest.php',
         'mobile/app/finished/[session].tsx',
         'mobile/src/capture/pending-captures.ts',
         'mobile/src/components/bottom-bar.tsx',
         'mobile/src/components/day-strip.tsx',
         'mobile/src/components/sorted-band.tsx',
-        'packages/shared/src/tokens.ts',
     ];
 
     foreach ($planned as $path) {

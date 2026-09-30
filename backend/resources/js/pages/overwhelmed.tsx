@@ -7,6 +7,7 @@ import {
 } from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
+import { quietLineClassName } from '@/components/responses';
 import { home } from '@/routes';
 
 /** No rail, no nav, no capture: the screen suppresses everything until this one step is done. */
@@ -20,10 +21,8 @@ export default function Overwhelmed({
             <Head title="One thing" />
 
             <div className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-20">
-                <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
-                    <p className="text-now font-mono text-[11px] tracking-[0.18em] uppercase">
-                        One thing
-                    </p>
+                <div className="max-w-content mx-auto flex w-full flex-col items-start gap-8">
+                    <p className="text-muted-foreground text-lead">One thing</p>
 
                     <OneThing>
                         {smallestStep
@@ -35,7 +34,7 @@ export default function Overwhelmed({
                         <>
                             <Meta>{smallestStepMeta(smallestStep.step)}</Meta>
 
-                            <ul className="text-muted-foreground space-y-1 pl-5 font-mono text-[13px]">
+                            <ul className="text-muted-foreground space-y-1">
                                 {smallestStep.why.map((line) => (
                                     <li key={line}>{line}</li>
                                 ))}
@@ -45,14 +44,11 @@ export default function Overwhelmed({
                         </>
                     )}
 
-                    <p className="text-muted-foreground border-border border-t pt-5 font-mono text-[13px]">
+                    <p className="text-muted-foreground">
                         {restCountLine(restCount)}
                     </p>
 
-                    <Link
-                        href={home()}
-                        className="text-muted-foreground hover:text-foreground font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"
-                    >
+                    <Link href={home()} className={quietLineClassName}>
                         {overwhelmedCopy.back}
                     </Link>
                 </div>

@@ -145,9 +145,13 @@ alreadyPassed: boolean,
 export type RailData = {
 nowMinute: number,
 sessionStartedMinute: number | null,
-leaveByMinute: number | null,
-leaveByClock: string | null,
+stepSeconds: number | null,
+marks: RailMarkData[],
 appointmentTitle: string | null,
+};
+export type RailMarkData = {
+rung: PlanRung | null,
+minute: number,
 };
 export type ReminderData = {
 id: string,

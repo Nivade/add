@@ -3,6 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @if (($appearance ?? 'system') === 'system')
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F4F5" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F1B22" />
+    @else
+        <meta name="theme-color" content="{{ $appearance === 'dark' ? '#0F1B22' : '#F2F4F5' }}" />
+    @endif
 
     {{-- Inline script to detect system dark mode preference and apply it immediately --}}
     <script>
@@ -27,11 +33,11 @@
     {{-- Inline style to set the HTML background color based on our theme in app.css --}}
     <style>
         html {
-            background-color: oklch(1 0 0);
+            background-color: #f2f4f5;
         }
 
         html.dark {
-            background-color: oklch(0.145 0 0);
+            background-color: #0f1b22;
         }
     </style>
 

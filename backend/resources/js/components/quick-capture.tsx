@@ -44,7 +44,9 @@ export function QuickCapture() {
             trigger={
                 <>
                     Capture
-                    <kbd className="text-muted-foreground ml-1 text-xs">c</kbd>
+                    <kbd className="text-muted-foreground text-small ml-1">
+                        c
+                    </kbd>
                 </>
             }
             title={entryCopy.thought.question}

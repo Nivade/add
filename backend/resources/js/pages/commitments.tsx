@@ -2,6 +2,7 @@ import type { CommitmentListData } from '@add/shared';
 import { commitmentCopy } from '@add/shared';
 import { Head, Link } from '@inertiajs/react';
 import { CommitmentRow } from '@/components/commitment-row';
+import { quietLineClassName } from '@/components/responses';
 import { home } from '@/routes';
 
 /** Reached only from home; home stays the place things are chosen from. */
@@ -14,8 +15,8 @@ export default function Commitments({
         <>
             <Head title={commitmentCopy.listTitle} />
 
-            <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 pt-6 pb-20 lg:mx-0 lg:ml-[8vw]">
-                <h1 className="text-2xl font-medium tracking-[-0.01em]">
+            <div className="flex flex-col items-start gap-10">
+                <h1 className="text-one-thing text-balance">
                     {commitmentCopy.listTitle}
                 </h1>
 
@@ -24,9 +25,9 @@ export default function Commitments({
                         {commitmentCopy.listEmpty}
                     </p>
                 ) : (
-                    <ul className="divide-border border-border divide-y border-t">
+                    <ul className="w-full space-y-8">
                         {open.map((commitment) => (
-                            <li key={commitment.id} className="py-5">
+                            <li key={commitment.id}>
                                 <CommitmentRow
                                     id={commitment.id}
                                     description={commitment.description}
@@ -40,10 +41,7 @@ export default function Commitments({
                     </ul>
                 )}
 
-                <Link
-                    href={home()}
-                    className="text-muted-foreground hover:text-foreground font-mono text-[11px] tracking-[0.16em] uppercase transition-colors"
-                >
+                <Link href={home()} className={quietLineClassName}>
                     Back to home
                 </Link>
             </div>

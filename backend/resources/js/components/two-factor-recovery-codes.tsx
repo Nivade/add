@@ -110,7 +110,7 @@ export default function TwoFactorRecoveryCodes({
                             <>
                                 <div
                                     ref={codesSectionRef}
-                                    className="bg-muted grid gap-1 rounded-lg p-4 font-mono text-sm"
+                                    className="bg-accent text-small grid gap-1 rounded-lg p-4 font-mono"
                                     role="list"
                                     aria-label="Recovery codes"
                                 >
@@ -143,7 +143,7 @@ export default function TwoFactorRecoveryCodes({
                                     )}
                                 </div>
 
-                                <div className="text-muted-foreground text-xs select-none">
+                                <div className="text-muted-foreground text-small select-none">
                                     <p id="regenerate-warning">
                                         Each recovery code can be used once to
                                         access your account and will be removed
