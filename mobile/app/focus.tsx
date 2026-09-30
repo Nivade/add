@@ -1,7 +1,7 @@
 import type { ExecutionStateData } from '@add/shared';
 import { commitmentCopy, focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { api, type SessionControl } from '@/api/endpoints';
@@ -19,6 +19,7 @@ export default function Focus() {
   const resource = useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;
@@ -58,6 +59,11 @@ export default function Focus() {
   const send = async (
     write: () => Promise<ExecutionStateData>,
   ): Promise<void> => {
+    if (inFlight.current) {
+      return;
+    }
+
+    inFlight.current = true;
     setBusy(true);
 
     try {
@@ -69,6 +75,7 @@ export default function Focus() {
 
       await reload();
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };

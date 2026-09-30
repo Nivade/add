@@ -92,6 +92,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         <div className="pl-5">
                             <OneTapForm
                                 form={focusRoutes.resume.form(session.id)}
+                                stepId={step?.id}
                             >
                                 {(processing) => (
                                     <Button

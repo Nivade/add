@@ -1,4 +1,4 @@
-import { aiConsentCopy } from '@add/shared';
+import { aiConsentCopy, timezoneLine } from '@add/shared';
 import { useCallback, useState } from 'react';
 import { deviceTimezone } from '@/api/client';
 import { api } from '@/api/endpoints';
@@ -44,7 +44,7 @@ export default function Settings() {
         disabled={saving}
       />
       <Meta>
-        Times are read in {deviceTimezone()}, taken from this device.
+        {timezoneLine(deviceTimezone())}
       </Meta>
     </Screen>
   );

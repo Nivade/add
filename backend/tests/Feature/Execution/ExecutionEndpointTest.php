@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\StopSession;
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
@@ -161,6 +162,16 @@ it('answers a conflict when a double tap finishes a step the session has moved p
         ->and($session->currentStep()->sole()->status)->toBe(StepStatus::Pending);
 
     Exceptions::assertNothingReported();
+});
+
+it('answers the API with a conflict even when the client did not ask for JSON', function (): void {
+    $session = started();
+    $first = $session->current_step_id;
+    CompleteStep::run($session, $first);
+
+    $this->actingAs($session->user)
+        ->post("/api/v1/sessions/{$session->id}/complete-step", ['step_id' => $first])
+        ->assertStatus(409);
 });
 
 it('sends a stale web control back without changing anything', function (): void {

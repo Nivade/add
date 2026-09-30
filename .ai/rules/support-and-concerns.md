@@ -20,5 +20,5 @@ reaction. They never reuse the `ExecutionEvent` name.
 
 `app/Concerns/` holds only the Fortify starter-kit validation traits,
 `PasswordValidationRules` and `ProfileValidationRules`. Every other trait
-lives with its layer: `app/Models/Concerns/`, `app/Http/Controllers/Concerns/`
-or `app/Actions/Concerns/`.
+lives with its layer: `app/Models/Concerns/`, `app/Http/Controllers/Concerns/`,
+`app/Http/Requests/Concerns/` or `app/Actions/Concerns/`.

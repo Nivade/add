@@ -19,6 +19,11 @@ export function restCountLine(count: number): string {
     return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about`;
 }
 
+/** Settings names the zone every clock is read in, and where it came from. */
+export function timezoneLine(zone: string): string {
+    return `Times are read in ${zone}, taken from this device.`;
+}
+
 /** Said while a capture is still with the model, so it never looks lost. */
 export function sortingLine(count: number): string {
     return count === 1

@@ -41,14 +41,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // No-op while SENTRY_LARAVEL_DSN is empty, which is the default everywhere but the debug profile.
         Integration::handles($exceptions);
 
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
-        );
+        $wantsJson = fn (Request $request): bool => $request->is('api/*') || $request->expectsJson();
 
-        $exceptions->render(function (Throwable $e, Request $request): ?JsonResponse {
+        $exceptions->shouldRenderJsonWhen($wantsJson);
+
+        $exceptions->render(function (Throwable $e, Request $request) use ($wantsJson): ?JsonResponse {
             $respondsWith = RespondsWithReader::for($e);
 
-            if (! $respondsWith instanceof RespondsWith || ! $request->expectsJson()) {
+            if (! $respondsWith instanceof RespondsWith || ! $wantsJson($request)) {
                 return null;
             }
 
@@ -59,10 +59,10 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // A stale page on the web reloads rather than showing a 409 it cannot act on.
-        $exceptions->render(fn (OutOfDateTransition $e, Request $request): ?RedirectResponse => $request->expectsJson() ? null : back());
+        $exceptions->render(fn (OutOfDateTransition $e, Request $request): ?RedirectResponse => $wantsJson($request) ? null : back());
 
         // After the attribute renderer, so a consent refusal keeps its own sentence; never the exception's detail.
-        $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()
+        $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $wantsJson($request)
             ? new JsonResponse(['message' => 'Reading this needs AI, which is not reachable right now. Try again in a while.'], Response::HTTP_SERVICE_UNAVAILABLE)
             : null);
     })->create();

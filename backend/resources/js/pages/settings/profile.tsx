@@ -1,3 +1,4 @@
+import { timezoneLine } from '@add/shared';
 import { Form, Head, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
@@ -37,8 +38,7 @@ export default function Profile({
                 />
 
                 <p className="text-muted-foreground text-sm">
-                    Times are read in {auth.user.timezone}, taken from this
-                    device.
+                    {timezoneLine(auth.user.timezone)}
                 </p>
 
                 <Form
