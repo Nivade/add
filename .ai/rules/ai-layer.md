@@ -1,8 +1,8 @@
 ---
 paths:
   - 'backend/app/Support/Ai/**'
-  - 'backend/app/Contracts/AiProvider.php'
-  - 'backend/config/ai.php'
+  - 'backend/app/Providers/AiServiceProvider.php'
+  - 'backend/config/ai-toolkit.php'
 ---
 # AI layer
 
@@ -31,14 +31,16 @@ exists to measure.
 
 ## A missing fixture throws
 
-`FixtureAiProvider` fails when there is no file for the request. Returning an
+The `fixture` driver fails when there is no file for the request. Returning an
 empty answer instead would enter something nobody said into the corpus and score
-it as a real response. `NullAiProvider` and an exhausted `FakeAiProvider` fail
-for the same reason.
+it as a real response. The `null` driver and an unanswered fake fail for the same
+reason. A miss also dumps the request, the person's words included, beside where
+the answer belongs, which is why `storage/ai-fixtures` is gitignored.
 
-The suite runs on the `fake` driver, so a test that reaches the AI path without
-queueing an answer fails rather than silently collecting a canned one. `canned`
-is for clicking through the UI, accepts any input, and is never scored.
+Every feature and browser test starts on `AiToolkit::fake()`, so a test that
+reaches the AI path without seeding an answer fails rather than silently
+collecting a canned one. `canned` is for clicking through the UI, accepts any
+input, and is never scored.
 
 ## One schema definition, the fluent builder
 
@@ -46,16 +48,19 @@ first-move kept a raw-array twin of every schema and the two drifted; the parser
 was the real validator both times. There is one definition here. Do not
 reintroduce the second copy.
 
-## Consent is the driver, and every call is logged
+## Consent is per person, and every call is logged
 
-§28 asks for an explicit, consented, logged path off the machine. Two thirds of
-that is the driver: `canned`, `fixture`, `fake` and `null` never leave, `openai`
-is the only one that does, and choosing it is the consent. Per-user consent needs
-a column and a screen, and waits for the first real user rather than being
-half-built now.
+§28 asks for an explicit, consented, logged path off the machine. `canned`,
+`fixture`, `fake` and `null` never leave; `openai` is the only one that does,
+so `AiServiceProvider` wraps only that driver in the toolkit's `GatedAiProvider`.
+The gate reads `ai_consented_at` for the user in the request's `rateLimitScope`,
+which `AiRequests` fills with the asking person's id; a request with no person
+is refused. The evals score a corpus nobody wrote, so they build the OpenAI
+provider themselves and skip the gate.
 
-The logging third is `LoggingAiProvider`, which wraps whatever the driver
-resolved. It records the operation, provider, model, prompt and schema versions,
+The logging third is the toolkit's event log on `ai-toolkit.log.channel`, which
+falls back to the app's own channel: `null` there switches the audit off
+silently. It records the operation, provider, model, prompt and schema versions,
 duration and token counts — and never the prompt or the answer. A log holding the
 person's own sentences is a second copy of the thing being protected, so a config
 flag claiming to redact input was deleted rather than left reading like a feature.
