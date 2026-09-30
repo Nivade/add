@@ -1,5 +1,5 @@
 import type { CaptureSource } from '@add/shared';
-import { entryCopy } from '@add/shared';
+import { captureCopy } from '@add/shared';
 import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
@@ -65,7 +65,7 @@ export default function Capture() {
 
   return (
     <Screen>
-      <OneThing>{entryCopy.thought.question}</OneThing>
+      <OneThing>{captureCopy.question}</OneThing>
       <Meta>no title, no category, no due date</Meta>
 
       <TextInput

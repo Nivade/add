@@ -1,12 +1,9 @@
-import { usePage } from '@inertiajs/react';
-import { CommitmentCapture } from '@/components/commitment-capture';
+import { Link, usePage } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
-import { FutureReminderCapture } from '@/components/future-reminder-capture';
-import { PasteCapture } from '@/components/paste-capture';
 import { QuickCapture } from '@/components/quick-capture';
 import { UserMenu } from '@/components/user-menu';
-import { WaitingForCapture } from '@/components/waiting-for-capture';
 import { Wordmark } from '@/components/wordmark';
+import { overwhelmed } from '@/routes';
 
 /** The header shares the content's column, so the eye never crosses the screen. */
 const columnClassName =
@@ -33,11 +30,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     <Wordmark />
 
                     <div className="ml-auto flex flex-wrap items-center gap-2">
+                        <Link href={overwhelmed()}>{"I'm overwhelmed"}</Link>
                         <QuickCapture />
-                        <WaitingForCapture />
-                        <CommitmentCapture />
-                        <FutureReminderCapture />
-                        <PasteCapture />
                         <UserMenu />
                     </div>
                 </header>

@@ -81,7 +81,7 @@ the same `render()`; `AiUnavailable` has its own closure in `bootstrap/app.php`.
   `render()`.
 - Tests already cover the behaviour and must stay green unchanged:
   `tests/Feature/Execution/ExecutionEndpointTest.php`, `tests/Feature/Commitments/CommitmentTest.php`,
-  `tests/Feature/Intentions/RecurringIntentionTest.php`, `tests/Feature/Ingestion/ClassifyPastedTextTest.php`.
+  `tests/Feature/Intentions/RecurringIntentionTest.php`, and the pasted-text endpoint test (deleted with its endpoint by the UX overhaul).
   Add a web (non-JSON) case only if none exists.
 - Skills: `ai-layer-changes` (for `AiUnavailable`), `tdd`.
 

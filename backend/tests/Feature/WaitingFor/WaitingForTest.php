@@ -7,21 +7,6 @@ use App\Models\User;
 use App\Models\WaitingFor;
 use Inertia\Testing\AssertableInertia;
 
-it('creates a waiting-for with nothing but who and what', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->from(route('home'))
-        ->post(route('waiting-fors.store'), ['subject' => 'John', 'note' => 'the contract'])
-        ->assertRedirect(route('home'));
-
-    $waitingFor = WaitingFor::query()->sole();
-
-    expect($waitingFor->subject)->toBe('John')
-        ->and($waitingFor->note)->toBe('the contract')
-        ->and($waitingFor->status)->toBe(WaitingForStatus::Waiting);
-});
-
 it('does not surface a fresh waiting-for on home', function (): void {
     $user = User::factory()->create();
     WaitingFor::factory()->for($user)->create();
@@ -100,22 +85,6 @@ it('counts staleness from the last answer, not from an unrelated edit', function
     $this->actingAs($user)
         ->get(route('home'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('home.needsAttention', 0));
-});
-
-it('answers over the API too', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->postJson(route('api.v1.waiting-fors.store'), ['subject' => 'Sarah', 'note' => 'the invoice'])
-        ->assertCreated()
-        ->assertJsonPath('subject', 'Sarah');
-
-    $waitingFor = WaitingFor::query()->sole();
-
-    $this->actingAs($user)
-        ->postJson(route('api.v1.waiting-fors.respond', $waitingFor), ['response' => 'wait_longer'])
-        ->assertOk()
-        ->assertJsonPath('status', 'waiting');
 });
 
 it('does not let one person respond for another', function (): void {

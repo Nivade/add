@@ -11,34 +11,6 @@ use App\Notifications\FutureReminderDue;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
 
-it('creates a time-triggered reminder from a phrase carrying its own time', function (): void {
-    CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-09-25 09:00:00', 'Europe/Amsterdam'));
-    $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
-
-    $this->actingAs($user)
-        ->from(route('home'))
-        ->post(route('future-reminders.store'), ['text' => 'tomorrow at 5, buy dishwasher tablets'])
-        ->assertRedirect(route('home'));
-
-    $reminder = FutureReminder::query()->sole();
-
-    expect($reminder->message)->toBe('buy dishwasher tablets')
-        ->and($reminder->trigger_at?->setTimezone('Europe/Amsterdam')->format('Y-m-d H:i'))->toBe('2026-09-26 05:00')
-        ->and($reminder->calendar_event_id)->toBeNull();
-});
-
-it('rejects a reminder with no time anywhere in it', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->from(route('home'))
-        ->post(route('future-reminders.store'), ['text' => 'buy dishwasher tablets'])
-        ->assertRedirect(route('home'))
-        ->assertSessionHasErrors('text');
-
-    expect(FutureReminder::query()->count())->toBe(0);
-});
-
 it('creates a calendar-relative reminder from the picked event and offset', function (): void {
     $user = User::factory()->create();
     $event = CalendarEvent::factory()->for($user)->create(['title' => 'Dentist', 'starts_at' => CarbonImmutable::parse('2026-09-19 14:00:00')]);
@@ -127,13 +99,4 @@ it('sends a due reminder once and not on every dispatch after', function (): voi
 it('refuses a row with no instant to fire at, even bypassing the action', function (): void {
     expect(fn () => FutureReminder::factory()->for(User::factory())->create(['trigger_at' => null]))
         ->toThrow(Illuminate\Database\QueryException::class);
-});
-
-it('answers over the API too', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->postJson(route('api.v1.future-reminders.store'), ['text' => 'in 2 hours, call the dentist'])
-        ->assertCreated()
-        ->assertJsonPath('message', 'call the dentist');
 });

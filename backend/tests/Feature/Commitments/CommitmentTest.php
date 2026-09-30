@@ -10,21 +10,6 @@ use App\Models\Intention;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
 
-it('creates a commitment typed directly, confirmed immediately', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->from(route('home'))
-        ->post(route('commitments.store'), ['description' => "I'll call Sarah Friday"])
-        ->assertRedirect(route('home'));
-
-    $commitment = Commitment::query()->sole();
-
-    expect($commitment->description)->toBe("I'll call Sarah Friday")
-        ->and($commitment->provenance)->toBe(CommitmentProvenance::UserStated)
-        ->and($commitment->confirmed_at)->not->toBeNull();
-});
-
 it('promotes an existing intention to a commitment, confirmed immediately', function (): void {
     $user = User::factory()->create();
     $intention = Intention::factory()->for($user)->create(['title' => 'Send the contract back']);
@@ -157,24 +142,6 @@ it('promotes an intention once, and keeps the commitment when the intention is f
     CompleteStep::run($session, $session->current_step_id);
 
     expect(Commitment::query()->sole()->status)->toBe(CommitmentStatus::Kept);
-});
-
-it('answers over the API too', function (): void {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->postJson(route('api.v1.commitments.store'), ['description' => "I'll bring the documents"])
-        ->assertCreated()
-        ->assertJsonPath('description', "I'll bring the documents")
-        ->assertJsonPath('provenance', 'user_stated');
-
-    $intention = Intention::factory()->for($user)->create(['title' => 'Book the movers']);
-
-    $this->actingAs($user)
-        ->postJson(route('api.v1.intentions.commitment', $intention))
-        ->assertCreated()
-        ->assertJsonPath('description', 'Book the movers')
-        ->assertJsonPath('provenance', 'user_task');
 });
 
 it('lists open commitments over the API', function (): void {
