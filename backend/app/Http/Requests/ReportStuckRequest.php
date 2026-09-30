@@ -15,9 +15,15 @@ final class ReportStuckRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'step_id' => ['required', 'string'],
             'reason' => ['required', Rule::enum(StuckReason::class)],
             'note' => ['nullable', 'string', 'max:2000'],
         ];
+    }
+
+    public function stepId(): string
+    {
+        return $this->string('step_id')->toString();
     }
 
     public function reason(): StuckReason

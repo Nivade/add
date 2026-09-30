@@ -154,7 +154,7 @@ it('promotes an intention once, and keeps the commitment when the intention is f
             ->where('home.rightNowIsCommitment', true)
             ->has('home.needsAttention', 0));
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect(Commitment::query()->sole()->status)->toBe(CommitmentStatus::Kept);
 });
@@ -259,7 +259,7 @@ it('promotes the step on screen, and keeps the commitment when that step is done
         ->get(route('focus'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.currentStepIsCommitment', true));
 
-    CompleteStep::run($session);
+    CompleteStep::run($session, $session->current_step_id);
 
     expect($commitment->refresh()->status)->toBe(CommitmentStatus::Kept);
 });

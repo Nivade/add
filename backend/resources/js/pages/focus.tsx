@@ -21,24 +21,46 @@ const CONTROL_CLASS =
 function Control({
     label,
     form,
+    stepId,
     onClick,
 }: {
     label: string;
     form?: { action: string; method: 'post' };
+    stepId?: string;
     onClick?: () => void;
 }) {
-    const button = (
-        <Button
-            type={form ? 'submit' : 'button'}
-            variant="outline"
-            className={CONTROL_CLASS}
-            onClick={onClick}
-        >
-            {label}
-        </Button>
-    );
+    if (!form) {
+        return (
+            <Button
+                type="button"
+                variant="outline"
+                className={CONTROL_CLASS}
+                onClick={onClick}
+            >
+                {label}
+            </Button>
+        );
+    }
 
-    return form ? <Form {...form}>{button}</Form> : button;
+    return (
+        <Form {...form}>
+            {({ processing }) => (
+                <>
+                    {stepId && (
+                        <input type="hidden" name="step_id" value={stepId} />
+                    )}
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        className={CONTROL_CLASS}
+                        disabled={processing}
+                    >
+                        {label}
+                    </Button>
+                </>
+            )}
+        </Form>
+    );
 }
 
 export default function Focus({ state }: { state: ExecutionStateData }) {
@@ -90,10 +112,12 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             <Control
                                 label="Done"
                                 form={focusRoutes.completeStep.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label="Skip"
                                 form={focusRoutes.skipStep.form(session.id)}
+                                stepId={step?.id}
                             />
                             <Control
                                 label="Pause"
@@ -141,7 +165,10 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                     setStuckOpen(false);
                                     router.post(
                                         focusRoutes.stuck.url(session.id),
-                                        { reason: reason.value },
+                                        {
+                                            step_id: step?.id,
+                                            reason: reason.value,
+                                        },
                                     );
                                 }}
                             >

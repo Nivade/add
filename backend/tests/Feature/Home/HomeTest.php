@@ -198,7 +198,7 @@ it('keeps the person on focus while the session is open', function (): void {
 
     $this->actingAs($session->user)
         ->from(route('focus'))
-        ->post(route('focus.complete-step', $session))
+        ->post(route('focus.complete-step', $session), ['step_id' => $session->current_step_id])
         ->assertRedirect(route('focus'));
 
     expect($session->refresh()->steps_completed)->toBe(1);

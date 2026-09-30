@@ -20,6 +20,7 @@ final class ReportStuckController extends Controller
     {
         return BuildExecutionState::run(ReportStuck::run(
             $this->owned($request, $session),
+            $request->stepId(),
             $request->reason(),
             $request->note(),
         ));

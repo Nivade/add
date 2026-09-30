@@ -23,10 +23,10 @@ final class ReportStuck
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session, StuckReason $reason, ?string $note = null): ExecutionSession
+    public function handle(ExecutionSession $session, string $stepId, StuckReason $reason, ?string $note = null): ExecutionSession
     {
-        return $session->transition(function () use ($session, $reason, $note): ExecutionSession {
-            $step = $session->currentStepOrFail();
+        return $session->transition(function () use ($session, $stepId, $reason, $note): ExecutionSession {
+            $step = $session->currentStepOrFail($stepId);
 
             RecordExecutionEvent::run($session, ExecutionEventType::Stuck, $step->id, [
                 'reason' => $reason->value,

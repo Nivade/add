@@ -189,7 +189,7 @@ function finishStepAt(User $user, Place $place): void
     $intention = Intention::factory()->decomposed()->for($user)->create();
     $step = Step::factory()->for($intention)->create(['position' => 1, 'place' => $place]);
 
-    CompleteStep::run(StartSession::run($user, $step));
+    CompleteStep::run(StartSession::run($user, $step), $step->id);
 }
 
 function workedOn(User $user): void

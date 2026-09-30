@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Attributes\RespondsWith;
 use App\Attributes\RespondsWithReader;
+use App\Exceptions\OutOfDateTransition;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Nvade\AiToolkit\Exceptions\AiUnavailable;
 use Sentry\Laravel\Integration;
@@ -55,6 +57,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 $respondsWith->status,
             );
         });
+
+        // A stale page on the web reloads rather than showing a 409 it cannot act on.
+        $exceptions->render(fn (OutOfDateTransition $e, Request $request): ?RedirectResponse => $request->expectsJson() ? null : back());
 
         // After the attribute renderer, so a consent refusal keeps its own sentence; never the exception's detail.
         $exceptions->render(fn (AiUnavailable $e, Request $request): ?JsonResponse => $request->expectsJson()

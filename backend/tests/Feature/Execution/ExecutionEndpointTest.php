@@ -62,12 +62,12 @@ it('answers 200 for each control that mutates an open session', function (): voi
     $session = started();
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/complete-step")
+        ->postJson("/api/v1/sessions/{$session->id}/complete-step", ['step_id' => $session->current_step_id])
         ->assertOk()
         ->assertJsonPath('session.stepsCompleted', 1);
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/skip-step")
+        ->postJson("/api/v1/sessions/{$session->id}/skip-step", ['step_id' => $session->refresh()->current_step_id])
         ->assertOk();
 
     $this->actingAs($session->user)
@@ -93,14 +93,14 @@ it('reads the stuck reason and refuses one it does not know', function (): void 
     $session = started();
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/stuck", ['reason' => 'tired'])
+        ->postJson("/api/v1/sessions/{$session->id}/stuck", ['step_id' => $session->current_step_id, 'reason' => 'tired'])
         ->assertOk()
         ->assertJsonPath('session.outcome', 'stopped');
 
     $other = started();
 
     $this->actingAs($other->user)
-        ->postJson("/api/v1/sessions/{$other->id}/stuck", ['reason' => 'cannot be bothered'])
+        ->postJson("/api/v1/sessions/{$other->id}/stuck", ['step_id' => $other->current_step_id, 'reason' => 'cannot be bothered'])
         ->assertUnprocessable()
         ->assertJsonValidationErrorFor('reason');
 });
@@ -138,11 +138,65 @@ it('reports an ended session as a conflict rather than a crash', function (): vo
     Exceptions::assertNothingReported();
 });
 
+it('answers a conflict when a double tap finishes a step the session has moved past', function (): void {
+    Exceptions::fake();
+    $session = started();
+    $first = $session->current_step_id;
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/complete-step", ['step_id' => $first])
+        ->assertOk();
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/complete-step", ['step_id' => $first])
+        ->assertStatus(409);
+
+    expect($session->refresh()->steps_completed)->toBe(1)
+        ->and($session->currentStep()->sole()->status)->toBe(StepStatus::Pending);
+
+    Exceptions::assertNothingReported();
+});
+
+it('sends a stale web control back without changing anything', function (): void {
+    $session = started();
+    $first = $session->current_step_id;
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route('focus.complete-step', $session), ['step_id' => $first])
+        ->assertRedirect(route('focus'));
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route('focus.skip-step', $session), ['step_id' => $first])
+        ->assertRedirect(route('focus'));
+
+    expect($session->refresh()->steps_completed)->toBe(1)
+        ->and($session->currentStep()->sole()->skip_count)->toBe(0)
+        ->and(replay($session))->toBe(['started', 'step_completed']);
+});
+
+it('refuses a step control that does not say which step it means', function (string $control, array $body): void {
+    $session = started();
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/{$control}", $body)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrorFor('step_id');
+
+    expect(replay($session))->toBe(['started']);
+})->with([
+    'complete' => ['complete-step', []],
+    'skip' => ['skip-step', []],
+    'stuck' => ['stuck', ['reason' => 'tired']],
+]);
+
 it('carries the stuck note through the endpoint', function (): void {
     $session = started();
 
     $this->actingAs($session->user)
         ->postJson("/api/v1/sessions/{$session->id}/stuck", [
+            'step_id' => $session->current_step_id,
             'reason' => StuckReason::NeedSomething->value,
             'note' => 'The drill is at my mother-in-law.',
         ])

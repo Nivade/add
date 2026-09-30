@@ -9,15 +9,15 @@ use App\Actions\Sessions\CompleteStep;
 use App\Data\ExecutionStateData;
 use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StepControlRequest;
 use App\Models\ExecutionSession;
-use Illuminate\Http\Request;
 
 final class CompleteStepController extends Controller
 {
     use ResolvesOwned;
 
-    public function __invoke(Request $request, ExecutionSession $session): ExecutionStateData
+    public function __invoke(StepControlRequest $request, ExecutionSession $session): ExecutionStateData
     {
-        return BuildExecutionState::run(CompleteStep::run($this->owned($request, $session)));
+        return BuildExecutionState::run(CompleteStep::run($this->owned($request, $session), $request->stepId()));
     }
 }

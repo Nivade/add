@@ -7,17 +7,17 @@ namespace App\Http\Controllers\Web;
 use App\Actions\Sessions\SkipCurrentStep;
 use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StepControlRequest;
 use App\Models\ExecutionSession;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 final class SkipStepController extends Controller
 {
     use ResolvesOwned;
 
-    public function __invoke(Request $request, ExecutionSession $session): RedirectResponse
+    public function __invoke(StepControlRequest $request, ExecutionSession $session): RedirectResponse
     {
-        SkipCurrentStep::run($this->owned($request, $session));
+        SkipCurrentStep::run($this->owned($request, $session), $request->stepId());
 
         return back();
     }

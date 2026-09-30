@@ -112,7 +112,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Http/Middleware/RecordTimezone.php',
         'backend/app/Http/Requests/ChangeCaptureKindRequest.php',
         'backend/app/Http/Requests/CorrectDeadlineRequest.php',
-        'backend/app/Http/Requests/StepControlRequest.php',
         'backend/resources/js/components/sorted-band.tsx',
         'backend/resources/js/components/wordmark.tsx',
         'backend/resources/js/hooks/use-shortcuts.ts',

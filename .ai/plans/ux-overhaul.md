@@ -1,6 +1,6 @@
 # UX overhaul — the audit of 2026-09-30
 
-**State:** designed, 2026-09-30 · [the slice table](executive-function-os.md#slices)
+**State:** building, 2026-09-30 · [the slice table](executive-function-os.md#slices)
 
 *Spec: [`product-spec.md`](product-spec.md) §2.1–§2.3, §5, §6, §10–§13, §16, §18, §21, §29–§31, §35, §39, §40.
 Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.md`, `testing.md`, `toolchain.md`, `general.md`.*
@@ -52,7 +52,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
 
 ## Before any step
 
-- [ ] **0.1 Branch.** Invoke skills: `slice-workflow`, `split-to-prs`, `sail-and-root-scripts`.
+- [x] **0.1 Branch.** Invoke skills: `slice-workflow`, `split-to-prs`, `sail-and-root-scripts`.
   - `git fetch origin && git log origin/main --oneline -30 | grep -i "slice 11\|metrics"` must print the slice 11 merge. If it prints nothing, stop and tell the person slice 11 is unmerged.
   - This plan, its spine row and the `$planned` list in `backend/tests/Feature/Guards/DocumentationTest.php` were written uncommitted on `feature/slice-11-measuring`. Move them: `git stash push -- .ai/plans/ux-overhaul.md .ai/plans/executive-function-os.md backend/tests/Feature/Guards/DocumentationTest.php`, `git switch -c fix/ux-trust origin/main`, `git stash pop`.
   - Commit `docs: plan the ux overhaul` with only those three files.
@@ -63,7 +63,7 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
 
 ## Phase 1 — trust (`fix/ux-trust`)
 
-- [ ] **1.1 A double tap cannot finish the next step.** Invoke skills: `laravel-actions`, `wayfinder-development`, `expo-react-native`.
+- [x] **1.1 A double tap cannot finish the next step.** Invoke skills: `laravel-actions`, `wayfinder-development`, `expo-react-native`.
   - `ExecutionSession::currentStepOrFail(?string $expectedStepId = null): Step` throws `InvalidSessionTransition("Session {$this->id} has moved past step {$expectedStepId}.")` when the current step id differs.
   - `CompleteStep::handle(ExecutionSession $session, string $stepId)`, `SkipCurrentStep::handle(ExecutionSession $session, string $stepId)`, `ReportStuck::handle(ExecutionSession $session, string $stepId, StuckReason $reason, ?string $note = null)` pass it through. Update every caller (`grep -rn "CompleteStep::run\|SkipCurrentStep::run\|ReportStuck::run" backend`).
   - New `backend/app/Http/Requests/StepControlRequest.php`: `step_id` required string; `stepId(): string`. The web and API `CompleteStepController` and `SkipStepController` take it. `ReportStuckRequest` gains the same `step_id` rule and `stepId()`.
