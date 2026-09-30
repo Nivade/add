@@ -11,6 +11,7 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use App\Support\NextAction\Decision;
 use App\Support\NextAction\ResolutionContext;
 use Carbon\CarbonImmutable;
 
@@ -357,4 +358,44 @@ it('offers no correction for a guess the why does not state', function (): void 
     expect($answer?->step->title)->toBe('Wipe one worktop.')
         ->and($answer?->why)->not->toContain('You seem to be at home, where this gets done.')
         ->and($answer?->assumedPlace)->toBeNull();
+});
+
+function decision(User $user): ?Decision
+{
+    return app(NextActionResolver::class)->decide($user, ResolutionContext::forUser($user));
+}
+
+it('names continuation as what decided a step the person is part-way through', function (): void {
+    $user = User::factory()->create();
+    $started = Intention::factory()->decomposed()->for($user)->create();
+    $current = Step::factory()->for($started)->create(['position' => 2]);
+    placedStep($user, 'Buy bin bags.', Place::Out, 60);
+    ExecutionSession::factory()->for($user)->for($started)->create(['current_step_id' => $current->id]);
+
+    $decision = decision($user);
+
+    expect($decision?->answer->step->id)->toBe($current->id)
+        ->and($decision?->decidedBy)->toBe(Decision::CONTINUATION);
+});
+
+it('names the place rung when the home step beats a shorter step out', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Buy bin bags.', Place::Out, 60);
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120);
+    finishStepAt($user, Place::Home);
+
+    $decision = decision($user);
+
+    expect($decision?->answer->step->title)->toBe('Wipe one worktop.')
+        ->and($decision?->decidedBy)->toBe('fits_where_you_are');
+});
+
+it('names the last rung when a lone first step had nothing to beat', function (): void {
+    $user = User::factory()->create();
+    $intention = Intention::factory()->decomposed()->for($user)->create();
+    Step::factory()->for($intention)->create(['position' => 1]);
+
+    expect(decision($user)?->decidedBy)->toBe('earliest_position');
 });

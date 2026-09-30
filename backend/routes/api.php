@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\V1\ShowOverwhelmedController;
 use App\Http\Controllers\Api\V1\SkipStepController;
 use App\Http\Controllers\Api\V1\StopSessionController;
 use App\Http\Controllers\Api\V1\StoreCaptureController;
+use App\Http\Controllers\Api\V1\StoreCheckInController;
 use App\Http\Controllers\Api\V1\StoreCommitmentController;
 use App\Http\Controllers\Api\V1\StoreDeviceController;
 use App\Http\Controllers\Api\V1\StoreFutureReminderController;
@@ -77,6 +78,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->name('api.v1.')->group(function
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
     Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
     Route::post('whereabouts/not-here', ReportNotHereController::class)->name('whereabouts.not-here');
+    Route::post('check-ins/{topic}', StoreCheckInController::class)->name('check-ins.store');
 
     Route::post('sessions', StoreSessionController::class)->name('sessions.store');
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');

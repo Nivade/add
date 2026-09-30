@@ -42,6 +42,11 @@ final class ChainedNextActionResolver implements NextActionResolver
 
     public function resolve(User $user, ResolutionContext $context): ?NextActionData
     {
+        return $this->decide($user, $context)?->answer;
+    }
+
+    public function decide(User $user, ResolutionContext $context): ?Decision
+    {
         $candidates = CandidatePool::forUser($user);
 
         if ($candidates === []) {
@@ -51,7 +56,7 @@ final class ChainedNextActionResolver implements NextActionResolver
         $continued = $this->continuation($user, $candidates);
 
         if ($continued instanceof Candidate) {
-            return $this->answer($continued, ['You are part-way through this one.']);
+            return new Decision($this->answer($continued, ['You are part-way through this one.']), Decision::CONTINUATION);
         }
 
         usort($candidates, fn (Candidate $a, Candidate $b): int => $this->rank($a, $b, $context));
@@ -59,7 +64,15 @@ final class ChainedNextActionResolver implements NextActionResolver
         $winner = $candidates[0];
         $separator = $this->separator($candidates, $context);
 
-        return $this->answer($winner, $this->why($winner, $separator, $context), $this->assumption($winner, $separator, $context));
+        return new Decision(
+            $this->answer($winner, $this->why($winner, $separator, $context), $this->assumption($winner, $separator, $context)),
+            $this->decidingRung($separator)->key(),
+        );
+    }
+
+    private function decidingRung(int $separator): Rung
+    {
+        return $separator >= 0 ? $this->chain[$separator] : $this->chain[count($this->chain) - 1];
     }
 
     /** @param  list<Candidate>  $candidates */

@@ -28,6 +28,7 @@ use App\Http\Controllers\Web\SkipStepController;
 use App\Http\Controllers\Web\StartFocusController;
 use App\Http\Controllers\Web\StopFocusController;
 use App\Http\Controllers\Web\StoreCaptureController;
+use App\Http\Controllers\Web\StoreCheckInController;
 use App\Http\Controllers\Web\StoreCommitmentController;
 use App\Http\Controllers\Web\StoreFutureReminderController;
 use App\Http\Controllers\Web\StoreRelativeFutureReminderController;
@@ -60,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::post('calendar-events/{calendarEvent}/future-reminder', StoreRelativeFutureReminderController::class)->name('calendar-events.future-reminder');
     Route::post('ingestion/classify', ClassifyPastedTextController::class)->name('ingestion.classify');
     Route::post('whereabouts/not-here', ReportNotHereController::class)->name('whereabouts.not-here');
+    Route::post('check-ins/{topic}', StoreCheckInController::class)->name('check-ins.store');
 
     Route::get('focus', ShowFocusController::class)->name('focus');
     Route::post('focus', StartFocusController::class)->name('focus.start');

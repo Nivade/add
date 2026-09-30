@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Home;
 
+use App\Actions\CheckIns\DueCheckIn;
 use App\Actions\Sessions\BuildExecutionState;
 use App\Contracts\Appointment;
 use App\Contracts\NextActionResolver;
@@ -41,17 +42,20 @@ final class BuildHome
         $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
         $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->whereNull('intention_id')->whereNull('step_id')->values());
         $rightNow = $this->resolver->resolve($user, $context);
+        $session = $this->session($user);
+        $reminder = $this->reminder($user, $context);
 
         return new HomeData(
             rightNow: $rightNow,
             rightNowIsCommitment: $rightNow instanceof NextActionData && $openCommitments->contains('intention_id', $rightNow->intention->id),
-            session: $this->session($user),
+            session: $session,
             comingUp: $this->comingUp($context),
-            reminder: $this->reminder($user, $context),
+            reminder: $reminder,
             justFinished: $this->justFinished($user, $context->now),
             needsAttention: $needsAttention->items,
             restCount: $this->open($user)->count() + $needsAttention->openBesidesIntentions - count($needsAttention->items),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
+            checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
         );
     }
 

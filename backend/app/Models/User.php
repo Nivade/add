@@ -64,6 +64,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    /** @return HasMany<CheckIn, $this> */
+    public function checkIns(): HasMany
+    {
+        return $this->hasMany(CheckIn::class);
+    }
+
     /** @return HasMany<NotHereReport, $this> */
     public function notHereReports(): HasMany
     {
@@ -73,6 +79,12 @@ class User extends Authenticatable implements PasskeyUser
     public function hasConsentedToAi(): bool
     {
         return $this->ai_consented_at !== null;
+    }
+
+    /** @return HasOne<CheckIn, $this> */
+    public function latestCheckIn(): HasOne
+    {
+        return $this->hasOne(CheckIn::class)->ofMany(['created_at' => 'max', 'id' => 'max']);
     }
 
     /** @return HasOne<ExecutionSession, $this> */

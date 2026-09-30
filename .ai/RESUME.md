@@ -15,18 +15,20 @@ contributed conventions only, not scope or product decisions.
 
 ## Stopped at
 
-**Slice 10 is done.** Slice 11 (measuring it)
-is next and has no file in `.ai/plans/slices/` yet: design it first with
-`slice-workflow`. Slices 12–14 have no files either. The Open section of
-[`10-context.md`](plans/slices/10-context.md) carries what slice 10 left:
-`place` cannot be corrected on a step, and the eval corpus scores no
-`expected_place`. Triage `findings.md` before planning slice 11.
+**Slice 11 is done.** Slice 12 (ingestion) is next and has no file in
+`.ai/plans/slices/` yet: design it first with `slice-workflow`, threat model
+first. Slices 13–14 have no files either. The Open sections of
+[`10-context.md`](plans/slices/10-context.md) and
+[`11-measuring.md`](plans/slices/11-measuring.md) carry what those slices left:
+`place` cannot be corrected on a step, the eval corpus scores no
+`expected_place`, and nothing compares the check-in trend with the behavioural
+outcomes.
 
 What is deliberately unbuilt, so it is not mistaken for a gap: named preparation
 items ("your insurance card"), which need somewhere for objects to live; camera
 capture, which waits for documents; location triggers, which need a consent
-surface; registration and password reset, which stay on the web; and §36's
-success metrics, which have no instrumentation anywhere yet. Reminders are
+surface; and registration and password reset, which stay on the web. The
+outcome numbers are `metrics:report` in a terminal and nothing else. Reminders are
 scheduled every minute in `routes/console.php` and dispatch one job per
 person, so both a scheduler and a queue worker have to be running to see one
 outside a test. The same is now true of `future-reminders:dispatch` and

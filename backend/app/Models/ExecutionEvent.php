@@ -6,14 +6,25 @@ namespace App\Models;
 
 use App\Enums\ExecutionEventType;
 use App\Models\Concerns\StoresDatesInUtc;
+use Carbon\CarbonImmutable;
 use Database\Factories\ExecutionEventFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $id
+ * @property string $execution_session_id
+ * @property string|null $step_id
+ * @property ExecutionEventType $type
+ * @property array<string, mixed>|null $payload
+ * @property CarbonImmutable $created_at
+ */
 #[Unguarded]
 #[UseFactory(ExecutionEventFactory::class)]
 class ExecutionEvent extends Model
@@ -36,6 +47,28 @@ class ExecutionEvent extends Model
     public function step(): BelongsTo
     {
         return $this->belongsTo(Step::class);
+    }
+
+    /**
+     * Joined through the session, so each row also carries `intention_id`.
+     *
+     * @param  Builder<static>  $query
+     * @param  iterable<mixed>  $intentionIds
+     */
+    #[Scope]
+    protected function startsOn(Builder $query, iterable $intentionIds): void
+    {
+        $query->join('execution_sessions', 'execution_sessions.id', '=', 'execution_events.execution_session_id')
+            ->where('execution_events.type', ExecutionEventType::Started)
+            ->whereIn('execution_sessions.intention_id', $intentionIds);
+    }
+
+    /** Two events can share a second; the ULID still orders them. */
+    public function happenedAfter(self $other): bool
+    {
+        return $this->created_at->equalTo($other->created_at)
+            ? strcmp($this->id, $other->id) > 0
+            : $this->created_at->greaterThan($other->created_at);
     }
 
     protected function casts(): array

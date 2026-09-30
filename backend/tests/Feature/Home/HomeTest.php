@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\Reminders\SendDueReminders;
 use App\Actions\Sessions\StartSession;
+use App\Models\CalendarEvent;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
@@ -223,4 +225,33 @@ it('starts a session from the API and finds it on home', function (): void {
     $this->actingAs($session->user)
         ->get(route('home'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.session.session.id', $session->id));
+});
+
+it('asks the due check-in on home', function (): void {
+    $this->actingAs(activeFor())
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.checkIn', 'overwhelm'));
+});
+
+it('holds the check-in back while a session is running', function (): void {
+    $user = activeFor();
+    StartSession::run($user, kitchen(user: $user)->steps()->first());
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.checkIn', null));
+});
+
+it('holds the check-in back while the reminder band shows', function (): void {
+    $user = activeFor();
+    CalendarEvent::factory()->for($user)->create(['starts_at' => CarbonImmutable::parse('2026-09-30 11:00:00')]);
+    $this->travelTo(CarbonImmutable::parse('2026-09-30 10:02:00'));
+    SendDueReminders::run($user);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->whereNot('home.reminder', null)
+            ->where('home.checkIn', null)
+        );
 });

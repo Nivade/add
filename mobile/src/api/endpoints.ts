@@ -4,6 +4,8 @@ import type {
   AppointmentKind,
   CaptureData,
   CaptureSource,
+  CheckInAnswer,
+  CheckInTopic,
   ComingUpData,
   CommitmentData,
   CommitmentListData,
@@ -136,6 +138,13 @@ export const api = {
     response: WaitingForResponse,
   ) =>
     request<WaitingForData>(`/waiting-fors/${waitingForId}/respond`, {
+      method: 'POST',
+      token,
+      body: { response },
+    }),
+
+  checkIn: (token: string, topic: CheckInTopic, response: CheckInAnswer) =>
+    request<void>(`/check-ins/${topic}`, {
       method: 'POST',
       token,
       body: { response },

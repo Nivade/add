@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\CheckInTopic;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -22,5 +23,6 @@ class HomeData extends Data
         public array $needsAttention,
         public int $restCount,
         public bool $hasOpenCommitments,
+        public ?CheckInTopic $checkIn,
     ) {}
 }

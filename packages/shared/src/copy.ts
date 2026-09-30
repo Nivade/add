@@ -1,4 +1,6 @@
 import type {
+    CheckInAnswer,
+    CheckInTopic,
     CommitmentProvenance,
     CommitmentResponse,
     Place,
@@ -74,6 +76,24 @@ export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = 
     user_stated: 'you said this',
     system_inferred: 'read from what you wrote',
 };
+
+/** Each is asked against when the person started, because a steady "less" is the claim worth testing. */
+export const checkInQuestions: Record<CheckInTopic, string> = {
+    overwhelm: 'Since you started using this, how much does everything weigh on you?',
+    remembering: 'Since you started using this, how much do you have to keep in your own head?',
+};
+
+export const checkInResponses: { value: CheckInAnswer; label: string }[] = [
+    { value: 'less', label: 'Less' },
+    { value: 'same', label: 'About the same' },
+    { value: 'more', label: 'More' },
+    { value: 'not_now', label: 'Not now' },
+];
+
+export const checkInCopy = {
+    band: 'Looking back',
+    meta: 'Asked every two weeks, to tell whether this app is helping.',
+} as const;
 
 export function recurrenceLine(everyDays: number): string {
     return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
