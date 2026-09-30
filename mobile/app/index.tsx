@@ -4,6 +4,9 @@ import type {
   NeedsAttentionData,
 } from '@add/shared';
 import {
+  checkInCopy,
+  checkInQuestions,
+  checkInResponses,
   commitmentCopy,
   formatEstimate,
   notHereLabels,
@@ -186,6 +189,7 @@ export default function Home() {
     justFinished,
     needsAttention,
     restCount,
+    checkIn,
   } = data;
 
   const promote = async () => {
@@ -335,6 +339,20 @@ export default function Home() {
                 );
             }
           })}
+        </Band>
+      )}
+
+      {checkIn && (
+        <Band label={checkInCopy.band}>
+          <Text style={styles.line}>{checkInQuestions[checkIn]}</Text>
+          <Meta>{checkInCopy.meta}</Meta>
+          <Responses
+            responses={checkInResponses}
+            onRespond={async (answer) => {
+              await api.checkIn(token as string, checkIn, answer);
+              await reload();
+            }}
+          />
         </Band>
       )}
 

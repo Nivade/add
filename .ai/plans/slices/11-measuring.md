@@ -374,7 +374,7 @@ gone on the next render, and that absence is the whole confirmation.
   *Check:* `npm run typecheck` passes, and the band renders only for an account
   where `DueCheckIn` answers a topic.
 
-- [ ] **10. Mobile.** Invoke skills: `expo-react-native`, `frontend-design`.
+- [x] **10. Mobile.** Invoke skills: `expo-react-native`, `frontend-design`.
   - `mobile/src/api/endpoints.ts` gains
     `checkIn: (token: string, topic: CheckInTopic, response: CheckInAnswer) => request<void>(\`/check-ins/${topic}\`, { method: 'POST', token, body: { response } })`.
     Copy the shape of `respondToWaitingFor`.
