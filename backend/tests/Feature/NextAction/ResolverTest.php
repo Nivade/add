@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Steps\SkipStep;
+use App\Actions\Whereabouts\ReportNotHere;
 use App\Contracts\NextActionResolver;
 use App\Data\NextActionData;
+use App\Enums\Place;
 use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
@@ -239,4 +241,105 @@ it('leaves work that belongs to somebody else alone', function (): void {
     Step::factory()->for($stranger)->create(['position' => 1]);
 
     expect(nextAction($user))->toBeNull();
+});
+
+/** A world where the person is somewhere: evidence goes through the app, and the context reads it back. */
+function nextActionWhereYouAre(User $user): ?NextActionData
+{
+    return app(NextActionResolver::class)->resolve($user, ResolutionContext::forUser($user));
+}
+
+function placedStep(User $user, string $title, ?Place $place, int $seconds, ?CarbonImmutable $deadline = null): Step
+{
+    $intention = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $deadline]);
+
+    return Step::factory()->for($intention)->create([
+        'title' => $title,
+        'position' => 1,
+        'place' => $place,
+        'estimated_seconds' => $seconds,
+    ]);
+}
+
+it('offers the step that fits where the person seems to be over a shorter one that does not', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Buy bin bags.', Place::Out, 60);
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120);
+    finishStepAt($user, Place::Home);
+
+    $answer = nextActionWhereYouAre($user);
+
+    expect($answer?->step->title)->toBe('Wipe one worktop.')
+        ->and($answer?->why)->toBe([
+            'You seem to be at home, where this gets done.',
+            'This takes about 2 minutes.',
+        ])
+        ->and($answer?->assumedPlace)->toBe(Place::Home);
+});
+
+it('still sends the person out for a deadline within reach', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Post the form.', Place::Out, 1800, now()->addHour());
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120);
+    finishStepAt($user, Place::Home);
+
+    $answer = nextActionWhereYouAre($user);
+
+    expect($answer?->step->title)->toBe('Post the form.')
+        ->and($answer?->why)->toBe([
+            'Your deadline is 1 hour from now and what is left only just fits.',
+            'This takes about 30 minutes.',
+        ])
+        ->and($answer?->assumedPlace)->toBeNull();
+});
+
+it('takes "not at home" over a far-off deadline on a step that needs home', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120, now()->addWeeks(2));
+    placedStep($user, 'Buy bin bags.', Place::Out, 600);
+    finishStepAt($user, Place::Home);
+    ReportNotHere::run($user, Place::Home);
+
+    $answer = nextActionWhereYouAre($user);
+
+    expect($answer?->step->title)->toBe('Buy bin bags.')
+        ->and($answer?->why)->toBe([
+            'The others need you somewhere you seem not to be.',
+            'This takes about 10 minutes.',
+        ])
+        ->and($answer?->assumedPlace)->toBeNull();
+});
+
+it('says a step with no place does not depend on where the person is', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Wipe one worktop.', Place::Home, 60);
+    placedStep($user, 'Ring the dentist.', null, 300);
+    ReportNotHere::run($user, Place::Home);
+
+    expect(nextActionWhereYouAre($user)?->why)->toBe([
+        'This one does not depend on where you are.',
+        'This takes about 5 minutes.',
+    ]);
+});
+
+it('ranks placed steps exactly as before while nothing is known about where the person is', function (): void {
+    $user = User::factory()->create();
+    $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
+
+    placedStep($user, 'Wipe one worktop.', Place::Home, 120);
+    placedStep($user, 'Buy bin bags.', Place::Out, 60);
+
+    $answer = nextActionWhereYouAre($user);
+
+    expect($answer?->step->title)->toBe('Buy bin bags.')
+        ->and($answer?->why)->toBe(['This takes about 1 minute.'])
+        ->and($answer?->assumedPlace)->toBeNull();
 });

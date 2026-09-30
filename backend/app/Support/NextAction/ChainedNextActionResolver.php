@@ -8,10 +8,12 @@ use App\Contracts\NextActionResolver;
 use App\Data\IntentionData;
 use App\Data\NextActionData;
 use App\Data\StepData;
+use App\Enums\Place;
 use App\Models\ExecutionSession;
 use App\Models\User;
 use App\Support\NextAction\Comparators\DeadlineWithinReach;
 use App\Support\NextAction\Comparators\EarliestPosition;
+use App\Support\NextAction\Comparators\FitsWhereYouAre;
 use App\Support\NextAction\Comparators\HasDeadline;
 use App\Support\NextAction\Comparators\NotRecentlySkipped;
 use App\Support\NextAction\Comparators\OldestIntention;
@@ -28,6 +30,7 @@ final class ChainedNextActionResolver implements NextActionResolver
     {
         $this->chain = [
             new DeadlineWithinReach,
+            new FitsWhereYouAre,
             new HasDeadline,
             new NotRecentlySkipped,
             new PrerequisiteFirst,
@@ -131,10 +134,14 @@ final class ChainedNextActionResolver implements NextActionResolver
     /** @param  list<string>  $why */
     private function answer(Candidate $candidate, array $why): NextActionData
     {
+        $place = $candidate->step->place;
+
         return new NextActionData(
             StepData::from($candidate->step),
             IntentionData::from($candidate->intention),
             $why,
+            // Only a guess the why states out loud gets the one-tap correction.
+            $place instanceof Place && in_array($place->seemsHere(), $why, true) ? $place : null,
         );
     }
 }

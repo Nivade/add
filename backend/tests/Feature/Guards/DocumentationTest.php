@@ -91,7 +91,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Http/Controllers/Api/V1/ReportNotHereController.php',
         'backend/app/Http/Controllers/Web/ReportNotHereController.php',
         'backend/app/Http/Requests/ReportNotHereRequest.php',
-        'backend/app/Support/NextAction/Comparators/FitsWhereYouAre.php',
         'backend/resources/js/components/not-here.tsx',
         'backend/tests/Feature/NextAction/NotHereEndpointTest.php',
     ];

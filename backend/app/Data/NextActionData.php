@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Attributes\OneThing;
+use App\Enums\Place;
 use Spatie\LaravelData\Data;
 use Spatie\TypeScriptTransformer\Attributes\TypeScript;
 
@@ -17,5 +18,6 @@ class NextActionData extends Data
         public StepData $step,
         public IntentionData $intention,
         public array $why,
+        public ?Place $assumedPlace = null,
     ) {}
 }

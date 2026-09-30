@@ -106,7 +106,9 @@ that place) and `0` unlikely. With no evidence at all, every candidate scores
 | `computer` | "You seem to be at a computer, which this needs." |
 
 When a neutral step wins because every other step is unlikely, `decides()`
-says "This one does not depend on where you are."
+says "This one does not depend on where you are." for a step with no place,
+and "The others need you somewhere you seem not to be." for a placed one, since
+an out step after "I'm not at home" does depend on where you are.
 
 **Every guess the `why` states can be corrected in one tap** (§2.5).
 `NextActionData` gains `assumedPlace`. It is set only when the `why` contains
@@ -256,7 +258,7 @@ day, and `model:prune` runs daily.
   `npm run artisan -- test --compact tests/Feature/NextAction tests/Feature/Time`
   passes.
 
-- [ ] **6. The rung.** Invoke skills: `next-action-resolver`, `laravel-data`,
+- [x] **6. The rung.** Invoke skills: `next-action-resolver`, `laravel-data`,
   `generated-artifacts`.
   - Create `backend/app/Support/NextAction/Comparators/FitsWhereYouAre.php`
     extending `Rung`:

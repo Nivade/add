@@ -2,23 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\Sessions\CompleteStep;
-use App\Actions\Sessions\StartSession;
 use App\Actions\Whereabouts\ReportNotHere;
 use App\Enums\Place;
-use App\Models\Intention;
-use App\Models\Step;
 use App\Models\User;
 use App\Support\NextAction\Whereabouts;
 use Carbon\CarbonImmutable;
-
-function completeStepAt(User $user, Place $place): void
-{
-    $intention = Intention::factory()->decomposed()->for($user)->create();
-    $step = Step::factory()->for($intention)->create(['position' => 1, 'place' => $place]);
-
-    CompleteStep::run(StartSession::run($user, $step));
-}
 
 function whereabouts(User $user): Whereabouts
 {
@@ -36,7 +24,7 @@ it('takes a home step finished minutes ago to mean home, and not work or out', f
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
 
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
     $this->travel(10)->minutes();
 
     $where = whereabouts($user);
@@ -51,7 +39,7 @@ it('forgets a finished step once the window has passed', function (): void {
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
 
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
     $this->travel(Whereabouts::LIKELY_MINUTES + 1)->minutes();
 
     expect(whereabouts($user)->isKnown())->toBeFalse();
@@ -61,7 +49,7 @@ it('believes a newer "not here" over an older finished step', function (): void 
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
 
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
     $this->travel(5)->minutes();
     ReportNotHere::run($user, Place::Home);
 
@@ -77,7 +65,7 @@ it('believes a newer finished step over an older "not here"', function (): void 
 
     ReportNotHere::run($user, Place::Home);
     $this->travel(5)->minutes();
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
 
     expect(whereabouts($user)->likely)->toBe([Place::Home]);
 });
@@ -86,9 +74,9 @@ it('takes only the latest location, since a person is in one at a time', functio
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
 
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
     $this->travel(5)->minutes();
-    completeStepAt($user, Place::Out);
+    finishStepAt($user, Place::Out);
 
     $where = whereabouts($user);
 
@@ -100,9 +88,9 @@ it('judges a computer on its own evidence, apart from any location', function ()
     $user = User::factory()->create();
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00'));
 
-    completeStepAt($user, Place::Computer);
+    finishStepAt($user, Place::Computer);
     $this->travel(5)->minutes();
-    completeStepAt($user, Place::Work);
+    finishStepAt($user, Place::Work);
     ReportNotHere::run($user, Place::Home);
 
     $where = whereabouts($user);
@@ -130,7 +118,7 @@ it('measures the window in instants for someone far from UTC', function (): void
     $user = User::factory()->create(['timezone' => 'Pacific/Auckland']);
     $this->travelTo(CarbonImmutable::parse('2026-09-26 10:00:00', 'UTC'));
 
-    completeStepAt($user, Place::Home);
+    finishStepAt($user, Place::Home);
 
     $this->travel(Whereabouts::LIKELY_MINUTES - 1)->minutes();
     expect(whereabouts($user)->likely)->toBe([Place::Home]);

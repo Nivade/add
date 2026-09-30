@@ -120,6 +120,7 @@ export type NextActionData = {
 step: StepData,
 intention: IntentionData,
 why: string[],
+assumedPlace: Place | null,
 };
 export type OverwhelmedData = {
 smallestStep: NextActionData | null,
