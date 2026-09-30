@@ -37,6 +37,11 @@ it as a real response. The `null` driver and an unanswered fake fail for the sam
 reason. A miss also dumps the request, the person's words included, beside where
 the answer belongs, which is why `storage/ai-fixtures` is gitignored.
 
+A miss is an `AiUnavailable`, so a job carrying `#[FailOn(AiUnavailable::class)]`
+fails at once instead of retrying: no retry writes the missing file. An unknown
+`AI_DRIVER` throws on resolve rather than falling back to `null`, because a typo
+there is a deployment mistake, not an outage.
+
 Every feature and browser test starts on `AiToolkit::fake()`, so a test that
 reaches the AI path without seeding an answer fails rather than silently
 collecting a canned one. `canned` is for clicking through the UI, accepts any
@@ -51,16 +56,18 @@ reintroduce the second copy.
 ## Consent is per person, and every call is logged
 
 §28 asks for an explicit, consented, logged path off the machine. `canned`,
-`fixture`, `fake` and `null` never leave; `openai` is the only one that does,
-so `AiServiceProvider` wraps only that driver in the toolkit's `GatedAiProvider`.
+`fake` and `null` never leave. `openai` does, and so does `fixture` recording
+through `AI_FIXTURE_ON_MISS=record:<driver>`, because the toolkit builds the
+driver it records through without any wrapper. `AiConsent::leavesTheMachine()`
+names both, and `AiServiceProvider` wraps them in the toolkit's `GatedAiProvider`.
 The gate reads `ai_consented_at` for the user in the request's `rateLimitScope`,
 which `AiRequests` fills with the asking person's id; a request with no person
 is refused. The evals score a corpus nobody wrote, so they build the OpenAI
 provider themselves and skip the gate.
 
-The logging third is the toolkit's event log on `ai-toolkit.log.channel`, which
-falls back to the app's own channel: `null` there switches the audit off
-silently. It records the operation, provider, model, prompt and schema versions,
+Every call is logged on `ai-toolkit.log.channel`, which falls back to the app's
+own channel: `null` there switches the audit off silently. The toolkit's events
+fire inside the gate, so a refusal is logged by `AiConsent` itself. It records the operation, provider, model, prompt and schema versions,
 duration and token counts — and never the prompt or the answer. A log holding the
 person's own sentences is a second copy of the thing being protected, so a config
 flag claiming to redact input was deleted rather than left reading like a feature.

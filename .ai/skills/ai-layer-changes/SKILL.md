@@ -56,7 +56,8 @@ collecting a canned one. When a test fails that way, seed the answer with
 `canned` is for clicking through the UI. It accepts any input and is never
 scored. `fixture` reads `ai-toolkit.fixture_path`, keyed by
 `AiRequest::cacheKey()`. On a miss it dumps the request beside the missing
-answer; `AI_FIXTURE_ON_MISS=record:openai` records live answers instead, and
+answer; `AI_FIXTURE_ON_MISS=record:openai` records live answers instead, behind
+the same consent gate as `openai`, and
 `artisan ai-toolkit:fixtures` lists dumps still waiting for one.
 
 ## Editing a prompt means bumping its version
