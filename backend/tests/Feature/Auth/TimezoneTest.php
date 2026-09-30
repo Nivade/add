@@ -26,6 +26,28 @@ it('reads the zone from the header the phone sends', function (): void {
     expect($user->refresh()->timezone)->toBe('America/New_York');
 });
 
+it('stores the current name for a zone a device reports by its old one', function (): void {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    $this->actingAs($user)
+        ->withHeader('X-Timezone', 'Asia/Calcutta')
+        ->getJson('/api/v1/home')
+        ->assertOk();
+
+    expect($user->refresh()->timezone)->toBe('Asia/Kolkata');
+});
+
+it('keeps a zone PHP already knows under the name the device sent', function (): void {
+    $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
+
+    $this->actingAs($user)
+        ->withHeader('X-Timezone', 'UTC')
+        ->getJson('/api/v1/home')
+        ->assertOk();
+
+    expect($user->refresh()->timezone)->toBe('UTC');
+});
+
 it('ignores a zone that does not exist', function (): void {
     $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
 
