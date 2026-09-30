@@ -74,7 +74,7 @@ final class BuildHome
         );
         $shownAbove = $shownIntentionId !== null && ! $shownElsewhere ? 1 : 0;
 
-        return max(0, CountOpenThings::run($user) - count($needsAttention) - $shownAbove);
+        return max(0, CountOpenThings::make()->handle($user) - count($needsAttention) - $shownAbove);
     }
 
     private function sorting(User $user, CarbonImmutable $now): int

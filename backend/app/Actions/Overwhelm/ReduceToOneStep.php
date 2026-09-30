@@ -28,7 +28,7 @@ final class ReduceToOneStep
         $candidates = CandidatePool::forUser($user);
 
         if ($candidates === []) {
-            return new OverwhelmedData(null, CountOpenThings::run($user));
+            return new OverwhelmedData(null, CountOpenThings::make()->handle($user));
         }
 
         $candidates = SmallestFirst::sort($candidates, $context);
@@ -40,7 +40,7 @@ final class ReduceToOneStep
                 IntentionData::from($smallest->intention),
                 $this->why($smallest, array_slice($candidates, 1), $context),
             ),
-            CountOpenThings::run($user) - 1,
+            CountOpenThings::make()->handle($user) - 1,
         );
     }
 
