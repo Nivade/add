@@ -99,7 +99,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                         type="submit"
                                         aria-disabled={processing}
                                     >
-                                        Continue
+                                        {focusCopy.continue}
                                     </Button>
                                 )}
                             </OneTapForm>

@@ -101,7 +101,7 @@ export default function Focus() {
               : returnCopy.pausedMeta}
           </Meta>
           <Button
-            label="Continue"
+            label={focusCopy.continue}
             tone="primary"
             disabled={busy}
             onPress={() => void control('resume')}

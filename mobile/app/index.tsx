@@ -8,6 +8,7 @@ import {
   checkInQuestions,
   checkInResponses,
   commitmentCopy,
+  focusCopy,
   homeBands,
   homeCopy,
   nothingNeedsYou,
@@ -268,7 +269,7 @@ export default function Home() {
               : partWayLine(session.intention.title)}
           </Meta>
           <Button
-            label="Continue"
+            label={focusCopy.continue}
             tone="primary"
             onPress={() => router.push('/focus')}
           />
@@ -277,7 +278,7 @@ export default function Home() {
         <>
           <OneThing>{rightNow.step.title}</OneThing>
           <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
-          <Button label="Start" tone="primary" onPress={() => void start()} />
+          <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
           {rightNow.why.length > 0 && (
             <Band label={homeBands.why}>
               {rightNow.why.map((line) => (

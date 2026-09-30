@@ -5,6 +5,7 @@ import type {
 } from '@add/shared';
 import {
     commitmentCopy,
+    focusCopy,
     homeBands,
     homeCopy,
     nothingNeedsYou,
@@ -181,7 +182,7 @@ function RightNow({ rightNow, session }: HomeData) {
                 </Meta>
                 <div className="pl-5">
                     <Button asChild>
-                        <Link href={focus()}>Continue</Link>
+                        <Link href={focus()}>{focusCopy.continue}</Link>
                     </Button>
                 </div>
             </div>

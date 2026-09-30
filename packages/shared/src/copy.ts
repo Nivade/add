@@ -102,6 +102,8 @@ export const overwhelmedCopy = {
 } as const;
 
 export const focusCopy = {
+    start: 'Start',
+    continue: 'Continue',
     done: 'Done',
     skip: 'Skip',
     pause: 'Pause',

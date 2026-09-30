@@ -46,9 +46,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen($wantsJson);
 
         $exceptions->render(function (Throwable $e, Request $request) use ($wantsJson): ?JsonResponse {
+            if (! $wantsJson($request)) {
+                return null;
+            }
+
             $respondsWith = RespondsWithReader::for($e);
 
-            if (! $respondsWith instanceof RespondsWith || ! $wantsJson($request)) {
+            if (! $respondsWith instanceof RespondsWith) {
                 return null;
             }
 
