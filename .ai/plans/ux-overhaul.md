@@ -103,13 +103,13 @@ Rules: `product-invariants.md`, `domain-model.md`, `api-and-data.md`, `ai-layer.
   - Tests in `SessionTest.php`: distracted pauses; returning after distracted; not returning one minute into a pause; returning six minutes in (`$this->travel(6)->minutes()`); returning after 21 idle minutes; resume on a running session records `Resumed` and clears returning.
   - `backend/tests/Browser/JourneyTest.php`: after "I got distracted", assert "Welcome back." and "You were working on"; Continue; then Pause asserts "Paused." and Continue.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution` and `npm run test:browser` pass.
-- [ ] **1.6 One count, one meaning.** Invoke skills: `next-action-resolver`, `laravel-actions`.
+- [x] **1.6 One count, one meaning.** Invoke skills: `next-action-resolver`, `laravel-actions`.
   - New `backend/app/Actions/Home/CountOpenThings.php`: `handle(User $user): int` = open intentions + open waiting-fors + open commitments with neither `intention_id` nor `step_id`.
   - `BuildHome::restCount` = `CountOpenThings` minus the needs-attention items minus one for the right-now or session intention when it is not already among them, never below zero. Drop `openBesidesIntentions` from `NeedsAttentionBand`.
   - `ReduceToOneStep` rest count = `CountOpenThings` minus one when a step is shown.
   - Test in `HomeTest.php`: three intentions and one waiting-for, one shown right now → home and `/overwhelmed` both answer 3.
   - Check: `npm run artisan -- test --compact tests/Feature/Home tests/Feature/Overwhelm` passes.
-- [ ] **1.7 Plan state.** Tick 1.1–1.6 here.
+- [x] **1.7 Plan state.** Tick 1.1–1.6 here.
 - [ ] **1.8 Finish.** Invoke skills: `security-review` (the timezone cookie and middleware), `phpstan-larastan`, `finish-branch`.
 
 ## Visual identity

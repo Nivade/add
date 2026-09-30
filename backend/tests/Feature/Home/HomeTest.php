@@ -11,6 +11,7 @@ use App\Models\ExecutionSession;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
+use App\Models\WaitingFor;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
 
@@ -122,6 +123,25 @@ it('counts the captures still being sorted, and only those', function (): void {
         ->get(route('home'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.sortingCount', 2));
+});
+
+it('answers the same count on home and when overwhelmed', function (): void {
+    $user = User::factory()->create();
+    kitchen(user: $user);
+    kitchen(user: $user);
+    kitchen(user: $user);
+    WaitingFor::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->whereNot('home.rightNow', null)
+            ->where('home.restCount', 3));
+
+    $this->actingAs($user)
+        ->getJson('/api/v1/overwhelmed')
+        ->assertOk()
+        ->assertJsonPath('restCount', 3);
 });
 
 it('counts open commitments beyond the one on show', function (): void {

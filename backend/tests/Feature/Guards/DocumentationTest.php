@@ -92,7 +92,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Actions/Captures/ChangeCaptureKind.php',
         'backend/app/Actions/Captures/ConfirmCaptureKind.php',
         'backend/app/Actions/Home/BuildSortedCaptures.php',
-        'backend/app/Actions/Home/CountOpenThings.php',
         'backend/app/Actions/Intentions/CorrectDeadline.php',
         'backend/app/Actions/Sessions/BuildFinished.php',
         'backend/app/Data/FinishedData.php',
