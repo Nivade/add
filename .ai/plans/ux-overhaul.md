@@ -217,7 +217,7 @@ desktop                                          phone
 
 ## Phase 3 — one capture box (`feature/unified-capture`)
 
-- [ ] **3.1 The capture parse answers a kind.** Invoke skills: `ai-layer-changes`, `laravel-data`.
+- [x] **3.1 The capture parse answers a kind.** Invoke skills: `ai-layer-changes`, `laravel-data`.
   - New `backend/app/Enums/CaptureKind.php`, `#[TypeScript]`: `Thought = 'thought'`, `WaitingFor = 'waiting_for'`, `Promise = 'promise'`, `Reminder = 'reminder'`, `NotForYou = 'not_for_you'`.
   - `ParseCaptureSchema`: `VERSION = '4'`; adds `kind` (string enum of the first four values, required) and `waiting_on` (nullable, required: the person or organisation waited on).
   - `Prompts::PARSE_CAPTURE_VERSION = '4'`; add rules: `thought` is the default; `waiting_for` only when someone else owes them something; `promise` only when they state they will do something for someone ("I'll", "I told X I'd"); `reminder` only when they ask to be reminded; hedged intent ("I'll probably") is a thought. Add one example per kind.

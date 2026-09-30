@@ -7,7 +7,7 @@ namespace App\Support\Ai;
 /** Keep these byte-stable: cached input is an order of magnitude cheaper, and anything varying per call belongs in the user message. */
 final class Prompts
 {
-    public const string PARSE_CAPTURE_VERSION = '3';
+    public const string PARSE_CAPTURE_VERSION = '4';
 
     public const string DECOMPOSE_VERSION = '2';
 
@@ -24,16 +24,30 @@ final class Prompts
         - The message opens with their date and zone. Read every relative date against those, and answer deadline_at with the matching UTC offset.
         - clarifying_question is one short question, asked only when you cannot tell what outcome they want, or when "should probably", "maybe" or "at some point" says they have not decided to do it. Otherwise null. A missing date alone is never a reason to ask.
         - Ask the question plainly, in under fifteen words, with no judgement and nothing they have already said.
+        - kind is thought unless the text clearly says otherwise.
+        - kind is waiting_for only when someone else owes them something. waiting_on names that person or organisation; the title is what they are waiting for.
+        - kind is promise only when they state they will do something for someone: "I'll", "I told Sam I'd".
+        - kind is reminder only when they ask to be reminded.
+        - Hedged intent, like "I'll probably" or "I might", is a thought.
 
         Examples:
         "I need to clean the apartment before Saturday because my parents are coming"
-        -> title "Clean the apartment", why "Parents are coming", deadline the coming Saturday, clarifying_question null.
+        -> kind thought, title "Clean the apartment", why "Parents are coming", deadline the coming Saturday, clarifying_question null.
 
         "I should probably renew my passport"
-        -> title "Renew my passport", why null, deadline null, clarifying_question "Is there a trip you need it for, and when?"
+        -> kind thought, title "Renew my passport", why null, deadline null, clarifying_question "Is there a trip you need it for, and when?"
 
         "sort the thing out"
-        -> title "Sort the thing out", why null, deadline null, clarifying_question "Which thing do you mean?"
+        -> kind thought, title "Sort the thing out", why null, deadline null, clarifying_question "Which thing do you mean?"
+
+        "still waiting on Mark to give back my drill"
+        -> kind waiting_for, title "My drill back", waiting_on "Mark", why null, deadline null, clarifying_question null.
+
+        "I'll bring the cake to Anna's party on Saturday"
+        -> kind promise, title "Bring the cake to Anna's party", why null, deadline the coming Saturday, clarifying_question null.
+
+        "remind me tonight to take the laundry out"
+        -> kind reminder, title "Take the laundry out", why null, deadline tonight, clarifying_question null.
         PROMPT;
 
     public const string DECOMPOSE = <<<'PROMPT'

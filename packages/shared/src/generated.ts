@@ -19,6 +19,7 @@ source: CaptureSource,
 intentionId: string | null,
 createdAt: string,
 };
+export type CaptureKind = 'thought' | 'waiting_for' | 'promise' | 'reminder' | 'not_for_you';
 export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 'url';
 export type CheckInAnswer = 'less' | 'same' | 'more' | 'not_now';
 export type CheckInTopic = 'overwhelm' | 'remembering';

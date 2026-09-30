@@ -2,52 +2,115 @@
     {
         "id": "passport-control",
         "capture": "I should probably renew my passport",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "thing-control",
         "capture": "sort the thing out",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "driving-licence",
         "capture": "I should probably renew my driving licence",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "teeth",
         "capture": "maybe do something about my teeth at some point",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "spanish",
         "capture": "should probably learn Spanish",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
-    { "id": "letter", "capture": "the letter", "expects_question": true },
+    {
+        "id": "letter",
+        "capture": "the letter",
+        "expects_question": true,
+        "expects_kind": "thought"
+    },
     {
         "id": "car-thing",
         "capture": "deal with the car thing",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "grandma",
         "capture": "call grandma at some point",
-        "expects_question": true
+        "expects_question": true,
+        "expects_kind": "thought"
     },
     {
         "id": "dentist",
         "capture": "book the dentist for next Tuesday",
-        "expects_question": false
+        "expects_question": false,
+        "expects_kind": "thought"
     },
     {
         "id": "electricity",
         "capture": "pay the electricity bill by Friday",
-        "expects_question": false
+        "expects_question": false,
+        "expects_kind": "thought"
     },
     {
         "id": "bins",
         "capture": "take the bins out tonight",
-        "expects_question": false
+        "expects_question": false,
+        "expects_kind": "thought"
+    },
+    {
+        "id": "waiting-contract",
+        "capture": "waiting for John to send the contract",
+        "expects_question": false,
+        "expects_kind": "waiting_for"
+    },
+    {
+        "id": "waiting-insurance",
+        "capture": "waiting on the insurance company about the claim",
+        "expects_question": false,
+        "expects_kind": "waiting_for"
+    },
+    {
+        "id": "promise-photos",
+        "capture": "I'll send Sarah the photos tomorrow",
+        "expects_question": false,
+        "expects_kind": "promise"
+    },
+    {
+        "id": "promise-mum",
+        "capture": "told mum I'd call her on Sunday",
+        "expects_question": false,
+        "expects_kind": "promise"
+    },
+    {
+        "id": "remind-dentist",
+        "capture": "remind me tomorrow at 9 to call the dentist",
+        "expects_question": false,
+        "expects_kind": "reminder"
+    },
+    {
+        "id": "remind-plants",
+        "capture": "remind me on Friday to water the plants",
+        "expects_question": false,
+        "expects_kind": "reminder"
+    },
+    {
+        "id": "call-dentist",
+        "capture": "need to call the dentist",
+        "expects_question": false,
+        "expects_kind": "thought"
+    },
+    {
+        "id": "hedged-phone",
+        "capture": "I'll probably need a new phone at some point",
+        "expects_question": true,
+        "expects_kind": "thought"
     }
 ]
