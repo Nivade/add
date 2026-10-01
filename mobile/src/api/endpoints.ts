@@ -135,7 +135,6 @@ export const api = {
       body: { step_id: stepId, reason },
     }),
 
-
   respondToWaitingFor: (
     token: string,
     waitingForId: string,
@@ -153,7 +152,6 @@ export const api = {
       token,
       body: { response },
     }),
-
 
   commitments: (token: string) =>
     request<CommitmentListData>('/commitments', { token }),
@@ -194,7 +192,6 @@ export const api = {
       token,
       body: { every_days: everyDays },
     }),
-
 
   remindAfterEvent: (
     token: string,

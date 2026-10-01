@@ -291,7 +291,6 @@ export function recurrenceLine(everyDays: number): string {
     return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
 }
 
-/** One question per way in, worded the same on both clients. */
 /** Both frontends open the one box with the same words. */
 export const captureCopy = {
     question: "What's on your mind?",

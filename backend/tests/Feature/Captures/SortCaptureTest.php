@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Ai\UpdateAiConsent;
+use App\Actions\Captures\ChangeCaptureKind;
 use App\Actions\Captures\RecordCapture;
 use App\Actions\Captures\SortCapture;
 use App\Actions\Home\BuildHome;
@@ -21,6 +22,7 @@ use App\Models\WaitingFor;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Lorisleiva\Actions\Decorators\JobDecorator;
 use Nvade\AiToolkit\AiRequest;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Nvade\AiToolkit\Testing\FakeAiProvider;
@@ -313,12 +315,12 @@ it('stores a promise the person chose as stated by them, and confirmed', functio
 it('routes again from the stored parse without asking the model', function (): void {
     $provider = answeredAi(['kind' => 'waiting_for', 'title' => 'The contract', 'waiting_on' => 'John']);
     $capture = RecordCapture::run(User::factory()->create(), 'waiting for John to send the contract')->refresh();
-    $capture->update(['kind' => null, 'routed_id' => null]);
 
-    SortCapture::run($capture, CaptureKind::Promise);
+    ChangeCaptureKind::run($capture, CaptureKind::Promise);
 
     expect($capture->refresh()->kind)->toBe(CaptureKind::Promise)
-        ->and(Commitment::query()->count())->toBe(1);
+        ->and(Commitment::query()->count())->toBe(1)
+        ->and(WaitingFor::query()->count())->toBe(0);
 
     $provider->assertSentCount(1);
 });
@@ -347,4 +349,16 @@ it('sorts what waited once consent is turned on', function (): void {
     expect($capture->refresh()->failed_at)->toBeNull()
         ->and($capture->kind)->toBe(CaptureKind::Thought)
         ->and($capture->intention_id)->toBe(Intention::query()->sole()->id);
+});
+
+it('leaves a capture still being sorted alone when consent is turned on again', function (): void {
+    Queue::fake();
+    $user = User::factory()->withoutAiConsent()->create();
+    Capture::factory()->for($user)->create(['failed_at' => now()]);
+    Capture::factory()->for($user)->create();
+
+    UpdateAiConsent::run($user, true);
+    UpdateAiConsent::run($user->refresh(), true);
+
+    Queue::assertPushed(JobDecorator::class, 1);
 });

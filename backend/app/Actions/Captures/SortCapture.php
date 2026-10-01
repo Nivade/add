@@ -25,7 +25,6 @@ use Carbon\CarbonImmutable;
 use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsJob;
 use Lorisleiva\Actions\Concerns\AsObject;
@@ -99,7 +98,7 @@ final class SortCapture
         }
 
         return new ParsedCaptureData(
-            title: $classified->title ?? Str::limit($capture->body, 80),
+            title: $classified->title ?? $capture->excerpt(),
             why: $classified->why,
             deadlineAt: $classified->deadlineAt,
             clarifyingQuestion: null,

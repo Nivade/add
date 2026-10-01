@@ -70,7 +70,7 @@ final class BuildHome
             sortingCount: $this->sortingCount($user, $context->now),
             sorted: $sorted['items'],
             sortedMore: $sorted['more'],
-            unsortedCount: Capture::query()->where('user_id', $user->id)->whereNull('processed_at')->whereNotNull('failed_at')->count(),
+            unsortedCount: $this->unsortedCount($user),
             aiConsented: $user->hasConsentedToAi(),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
             checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
@@ -98,11 +98,16 @@ final class BuildHome
     {
         return array_values(Capture::query()
             ->where('user_id', $user->id)
+            ->awaitingReadBack()
             ->where('kind', CaptureKind::Promise)
-            ->whereNull('kind_confirmed_at')
             ->whereNotNull('routed_id')
             ->pluck('routed_id')
             ->all());
+    }
+
+    private function unsortedCount(User $user): int
+    {
+        return Capture::query()->where('user_id', $user->id)->whereNull('processed_at')->whereNotNull('failed_at')->count();
     }
 
     private function sortingCount(User $user, CarbonImmutable $now): int

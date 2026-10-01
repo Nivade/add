@@ -10,16 +10,13 @@ use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RespondToWaitingForRequest;
 use App\Models\WaitingFor;
-use Symfony\Component\HttpFoundation\Response;
 
 final class RespondToWaitingForController extends Controller
 {
     use ResolvesOwned;
 
-    public function __invoke(RespondToWaitingForRequest $request, WaitingFor $waitingFor): Response
+    public function __invoke(RespondToWaitingForRequest $request, WaitingFor $waitingFor): WaitingForData
     {
-        $updated = RespondToWaitingFor::run($this->owned($request, $waitingFor), $request->response());
-
-        return WaitingForData::from($updated)->toResponse($request)->setStatusCode(Response::HTTP_OK);
+        return WaitingForData::from(RespondToWaitingFor::run($this->owned($request, $waitingFor), $request->response()));
     }
 }

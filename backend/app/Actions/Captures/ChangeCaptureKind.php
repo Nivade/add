@@ -24,7 +24,7 @@ final class ChangeCaptureKind
     public function handle(Capture $capture, CaptureKind $kind): Capture
     {
         return DB::transaction(function () use ($capture, $kind): Capture {
-            $routed = $this->routed($capture);
+            $routed = $capture->routed();
 
             if ($routed !== null && $this->actedOn($routed)) {
                 throw new CaptureAlreadyActedOn("Capture {$capture->id} was already acted on as {$capture->kind?->value}.");
@@ -39,17 +39,6 @@ final class ChangeCaptureKind
 
             return SortCapture::run($capture, $kind);
         });
-    }
-
-    private function routed(Capture $capture): Intention|WaitingFor|Commitment|FutureReminder|null
-    {
-        return match ($capture->kind) {
-            CaptureKind::Thought => Intention::query()->find($capture->routed_id),
-            CaptureKind::WaitingFor => WaitingFor::query()->find($capture->routed_id),
-            CaptureKind::Promise => Commitment::query()->find($capture->routed_id),
-            CaptureKind::Reminder => FutureReminder::query()->find($capture->routed_id),
-            CaptureKind::NotForYou, null => null,
-        };
     }
 
     private function actedOn(Intention|WaitingFor|Commitment|FutureReminder $routed): bool

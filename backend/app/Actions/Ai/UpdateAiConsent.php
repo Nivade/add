@@ -17,19 +17,23 @@ final class UpdateAiConsent
 
     public function handle(User $user, bool $consented): void
     {
+        $wasConsented = $user->hasConsentedToAi();
+
         $user->ai_consented_at = $consented ? Carbon::now() : null;
         $user->save();
 
-        if ($consented) {
-            $this->sortWhatWaited($user);
+        if ($consented && ! $wasConsented) {
+            $this->sortWhatFailed($user);
         }
     }
 
-    private function sortWhatWaited(User $user): void
+    /** Only what failed: a capture still in its first job must not get a second one. */
+    private function sortWhatFailed(User $user): void
     {
         Capture::query()
             ->where('user_id', $user->id)
             ->whereNull('processed_at')
+            ->whereNotNull('failed_at')
             ->each(function (Capture $capture): void {
                 $capture->update(['failed_at' => null]);
                 SortCapture::dispatch($capture);
