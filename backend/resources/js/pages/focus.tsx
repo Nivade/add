@@ -1,4 +1,7 @@
-import type { ExecutionStateData } from '@add/shared';
+import type {
+    ExecutionStateData,
+    StuckReason as StuckReasonValue,
+} from '@add/shared';
 import { focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Head, router } from '@inertiajs/react';
 import { useId, useLayoutEffect, useState } from 'react';
@@ -16,6 +19,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { useShortcuts } from '@/hooks/use-shortcuts';
+import { fieldClassName } from '@/lib/field';
 import focusRoutes from '@/routes/focus';
 
 const controlClassName =
@@ -144,9 +148,20 @@ function StuckReason({
 
 export default function Focus({ state }: { state: ExecutionStateData }) {
     const [stuckOpen, setStuckOpen] = useState(false);
+    const [askingNote, setAskingNote] = useState(false);
     const { session, intention, progress, elapsed } = state;
     const step = session.currentStep;
     const paused = session.pausedAt !== null;
+
+    const reportStuck = (reason: StuckReasonValue, note?: string): void => {
+        setStuckOpen(false);
+        setAskingNote(false);
+        router.post(focusRoutes.stuck.url(session.id), {
+            step_id: step?.id ?? '',
+            reason,
+            note: note ?? '',
+        });
+    };
 
     useLayoutEffect(() => {
         document.querySelector<HTMLElement>('main h1')?.focus();
@@ -194,6 +209,14 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             key={step?.id}
                             className="animate-in fade-in slide-in-from-bottom-2 flex flex-col items-start gap-4 duration-300 motion-reduce:animate-none"
                         >
+                            {state.notice && (
+                                <p
+                                    role="status"
+                                    className="text-muted-foreground text-lead"
+                                >
+                                    {state.notice}
+                                </p>
+                            )}
                             <OneThing>{step?.title}</OneThing>
                             {step && <Meta>{stepMeta(step)}</Meta>}
                             {step && (
@@ -262,7 +285,13 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                 </ul>
             </div>
 
-            <Dialog open={stuckOpen} onOpenChange={setStuckOpen}>
+            <Dialog
+                open={stuckOpen}
+                onOpenChange={(open) => {
+                    setStuckOpen(open);
+                    setAskingNote(false);
+                }}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{focusCopy.stuckQuestion}</DialogTitle>
@@ -270,27 +299,55 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             {focusCopy.stuckMeta}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="flex flex-col gap-2">
-                        {stuckReasonsFor(step?.place ?? null).map(
-                            (reason, index) => (
-                                <StuckReason
-                                    key={reason.value}
-                                    label={reason.label}
-                                    shortcut={String(index + 1)}
-                                    onChoose={() => {
-                                        setStuckOpen(false);
-                                        router.post(
-                                            focusRoutes.stuck.url(session.id),
-                                            {
-                                                step_id: step?.id,
-                                                reason: reason.value,
-                                            },
-                                        );
-                                    }}
-                                />
-                            ),
-                        )}
-                    </div>
+                    {askingNote ? (
+                        <form
+                            className="flex flex-col gap-3"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                const note = new FormData(
+                                    event.currentTarget,
+                                ).get('note');
+
+                                reportStuck(
+                                    'something_else',
+                                    typeof note === 'string' ? note : '',
+                                );
+                            }}
+                        >
+                            <label htmlFor="stuck-note">
+                                {focusCopy.stuckNoteQuestion}
+                            </label>
+                            <textarea
+                                id="stuck-note"
+                                name="note"
+                                rows={3}
+                                autoFocus
+                                className={fieldClassName}
+                            />
+                            <div className="flex justify-end">
+                                <Button type="submit">
+                                    {focusCopy.stuckNoteSend}
+                                </Button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            {stuckReasonsFor(step?.place ?? null).map(
+                                (reason, index) => (
+                                    <StuckReason
+                                        key={reason.value}
+                                        label={reason.label}
+                                        shortcut={String(index + 1)}
+                                        onChoose={() =>
+                                            reason.value === 'something_else'
+                                                ? setAskingNote(true)
+                                                : reportStuck(reason.value)
+                                        }
+                                    />
+                                ),
+                            )}
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </>

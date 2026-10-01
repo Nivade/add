@@ -314,7 +314,7 @@ desktop                                          phone
   - New `backend/tests/Feature/Execution/FinishedTest.php`: the last Done redirects there; each line appears only when true; the API answers `FinishedData`; another person's session and a running session are refused.
   - `JourneyTest.php` ends on "is handled." and "Leave it there".
   - Check: `npm run artisan -- test --compact tests/Feature/Execution tests/Feature/Home` and `npm run test:browser` pass.
-- [ ] **4.5 Stuck answers back, and does not bounce.** Invoke skills: `laravel-actions`.
+- [x] **4.5 Stuck answers back, and does not bounce.** Invoke skills: `laravel-actions`.
   - `StuckReason::acknowledgement(string $intentionTitle): ?string`: TooBig and DontKnowWhatToDo "Let's make it smaller. Forget the rest of {title} for now."; NeedSomething and NotEnoughInformation "That one can wait until you have what it needs. Here is something you can do now."; NotHere "That one waits until you are there. Here is one you can do here."; SomethingElse "Noted. This one is still here when you want it."; Tired and DontWantTo null.
   - `ExecutionStateData` gains `?string $notice`, set when the session's latest event is `Stuck`. Web and mobile render it as `role="status"` above the step.
   - A stuck answer that stops the session: web flashes the toast "Stopped for now. It will be here later." and redirects home; mobile routes home with the same line.

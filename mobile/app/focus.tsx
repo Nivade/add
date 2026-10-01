@@ -40,9 +40,14 @@ export default function Focus() {
   const step = session.currentStep;
   const paused = session.pausedAt !== null;
 
-  const take = (state: ExecutionStateData): void => {
+  /** A stuck answer that stops the session says so on home; Stop itself needs no line. */
+  const take = (state: ExecutionStateData, fromStuck: boolean): void => {
     if (state.session.endedAt !== null || state.session.currentStep === null) {
-      router.replace('/');
+      router.replace(
+        fromStuck && state.session.outcome === 'stopped'
+          ? { pathname: '/', params: { notice: focusCopy.stoppedForNow } }
+          : '/',
+      );
 
       return;
     }
@@ -58,6 +63,7 @@ export default function Focus() {
   /** A 409 means another tap already moved the session on, so the screen catches up instead. */
   const send = async (
     write: () => Promise<ExecutionStateData>,
+    fromStuck = false,
   ): Promise<void> => {
     if (inFlight.current) {
       return;
@@ -67,7 +73,7 @@ export default function Focus() {
     setBusy(true);
 
     try {
-      take(await write());
+      take(await write(), fromStuck);
     } catch (error) {
       if (!(error instanceof ApiError && error.status === 409)) {
         throw error;
@@ -109,6 +115,11 @@ export default function Focus() {
         </>
       ) : (
         <>
+          {data.notice && (
+            <Text accessibilityLiveRegion="polite" style={styles.notice}>
+              {data.notice}
+            </Text>
+          )}
           <OneThing>{step?.title ?? intention.title}</OneThing>
           {step && <Meta>{stepMeta(step)}</Meta>}
           {data.currentStepIsCommitment ? (
@@ -178,13 +189,15 @@ export default function Focus() {
                 label={reason.label}
                 onPress={() => {
                   setStuckOpen(false);
-                  void send(() =>
-                    api.stuck(
-                      token as string,
-                      session.id,
-                      step?.id ?? null,
-                      reason.value,
-                    ),
+                  void send(
+                    () =>
+                      api.stuck(
+                        token as string,
+                        session.id,
+                        step?.id ?? null,
+                        reason.value,
+                      ),
+                    true,
                   );
                 }}
               />
@@ -198,6 +211,7 @@ export default function Focus() {
 
 const styles = StyleSheet.create({
   controls: { gap: theme.space(1.5) },
+  notice: { color: theme.color.muted, fontSize: 18 },
   progress: {
     borderTopColor: theme.color.border,
     borderTopWidth: 1,

@@ -19,7 +19,7 @@ import {
   sortingLine,
   waitingForResponses,
 } from '@add/shared';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
@@ -117,6 +117,7 @@ function WaitingFor({
 
 export default function Home() {
   const { token, signOut } = useSession();
+  const { notice } = useLocalSearchParams<{ notice?: string }>();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
   const sortingCount =
@@ -195,6 +196,11 @@ export default function Home() {
   return (
     <Screen>
       <StaleNote problem={problem} />
+      {notice && (
+        <Text accessibilityLiveRegion="polite" style={styles.line}>
+          {notice}
+        </Text>
+      )}
       {session ? (
         <>
           <OneThing>

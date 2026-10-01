@@ -29,4 +29,16 @@ enum StuckReason: string
             self::SomethingElse => StuckResolution::StayPut,
         };
     }
+
+    /** Said above the step that replaces the one they were stuck on; a stop says its own line. */
+    public function acknowledgement(string $intentionTitle): ?string
+    {
+        return match ($this) {
+            self::TooBig, self::DontKnowWhatToDo => "Let's make it smaller. Forget the rest of {$intentionTitle} for now.",
+            self::NeedSomething, self::NotEnoughInformation => 'That one can wait until you have what it needs. Here is something you can do now.',
+            self::NotHere => 'That one waits until you are there. Here is one you can do here.',
+            self::SomethingElse => 'Noted. This one is still here when you want it.',
+            self::Tired, self::DontWantTo => null,
+        };
+    }
 }

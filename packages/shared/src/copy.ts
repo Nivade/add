@@ -212,6 +212,9 @@ export const focusCopy = {
         stop: 'Done for now',
     },
     stuckQuestion: "What's blocking you?",
+    stuckNoteQuestion: "What's in the way? You can leave this empty.",
+    stuckNoteSend: 'Tell it',
+    stoppedForNow: 'Stopped for now. It will be here later.',
     stuckMeta: 'every answer leads somewhere',
 } as const;
 

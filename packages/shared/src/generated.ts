@@ -71,6 +71,7 @@ elapsed: string,
 currentStepIsCommitment: boolean,
 returning: boolean,
 stepsDone: number,
+notice: string | null,
 };
 export type FinishedData = {
 intention: IntentionData,
@@ -91,7 +92,6 @@ rightNowIsCommitment: boolean,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
 reminder: ReminderData | null,
-justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
 sortingCount: number,
@@ -113,11 +113,6 @@ clarifyingQuestion: string | null,
 recurrenceEveryDays: number | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
-export type JustFinishedData = {
-id: string,
-title: string,
-recurrenceEveryDays: number | null,
-};
 export type NeedsAttentionData = {
 kind: NeedsAttentionKind,
 id: string,

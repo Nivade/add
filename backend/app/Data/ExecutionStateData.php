@@ -25,5 +25,6 @@ class ExecutionStateData extends Data
         public bool $currentStepIsCommitment,
         public bool $returning,
         public int $stepsDone,
+        public ?string $notice,
     ) {}
 }

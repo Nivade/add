@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReportStuckRequest;
 use App\Models\ExecutionSession;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 
 final class ReportStuckController extends Controller
 {
@@ -25,6 +26,17 @@ final class ReportStuckController extends Controller
             $request->note(),
         );
 
-        return $session->outcome === SessionOutcome::Completed ? to_route('focus.finished', $session) : back();
+        return match ($session->outcome) {
+            SessionOutcome::Completed => to_route('focus.finished', $session),
+            SessionOutcome::Stopped => $this->stoppedForNow(),
+            default => back(),
+        };
+    }
+
+    private function stoppedForNow(): RedirectResponse
+    {
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Stopped for now. It will be here later.')]);
+
+        return to_route('home');
     }
 }
