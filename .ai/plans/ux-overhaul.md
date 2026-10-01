@@ -283,7 +283,7 @@ desktop                                          phone
   - Tests in `backend/tests/Feature/Auth/RegistrationTest.php`: registering without `ai_consent` fails validation and creates no user; with it, `ai_consented_at` is set.
   - Records: under item 1 of Phase 4 in [`slices/08-mvp-real.md`](slices/08-mvp-real.md) add "Amended 2026-10-01 by the UX overhaul plan: consent is asked at signup and required; the settings switch withdraws it."; in `.ai/rules/ai-layer.md`, "Consent is per person" gains: registration requires it, and withdrawing it stops sorting, which home says.
   - Check: `npm run artisan -- test --compact tests/Feature/Auth tests/Feature/Settings tests/Feature/Ai` and `DocumentationTest.php` pass.
-- [ ] **3.9 Finish.** Invoke skills: `security-review` (ownership on the new routes, model output driving writes), `phpstan-larastan`, `finish-branch`.
+- [x] **3.9 Finish.** Invoke skills: `security-review` (ownership on the new routes, model output driving writes), `phpstan-larastan`, `finish-branch`.
 
 ## Phase 4 — the journey (`feature/ux-journey`)
 
