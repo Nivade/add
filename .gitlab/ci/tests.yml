@@ -6,27 +6,28 @@
       optional: true
   variables:
     CI_IMAGE_TAG: php-8.5
-    COMPOSER_CACHE_DIR: .cache/composer
-    npm_config_cache: .cache/npm
+    # Outside backend/, where vp check would format the cached JSON.
+    COMPOSER_CACHE_DIR: $CI_PROJECT_DIR/.cache/composer
+    npm_config_cache: $CI_PROJECT_DIR/.cache/npm
     CACHE_STORE: array
     SESSION_DRIVER: array
     QUEUE_CONNECTION: sync
     HUSKY: '0'
-    PLAYWRIGHT_BROWSERS_PATH: $CI_PROJECT_DIR/backend/.cache/ms-playwright
+    PLAYWRIGHT_BROWSERS_PATH: $CI_PROJECT_DIR/.cache/ms-playwright
   cache:
     - key:
         files:
           - 'backend/composer.lock'
       paths:
-        - 'backend/.cache/composer/'
+        - '.cache/composer/'
     - key:
         files:
           - 'package-lock.json'
       paths:
-        - 'backend/.cache/npm/'
+        - '.cache/npm/'
     - key: playwright
       paths:
-        - 'backend/.cache/ms-playwright/'
+        - '.cache/ms-playwright/'
     # GitLab keeps protected-branch caches apart by default, so the default-branch fallback needs that setting off.
     - key: analysis-$CI_COMMIT_REF_SLUG
       fallback_keys:
