@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, estimateLine, focusCopy, returnCopy, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, focusCopy, returnCopy, stuckReasonsFor, underWayEstimateLine } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -129,7 +129,7 @@ export default function Focus() {
             </Text>
           )}
           <OneThing>{step?.title ?? intention.title}</OneThing>
-          {step && <Meta>{estimateLine(step.estimatedSeconds, nowMinute())}</Meta>}
+          {step && <Meta>{underWayEstimateLine(step.estimatedSeconds, nowMinute())}</Meta>}
           {step?.generated && <SuggestedPill />}
           {data.currentStepIsCommitment ? (
             <Meta>{commitmentCopy.promised}</Meta>

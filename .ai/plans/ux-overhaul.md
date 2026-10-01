@@ -361,6 +361,16 @@ desktop                                          phone
   - Check: `npm run artisan -- test --compact tests/Feature/Execution tests/Feature/Commitments` and `npm run typecheck` pass.
 - [ ] **4.11 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
 
+## Phase 4 as built, 2026-10-01
+
+- 4.4: the steps line reads "{n} steps done, {m} skipped along the way.", since nothing sets a step `skipped` and m counts steps skipped at least once.
+- 4.4: with no next step the closing screen offers "Back to home", not "Leave it there"; an inferred deadline reads "Going by what you wrote, that is {words} before the deadline."
+- 4.6: home shows "Plan for it" only when the appointment page has a plan or a calendar reminder to set.
+- 4.7: focus uses `underWayEstimateLine`, which drops "if you start now"; pages read the minute from `useNowMinute()`, the layout's one clock.
+- 4.2: key hints hide on coarse pointers; `aria-keyshortcuts` stays, so the keys are still announced.
+- 4.8 landed after 4.9 and 4.10 so the audit ran once; dark `/focus` was checked with axe-core in a throwaway browser test, as the demo had nothing startable.
+- Mobile's something-else note and the closing screen's repeat offer wait for 5.3.
+
 ## Phase 5 — mobile (`feature/mobile-parity`)
 
 - [ ] **5.1 Dependencies, fonts and tokens.** Invoke skills: `expo-react-native`, `sail-and-root-scripts`.

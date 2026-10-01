@@ -111,7 +111,9 @@ final class BuildFinished
             ->cascade()
             ->forHumans(parts: 1);
 
-        return ucfirst($words).' before the deadline.';
+        return $intention->deadline_inferred
+            ? "Going by what you wrote, that is {$words} before the deadline."
+            : ucfirst($words).' before the deadline.';
     }
 
     private function onTheListLine(Intention $intention, CarbonImmutable $finishedAt): ?string

@@ -1,4 +1,9 @@
-import { estimateLine, focusCopy, suggestedLabel } from '@add/shared';
+import {
+    estimateLine,
+    focusCopy,
+    suggestedLabel,
+    underWayEstimateLine,
+} from '@add/shared';
 import { Form } from '@inertiajs/react';
 import { NowButton } from '@/components/now-button';
 import { useNowMinute } from '@/hooks/use-minute-of-day';
@@ -22,8 +27,18 @@ export function Meta({ children }: { children: React.ReactNode }) {
 }
 
 /** Read off the layout's clock, so it says the same minute the day strip draws. */
-export function EstimateLine({ seconds }: { seconds: number | null }) {
-    return estimateLine(seconds, useNowMinute());
+export function EstimateLine({
+    seconds,
+    underWay = false,
+}: {
+    seconds: number | null;
+    underWay?: boolean;
+}) {
+    const nowMinute = useNowMinute();
+
+    return underWay
+        ? underWayEstimateLine(seconds, nowMinute)
+        : estimateLine(seconds, nowMinute);
 }
 
 export function SuggestedPill() {

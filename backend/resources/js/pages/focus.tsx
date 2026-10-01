@@ -80,7 +80,7 @@ function Control({
             </span>
             <span
                 id={hintId}
-                className="text-small text-muted-foreground hidden font-normal sm:block"
+                className="text-small text-muted-foreground block font-normal"
             >
                 {hint}
             </span>
@@ -230,6 +230,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                     <Meta>
                                         <EstimateLine
                                             seconds={step.estimatedSeconds}
+                                            underWay
                                         />
                                     </Meta>
                                     {step.generated && <SuggestedPill />}

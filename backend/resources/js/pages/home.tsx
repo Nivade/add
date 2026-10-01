@@ -149,9 +149,11 @@ function ComingUp({ comingUp }: { comingUp: ComingUpData }) {
                     </Link>
                 </Form>
             )}
-            <Link href={page} className={quietLineClassName}>
-                {comingUpCopy.planFor}
-            </Link>
+            {(comingUp.plan || comingUp.kind === 'calendar_event') && (
+                <Link href={page} className={quietLineClassName}>
+                    {comingUpCopy.planFor}
+                </Link>
+            )}
         </Band>
     );
 }

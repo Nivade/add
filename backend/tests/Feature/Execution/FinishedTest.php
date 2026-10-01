@@ -63,7 +63,7 @@ it('says how long it took without the pauses, how early it was, and how long it 
     $intention = kitchen(2);
 
     $this->travelTo(CarbonImmutable::parse('2026-09-30 10:00:00'));
-    $intention->update(['deadline_at' => now()->addDays(2)->addHour()]);
+    $intention->update(['deadline_at' => now()->addDays(2)->addHour(), 'deadline_confirmed_at' => now()]);
     $session = StartSession::run($intention->user, $intention->steps()->first());
     $session = SkipCurrentStep::run($session, (string) $session->current_step_id);
 
@@ -83,6 +83,15 @@ it('says how long it took without the pauses, how early it was, and how long it 
         'It had been on your list for 3 days.',
         '1 thing finished today.',
     ]);
+});
+
+it('says a deadline it read out of what they wrote is only going by that', function (): void {
+    $intention = kitchen(1);
+    $intention->update(['deadline_at' => now()->addDays(2)->addHour()]);
+    $session = StartSession::run($intention->user, $intention->steps()->first());
+    $session = CompleteStep::run($session, (string) $session->current_step_id);
+
+    expect(BuildFinished::run($session)->lines)->toContain('Going by what you wrote, that is 2 days before the deadline.');
 });
 
 it('offers one thing next when there is one', function (): void {

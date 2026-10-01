@@ -149,15 +149,28 @@ export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
-/** What starting now costs, as a time on the clock; a missing estimate says so rather than reading as zero. */
-export function estimateLine(seconds: number | null, nowMinute: number): string {
+function estimatedCost(seconds: number | null, nowMinute: number): string | null {
     const estimate = formatEstimate(seconds);
 
-    if (seconds === null || estimate === null) {
-        return 'Nobody has estimated this one.';
-    }
+    return seconds === null || estimate === null
+        ? null
+        : `About ${estimate}, so done around ${clockOf(doneMinute(nowMinute, seconds))}`;
+}
 
-    return `About ${estimate}, so done around ${clockOf(doneMinute(nowMinute, seconds))} if you start now.`;
+const notEstimated = 'Nobody has estimated this one.';
+
+/** What starting now costs, as a time on the clock; a missing estimate says so rather than reading as zero. */
+export function estimateLine(seconds: number | null, nowMinute: number): string {
+    const cost = estimatedCost(seconds, nowMinute);
+
+    return cost === null ? notEstimated : `${cost} if you start now.`;
+}
+
+/** The same cost once the step is under way, where "if you start now" would be a step behind. */
+export function underWayEstimateLine(seconds: number | null, nowMinute: number): string {
+    const cost = estimatedCost(seconds, nowMinute);
+
+    return cost === null ? notEstimated : `${cost}.`;
 }
 
 /** A step the app wrote says who wrote it, beside Start, so it is never mistaken for one they did. */
