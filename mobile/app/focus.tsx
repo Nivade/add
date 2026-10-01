@@ -1,5 +1,5 @@
 import type { ExecutionStateData } from '@add/shared';
-import { commitmentCopy, focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
+import { commitmentCopy, estimateLine, focusCopy, returnCopy, stuckReasonsFor } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -11,6 +11,7 @@ import { Button } from '@/components/button';
 import { QuietAction } from '@/components/quiet-action';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
+import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
 import { theme } from '@/theme';
 
 export default function Focus() {
@@ -121,7 +122,8 @@ export default function Focus() {
             </Text>
           )}
           <OneThing>{step?.title ?? intention.title}</OneThing>
-          {step && <Meta>{stepMeta(step)}</Meta>}
+          {step && <Meta>{estimateLine(step.estimatedSeconds, nowMinute())}</Meta>}
+          {step?.generated && <SuggestedPill />}
           {data.currentStepIsCommitment ? (
             <Meta>{commitmentCopy.promised}</Meta>
           ) : (
@@ -164,10 +166,10 @@ export default function Focus() {
       )}
 
       <View style={styles.progress}>
-        <Text style={styles.progressLine}>{elapsed.toLowerCase()}</Text>
+        <Text style={styles.progressLine}>{elapsed}</Text>
         {progress.map((line) => (
           <Text key={line} style={styles.progressLine}>
-            {line.toLowerCase()}
+            {line}
           </Text>
         ))}
       </View>

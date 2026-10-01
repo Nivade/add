@@ -17,10 +17,10 @@ import { formatEstimate } from './estimate';
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
     if (count === 0) {
-        return 'nothing else is waiting';
+        return 'Nothing else is waiting.';
     }
 
-    return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about`;
+    return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about.`;
 }
 
 /** Settings names the zone every clock is read in, and where it came from. */
@@ -87,6 +87,7 @@ export function sortedMoreLine(count: number): string {
 /** Coming back is welcomed, never timed: both frontends say it in these words. */
 export const returnCopy = {
     welcome: 'Welcome back.',
+    partWay: (title: string): string => `Part-way through ${title}.`,
     paused: 'Paused.',
     pausedMeta: 'Continue whenever you are ready.',
     workingOn: (title: string): string => `You were working on ${title}.`,
@@ -148,25 +149,22 @@ export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
-type EstimatedStep = { estimatedSeconds: number | null; generated: boolean };
+/** What starting now costs, as a time on the clock; a missing estimate says so rather than reading as zero. */
+export function estimateLine(seconds: number | null, nowMinute: number): string {
+    const estimate = formatEstimate(seconds);
 
-/** Going quiet on a missing estimate would read as zero minutes, and a guessed step must say who guessed. */
-export function stepMeta(step: EstimatedStep): string {
-    const estimate = formatEstimate(step.estimatedSeconds);
+    if (seconds === null || estimate === null) {
+        return 'Nobody has estimated this one.';
+    }
 
-    return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
+    return `About ${estimate}, so done around ${clockOf(doneMinute(nowMinute, seconds))} if you start now.`;
 }
 
-export function rightNowMeta(step: EstimatedStep, intentionTitle: string): string {
-    return `${stepMeta(step)} · ${intentionTitle.toLowerCase()}`;
-}
+/** A step the app wrote says who wrote it, beside Start, so it is never mistaken for one they did. */
+export const suggestedLabel = 'suggested step';
 
-export function smallestStepMeta(step: EstimatedStep): string {
-    return `${stepMeta(step)} · that is all you have to do`;
-}
-
-export function partWayLine(intentionTitle: string): string {
-    return `Part-way through ${intentionTitle}.`;
+export function partOfLine(intentionTitle: string): string {
+    return `Part of ${intentionTitle}.`;
 }
 
 export const nothingNeedsYou = 'Nothing needs you right now.';
@@ -291,9 +289,9 @@ export function commitmentResponses(
 }
 
 export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = {
-    user_task: 'from something you were doing',
-    user_stated: 'you said this',
-    system_inferred: 'read from what you wrote',
+    user_task: 'From something you were doing.',
+    user_stated: 'You said this.',
+    system_inferred: 'Read from what you wrote.',
 };
 
 /** Each is asked against when the person started, because a steady "less" is the claim worth testing. */

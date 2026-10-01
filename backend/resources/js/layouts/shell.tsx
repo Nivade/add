@@ -4,7 +4,7 @@ import { KeyHint } from '@/components/key-hint';
 import { QuickCapture } from '@/components/quick-capture';
 import { UserMenu } from '@/components/user-menu';
 import { Wordmark } from '@/components/wordmark';
-import { useMinuteOfDay } from '@/hooks/use-minute-of-day';
+import { NowMinuteContext, useMinuteOfDay } from '@/hooks/use-minute-of-day';
 import { useShortcuts } from '@/hooks/use-shortcuts';
 import { columnClassName } from '@/lib/column';
 import { overwhelmed } from '@/routes';
@@ -59,7 +59,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 <main
                     className={`${columnClassName} flex-1 pt-8 pb-20 sm:pt-10`}
                 >
-                    {children}
+                    <NowMinuteContext value={nowMinute}>
+                        {children}
+                    </NowMinuteContext>
                 </main>
             </div>
         </div>

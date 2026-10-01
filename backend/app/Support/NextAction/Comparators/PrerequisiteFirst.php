@@ -22,6 +22,6 @@ final class PrerequisiteFirst extends Rung
 
     public function decides(Candidate $candidate, ResolutionContext $context): string
     {
-        return 'It is the first thing left in this one.';
+        return "It comes first in “{$candidate->intention->title}”.";
     }
 }

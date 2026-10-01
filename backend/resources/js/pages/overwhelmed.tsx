@@ -1,13 +1,13 @@
 import type { OverwhelmedData } from '@add/shared';
-import {
-    nothingNeedsYou,
-    overwhelmedCopy,
-    restCountLine,
-    smallestStepMeta,
-} from '@add/shared';
+import { nothingNeedsYou, overwhelmedCopy, restCountLine } from '@add/shared';
 import { Head, Link, router } from '@inertiajs/react';
 import { KeyHint } from '@/components/key-hint';
-import { Meta, OneThing, StartStep } from '@/components/one-thing';
+import {
+    EstimateLine,
+    Meta,
+    OneThing,
+    StartStep,
+} from '@/components/one-thing';
 import { quietLineClassName } from '@/components/responses';
 import { useShortcuts } from '@/hooks/use-shortcuts';
 import { home } from '@/routes';
@@ -36,7 +36,11 @@ export default function Overwhelmed({
 
                     {smallestStep && (
                         <>
-                            <Meta>{smallestStepMeta(smallestStep.step)}</Meta>
+                            <Meta>
+                                <EstimateLine
+                                    seconds={smallestStep.step.estimatedSeconds}
+                                />
+                            </Meta>
 
                             <ul className="text-muted-foreground space-y-1">
                                 {smallestStep.why.map((line) => (
@@ -44,7 +48,10 @@ export default function Overwhelmed({
                                 ))}
                             </ul>
 
-                            <StartStep stepId={smallestStep.step.id} />
+                            <StartStep
+                                stepId={smallestStep.step.id}
+                                suggested={smallestStep.step.generated}
+                            />
                         </>
                     )}
 

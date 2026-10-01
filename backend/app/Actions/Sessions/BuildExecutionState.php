@@ -92,7 +92,8 @@ final class BuildExecutionState
             $lines[] = $done.' of '.$steps->count().' steps done.';
         }
 
-        if ($session->steps_completed > 0) {
+        // Said only when it adds something: on a first sitting it repeats the line above.
+        if ($session->steps_completed > 0 && $session->steps_completed !== $done) {
             $lines[] = $session->steps_completed.' '
                 .($session->steps_completed === 1 ? 'step' : 'steps')
                 .' done in this sitting.';
@@ -100,8 +101,8 @@ final class BuildExecutionState
 
         $today = $this->doneToday($session);
 
-        if ($today > 0) {
-            $lines[] = $today.' '.($today === 1 ? 'thing' : 'things').' finished today.';
+        if ($today > $session->steps_completed) {
+            $lines[] = $today.' '.($today === 1 ? 'step' : 'steps').' finished today.';
         }
 
         $avoided = $this->avoidedLine($session);

@@ -34,7 +34,7 @@ it('stays in the session rather than re-ranking mid-task', function (): void {
     $current = Step::factory()->for($started)->create(['title' => 'Write the second paragraph.', 'position' => 2]);
 
     $urgent = Intention::factory()->decomposed()->for($user)->create([
-        'deadline_at' => CarbonImmutable::now()->addHour(),
+        'deadline_confirmed_at' => now(), 'deadline_at' => CarbonImmutable::now()->addHour(),
     ]);
     Step::factory()->for($urgent)->create(['title' => 'Call the garage.', 'position' => 1]);
 
@@ -52,7 +52,7 @@ it('picks the deadline whose remaining steps only just fit, and says so', functi
 
     $tight = Intention::factory()->decomposed()->for($user)->create([
         'title' => 'Get the car through its inspection',
-        'deadline_at' => $now->addHours(2),
+        'deadline_confirmed_at' => now(), 'deadline_at' => $now->addHours(2),
     ]);
 
     foreach ([1, 2, 3] as $position) {
@@ -75,11 +75,34 @@ it('picks the deadline whose remaining steps only just fit, and says so', functi
         ]);
 });
 
+it('says a deadline it read out of what they wrote is only going by that', function (): void {
+    $user = User::factory()->create();
+    $now = CarbonImmutable::parse('2026-09-19 09:00:00');
+
+    $tight = Intention::factory()->decomposed()->for($user)->create([
+        'title' => 'Send the tax return',
+        'deadline_at' => $now->addHours(2),
+    ]);
+    Step::factory()->for($tight)->create(['title' => "Find last year's figures.", 'position' => 1, 'estimated_seconds' => 3600]);
+    Step::factory()->for($tight)->create(['title' => 'Fill in the form.', 'position' => 2, 'estimated_seconds' => 3600]);
+
+    $later = Intention::factory()->decomposed()->for($user)->create(['title' => 'Book the dentist', 'deadline_at' => $now->addWeek()]);
+    Step::factory()->for($later)->create(['title' => 'Call the dentist.', 'position' => 1, 'estimated_seconds' => 300]);
+
+    $answer = nextAction($user, $now);
+
+    expect($answer?->step->title)->toBe("Find last year's figures.")
+        ->and($answer?->why)->toBe([
+            'Going by what you wrote, the deadline is 2 hours from now and what is left only just fits.',
+            'This takes about 1 hour.',
+        ]);
+});
+
 it('prefers a real deadline over none when both are comfortably far off', function (): void {
     $user = User::factory()->create();
     $now = CarbonImmutable::parse('2026-09-19 09:00:00');
 
-    $dated = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addDay()]);
+    $dated = Intention::factory()->decomposed()->for($user)->create(['deadline_confirmed_at' => now(), 'deadline_at' => $now->addDay()]);
     Step::factory()->for($dated)->create(['title' => 'Print the form.', 'position' => 1, 'estimated_seconds' => 300]);
 
     $undated = Intention::factory()->decomposed()->for($user)->create();
@@ -100,11 +123,11 @@ it('stops treating a deadline that has passed as a reach, and says it flatly', f
 
     $passed = Intention::factory()->decomposed()->for($user)->create([
         'title' => 'Send the rental form',
-        'deadline_at' => $now->subDays(2),
+        'deadline_confirmed_at' => now(), 'deadline_at' => $now->subDays(2),
     ]);
     Step::factory()->for($passed)->create(['title' => 'Scan the form.', 'position' => 1, 'estimated_seconds' => 600]);
 
-    $ahead = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addHour()]);
+    $ahead = Intention::factory()->decomposed()->for($user)->create(['deadline_confirmed_at' => now(), 'deadline_at' => $now->addHour()]);
     foreach ([1, 2] as $position) {
         Step::factory()->for($ahead)->create([
             'title' => "Inspection step {$position}.",
@@ -130,10 +153,10 @@ it('leads with the soonest deadline when several are ahead', function (): void {
     $user = User::factory()->create();
     $now = CarbonImmutable::parse('2026-09-19 09:00:00');
 
-    $later = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addDays(3)]);
+    $later = Intention::factory()->decomposed()->for($user)->create(['deadline_confirmed_at' => now(), 'deadline_at' => $now->addDays(3)]);
     Step::factory()->for($later)->create(['title' => 'Book the van.', 'position' => 1, 'estimated_seconds' => 300]);
 
-    $sooner = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $now->addDay()]);
+    $sooner = Intention::factory()->decomposed()->for($user)->create(['deadline_confirmed_at' => now(), 'deadline_at' => $now->addDay()]);
     Step::factory()->for($sooner)->create(['title' => 'Print the form.', 'position' => 1, 'estimated_seconds' => 300]);
 
     expect(nextAction($user, $now)?->step->title)->toBe('Print the form.');
@@ -158,7 +181,7 @@ it('offers a prerequisite before the shorter step that follows it', function ():
 
     expect($answer?->step->title)->toBe('Empty the top shelf.')
         ->and($answer?->why)->toBe([
-            'It is the first thing left in this one.',
+            'It comes first in “Clean the apartment”.',
             'This takes about 15 minutes.',
         ]);
 });
@@ -252,7 +275,7 @@ function nextActionWhereYouAre(User $user): ?NextActionData
 
 function placedStep(User $user, string $title, ?Place $place, int $seconds, ?CarbonImmutable $deadline = null): Step
 {
-    $intention = Intention::factory()->decomposed()->for($user)->create(['deadline_at' => $deadline]);
+    $intention = Intention::factory()->decomposed()->for($user)->create(['deadline_confirmed_at' => now(), 'deadline_at' => $deadline]);
 
     return Step::factory()->for($intention)->create([
         'title' => $title,

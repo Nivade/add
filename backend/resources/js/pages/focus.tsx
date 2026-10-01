@@ -2,12 +2,17 @@ import type {
     ExecutionStateData,
     StuckReason as StuckReasonValue,
 } from '@add/shared';
-import { focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
+import { focusCopy, returnCopy, stuckReasonsFor } from '@add/shared';
 import { Head, router } from '@inertiajs/react';
 import { useId, useLayoutEffect, useState } from 'react';
 import { KeyHint } from '@/components/key-hint';
 import { NowButton } from '@/components/now-button';
-import { Meta, OneThing } from '@/components/one-thing';
+import {
+    EstimateLine,
+    Meta,
+    OneThing,
+    SuggestedPill,
+} from '@/components/one-thing';
 import { OneTapForm } from '@/components/one-tap-form';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { Button } from '@/components/ui/button';
@@ -218,7 +223,16 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 </p>
                             )}
                             <OneThing>{step?.title}</OneThing>
-                            {step && <Meta>{stepMeta(step)}</Meta>}
+                            {step && (
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <Meta>
+                                        <EstimateLine
+                                            seconds={step.estimatedSeconds}
+                                        />
+                                    </Meta>
+                                    {step.generated && <SuggestedPill />}
+                                </div>
+                            )}
                             {step && (
                                 <SaidIdDoThis
                                     promised={state.currentStepIsCommitment}
@@ -278,9 +292,9 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                 )}
 
                 <ul className="text-muted-foreground space-y-1">
-                    <li>{elapsed.toLowerCase()}</li>
+                    <li>{elapsed}</li>
                     {progress.map((line) => (
-                        <li key={line}>{line.toLowerCase()}</li>
+                        <li key={line}>{line}</li>
                     ))}
                 </ul>
             </div>

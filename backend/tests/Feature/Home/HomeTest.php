@@ -42,7 +42,7 @@ it('answers with one thing and says why it is that one', function (): void {
             ->where('home.rightNow.step.title', 'Step 1.')
             ->where('home.rightNow.intention.title', 'Clean the kitchen')
             ->where('home.rightNow.why', [
-                'It is the first thing left in this one.',
+                'It comes first in “Clean the kitchen”.',
                 'This takes about 1 minute.',
             ])
             ->where('home.session', null)

@@ -331,7 +331,7 @@ desktop                                          phone
   - Home's "What's coming up": "{title}, {inWords}." and "Leave at {clock}." when planned; "Plan for it" links to the appointment page; an inferred deadline shows "Read from what you wrote." with That's right and "Change" (to the page). The future-reminder form and the plan editor leave home.
   - New `backend/tests/Feature/Intentions/CorrectDeadlineTest.php`: set, clear, zone, ownership.
   - Check: `npm run artisan -- test --compact tests/Feature/Intentions tests/Feature/Home` passes.
-- [ ] **4.7 Say it plainly.** Invoke skills: `next-action-resolver`.
+- [x] **4.7 Say it plainly.** Invoke skills: `next-action-resolver`.
   - Remove every `.toLowerCase()` applied to titles or server lines in `backend/resources/js` and `mobile/`.
   - `BuildExecutionState` progress: "{done} of {n} steps done."; the sitting line only when `steps_completed` differs from the intention's done count; the today line reads "{t} steps finished today." and only when above the sitting count.
   - `PrerequisiteFirst::decides` → "It comes first in “{title}”." `HasDeadline::qualifies` and `DeadlineWithinReach::decides`, when `$candidate->intention->deadline_inferred`: "Going by what you wrote, the deadline is {d}." / "…was {d}." / "Going by what you wrote, the deadline is {d} and what is left only just fits."

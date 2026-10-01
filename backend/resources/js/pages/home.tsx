@@ -6,10 +6,9 @@ import {
     homeBands,
     homeCopy,
     nothingNeedsYou,
-    partWayLine,
+    partOfLine,
     restCountLine,
     returnCopy,
-    rightNowMeta,
     sortingLine,
     unsortedLine,
     waitingForResponses,
@@ -23,7 +22,12 @@ import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
 import { NowButton } from '@/components/now-button';
-import { Meta, OneThing, StartStep } from '@/components/one-thing';
+import {
+    EstimateLine,
+    Meta,
+    OneThing,
+    StartStep,
+} from '@/components/one-thing';
 import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { SortedBand } from '@/components/sorted-band';
@@ -93,8 +97,7 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
                 {item.title}
                 {item.detail && (
                     <span className="text-muted-foreground">
-                        {' '}
-                        · {item.detail}
+                        : {item.detail}
                     </span>
                 )}
             </p>
@@ -164,7 +167,7 @@ function RightNow({ rightNow, session }: HomeData) {
                 <Meta>
                     {session.returning
                         ? returnCopy.workingOn(session.intention.title)
-                        : partWayLine(session.intention.title)}
+                        : returnCopy.partWay(session.intention.title)}
                 </Meta>
                 <NowButton onClick={() => router.visit(focus())}>
                     {focusCopy.continue}
@@ -185,8 +188,14 @@ function RightNow({ rightNow, session }: HomeData) {
     return (
         <div className="flex flex-col items-start gap-5">
             <OneThing>{rightNow.step.title}</OneThing>
-            <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
-            <StartStep stepId={rightNow.step.id} />
+            <Meta>
+                <EstimateLine seconds={rightNow.step.estimatedSeconds} />{' '}
+                {partOfLine(rightNow.intention.title)}
+            </Meta>
+            <StartStep
+                stepId={rightNow.step.id}
+                suggested={rightNow.step.generated}
+            />
         </div>
     );
 }

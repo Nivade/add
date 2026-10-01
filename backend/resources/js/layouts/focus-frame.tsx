@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
 import { CaptureHost } from '@/components/quick-capture';
-import { useMinuteOfDay } from '@/hooks/use-minute-of-day';
+import { NowMinuteContext, useMinuteOfDay } from '@/hooks/use-minute-of-day';
 import { columnClassName } from '@/lib/column';
 
 /** The day and the step, nothing else: no header pulls the eye off the work, and `c` still captures. */
@@ -37,7 +37,9 @@ export default function FocusFrame({
                 <main
                     className={`${columnClassName} flex-1 pt-8 pb-20 sm:pt-16`}
                 >
-                    {children}
+                    <NowMinuteContext value={nowMinute}>
+                        {children}
+                    </NowMinuteContext>
                 </main>
             </div>
 
