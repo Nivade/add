@@ -119,8 +119,9 @@ In this monorepo, `sync --write` does not write a hook script that is missing,
 and `devtools:install` writes its gitignore entries into `backend/.gitignore`;
 both are fixed by hand, the second in the root `.gitignore`.
 
-Shipped skills are copied into `.ai/skills/`, because the skill hook reads only
-there. `phpstan-larastan` is this repo's own rewrite and stays one.
+devtools' own skills (`start-work`, `whats-next`, `after-merge` and the rest) are
+copied into `.ai/skills/`, because the skill hook reads only there; the
+third-party ones in `.agents/skills/` are started by hand and need no hook. `phpstan-larastan` is this repo's own rewrite and stays one.
 
 `devtools:check-agent-content` stays out of `composer test`: it wants
 `metadata.version` on every skill, vendored ones included.
