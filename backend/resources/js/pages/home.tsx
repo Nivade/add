@@ -19,7 +19,7 @@ import {
     unsortedLine,
     waitingForResponses,
 } from '@add/shared';
-import { Form, Head, Link, usePoll } from '@inertiajs/react';
+import { Form, Head, Link, router, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { BackwardsPlan } from '@/components/backwards-plan';
 import { fieldClassName } from '@/lib/field';
@@ -28,6 +28,7 @@ import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
+import { NowButton } from '@/components/now-button';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
 import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
@@ -173,9 +174,9 @@ function RightNow({ rightNow, session }: HomeData) {
                         ? returnCopy.workingOn(session.intention.title)
                         : partWayLine(session.intention.title)}
                 </Meta>
-                <Button asChild variant="now" size="action">
-                    <Link href={focus()}>{focusCopy.continue}</Link>
-                </Button>
+                <NowButton onClick={() => router.visit(focus())}>
+                    {focusCopy.continue}
+                </NowButton>
             </div>
         );
     }

@@ -1,9 +1,11 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
+import { KeyHint } from '@/components/key-hint';
 import { QuickCapture } from '@/components/quick-capture';
 import { UserMenu } from '@/components/user-menu';
 import { Wordmark } from '@/components/wordmark';
 import { useMinuteOfDay } from '@/hooks/use-minute-of-day';
+import { useShortcuts } from '@/hooks/use-shortcuts';
 import { columnClassName } from '@/lib/column';
 import { overwhelmed } from '@/routes';
 
@@ -11,6 +13,8 @@ import { overwhelmed } from '@/routes';
 export default function Shell({ children }: { children: React.ReactNode }) {
     const { rail } = usePage().props;
     const nowMinute = useMinuteOfDay(rail?.nowMinute ?? 0, rail !== null);
+
+    useShortcuts({ o: () => router.visit(overwhelmed()) });
 
     return (
         <div className="bg-background text-foreground flex min-h-screen">
@@ -30,7 +34,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     <Wordmark />
 
                     <div className="ml-auto flex flex-wrap items-center gap-2">
-                        <Link href={overwhelmed()}>{"I'm overwhelmed"}</Link>
+                        <Link
+                            href={overwhelmed()}
+                            aria-keyshortcuts="o"
+                            className="inline-flex min-h-11 items-center gap-2"
+                        >
+                            {"I'm overwhelmed"}
+                            <KeyHint>o</KeyHint>
+                        </Link>
                         <QuickCapture />
                         <UserMenu />
                     </div>

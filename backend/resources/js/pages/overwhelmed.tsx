@@ -5,9 +5,11 @@ import {
     restCountLine,
     smallestStepMeta,
 } from '@add/shared';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { KeyHint } from '@/components/key-hint';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
 import { quietLineClassName } from '@/components/responses';
+import { useShortcuts } from '@/hooks/use-shortcuts';
 import { home } from '@/routes';
 
 /** No rail, no nav, no capture: the screen suppresses everything until this one step is done. */
@@ -16,6 +18,8 @@ export default function Overwhelmed({
 }: {
     overwhelmed: OverwhelmedData;
 }) {
+    useShortcuts({ Escape: () => router.visit(home()) });
+
     return (
         <>
             <Head title="One thing" />
@@ -48,8 +52,13 @@ export default function Overwhelmed({
                         {restCountLine(restCount)}
                     </p>
 
-                    <Link href={home()} className={quietLineClassName}>
+                    <Link
+                        href={home()}
+                        aria-keyshortcuts="Escape"
+                        className={quietLineClassName}
+                    >
                         {overwhelmedCopy.back}
+                        <KeyHint className="ml-2">Esc</KeyHint>
                     </Link>
                 </div>
             </div>

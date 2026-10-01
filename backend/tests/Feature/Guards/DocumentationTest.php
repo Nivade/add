@@ -99,8 +99,6 @@ it('names only paths that exist', function (): void {
         'backend/app/Http/Controllers/Web/ShowFinishedController.php',
         'backend/app/Http/Requests/CorrectDeadlineRequest.php',
         'backend/app/Http/Requests/SessionControlRequest.php',
-        'backend/resources/js/components/now-button.tsx',
-        'backend/resources/js/hooks/use-shortcuts.ts',
         'backend/resources/js/pages/appointment.tsx',
         'backend/resources/js/pages/finished.tsx',
         'backend/tests/Feature/Execution/FinishedTest.php',

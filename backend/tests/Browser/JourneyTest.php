@@ -26,7 +26,9 @@ function focusedDescriptor(mixed $page): string
             if (!el) { return JSON.stringify({label: '', visible: false}); }
             var style = getComputedStyle(el);
             var visible = style.boxShadow !== 'none' || style.outlineStyle !== 'none';
-            var label = el.getAttribute('aria-label') || (el.textContent || '').trim();
+            var copy = el.cloneNode(true);
+            copy.querySelectorAll('kbd').forEach(function (kbd) { kbd.remove(); });
+            var label = el.getAttribute('aria-label') || (copy.textContent || '').trim();
             return JSON.stringify({label: label, visible: visible});
         })()
     JS_WRAP), associative: true, flags: JSON_THROW_ON_ERROR);
@@ -34,6 +36,12 @@ function focusedDescriptor(mixed $page): string
     expect($result['visible'])->toBeTrue('Focus landed on "'.$result['label'].'" with no visible indicator.');
 
     return $result['label'];
+}
+
+/** A button by its accessible name, so the key hint drawn inside it does not change what it is called. */
+function button(string $name): string
+{
+    return 'internal:role=button[name="'.$name.'"]';
 }
 
 it('walks the §39 journey by keyboard, with focus visible at every control', function (): void {
@@ -70,48 +78,45 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     expect(focusedDescriptor($page))->toBe('Capture');
 
     // Start.
-    $page->keys('Start', 'Enter');
+    $page->keys(button('Start'), 'Enter');
 
     expect(focusedDescriptor($page))->toBe('Start');
     $page->assertPathIs('/focus')
         ->assertSee('Put the thing you need on the desk.');
 
-    // Done.
-    $page->keys('Done', 'Enter');
-    expect(focusedDescriptor($page))->toBe('Done');
+    // Done, by its key rather than by reaching the button.
+    $page->keys('h1[tabindex]', 'd');
 
     // The next step, and a progress line nobody wrote by hand.
     $page->assertSee('Open it.')
         ->assertSee('1 of 3 steps done.');
 
     // Distracted, and welcomed back.
-    $page->keys('I got distracted', 'Enter');
+    $page->keys(button('I got distracted'), 'Enter');
     expect(focusedDescriptor($page))->toBe('I got distracted');
     $page->assertSee('Welcome back.')
         ->assertSee('You were working on');
 
-    $page->keys('Continue', 'Enter');
-
-    expect(focusedDescriptor($page))->toBe('Continue');
+    $page->keys('h1[tabindex]', 'Enter');
     $page->assertSee('Open it.');
 
     // Paused, which is not a return.
-    $page->keys('Pause', 'Enter');
+    $page->keys(button('Pause'), 'Enter');
 
     expect(focusedDescriptor($page))->toBe('Pause');
     $page->assertSee('Paused.');
 
-    $page->keys('Continue', 'Enter');
+    $page->keys(button('Continue'), 'Enter');
 
     expect(focusedDescriptor($page))->toBe('Continue');
     $page->assertSee('Open it.');
 
-    $page->keys('Done', 'Enter');
+    $page->keys('h1[tabindex]', 'd');
     $page->assertSee('Write the first line.')
         ->assertSee('2 of 3 steps done.');
 
     // Finish.
-    $page->keys('Done', 'Enter');
+    $page->keys('h1[tabindex]', 'd');
     $page->assertPathIs('/home')
         ->assertSee('Nothing needs you right now.')
         ->assertNoJavaScriptErrors();

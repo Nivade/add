@@ -1,7 +1,8 @@
 import { captureCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { KeyHint } from '@/components/key-hint';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -11,17 +12,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { useShortcuts } from '@/hooks/use-shortcuts';
 import { useSingleFlight } from '@/hooks/use-single-flight';
 import { fieldClassName } from '@/lib/field';
 import { store } from '@/routes/captures';
-
-function isTyping(target: EventTarget | null): boolean {
-    return (
-        target instanceof HTMLElement &&
-        (target.isContentEditable ||
-            ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
-    );
-}
 
 function saveShortcut(): string {
     return typeof navigator !== 'undefined' &&
@@ -42,24 +36,7 @@ export function CaptureHost({ trigger }: { trigger?: ReactNode }) {
     const [open, setOpen] = useState(false);
     const singleFlight = useSingleFlight();
 
-    useEffect(() => {
-        function onKeyDown(event: globalThis.KeyboardEvent) {
-            if (event.key !== 'c' || event.metaKey || event.ctrlKey) {
-                return;
-            }
-
-            if (isTyping(event.target)) {
-                return;
-            }
-
-            event.preventDefault();
-            setOpen(true);
-        }
-
-        window.addEventListener('keydown', onKeyDown);
-
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, []);
+    useShortcuts({ c: () => setOpen(true) });
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -103,11 +80,14 @@ export function QuickCapture() {
     return (
         <CaptureHost
             trigger={
-                <Button variant="outline" size="sm" aria-label="Capture">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Capture"
+                    aria-keyshortcuts="c"
+                >
                     Capture
-                    <kbd className="text-muted-foreground text-small ml-1">
-                        c
-                    </kbd>
+                    <KeyHint>c</KeyHint>
                 </Button>
             }
         />

@@ -292,7 +292,7 @@ desktop                                          phone
   - One clock per page: move `useMinuteOfDay(from, live)` out of `day-strip.tsx` into `backend/resources/js/hooks/use-minute-of-day.ts`; `shell.tsx` and `focus-frame.tsx` call it once and pass `nowMinute` to both `DayStrip`s (column and row), which stop running their own interval.
   - `backend/resources/js/app.tsx`: `focus` and `finished` use `FocusFrame`.
   - Check: `/focus` shows no header; `c` still opens capture.
-- [ ] **4.2 A keyboard layer.** Invoke skills: `inertia-react-development`.
+- [x] **4.2 A keyboard layer.** Invoke skills: `inertia-react-development`.
   - New `backend/resources/js/hooks/use-shortcuts.ts`: `useShortcuts(map: Record<string, () => void>, enabled = true)`; ignores typing targets, modifier keys, and any open `[role="dialog"]` other than the one that registered it.
   - Keys: shell `c` capture, `o` overwhelmed; home `Enter` starts when `document.activeElement === document.body`; focus `d` Done, `s` Skip, `?` and `h` I'm stuck, `p` Pause, `r` I got distracted, `x` Stop; stuck dialog `1`–`8`; overwhelmed `Enter` start, `Escape` home; finished `Enter` start next, `Escape` home.
   - Every button with a key shows a `<kbd>` hint and carries `aria-keyshortcuts`.

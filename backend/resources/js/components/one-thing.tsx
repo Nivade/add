@@ -1,6 +1,6 @@
 import { focusCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
+import { NowButton } from '@/components/now-button';
 import focusRoutes from '@/routes/focus';
 
 /** The one thing every screen answers with. One type scale, so no screen shouts louder than another. */
@@ -24,9 +24,7 @@ export function StartStep({ stepId }: { stepId: string }) {
     return (
         <Form {...focusRoutes.start.form()}>
             <input type="hidden" name="step_id" value={stepId} />
-            <Button type="submit" variant="now" size="action">
-                {focusCopy.start}
-            </Button>
+            <NowButton type="submit">{focusCopy.start}</NowButton>
         </Form>
     );
 }
