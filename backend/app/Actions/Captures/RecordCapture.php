@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Captures;
 
-use App\Actions\Intentions\ConvertCaptureToIntention;
 use App\Enums\CaptureSource;
 use App\Models\Capture;
 use App\Models\User;
@@ -23,7 +22,7 @@ final class RecordCapture
             'source' => $source,
         ]);
 
-        ConvertCaptureToIntention::dispatch($capture);
+        SortCapture::dispatch($capture);
 
         return $capture;
     }

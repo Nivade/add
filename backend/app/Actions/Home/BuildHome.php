@@ -16,6 +16,7 @@ use App\Data\NeedsAttentionData;
 use App\Data\NextActionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
+use App\Enums\CaptureKind;
 use App\Enums\IntentionStatus;
 use App\Enums\NeedsAttentionKind;
 use App\Models\Capture;
@@ -48,7 +49,11 @@ final class BuildHome
     {
         $context ??= ResolutionContext::forUser($user);
         $openCommitments = Commitment::query()->where('user_id', $user->id)->open()->mostPressingFirst()->get();
-        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->first(fn (Commitment $commitment): bool => $commitment->isStandalone()));
+        $readingBack = $this->promisesReadingBack($user);
+        $needsAttention = BuildNeedsAttention::run($user, $context->now, $openCommitments->first(
+            fn (Commitment $commitment): bool => $commitment->isStandalone() && ! in_array($commitment->id, $readingBack, true),
+        ));
+        $sorted = BuildSortedCaptures::run($user);
         $rightNow = $this->resolver->resolve($user, $context);
         $session = $this->session($user);
         $reminder = $this->reminder($user, $context);
@@ -63,6 +68,10 @@ final class BuildHome
             needsAttention: $needsAttention,
             restCount: $this->restCount($user, $needsAttention, $session?->intention->id ?? $rightNow?->intention->id),
             sortingCount: $this->sortingCount($user, $context->now),
+            sorted: $sorted['items'],
+            sortedMore: $sorted['more'],
+            unsortedCount: $this->unsortedCount($user),
+            aiConsented: $user->hasConsentedToAi(),
             hasOpenCommitments: $openCommitments->isNotEmpty(),
             checkIn: ! $session instanceof ExecutionStateData && ! $reminder instanceof ReminderData ? DueCheckIn::run($user, $context->now) : null,
         );
@@ -80,11 +89,32 @@ final class BuildHome
         return max(0, $this->countOpenThings->handle($user) - count($needsAttention) - $shownAbove);
     }
 
+    /**
+     * An inferred promise still being read back is asked about there, not twice.
+     *
+     * @return list<string>
+     */
+    private function promisesReadingBack(User $user): array
+    {
+        return array_values(Capture::query()
+            ->where('user_id', $user->id)
+            ->awaitingReadBack()
+            ->where('kind', CaptureKind::Promise)
+            ->pluck('routed_id')
+            ->all());
+    }
+
+    private function unsortedCount(User $user): int
+    {
+        return Capture::query()->where('user_id', $user->id)->failedToSort()->count();
+    }
+
     private function sortingCount(User $user, CarbonImmutable $now): int
     {
         return Capture::query()
             ->where('user_id', $user->id)
             ->whereNull('processed_at')
+            ->whereNull('failed_at')
             ->where('created_at', '>=', $now->subHours(self::SORTING_WITHIN_HOURS))
             ->count();
     }

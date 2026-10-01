@@ -97,6 +97,8 @@ POST   /api/v1/devices                    an Expo push token for this person
 GET    /api/v1/home                       the same HomeData the web page renders
 POST   /api/v1/reminders/{id}/dismiss     the band, ended by the person
 POST   /api/v1/captures                   text in, capture out
+POST   /api/v1/captures/{id}/kind         the person changes what it was sorted into
+POST   /api/v1/captures/{id}/confirm      the person says the sort was right
 POST   /api/v1/intentions                 from a capture or free text
 GET    /api/v1/next-action                the one recommendation + why
 POST   /api/v1/sessions                   start on a step

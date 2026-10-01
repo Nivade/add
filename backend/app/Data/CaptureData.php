@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Enums\CaptureKind;
 use App\Enums\CaptureSource;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -19,6 +20,8 @@ class CaptureData extends Data
         public string $body,
         public CaptureSource $source,
         public ?string $intentionId,
+        public ?CaptureKind $kind,
+        public ?string $kindConfirmedAt,
         public string $createdAt,
     ) {}
 }

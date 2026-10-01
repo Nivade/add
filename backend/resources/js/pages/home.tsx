@@ -16,12 +16,13 @@ import {
     returnCopy,
     rightNowMeta,
     sortingLine,
+    unsortedLine,
     waitingForResponses,
 } from '@add/shared';
 import { Form, Head, Link, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { BackwardsPlan } from '@/components/backwards-plan';
-import { captureFieldClassName } from '@/components/capture-dialog';
+import { fieldClassName } from '@/lib/field';
 import { CheckIn } from '@/components/check-in';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
@@ -30,9 +31,12 @@ import { NotHere } from '@/components/not-here';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
 import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
+import { SortedBand } from '@/components/sorted-band';
+import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { focus, overwhelmed } from '@/routes';
+import ai from '@/routes/ai';
 import calendarEvents from '@/routes/calendar-events';
 import commitments from '@/routes/commitments';
 import intentions from '@/routes/intentions';
@@ -67,10 +71,7 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
                             aria-describedby={
                                 errors.answer ? `${fieldId}-error` : undefined
                             }
-                            className={cn(
-                                captureFieldClassName,
-                                'min-w-0 flex-1',
-                            )}
+                            className={cn(fieldClassName, 'min-w-0 flex-1')}
                         />
                         <Button
                             type="submit"
@@ -139,7 +140,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 min={1}
                                 max={365}
                                 defaultValue={7}
-                                className={cn(captureFieldClassName, 'w-20')}
+                                className={cn(fieldClassName, 'w-20')}
                             />
                             <span className="text-muted-foreground">days</span>
                             <Button type="submit" variant="quiet">
@@ -208,7 +209,12 @@ export default function Home({ home: data }: { home: HomeData }) {
         needsAttention,
         restCount,
         sortingCount,
+        sorted,
+        sortedMore,
+        unsortedCount,
+        aiConsented,
     } = data;
+    const unsorted = unsortedLine(unsortedCount, aiConsented);
     const { start, stop } = usePoll(
         3000,
         { only: ['home'] },
@@ -239,6 +245,20 @@ export default function Home({ home: data }: { home: HomeData }) {
                     {sortingCount > 0 && sortingLine(sortingCount)}
                 </p>
 
+                {unsortedCount > 0 && (
+                    <p role="status" className="text-muted-foreground">
+                        {unsorted.line}
+                        {unsorted.action && (
+                            <>
+                                {' '}
+                                <TextLink href={ai.edit()}>
+                                    {unsorted.action}
+                                </TextLink>
+                            </>
+                        )}
+                    </p>
+                )}
+
                 {!data.session && rightNow && rightNow.why.length > 0 && (
                     <Band label={homeBands.why}>
                         <ul className="space-y-1">
@@ -261,6 +281,8 @@ export default function Home({ home: data }: { home: HomeData }) {
                         </div>
                     </Band>
                 )}
+
+                <SortedBand sorted={sorted} more={sortedMore} />
 
                 {justFinished && <JustFinished finished={justFinished} />}
 
@@ -323,7 +345,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     placeholder={remindAfterCopy.question}
                                     aria-label={remindAfterCopy.question}
                                     className={cn(
-                                        captureFieldClassName,
+                                        fieldClassName,
                                         'w-auto min-w-0 flex-1',
                                     )}
                                 />
@@ -332,10 +354,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     name="offset_minutes"
                                     defaultValue={30}
                                     aria-label="Minutes after"
-                                    className={cn(
-                                        captureFieldClassName,
-                                        'w-20',
-                                    )}
+                                    className={cn(fieldClassName, 'w-20')}
                                 />
                                 <Button type="submit" variant="quiet">
                                     {remindAfterCopy.action}

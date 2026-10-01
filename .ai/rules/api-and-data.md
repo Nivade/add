@@ -53,6 +53,11 @@ A controller overrides locally only when the status depends on what happened:
 `StoreSessionController` answers 201 or 200 on `wasRecentlyCreated`, because
 starting a session that is already running creates nothing.
 
+It also overrides when the same Data class answers a create elsewhere, so the
+class cannot carry one status: `CaptureData` is 201 from storing a capture and
+200 from changing or confirming its kind, and `CommitmentData` is 201 from a
+promotion and 200 from its respond route.
+
 `GET /api/v1/next-action` and `GET /api/v1/sessions/current` return `null` in a
 200, never a 404. A cold launch reads both, and a 404 there reads as an error to
 every client.

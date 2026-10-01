@@ -23,12 +23,14 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'ai_consent' => ['accepted'],
         ])->validate();
 
-        return User::query()->create([
+        return User::query()->forceCreate([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'ai_consented_at' => now(),
         ]);
     }
 }

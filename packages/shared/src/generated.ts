@@ -17,8 +17,11 @@ id: string,
 body: string,
 source: CaptureSource,
 intentionId: string | null,
+kind: CaptureKind | null,
+kindConfirmedAt: string | null,
 createdAt: string,
 };
+export type CaptureKind = 'thought' | 'waiting_for' | 'promise' | 'reminder' | 'not_for_you';
 export type CaptureSource = 'text' | 'voice' | 'photo' | 'document' | 'email' | 'url';
 export type CheckInAnswer = 'less' | 'same' | 'more' | 'not_now';
 export type CheckInTopic = 'overwhelm' | 'remembering';
@@ -86,15 +89,12 @@ justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
 sortingCount: number,
+sorted: SortedCaptureData[],
+sortedMore: number,
+unsortedCount: number,
+aiConsented: boolean,
 hasOpenCommitments: boolean,
 checkIn: CheckInTopic | null,
-};
-export type IngestionClassificationData = {
-actionable: boolean,
-title: string | null,
-why: string | null,
-deadlineAt: string | null,
-estimatedSeconds: number | null,
 };
 export type IntentionData = {
 id: string,
@@ -159,6 +159,12 @@ title: string,
 lines: string[],
 };
 export type SessionOutcome = 'continued' | 'completed' | 'stopped';
+export type SortedCaptureData = {
+id: string,
+excerpt: string,
+kind: CaptureKind,
+detail: string | null,
+};
 export type StepData = {
 id: string,
 intentionId: string,

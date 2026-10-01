@@ -415,10 +415,6 @@ export default function Home() {
           onPress={() => router.push('/capture')}
         />
         <Button
-          label="Something else"
-          onPress={() => router.push('/add')}
-        />
-        <Button
           label="I'm overwhelmed"
           onPress={() => router.push('/overwhelmed')}
         />

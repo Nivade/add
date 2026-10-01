@@ -15,7 +15,6 @@ import type {
   ExecutionStateData,
   FutureReminderData,
   HomeData,
-  IngestionClassificationData,
   IntentionData,
   NextActionData,
   OverwhelmedData,
@@ -136,13 +135,6 @@ export const api = {
       body: { step_id: stepId, reason },
     }),
 
-  createWaitingFor: (token: string, subject: string, note: string) =>
-    request<WaitingForData>('/waiting-fors', {
-      method: 'POST',
-      token,
-      body: { subject, note },
-    }),
-
   respondToWaitingFor: (
     token: string,
     waitingForId: string,
@@ -159,13 +151,6 @@ export const api = {
       method: 'POST',
       token,
       body: { response },
-    }),
-
-  createCommitment: (token: string, description: string) =>
-    request<CommitmentData>('/commitments', {
-      method: 'POST',
-      token,
-      body: { description },
     }),
 
   commitments: (token: string) =>
@@ -208,13 +193,6 @@ export const api = {
       body: { every_days: everyDays },
     }),
 
-  remindFutureSelf: (token: string, text: string) =>
-    request<FutureReminderData>('/future-reminders', {
-      method: 'POST',
-      token,
-      body: { text },
-    }),
-
   remindAfterEvent: (
     token: string,
     calendarEventId: string,
@@ -230,10 +208,4 @@ export const api = {
       },
     ),
 
-  classifyPasted: (token: string, text: string) =>
-    request<IngestionClassificationData>('/ingestion/classify', {
-      method: 'POST',
-      token,
-      body: { text },
-    }),
 };

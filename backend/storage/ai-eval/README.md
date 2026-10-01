@@ -18,11 +18,12 @@ corpus does not add a second definition of what a good answer looks like.
 ## Clarifying questions
 
 `capture-corpus.json` — captures that need a clarifying question and are not
-the prompt's examples, the prompt's two examples marked `-control`, and three
-that need none. `ai:eval:capture` (`npm run artisan -- ai:eval:capture`) scores
-whether a question was asked when one was expected and whether it is one of the
-prompt's example questions, and writes `capture-baseline.json`. Same live key,
-same cost, same rule: never in CI.
+the prompt's examples, the prompt's two examples marked `-control`, some that
+need none, and at least two per kind, each with the kind it expects.
+`ai:eval:capture` (`npm run artisan -- ai:eval:capture`) scores whether a
+question was asked when one was expected, whether it is one of the prompt's
+example questions, and whether the kind matches, and writes
+`capture-baseline.json`. Same live key, same cost, same rule: never in CI.
 
 ## Known weak spots
 

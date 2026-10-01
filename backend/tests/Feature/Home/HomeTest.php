@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\Reminders\SendDueReminders;
 use App\Actions\Sessions\StartSession;
+use App\Enums\CaptureKind;
 use App\Models\CalendarEvent;
 use App\Models\Capture;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
+use App\Models\FutureReminder;
 use App\Models\Intention;
 use App\Models\Step;
 use App\Models\User;
@@ -123,6 +125,81 @@ it('counts the captures still being sorted, and only those', function (): void {
         ->get(route('home'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.sortingCount', 2));
+});
+
+it('reads back what it sorted and has not heard about yet, three at most, with the rest counted', function (): void {
+    $user = User::factory()->create();
+
+    foreach (range(1, 4) as $minutesAgo) {
+        Capture::factory()->for($user)->create([
+            'body' => "waiting for John, {$minutesAgo}",
+            'kind' => CaptureKind::WaitingFor,
+            'routed_id' => WaitingFor::factory()->for($user)->create()->id,
+            'processed_at' => now(),
+            'created_at' => now()->subMinutes($minutesAgo),
+        ]);
+    }
+
+    Capture::factory()->for($user)->create(['kind' => CaptureKind::Thought, 'processed_at' => now()]);
+    Capture::factory()->for($user)->create(['kind' => CaptureKind::Promise, 'processed_at' => now(), 'kind_confirmed_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.sorted', 3)
+            ->where('home.sorted.0.excerpt', 'waiting for John, 1')
+            ->where('home.sorted.0.kind', 'waiting_for')
+            ->where('home.sorted.0.detail', 'John')
+            ->where('home.sortedMore', 1)
+        );
+});
+
+it('says when a sorted reminder will come, on the clock the person reads', function (): void {
+    $this->travelTo(CarbonImmutable::parse('2026-09-16 10:00:00', 'UTC'));
+    $user = User::factory()->create(['timezone' => 'Europe/Amsterdam']);
+    $reminder = FutureReminder::factory()->for($user)->create(['trigger_at' => CarbonImmutable::parse('2026-09-17 07:00:00', 'UTC')]);
+    Capture::factory()->for($user)->create(['kind' => CaptureKind::Reminder, 'routed_id' => $reminder->id, 'processed_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.sorted.0.detail', 'tomorrow at 09:00'));
+});
+
+it('asks about an inferred promise in its read-back, not in Needs you as well', function (): void {
+    $user = User::factory()->create();
+    $commitment = Commitment::factory()->inferred()->for($user)->create();
+    $capture = Capture::factory()->for($user)->create(['kind' => CaptureKind::Promise, 'routed_id' => $commitment->id, 'processed_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.sorted', 1)
+            ->has('home.needsAttention', 0)
+        );
+
+    $capture->update(['kind_confirmed_at' => now()]);
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('home.sorted', 0)
+            ->where('home.needsAttention.0.kind', 'commitment')
+        );
+});
+
+it('counts a capture that could not be sorted as unsorted, not as still sorting', function (): void {
+    $user = User::factory()->create();
+    Capture::factory()->for($user)->create(['failed_at' => now()]);
+    Capture::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('home.unsortedCount', 1)
+            ->where('home.sortingCount', 1)
+            ->where('home.aiConsented', true)
+        );
 });
 
 it('answers the same count on home and when overwhelmed', function (): void {

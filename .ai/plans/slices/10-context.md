@@ -196,7 +196,7 @@ day, and `model:prune` runs daily.
     `'place' => null`, `'place' => null` and `'place' => 'computer'`.
   - **Tests** in `backend/tests/Feature/Ai/ParserTest.php`: a place is parsed;
     an absent place is null; an unknown place is rejected.
-    `backend/tests/Feature/Captures/CaptureToIntentionTest.php`: a decomposed
+    `backend/tests/Feature/Captures/SortCaptureTest.php`: a decomposed
     step persists its place. `backend/tests/Feature/Execution/StuckTest.php`:
     split children carry the parent's place even when the fake answers a
     different one.

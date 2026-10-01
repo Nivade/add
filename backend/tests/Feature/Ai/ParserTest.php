@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CaptureKind;
 use App\Support\Ai\Parsers\DecomposeParser;
 use App\Support\Ai\Parsers\ParseCaptureParser;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
@@ -42,6 +43,18 @@ it('keeps the offset a model stated rather than reading it again', function (): 
     expect($parsed->deadlineAt?->utc()->toDateTimeString())->toBe('2026-09-19 09:00:00');
 });
 
+it('reads the kind a capture was sorted into, and who it waits on', function (string $kind, ?string $waitingOn): void {
+    $parsed = (new ParseCaptureParser)->parse(parsedCapture(['kind' => $kind, 'waiting_on' => $waitingOn]), 'UTC');
+
+    expect($parsed->kind)->toBe(CaptureKind::from($kind))
+        ->and($parsed->waitingOn)->toBe($waitingOn);
+})->with([
+    'thought' => ['thought', null],
+    'waiting for' => ['waiting_for', 'John'],
+    'promise' => ['promise', null],
+    'reminder' => ['reminder', null],
+]);
+
 it('treats an absent deadline as no deadline rather than an error', function (mixed $value): void {
     expect((new ParseCaptureParser)->parse(parsedCapture(['deadline_at' => $value]), 'UTC')->deadlineAt)->toBeNull();
 })->with([null, '', '   ', 'null']);
@@ -54,6 +67,9 @@ it('rejects a capture answer the application cannot use', function (array $paylo
     'no clarifying_question' => [['title' => 'Clean the apartment']],
     'non-string clarifying_question' => [['title' => 'Clean the apartment', 'clarifying_question' => true]],
     'non-string why' => [['title' => 'Clean the apartment', 'why' => ['a'], 'clarifying_question' => null]],
+    'no kind' => [['title' => 'Clean the apartment', 'clarifying_question' => null]],
+    'unknown kind' => [parsedCapture(['kind' => 'errand'])],
+    'not-for-you kind' => [parsedCapture(['kind' => 'not_for_you'])],
     'unreadable deadline' => [['title' => 'Clean the apartment', 'deadline_at' => 'whenever', 'clarifying_question' => null]],
 ]);
 

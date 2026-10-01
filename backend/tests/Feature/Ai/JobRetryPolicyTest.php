@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Intentions\ConvertCaptureToIntention;
+use App\Actions\Captures\SortCapture;
 use App\Actions\Intentions\DecomposeIntention;
 use App\Actions\Steps\SplitStep;
 use App\Enums\StepStatus;
@@ -44,10 +44,10 @@ it('leaves a decomposition job for the worker to retry on an invalid AI answer',
     $job->assertNotFailed();
 });
 
-it('fails an intention conversion job immediately when the AI layer is unavailable', function (): void {
+it('fails a capture sorting job immediately when the AI layer is unavailable', function (): void {
     $capture = Capture::factory()->for(User::factory())->create();
 
-    $job = ConvertCaptureToIntention::makeJob($capture);
+    $job = SortCapture::makeJob($capture);
     runQueuedJob($job);
 
     $job->assertFailed();

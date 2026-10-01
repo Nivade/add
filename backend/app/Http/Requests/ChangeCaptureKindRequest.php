@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Enums\CaptureKind;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-final class StoreFutureReminderRequest extends FormRequest
+final class ChangeCaptureKindRequest extends FormRequest
 {
     /** @return array<string, ValidationRule|array<mixed>|string> */
     public function rules(): array
     {
         return [
-            'text' => ['required', 'string', 'max:500'],
+            'kind' => ['required', Rule::enum(CaptureKind::class)->except([CaptureKind::NotForYou])],
         ];
     }
 
-    public function text(): string
+    public function kind(): CaptureKind
     {
-        return $this->string('text')->toString();
+        return $this->enum('kind', CaptureKind::class);
     }
 }

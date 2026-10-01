@@ -1,5 +1,6 @@
 import { Form } from '@inertiajs/react';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { useSingleFlight } from '@/hooks/use-single-flight';
 import { cn } from '@/lib/utils';
 import type { RouteFormDefinition } from '@/wayfinder';
 
@@ -10,17 +11,24 @@ export const quietLineClassName = cn(buttonVariants({ variant: 'quiet' }));
 export function Responses({
     action,
     responses,
+    name = 'response',
+    id,
 }: {
     action: RouteFormDefinition<'post'>;
     responses: { value: string; label: string }[];
+    name?: string;
+    id?: string;
 }) {
+    const singleFlight = useSingleFlight();
+
     return (
-        <div className="flex flex-wrap gap-x-6">
+        <div id={id} className="flex flex-wrap gap-x-6">
             {responses.map(({ value, label }) => (
                 <Form
                     key={value}
                     {...action}
-                    transform={(data) => ({ ...data, response: value })}
+                    {...singleFlight}
+                    transform={(data) => ({ ...data, [name]: value })}
                     options={{ preserveScroll: true }}
                 >
                     <Button type="submit" variant="quiet">

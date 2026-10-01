@@ -16,7 +16,7 @@ use Nvade\AiToolkit\Contracts\AiProvider;
 use Nvade\AiToolkit\Exceptions\AiResponseInvalid;
 use Nvade\AiToolkit\Exceptions\AiResponseTruncated;
 
-/** Scores whether the live model asks when it should, and whether what it asks is the prompt's own example. */
+/** Scores whether the live model asks when it should, whether what it asks is the prompt's own example, and which kind it sorts into. */
 final class RunCaptureEval
 {
     use AsCommand;
@@ -25,11 +25,11 @@ final class RunCaptureEval
 
     public string $commandSignature = 'ai:eval:capture';
 
-    public string $commandDescription = 'Score the clarifying questions the live capture parser asks against the corpus in storage/ai-eval.';
+    public string $commandDescription = 'Score the clarifying questions and kinds the live capture parser answers against the corpus in storage/ai-eval.';
 
     public function __construct(private readonly AiProvider $provider, private readonly ParseCaptureParser $parser) {}
 
-    /** @return list<array{id: string, expects_question: bool, question: ?string, copied: bool, invalid: ?string}> */
+    /** @return list<array{id: string, expects_question: bool, question: ?string, copied: bool, expects_kind: string, kind: ?string, kind_matches: bool, invalid: ?string}> */
     public function handle(): array
     {
         $scored = array_map($this->score(...), $this->corpus());
@@ -47,47 +47,56 @@ final class RunCaptureEval
             return Command::FAILURE;
         }
 
-        $command->table(['id', 'expected a question', 'asked', 'copied from the prompt'], array_map(fn (array $result): array => [
+        $command->table(['id', 'expected a question', 'asked', 'copied from the prompt', 'expected kind', 'kind', 'kind matches'], array_map(fn (array $result): array => [
             $result['id'],
             $result['expects_question'] ? 'yes' : 'no',
             $result['invalid'] !== null ? 'invalid response: '.$result['invalid'] : $result['question'] ?? '—',
             $result['copied'] ? 'yes' : 'no',
+            $result['expects_kind'],
+            $result['kind'] ?? '—',
+            $result['kind_matches'] ? 'yes' : 'no',
         ], $this->handle()));
 
         return Command::SUCCESS;
     }
 
-    /** @return list<array{id: string, capture: string, expects_question: bool}> */
+    /** @return list<array{id: string, capture: string, expects_question: bool, expects_kind: string}> */
     private function corpus(): array
     {
-        /** @var list<array{id: string, capture: string, expects_question: bool}> */
+        /** @var list<array{id: string, capture: string, expects_question: bool, expects_kind: string}> */
         return $this->readCorpus('capture-corpus.json');
     }
 
     /**
-     * @param  array{id: string, capture: string, expects_question: bool}  $entry
-     * @return array{id: string, expects_question: bool, question: ?string, copied: bool, invalid: ?string}
+     * @param  array{id: string, capture: string, expects_question: bool, expects_kind: string}  $entry
+     * @return array{id: string, expects_question: bool, question: ?string, copied: bool, expects_kind: string, kind: ?string, kind_matches: bool, invalid: ?string}
      */
     private function score(array $entry): array
     {
         $now = CarbonImmutable::now('Europe/Amsterdam');
-        $question = null;
+        $parsed = null;
         $invalid = null;
 
         try {
-            $question = $this->parser->parse(
+            $parsed = $this->parser->parse(
                 $this->provider->respond(AiRequests::parseCapture(null, $entry['capture'], $now))->payload,
                 $now->getTimezone()->getName(),
-            )->clarifyingQuestion;
+            );
         } catch (AiResponseInvalid|AiResponseTruncated $aiResponseInvalid) {
             $invalid = $aiResponseInvalid->getMessage();
         }
+
+        $question = $parsed?->clarifyingQuestion;
+        $kind = $parsed?->kind->value;
 
         return [
             'id' => $entry['id'],
             'expects_question' => $entry['expects_question'],
             'question' => $question,
             'copied' => ParseCaptureExamples::isCopiedQuestion($question),
+            'expects_kind' => $entry['expects_kind'],
+            'kind' => $kind,
+            'kind_matches' => $kind === $entry['expects_kind'],
             'invalid' => $invalid,
         ];
     }

@@ -238,6 +238,8 @@ function parsedCapture(array $overrides = []): array
         'why' => null,
         'deadline_at' => null,
         'clarifying_question' => null,
+        'kind' => 'thought',
+        'waiting_on' => null,
         ...$overrides,
     ];
 }

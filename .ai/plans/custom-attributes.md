@@ -81,13 +81,13 @@ the same `render()`; `AiUnavailable` has its own closure in `bootstrap/app.php`.
   `render()`.
 - Tests already cover the behaviour and must stay green unchanged:
   `tests/Feature/Execution/ExecutionEndpointTest.php`, `tests/Feature/Commitments/CommitmentTest.php`,
-  `tests/Feature/Intentions/RecurringIntentionTest.php`, `tests/Feature/Ingestion/ClassifyPastedTextTest.php`.
+  `tests/Feature/Intentions/RecurringIntentionTest.php`, and the pasted-text endpoint test (deleted with its endpoint by the UX overhaul).
   Add a web (non-JSON) case only if none exists.
 - Skills: `ai-layer-changes` (for `AiUnavailable`), `tdd`.
 
 ## 3. `#[FailOn]` — a retry policy on the AI jobs
 
-`DecomposeIntention`, `ConvertCaptureToIntention` and `SplitStep` run queued with no policy, so the
+`DecomposeIntention`, `SortCapture` and `SplitStep` run queued with no policy, so the
 worker default decides. `AiRateLimited` and `AiProviderRequestFailed` are transient;
 `AiUnavailable` (consent off, no key) never heals by retrying.
 

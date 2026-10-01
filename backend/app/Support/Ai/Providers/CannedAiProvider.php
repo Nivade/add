@@ -6,6 +6,7 @@ namespace App\Support\Ai\Providers;
 
 use App\Attributes\Driver;
 use App\Enums\Ai\AiOperation;
+use App\Enums\CaptureKind;
 use App\Support\Concerns\NamedByDriver;
 use Illuminate\Support\Str;
 use Nvade\AiToolkit\AiRequest;
@@ -43,12 +44,34 @@ final class CannedAiProvider implements AiProvider
         // The message opens with the day and zone, and the person's own words follow the blank line.
         $title = Str::of($user)->after("\n\n")->trim()->before("\n")->trim()->limit(80)->value();
 
+        $kind = $this->kindOf($title);
+        $waitingOn = null;
+
+        // "waiting for John to send the contract" waits on John, for the contract.
+        if ($kind === CaptureKind::WaitingFor && preg_match('/^waiting (?:for|on) (.+?)(?: to | about )(.+)$/i', $title, $matches) === 1) {
+            [, $waitingOn, $title] = $matches;
+        }
+
         return [
+            'kind' => $kind->value,
             'title' => $title === '' ? 'Untitled' : $title,
             'why' => null,
             'deadline_at' => null,
             'clarifying_question' => null,
+            'waiting_on' => $waitingOn,
         ];
+    }
+
+    private function kindOf(string $capture): CaptureKind
+    {
+        $opening = Str::lower($capture);
+
+        return match (true) {
+            Str::startsWith($opening, ['waiting for', 'waiting on']) => CaptureKind::WaitingFor,
+            Str::startsWith($opening, ["i'll", 'i will']) => CaptureKind::Promise,
+            Str::startsWith($opening, 'remind me') => CaptureKind::Reminder,
+            default => CaptureKind::Thought,
+        };
     }
 
     /**
