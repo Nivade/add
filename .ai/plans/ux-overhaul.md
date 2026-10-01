@@ -359,7 +359,7 @@ desktop                                          phone
   - `ExecutionStateData` gains `string $seenEventId`. Web `focus.tsx` posts it as a hidden `seen_event_id`. Home's Continue for a returning or paused session becomes a `OneTapForm` posting `resume` with it (today it only links to focus, so focus says "Welcome back." a second time), and `ResumeFocusController` redirects to `focus` rather than `back()`; the promise form posts `step_id`. Mobile `mobile/src/api/endpoints.ts` sends `seen_event_id` for pause, resume, distracted and stop, and `step_id` for commitment.
   - Tests in `SessionTest.php` and `ExecutionEndpointTest.php`: a second Pause, Stop and I got distracted with the old event id is refused (API 409, web redirect, nothing recorded); a missing `seen_event_id` is 422; `ReportStuck` with a stop resolution still stops.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution tests/Feature/Commitments` and `npm run typecheck` pass.
-- [ ] **4.11 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
+- [x] **4.11 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
 
 ## Phase 4 as built, 2026-10-01
 
