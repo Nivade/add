@@ -24,9 +24,15 @@ final class BuildSortedCaptures
     /** @return array{items: list<SortedCaptureData>, more: int} */
     public function handle(User $user): array
     {
-        $total = Capture::query()->where('user_id', $user->id)->awaitingReadBack()->count();
-        $captures = Capture::query()->where('user_id', $user->id)->awaitingReadBack()->latest()->limit(self::SHOWN)->get();
+        $captures = Capture::query()->where('user_id', $user->id)->awaitingReadBack()
+            ->select(['id', 'body', 'kind', 'routed_id', 'created_at'])
+            ->latest()->limit(self::SHOWN)->get();
 
+        if ($captures->isEmpty()) {
+            return ['items' => [], 'more' => 0];
+        }
+
+        $total = $captures->count() < self::SHOWN ? $captures->count() : Capture::query()->where('user_id', $user->id)->awaitingReadBack()->count();
         $subjects = WaitingFor::query()->whereKey($this->routedIds($captures, CaptureKind::WaitingFor))->pluck('subject', 'id');
         $triggers = FutureReminder::query()->whereKey($this->routedIds($captures, CaptureKind::Reminder))->get()->keyBy('id');
         $now = $user->now();

@@ -1,8 +1,7 @@
 import { Form } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { useRef } from 'react';
+import { useSingleFlight } from '@/hooks/use-single-flight';
 
-/** Drops a second submit while the first is in flight; `disabled` would drop keyboard focus mid-request. */
 export function OneTapForm({
     form,
     stepId,
@@ -12,19 +11,10 @@ export function OneTapForm({
     stepId?: string;
     children: (processing: boolean) => ReactNode;
 }) {
-    const inFlight = useRef(false);
+    const singleFlight = useSingleFlight();
 
     return (
-        <Form
-            {...form}
-            onBefore={() => !inFlight.current}
-            onStart={() => {
-                inFlight.current = true;
-            }}
-            onFinish={() => {
-                inFlight.current = false;
-            }}
-        >
+        <Form {...form} {...singleFlight}>
             {({ processing }) => (
                 <>
                     {stepId && (

@@ -1,4 +1,4 @@
-import type { CaptureKind, SortedCaptureData } from '@add/shared';
+import type { SortedCaptureData } from '@add/shared';
 import {
     captureKindChoices,
     homeBands,
@@ -9,34 +9,20 @@ import {
 import { Form } from '@inertiajs/react';
 import { useId, useState } from 'react';
 import { Band } from '@/components/band';
+import { Responses } from '@/components/responses';
 import { Button } from '@/components/ui/button';
+import { useSingleFlight } from '@/hooks/use-single-flight';
 import captures from '@/routes/captures';
 
-function ChangeKind({
-    id,
-    kind,
-    label,
-}: {
-    id: string;
-    kind: CaptureKind;
-    label: string;
-}) {
+function Confirm({ id }: { id: string }) {
+    const singleFlight = useSingleFlight();
+
     return (
         <Form
-            {...captures.kind.form(id)}
-            transform={(data) => ({ ...data, kind })}
+            {...captures.confirm.form(id)}
+            {...singleFlight}
             options={{ preserveScroll: true }}
         >
-            <Button type="submit" variant="quiet">
-                {label}
-            </Button>
-        </Form>
-    );
-}
-
-function Confirm({ id }: { id: string }) {
-    return (
-        <Form {...captures.confirm.form(id)} options={{ preserveScroll: true }}>
             <Button type="submit" variant="quiet">
                 {sortedCopy.right}
             </Button>
@@ -47,6 +33,7 @@ function Confirm({ id }: { id: string }) {
 function SortedItem({ item }: { item: SortedCaptureData }) {
     const [choosing, setChoosing] = useState(false);
     const choicesId = useId();
+    const notForYou = item.kind === 'not_for_you';
 
     return (
         <li className="space-y-2">
@@ -55,15 +42,17 @@ function SortedItem({ item }: { item: SortedCaptureData }) {
                 {sortedLine(item.kind, item.detail)}
             </p>
             <div className="flex flex-wrap gap-x-6">
-                {item.kind === 'not_for_you' && (
-                    <ChangeKind
-                        id={item.id}
-                        kind="thought"
-                        label={sortedCopy.keep}
+                {notForYou && (
+                    <Responses
+                        action={captures.kind.form(item.id)}
+                        name="kind"
+                        responses={[
+                            { value: 'thought', label: sortedCopy.keep },
+                        ]}
                     />
                 )}
                 <Confirm id={item.id} />
-                {item.kind !== 'not_for_you' && (
+                {!notForYou && (
                     <Button
                         type="button"
                         variant="quiet"
@@ -76,18 +65,14 @@ function SortedItem({ item }: { item: SortedCaptureData }) {
                 )}
             </div>
             {choosing && (
-                <div id={choicesId} className="flex flex-wrap gap-x-6">
-                    {captureKindChoices
-                        .filter(({ value }) => value !== item.kind)
-                        .map(({ value, label }) => (
-                            <ChangeKind
-                                key={value}
-                                id={item.id}
-                                kind={value}
-                                label={label}
-                            />
-                        ))}
-                </div>
+                <Responses
+                    id={choicesId}
+                    action={captures.kind.form(item.id)}
+                    name="kind"
+                    responses={captureKindChoices.filter(
+                        ({ value }) => value !== item.kind,
+                    )}
+                />
             )}
         </li>
     );

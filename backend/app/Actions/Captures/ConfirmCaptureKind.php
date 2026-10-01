@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Captures;
 
 use App\Actions\Commitments\RespondToCommitment;
-use App\Enums\CaptureKind;
 use App\Enums\CommitmentResponse;
 use App\Models\Capture;
 use App\Models\Commitment;
@@ -20,10 +19,10 @@ final class ConfirmCaptureKind
     public function handle(Capture $capture): Capture
     {
         return DB::transaction(function () use ($capture): Capture {
-            $commitment = $capture->kind === CaptureKind::Promise ? Commitment::query()->find($capture->routed_id) : null;
+            $routed = $capture->routed();
 
-            if ($commitment?->awaiting_confirmation === true) {
-                RespondToCommitment::run($commitment, CommitmentResponse::Confirm);
+            if ($routed instanceof Commitment && $routed->awaiting_confirmation) {
+                RespondToCommitment::run($routed, CommitmentResponse::Confirm);
             }
 
             $capture->update(['kind_confirmed_at' => now()]);

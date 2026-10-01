@@ -22,7 +22,7 @@ import {
 import { Form, Head, Link, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { BackwardsPlan } from '@/components/backwards-plan';
-import { captureFieldClassName } from '@/components/capture-dialog';
+import { fieldClassName } from '@/lib/field';
 import { CheckIn } from '@/components/check-in';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
@@ -71,10 +71,7 @@ function Clarify({ item }: { item: NeedsAttentionData }) {
                             aria-describedby={
                                 errors.answer ? `${fieldId}-error` : undefined
                             }
-                            className={cn(
-                                captureFieldClassName,
-                                'min-w-0 flex-1',
-                            )}
+                            className={cn(fieldClassName, 'min-w-0 flex-1')}
                         />
                         <Button
                             type="submit"
@@ -143,7 +140,7 @@ function JustFinished({ finished }: { finished: JustFinishedData }) {
                                 min={1}
                                 max={365}
                                 defaultValue={7}
-                                className={cn(captureFieldClassName, 'w-20')}
+                                className={cn(fieldClassName, 'w-20')}
                             />
                             <span className="text-muted-foreground">days</span>
                             <Button type="submit" variant="quiet">
@@ -348,7 +345,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     placeholder={remindAfterCopy.question}
                                     aria-label={remindAfterCopy.question}
                                     className={cn(
-                                        captureFieldClassName,
+                                        fieldClassName,
                                         'w-auto min-w-0 flex-1',
                                     )}
                                 />
@@ -357,10 +354,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                                     name="offset_minutes"
                                     defaultValue={30}
                                     aria-label="Minutes after"
-                                    className={cn(
-                                        captureFieldClassName,
-                                        'w-20',
-                                    )}
+                                    className={cn(fieldClassName, 'w-20')}
                                 />
                                 <Button type="submit" variant="quiet">
                                     {remindAfterCopy.action}

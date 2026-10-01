@@ -90,6 +90,13 @@ class Capture extends Model
             ->whereNull('kind_confirmed_at');
     }
 
+    /** @param  Builder<static>  $query */
+    #[Scope]
+    protected function failedToSort(Builder $query): void
+    {
+        $query->whereNull('processed_at')->whereNotNull('failed_at');
+    }
+
     protected function casts(): array
     {
         return [

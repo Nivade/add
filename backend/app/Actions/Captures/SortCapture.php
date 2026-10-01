@@ -21,7 +21,6 @@ use App\Models\Intention;
 use App\Models\User;
 use App\Support\Ai\AiRequests;
 use App\Support\Ai\Parsers\ParseCaptureParser;
-use Carbon\CarbonImmutable;
 use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\DB;
@@ -110,7 +109,7 @@ final class SortCapture
     /** The extractor answers first and its answer wins; the model is asked only about what it left behind. */
     private function parse(Capture $capture, User $user): ParsedCaptureData
     {
-        $now = CarbonImmutable::now($user->timezone);
+        $now = $user->now();
         $extracted = $this->extractor->extract($capture->body, $now);
 
         $parsed = $this->parser->parse(

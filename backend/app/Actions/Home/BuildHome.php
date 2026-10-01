@@ -100,14 +100,13 @@ final class BuildHome
             ->where('user_id', $user->id)
             ->awaitingReadBack()
             ->where('kind', CaptureKind::Promise)
-            ->whereNotNull('routed_id')
             ->pluck('routed_id')
             ->all());
     }
 
     private function unsortedCount(User $user): int
     {
-        return Capture::query()->where('user_id', $user->id)->whereNull('processed_at')->whereNotNull('failed_at')->count();
+        return Capture::query()->where('user_id', $user->id)->failedToSort()->count();
     }
 
     private function sortingCount(User $user, CarbonImmutable $now): int

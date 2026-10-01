@@ -30,13 +30,12 @@ final class UpdateAiConsent
     /** Only what failed: a capture still in its first job must not get a second one. */
     private function sortWhatFailed(User $user): void
     {
-        Capture::query()
-            ->where('user_id', $user->id)
-            ->whereNull('processed_at')
-            ->whereNotNull('failed_at')
-            ->each(function (Capture $capture): void {
-                $capture->update(['failed_at' => null]);
-                SortCapture::dispatch($capture);
-            });
+        $failed = Capture::query()->where('user_id', $user->id)->failedToSort()->get();
+
+        Capture::query()->whereKey($failed->modelKeys())->update(['failed_at' => null]);
+
+        foreach ($failed as $capture) {
+            SortCapture::dispatch($capture);
+        }
     }
 }

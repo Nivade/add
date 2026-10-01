@@ -1,12 +1,18 @@
 import { captureCopy } from '@add/shared';
 import { Form } from '@inertiajs/react';
-import type { KeyboardEvent, ReactNode, RefObject } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import {
-    captureFieldClassName,
-    CaptureDialog,
-} from '@/components/capture-dialog';
+import type { KeyboardEvent, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { useSingleFlight } from '@/hooks/use-single-flight';
+import { fieldClassName } from '@/lib/field';
 import { store } from '@/routes/captures';
 
 function isTyping(target: EventTarget | null): boolean {
@@ -32,17 +38,9 @@ function submitOnModifiedEnter(event: KeyboardEvent<HTMLTextAreaElement>) {
 }
 
 /** The one way in: every capture lands in this box, and the app sorts it. `c` opens it from anywhere. */
-export function CaptureHost({
-    trigger,
-}: {
-    trigger?: (
-        open: () => void,
-        ref: RefObject<HTMLButtonElement | null>,
-    ) => ReactNode;
-}) {
+export function CaptureHost({ trigger }: { trigger?: ReactNode }) {
     const [open, setOpen] = useState(false);
-    const triggerRef = useRef<HTMLButtonElement>(null);
-    const saving = useRef(false);
+    const singleFlight = useSingleFlight();
 
     useEffect(() => {
         function onKeyDown(event: globalThis.KeyboardEvent) {
@@ -64,79 +62,54 @@ export function CaptureHost({
     }, []);
 
     return (
-        <>
-            {trigger?.(() => setOpen(true), triggerRef)}
-
-            <CaptureDialog
-                title={captureCopy.question}
-                description={captureCopy.description}
-                open={open}
-                onOpenChange={setOpen}
-                onCloseAutoFocus={(event) => {
-                    // Opened by its key, the dialog has nothing to hand focus back to but the button.
-                    if (triggerRef.current) {
-                        event.preventDefault();
-                        triggerRef.current.focus();
-                    }
-                }}
-            >
+        <Dialog open={open} onOpenChange={setOpen}>
+            {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{captureCopy.question}</DialogTitle>
+                    <DialogDescription>
+                        {captureCopy.description}
+                    </DialogDescription>
+                </DialogHeader>
                 <Form
                     {...store.form()}
+                    {...singleFlight}
                     options={{ preserveScroll: true }}
-                    onBefore={() => !saving.current}
-                    onStart={() => {
-                        saving.current = true;
-                    }}
-                    onFinish={() => {
-                        saving.current = false;
-                    }}
                     onSuccess={() => setOpen(false)}
                     resetOnSuccess
                     className="flex flex-col gap-3"
                 >
-                    {() => (
-                        <>
-                            <textarea
-                                name="body"
-                                rows={4}
-                                autoFocus
-                                aria-label={captureCopy.question}
-                                onKeyDown={submitOnModifiedEnter}
-                                className={captureFieldClassName}
-                            />
-                            <div className="flex items-center justify-end gap-3">
-                                <kbd className="text-muted-foreground text-small">
-                                    {saveShortcut()}
-                                </kbd>
-                                <Button type="submit">
-                                    {captureCopy.save}
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                    <textarea
+                        name="body"
+                        rows={4}
+                        autoFocus
+                        aria-label={captureCopy.question}
+                        onKeyDown={submitOnModifiedEnter}
+                        className={fieldClassName}
+                    />
+                    <div className="flex items-center justify-end gap-3">
+                        <kbd className="text-muted-foreground text-small">
+                            {saveShortcut()}
+                        </kbd>
+                        <Button type="submit">{captureCopy.save}</Button>
+                    </div>
                 </Form>
-            </CaptureDialog>
-        </>
+            </DialogContent>
+        </Dialog>
     );
 }
 
 export function QuickCapture() {
     return (
         <CaptureHost
-            trigger={(open, ref) => (
-                <Button
-                    ref={ref}
-                    variant="outline"
-                    size="sm"
-                    aria-label="Capture"
-                    onClick={open}
-                >
+            trigger={
+                <Button variant="outline" size="sm" aria-label="Capture">
                     Capture
                     <kbd className="text-muted-foreground text-small ml-1">
                         c
                     </kbd>
                 </Button>
-            )}
+            }
         />
     );
 }

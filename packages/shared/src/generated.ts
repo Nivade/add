@@ -96,13 +96,6 @@ aiConsented: boolean,
 hasOpenCommitments: boolean,
 checkIn: CheckInTopic | null,
 };
-export type IngestionClassificationData = {
-actionable: boolean,
-title: string | null,
-why: string | null,
-deadlineAt: string | null,
-estimatedSeconds: number | null,
-};
 export type IntentionData = {
 id: string,
 title: string,
