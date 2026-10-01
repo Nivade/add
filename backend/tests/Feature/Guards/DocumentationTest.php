@@ -89,7 +89,6 @@ it('names only paths that exist', function (): void {
     // Designed but unbuilt. Delete an entry in the change that builds it.
     // .ai/plans/ux-overhaul.md
     $planned = [
-        'backend/app/Http/Requests/SessionControlRequest.php',
         'mobile/app/finished/[session].tsx',
         'mobile/src/api/use-write.ts',
         'mobile/src/capture/pending-captures.ts',

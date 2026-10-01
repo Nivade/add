@@ -26,5 +26,6 @@ class ExecutionStateData extends Data
         public bool $returning,
         public int $stepsDone,
         public ?string $notice,
+        public string $seenEventId,
     ) {}
 }

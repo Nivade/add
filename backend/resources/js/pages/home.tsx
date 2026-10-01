@@ -22,6 +22,7 @@ import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
 import { NowButton } from '@/components/now-button';
+import { OneTapForm } from '@/components/one-tap-form';
 import {
     EstimateLine,
     Meta,
@@ -38,6 +39,7 @@ import { focus } from '@/routes';
 import ai from '@/routes/ai';
 import appointments from '@/routes/appointments';
 import commitments from '@/routes/commitments';
+import focusRoutes from '@/routes/focus';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
 import waitingFors from '@/routes/waiting-fors';
@@ -169,9 +171,22 @@ function RightNow({ rightNow, session }: HomeData) {
                         ? returnCopy.workingOn(session.intention.title)
                         : returnCopy.partWay(session.intention.title)}
                 </Meta>
-                <NowButton onClick={() => router.visit(focus())}>
-                    {focusCopy.continue}
-                </NowButton>
+                {session.returning || session.session.pausedAt !== null ? (
+                    <OneTapForm
+                        form={focusRoutes.resume.form(session.session.id)}
+                        fields={{ seen_event_id: session.seenEventId }}
+                    >
+                        {(processing) => (
+                            <NowButton type="submit" aria-disabled={processing}>
+                                {focusCopy.continue}
+                            </NowButton>
+                        )}
+                    </OneTapForm>
+                ) : (
+                    <NowButton onClick={() => router.visit(focus())}>
+                        {focusCopy.continue}
+                    </NowButton>
+                )}
             </div>
         );
     }

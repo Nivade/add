@@ -56,14 +56,14 @@ function Control({
     hint,
     keys,
     form,
-    stepId,
+    fields = {},
     onClick,
 }: {
     label: string;
     hint: string;
     keys: string[];
     form?: { action: string; method: 'post' };
-    stepId?: string;
+    fields?: Record<string, string>;
     onClick?: () => void;
 }) {
     const ref = useShortcuts<HTMLButtonElement>(
@@ -106,7 +106,7 @@ function Control({
     }
 
     return (
-        <OneTapForm form={form} stepId={stepId}>
+        <OneTapForm form={form} fields={fields}>
             {(processing) => (
                 <Button
                     ref={ref}
@@ -157,6 +157,8 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
     const { session, intention, progress, elapsed } = state;
     const step = session.currentStep;
     const paused = session.pausedAt !== null;
+    const stepFields = { step_id: step?.id ?? '' };
+    const seenFields = { seen_event_id: state.seenEventId };
 
     const reportStuck = (reason: StuckReasonValue, note?: string): void => {
         setStuckOpen(false);
@@ -196,7 +198,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                         </Meta>
                         <OneTapForm
                             form={focusRoutes.resume.form(session.id)}
-                            stepId={step?.id}
+                            fields={seenFields}
                         >
                             {(processing) => (
                                 <NowButton
@@ -239,6 +241,7 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                     form={focusRoutes.commitment.form(
                                         session.id,
                                     )}
+                                    fields={stepFields}
                                 />
                             )}
                         </div>
@@ -249,14 +252,14 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 hint={focusCopy.hints.done}
                                 keys={['d']}
                                 form={focusRoutes.completeStep.form(session.id)}
-                                stepId={step?.id}
+                                fields={stepFields}
                             />
                             <Control
                                 label={focusCopy.skip}
                                 hint={focusCopy.hints.skip}
                                 keys={['s']}
                                 form={focusRoutes.skipStep.form(session.id)}
-                                stepId={step?.id}
+                                fields={stepFields}
                             />
                             <Control
                                 label={focusCopy.stuck}
@@ -271,21 +274,21 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                                 hint={focusCopy.hints.pause}
                                 keys={['p']}
                                 form={focusRoutes.pause.form(session.id)}
-                                stepId={step?.id}
+                                fields={seenFields}
                             />
                             <Control
                                 label={focusCopy.distracted}
                                 hint={focusCopy.hints.distracted}
                                 keys={['r']}
                                 form={focusRoutes.distracted.form(session.id)}
-                                stepId={step?.id}
+                                fields={seenFields}
                             />
                             <Control
                                 label={focusCopy.stop}
                                 hint={focusCopy.hints.stop}
                                 keys={['x']}
                                 form={focusRoutes.stop.form(session.id)}
-                                stepId={step?.id}
+                                fields={seenFields}
                             />
                         </ControlRow>
                     </>

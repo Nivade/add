@@ -73,6 +73,7 @@ currentStepIsCommitment: boolean,
 returning: boolean,
 stepsDone: number,
 notice: string | null,
+seenEventId: string,
 };
 export type FinishedData = {
 intention: IntentionData,

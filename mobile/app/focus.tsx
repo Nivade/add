@@ -57,7 +57,11 @@ export default function Focus() {
   };
 
   const promise = async (): Promise<void> => {
-    await api.promoteCurrentStep(token as string, session.id);
+    if (!step) {
+      return;
+    }
+
+    await api.promoteCurrentStep(token as string, session.id, step.id);
     await reload();
   };
 
@@ -89,7 +93,10 @@ export default function Focus() {
 
   const control = (name: SessionControl): Promise<void> =>
     send(() =>
-      api.control(token as string, session.id, name, step?.id ?? null),
+      api.control(token as string, session.id, name, {
+        stepId: step?.id ?? null,
+        seenEventId: data.seenEventId,
+      }),
     );
 
   return (

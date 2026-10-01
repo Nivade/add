@@ -7,9 +7,11 @@ import type { RouteFormDefinition } from '@/wayfinder';
 export function SaidIdDoThis({
     promised,
     form,
+    fields = {},
 }: {
     promised: boolean;
     form: RouteFormDefinition<'post'>;
+    fields?: Record<string, string>;
 }) {
     if (promised) {
         return (
@@ -19,6 +21,9 @@ export function SaidIdDoThis({
 
     return (
         <Form {...form} options={{ preserveScroll: true }}>
+            {Object.entries(fields).map(([name, value]) => (
+                <input key={name} type="hidden" name={name} value={value} />
+            ))}
             <button type="submit" className={quietLineClassName}>
                 {commitmentCopy.promise}
             </button>

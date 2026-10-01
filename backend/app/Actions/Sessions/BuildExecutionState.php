@@ -36,7 +36,7 @@ final class BuildExecutionState
     public function handle(ExecutionSession $session): ExecutionStateData
     {
         $session->refresh()->load(['currentStep', 'intention.steps', 'user']);
-        $latest = $session->events()->latest()->orderByDesc('id')->first();
+        $latest = $session->latestEvent();
 
         return new ExecutionStateData(
             ExecutionSessionData::from($session),
@@ -47,6 +47,7 @@ final class BuildExecutionState
             $this->returning($session, $latest),
             $session->intention->steps->where('status', StepStatus::Done)->count(),
             $this->notice($session, $latest),
+            $latest->id ?? '',
         );
     }
 

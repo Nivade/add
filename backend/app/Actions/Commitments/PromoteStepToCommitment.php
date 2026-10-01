@@ -14,9 +14,9 @@ final class PromoteStepToCommitment
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session): Commitment
+    public function handle(ExecutionSession $session, string $stepId): Commitment
     {
-        $step = $session->currentStepOrFail();
+        $step = $session->currentStepOrFail($stepId);
 
         return CreateCommitment::run($session->user, $step->title, CommitmentProvenance::UserTask, step: $step);
     }

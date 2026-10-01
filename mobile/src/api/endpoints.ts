@@ -111,16 +111,20 @@ export const api = {
       body: { step_id: stepId },
     }),
 
+  /** A step control names the step it acts on; a session control names the event it was tapped against. */
   control: (
     token: string,
     sessionId: string,
     control: SessionControl,
-    stepId: string | null,
+    seen: { stepId: string | null; seenEventId: string },
   ) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/${control}`, {
       method: 'POST',
       token,
-      body: { step_id: stepId },
+      body:
+        control === 'complete-step' || control === 'skip-step'
+          ? { step_id: seen.stepId }
+          : { seen_event_id: seen.seenEventId },
     }),
 
   stuck: (
@@ -169,10 +173,11 @@ export const api = {
       body: { place },
     }),
 
-  promoteCurrentStep: (token: string, sessionId: string) =>
+  promoteCurrentStep: (token: string, sessionId: string, stepId: string) =>
     request<CommitmentData>(`/sessions/${sessionId}/commitment`, {
       method: 'POST',
       token,
+      body: { step_id: stepId },
     }),
 
   respondToCommitment: (

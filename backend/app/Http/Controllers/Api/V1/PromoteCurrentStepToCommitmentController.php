@@ -8,17 +8,17 @@ use App\Actions\Commitments\PromoteStepToCommitment;
 use App\Data\CommitmentData;
 use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StepControlRequest;
 use App\Models\ExecutionSession;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 final class PromoteCurrentStepToCommitmentController extends Controller
 {
     use ResolvesOwned;
 
-    public function __invoke(Request $request, ExecutionSession $session): Response
+    public function __invoke(StepControlRequest $request, ExecutionSession $session): Response
     {
-        $commitment = PromoteStepToCommitment::run($this->owned($request, $session));
+        $commitment = PromoteStepToCommitment::run($this->owned($request, $session), $request->stepId());
 
         return CommitmentData::from($commitment)
             ->toResponse($request)

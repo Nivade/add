@@ -276,7 +276,7 @@ it("hides another person's session behind the web controls too", function (): vo
     $session = started();
 
     $this->actingAs(User::factory()->create())
-        ->post(route('focus.pause', $session))
+        ->post(route('focus.pause', $session), ['seen_event_id' => seenEvent($session)])
         ->assertNotFound();
 });
 
@@ -296,7 +296,7 @@ it('sends the person home once the session has ended', function (): void {
 
     $this->actingAs($session->user)
         ->from(route('focus'))
-        ->post(route('focus.stop', $session))
+        ->post(route('focus.stop', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($session->user)

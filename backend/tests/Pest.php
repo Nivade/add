@@ -189,6 +189,12 @@ function dated(User $user): Intention
     return $intention;
 }
 
+/** What a screen built now would post back as the moment the person saw. */
+function seenEvent(ExecutionSession $session): string
+{
+    return (string) $session->latestEvent()?->id;
+}
+
 function started(int $steps = 3): ExecutionSession
 {
     $intention = kitchen($steps);

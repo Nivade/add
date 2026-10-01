@@ -350,7 +350,7 @@ desktop                                          phone
   - `backend/resources/js/pages/overwhelmed.tsx`: those three lines, then the step, its why, Start; the rest line; "Back to home" (Esc). More space, no motion.
   - Header "I'm overwhelmed" is visible ink text, body size, key `o`; the footer link on home goes.
   - Check: screenshot at 1440 and 390.
-- [ ] **4.10 No stale tap lands.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`, `pest-testing`.
+- [x] **4.10 No stale tap lands.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`, `pest-testing`.
   - `ExecutionSession::assertSeen(string $eventId): void` throws `InvalidSessionTransition("Session {$this->id} has moved on since event {$eventId}.")` when the session's latest event id (ulid, `events()->latest('id')->value('id')`) differs.
   - `PauseSession`, `ResumeSession`, `RecordDistraction`, `StopSession` gain `?string $seenEventId = null`, checked first inside their `transition()`; null is only for internal callers (`ReportStuck`, `StartSession` stopping a session), never a controller.
   - New `backend/app/Http/Requests/SessionControlRequest.php`: `seen_event_id` required string; `seenEventId(): string`. The web `PauseFocusController`, `ResumeFocusController`, `RecordDistractionController`, `StopFocusController` and API `PauseSessionController`, `ResumeSessionController`, `RecordDistractionController`, `StopSessionController` take it and pass it through.
