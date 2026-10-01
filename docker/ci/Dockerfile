@@ -12,3 +12,6 @@ RUN curl -sSLf -o /usr/local/bin/install-php-extensions https://github.com/mloca
 # Node 22 from its tarball: Debian's own nodejs is 20, which is end of life.
 RUN curl -fsSL https://nodejs.org/dist/latest-v22.x/SHASUMS256.txt | grep -o 'node-v22[^ ]*-linux-x64.tar.xz' \
     | xargs -I{} curl -fsSL https://nodejs.org/dist/latest-v22.x/{} | tar -xJ -C /usr/local --strip-components=1
+
+# Paratest workers do not inherit the parent's -d memory_limit, and Sail runs unlimited.
+RUN echo 'memory_limit=-1' > /usr/local/etc/php/conf.d/memory-limit.ini
