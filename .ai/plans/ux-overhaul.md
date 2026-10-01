@@ -287,7 +287,7 @@ desktop                                          phone
 
 ## Phase 4 — the journey (`feature/ux-journey`)
 
-- [ ] **4.1 Focus drops the chrome.** Invoke skills: `inertia-react-development`.
+- [x] **4.1 Focus drops the chrome.** Invoke skills: `inertia-react-development`.
   - New `backend/resources/js/layouts/focus-frame.tsx`: the day strip and the page, no header; mounts `CaptureHost`.
   - One clock per page: move `useMinuteOfDay(from, live)` out of `day-strip.tsx` into `backend/resources/js/hooks/use-minute-of-day.ts`; `shell.tsx` and `focus-frame.tsx` call it once and pass `nowMinute` to both `DayStrip`s (column and row), which stop running their own interval.
   - `backend/resources/js/app.tsx`: `focus` and `finished` use `FocusFrame`.

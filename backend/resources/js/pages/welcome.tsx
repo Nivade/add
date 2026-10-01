@@ -36,13 +36,13 @@ function SampleHome() {
                     <DayStrip
                         rail={sampleRail}
                         orientation="column"
-                        live={false}
+                        nowMinute={sampleRail.nowMinute}
                         className="hidden h-full sm:block"
                     />
                     <DayStrip
                         rail={sampleRail}
                         orientation="row"
-                        live={false}
+                        nowMinute={sampleRail.nowMinute}
                         className="h-10 sm:hidden"
                     />
                 </div>

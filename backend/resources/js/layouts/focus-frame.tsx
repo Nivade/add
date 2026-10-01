@@ -1,14 +1,15 @@
-import { Link, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { DayStrip } from '@/components/day-strip';
-import { QuickCapture } from '@/components/quick-capture';
-import { UserMenu } from '@/components/user-menu';
-import { Wordmark } from '@/components/wordmark';
+import { CaptureHost } from '@/components/quick-capture';
 import { useMinuteOfDay } from '@/hooks/use-minute-of-day';
 import { columnClassName } from '@/lib/column';
-import { overwhelmed } from '@/routes';
 
-/** The day, drawn beside a single column: one key to capture, and nothing else in the frame. */
-export default function Shell({ children }: { children: React.ReactNode }) {
+/** The day and the step, nothing else: no header pulls the eye off the work, and `c` still captures. */
+export default function FocusFrame({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { rail } = usePage().props;
     const nowMinute = useMinuteOfDay(rail?.nowMinute ?? 0, rail !== null);
 
@@ -24,18 +25,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             )}
 
             <div className="flex min-w-0 flex-1 flex-col">
-                <header
-                    className={`${columnClassName} flex flex-wrap items-center gap-x-3 gap-y-2 py-4`}
-                >
-                    <Wordmark />
-
-                    <div className="ml-auto flex flex-wrap items-center gap-2">
-                        <Link href={overwhelmed()}>{"I'm overwhelmed"}</Link>
-                        <QuickCapture />
-                        <UserMenu />
-                    </div>
-                </header>
-
                 {rail && (
                     <DayStrip
                         rail={rail}
@@ -46,11 +35,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 )}
 
                 <main
-                    className={`${columnClassName} flex-1 pt-8 pb-20 sm:pt-10`}
+                    className={`${columnClassName} flex-1 pt-8 pb-20 sm:pt-16`}
                 >
                     {children}
                 </main>
             </div>
+
+            <CaptureHost />
         </div>
     );
 }
