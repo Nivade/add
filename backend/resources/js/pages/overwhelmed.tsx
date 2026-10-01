@@ -24,7 +24,7 @@ export default function Overwhelmed({
         <>
             <Head title="One thing" />
 
-            <div className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-24">
+            <main className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-24">
                 <div className="max-w-content mx-auto flex w-full flex-col items-start gap-12">
                     <div className="text-muted-foreground text-lead space-y-1">
                         {overwhelmedCopy.lines.map((line) => (
@@ -76,7 +76,7 @@ export default function Overwhelmed({
                         <KeyHint className="ml-2">Esc</KeyHint>
                     </Link>
                 </div>
-            </div>
+            </main>
         </>
     );
 }

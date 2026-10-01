@@ -12,7 +12,7 @@ export function KeyHint({
         <kbd
             aria-hidden="true"
             className={cn(
-                'text-small font-normal opacity-75 pointer-coarse:hidden',
+                'text-small font-normal pointer-coarse:hidden',
                 className,
             )}
         >

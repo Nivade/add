@@ -1,7 +1,7 @@
 import type { FinishedData } from '@add/shared';
 import { finishedCopy, recurrenceLine } from '@add/shared';
 import { Form, Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import InputError from '@/components/input-error';
 import { KeyHint } from '@/components/key-hint';
 import { Meta, OneThing, StartStep } from '@/components/one-thing';
@@ -113,6 +113,10 @@ export default function Finished({
     finished: FinishedData;
 }) {
     useShortcuts({ Escape: () => router.visit(home()) });
+
+    useLayoutEffect(() => {
+        document.querySelector<HTMLElement>('main h1')?.focus();
+    }, []);
 
     return (
         <>

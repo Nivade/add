@@ -339,7 +339,7 @@ desktop                                          phone
   - No middle-dot joins in UI copy: waiting-for rows read "{subject}: {note}", coming-up reads as a sentence.
   - Tests: update strings in `backend/tests/Feature/NextAction/ResolverTest.php`, `HomeTest.php`, `backend/tests/Feature/Intentions/ClarifyIntentionTest.php`, `SessionTest.php`; add a scenario for the inferred-deadline wording.
   - Check: `npm run test` passes.
-- [ ] **4.8 Accessibility pass.** Invoke skills: `chrome-devtools-mcp:a11y-debugging`.
+- [x] **4.8 Accessibility pass.** Invoke skills: `chrome-devtools-mcp:a11y-debugging`.
   - Each page has one `h1` (the one thing, or the page's question) before any `h2`; bands are `h2`.
   - After the step changes, focus moves to the `h1`; the notice is `role="status"`.
   - The day strip's drawing is `aria-hidden`; `railSummary()` is its one visually hidden sentence.
