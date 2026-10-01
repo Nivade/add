@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web;
 
 use App\Actions\Sessions\CompleteStep;
+use App\Enums\SessionOutcome;
 use App\Http\Controllers\Concerns\ResolvesOwned;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StepControlRequest;
@@ -17,8 +18,8 @@ final class CompleteStepController extends Controller
 
     public function __invoke(StepControlRequest $request, ExecutionSession $session): RedirectResponse
     {
-        CompleteStep::run($this->owned($request, $session), $request->stepId());
+        $session = CompleteStep::run($this->owned($request, $session), $request->stepId());
 
-        return back();
+        return $session->outcome === SessionOutcome::Completed ? to_route('focus.finished', $session) : back();
     }
 }

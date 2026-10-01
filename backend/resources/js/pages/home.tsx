@@ -1,8 +1,4 @@
-import type {
-    HomeData,
-    JustFinishedData,
-    NeedsAttentionData,
-} from '@add/shared';
+import type { HomeData, NeedsAttentionData } from '@add/shared';
 import {
     commitmentCopy,
     focusCopy,
@@ -10,7 +6,6 @@ import {
     homeCopy,
     nothingNeedsYou,
     partWayLine,
-    recurrenceLine,
     remindAfterCopy,
     restCountLine,
     returnCopy,
@@ -112,53 +107,6 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
     );
 }
 
-function JustFinished({ finished }: { finished: JustFinishedData }) {
-    return (
-        <Band label={homeBands.justFinished}>
-            <p>{finished.title}</p>
-            {finished.recurrenceEveryDays ? (
-                <p className="text-muted-foreground mt-2">
-                    {recurrenceLine(finished.recurrenceEveryDays)}
-                </p>
-            ) : (
-                <Form
-                    {...intentions.recurrence.form(finished.id)}
-                    options={{ preserveScroll: true }}
-                    className="mt-3 flex flex-wrap items-center gap-3"
-                >
-                    {({ errors }) => (
-                        <>
-                            <label
-                                htmlFor="repeat-every-days"
-                                className="text-muted-foreground"
-                            >
-                                {homeCopy.repeatEvery}
-                            </label>
-                            <input
-                                id="repeat-every-days"
-                                type="number"
-                                name="every_days"
-                                min={1}
-                                max={365}
-                                defaultValue={7}
-                                className={cn(fieldClassName, 'w-20')}
-                            />
-                            <span className="text-muted-foreground">days</span>
-                            <Button type="submit" variant="quiet">
-                                Repeat
-                            </Button>
-                            <InputError
-                                message={errors.every_days}
-                                className="basis-full"
-                            />
-                        </>
-                    )}
-                </Form>
-            )}
-        </Band>
-    );
-}
-
 function RightNow({ rightNow, session }: HomeData) {
     if (session) {
         return (
@@ -206,7 +154,6 @@ export default function Home({ home: data }: { home: HomeData }) {
         hasOpenCommitments,
         comingUp,
         reminder,
-        justFinished,
         needsAttention,
         restCount,
         sortingCount,
@@ -284,8 +231,6 @@ export default function Home({ home: data }: { home: HomeData }) {
                 )}
 
                 <SortedBand sorted={sorted} more={sortedMore} />
-
-                {justFinished && <JustFinished finished={justFinished} />}
 
                 {reminder && (
                     <Band label={homeBands.beforeYouGo}>

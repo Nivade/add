@@ -11,7 +11,10 @@ export function KeyHint({
     return (
         <kbd
             aria-hidden="true"
-            className={cn('text-small font-normal opacity-75 pointer-coarse:hidden', className)}
+            className={cn(
+                'text-small font-normal opacity-75 pointer-coarse:hidden',
+                className,
+            )}
         >
             {children}
         </kbd>

@@ -89,7 +89,7 @@ it('carries one typed thought all the way to a finished intention', function ():
     $this->actingAs($user)
         ->from(route('focus'))
         ->post(route('focus.complete-step', $session), ['step_id' => $session->refresh()->current_step_id])
-        ->assertRedirect(route('focus'));
+        ->assertRedirect(route('focus.finished', $session));
 
     $this->actingAs($user)
         ->get(route('home'))

@@ -90,18 +90,12 @@ it('names only paths that exist', function (): void {
     // .ai/plans/ux-overhaul.md
     $planned = [
         'backend/app/Actions/Intentions/CorrectDeadline.php',
-        'backend/app/Actions/Sessions/BuildFinished.php',
-        'backend/app/Data/FinishedData.php',
         'backend/app/Http/Controllers/Api/V1/CorrectDeadlineController.php',
-        'backend/app/Http/Controllers/Api/V1/ShowFinishedController.php',
         'backend/app/Http/Controllers/Web/CorrectDeadlineController.php',
         'backend/app/Http/Controllers/Web/ShowAppointmentController.php',
-        'backend/app/Http/Controllers/Web/ShowFinishedController.php',
         'backend/app/Http/Requests/CorrectDeadlineRequest.php',
         'backend/app/Http/Requests/SessionControlRequest.php',
         'backend/resources/js/pages/appointment.tsx',
-        'backend/resources/js/pages/finished.tsx',
-        'backend/tests/Feature/Execution/FinishedTest.php',
         'backend/tests/Feature/Intentions/CorrectDeadlineTest.php',
         'mobile/app/finished/[session].tsx',
         'mobile/src/api/use-write.ts',

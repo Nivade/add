@@ -21,6 +21,7 @@ use App\Http\Controllers\Web\RespondToWaitingForController;
 use App\Http\Controllers\Web\ResumeFocusController;
 use App\Http\Controllers\Web\SetIntentionRecurrenceController;
 use App\Http\Controllers\Web\ShowCommitmentsController;
+use App\Http\Controllers\Web\ShowFinishedController;
 use App\Http\Controllers\Web\ShowFocusController;
 use App\Http\Controllers\Web\ShowHomeController;
 use App\Http\Controllers\Web\ShowOverwhelmedController;
@@ -64,6 +65,7 @@ Route::middleware(['auth', 'verified', RecordTimezone::class])->group(function (
     Route::post('focus', StartFocusController::class)->name('focus.start');
 
     Route::prefix('focus/{session}')->name('focus.')->group(function (): void {
+        Route::get('finished', ShowFinishedController::class)->name('finished');
         Route::post('complete-step', CompleteStepController::class)->name('complete-step');
         Route::post('skip-step', SkipStepController::class)->name('skip-step');
         Route::post('pause', PauseFocusController::class)->name('pause');

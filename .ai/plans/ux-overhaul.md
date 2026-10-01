@@ -304,7 +304,7 @@ desktop                                          phone
   - `packages/shared/src/copy.ts` `focusCopy` gains `hints`: Done "Finished it", Skip "Not this one now", I'm stuck "Tell me what's in the way", Pause "Back in a bit", I got distracted "I drifted off", Stop "Done for now".
   - After any control, focus moves to the `h1`; the step container is keyed by step id for the motion beat.
   - Check: screenshots at 1440 and 390; `JourneyTest.php` passes.
-- [ ] **4.4 Finishing is a moment.** Invoke skills: `laravel-actions`, `laravel-data`, `frontend-design`, `pest-testing`.
+- [x] **4.4 Finishing is a moment.** Invoke skills: `laravel-actions`, `laravel-data`, `frontend-design`, `pest-testing`.
   - New `backend/app/Data/FinishedData.php`, `#[TypeScript]`: `IntentionData $intention`, `list<string> $lines`, `?NextActionData $next`, `?int $recurrenceEveryDays`.
   - New `backend/app/Actions/Sessions/BuildFinished.php`: `handle(ExecutionSession $session): FinishedData`. Lines, each only when true: "{n} steps done." or "{n} steps done, {m} skipped."; "About {duration} of work." (the sum of the intention's sessions, paused time excluded); "{words} before the deadline."; "It had been on your list for {d} days." (two days or more); "{t} things finished today." (intentions). `next` from `NextActionResolver::resolve`.
   - Routes: web `GET focus/{session}/finished` named `focus.finished` → `backend/app/Http/Controllers/Web/ShowFinishedController.php`; API `GET /api/v1/sessions/{session}/finished` → `backend/app/Http/Controllers/Api/V1/ShowFinishedController.php`. Both owned, both 404 unless the outcome is `Completed`.

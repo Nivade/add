@@ -22,7 +22,6 @@ class HomeData extends Data
         public ?ExecutionStateData $session,
         public ?ComingUpData $comingUp,
         public ?ReminderData $reminder,
-        public ?JustFinishedData $justFinished,
         public array $needsAttention,
         public int $restCount,
         public int $sortingCount,

@@ -72,6 +72,12 @@ currentStepIsCommitment: boolean,
 returning: boolean,
 stepsDone: number,
 };
+export type FinishedData = {
+intention: IntentionData,
+lines: string[],
+next: NextActionData | null,
+recurrenceEveryDays: number | null,
+};
 export type FutureReminderData = {
 id: string,
 message: string,

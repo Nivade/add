@@ -232,30 +232,6 @@ it('counts open commitments beyond the one on show', function (): void {
             ->where('home.restCount', 2));
 });
 
-it('offers what was just finished so it can be set to repeat, and lets it go after an hour', function (): void {
-    $user = User::factory()->create();
-    $finished = Intention::factory()->for($user)->done()->create(['title' => 'Water the plants', 'completed_at' => now()->subMinutes(20)]);
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('home.justFinished.id', $finished->id)
-            ->where('home.justFinished.recurrenceEveryDays', null));
-
-    $this->actingAs($user)->post(route('intentions.recurrence', $finished), ['every_days' => 7]);
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('home.justFinished.recurrenceEveryDays', 7));
-
-    $this->travel(2)->hours();
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.justFinished', null));
-});
-
 it('sends focus back home when no session is open', function (): void {
     $this->actingAs(User::factory()->create())
         ->get(route('focus'))

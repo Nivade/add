@@ -1,6 +1,5 @@
 import type {
   HomeData,
-  JustFinishedData,
   NeedsAttentionData,
 } from '@add/shared';
 import {
@@ -14,7 +13,6 @@ import {
   nothingNeedsYou,
   notHereLabels,
   partWayLine,
-  recurrenceLine,
   restCountLine,
   returnCopy,
   rightNowMeta,
@@ -117,64 +115,6 @@ function WaitingFor({
   );
 }
 
-function JustFinished({
-  finished,
-  onRepeated,
-}: {
-  finished: JustFinishedData;
-  onRepeated: () => void;
-}) {
-  const { token } = useSession();
-  const [everyDays, setEveryDays] = useState('7');
-  const [saving, setSaving] = useState(false);
-
-  const repeat = async () => {
-    const days = Number(everyDays);
-
-    if (!Number.isInteger(days) || days < 1) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await api.repeatIntention(token as string, finished.id, days);
-      onRepeated();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Band label={homeBands.justFinished}>
-      <Text style={styles.line}>{finished.title}</Text>
-      {finished.recurrenceEveryDays ? (
-        <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
-      ) : (
-        <>
-          <View style={styles.repeat}>
-            <Meta>{homeCopy.repeatEvery}</Meta>
-            <TextInput
-              style={[styles.input, styles.days]}
-              value={everyDays}
-              onChangeText={setEveryDays}
-              keyboardType="number-pad"
-              inputMode="numeric"
-              accessibilityLabel="Repeat every how many days"
-            />
-            <Meta>days</Meta>
-          </View>
-          <Button
-            label={saving ? 'Saving' : 'Repeat'}
-            disabled={saving}
-            onPress={() => void repeat()}
-          />
-        </>
-      )}
-    </Band>
-  );
-}
-
 export default function Home() {
   const { token, signOut } = useSession();
   const load = useCallback(() => api.home(token as string), [token]);
@@ -224,7 +164,6 @@ export default function Home() {
     session,
     comingUp,
     reminder,
-    justFinished,
     needsAttention,
     restCount,
     checkIn,
@@ -308,10 +247,6 @@ export default function Home() {
           <OneThing>{nothingNeedsYou}</OneThing>
           <Meta>{homeCopy.wholeAnswer}</Meta>
         </>
-      )}
-
-      {justFinished && (
-        <JustFinished finished={justFinished} onRepeated={() => void reload()} />
       )}
 
       {reminder && (
@@ -430,6 +365,4 @@ const styles = StyleSheet.create({
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
-  repeat: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1) },
-  days: { width: 72, textAlign: 'right' },
 });

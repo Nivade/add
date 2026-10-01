@@ -116,14 +116,26 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
 
     expect(focusedDescriptor($page))->toBe('Open it.');
 
+    // Capture still opens from focus, where the header is gone, and leaves the step where it was.
+    $page->keys('h1[tabindex]', 'c');
+    $page->type('[aria-label="What\'s on your mind?"]', 'water the plants');
+    $page->keys('Save', 'Enter');
+    $page->assertDontSee('Write it however it comes out.')
+        ->assertSee('Open it.');
+
     $page->keys('h1[tabindex]', 'd');
     $page->assertSee('Write the first line.')
         ->assertSee('2 of 3 steps done.');
 
-    // Finish.
+    // Finish, on a closing screen that offers one thing next and asks nothing.
     $page->keys('h1[tabindex]', 'd');
+    $page->assertPathContains('/finished')
+        ->assertSee('clean the kitchen before my parents arrive is handled.')
+        ->assertSee('Next, if you want:')
+        ->assertSee('Leave it there');
+
+    $page->keys('h1[tabindex]', 'Escape');
     $page->assertPathIs('/home')
-        ->assertSee('Nothing needs you right now.')
         ->assertNoJavaScriptErrors();
 });
 

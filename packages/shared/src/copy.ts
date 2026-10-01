@@ -173,7 +173,6 @@ export const nothingNeedsYou = 'Nothing needs you right now.';
 
 export const homeCopy = {
     wholeAnswer: 'That is the whole answer.',
-    repeatEvery: 'Repeat every',
 } as const;
 
 export const homeBands = {
@@ -181,7 +180,6 @@ export const homeBands = {
     comingUp: "What's coming up",
     beforeYouGo: 'Before you go',
     needsAttention: 'Needs you',
-    justFinished: 'Just finished',
     sorted: 'What you just wrote',
 } as const;
 
@@ -298,8 +296,20 @@ export const checkInCopy = {
 } as const;
 
 export function recurrenceLine(everyDays: number): string {
-    return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
+    return everyDays === 1 ? 'It comes back every day.' : `It comes back every ${everyDays} days.`;
 }
+
+/** The closing screen: the intention handled, and nothing asked of the person but what they want next. */
+export const finishedCopy = {
+    handled: (title: string) => `${title} is handled.`,
+    next: 'Next, if you want:',
+    leave: 'Leave it there',
+    home: 'Back to home',
+    comesBack: 'Does this come back?',
+    every: 'Every',
+    days: 'days',
+    repeat: 'Repeat',
+} as const;
 
 /** Both frontends open the one box with the same words. */
 export const captureCopy = {

@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowAppointmentController;
 use App\Http\Controllers\Api\V1\ShowCommitmentsController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
+use App\Http\Controllers\Api\V1\ShowFinishedController;
 use App\Http\Controllers\Api\V1\ShowHomeController;
 use App\Http\Controllers\Api\V1\ShowNextActionController;
 use App\Http\Controllers\Api\V1\ShowOverwhelmedController;
@@ -81,6 +82,7 @@ Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');
 
     Route::prefix('sessions/{session}')->name('sessions.')->group(function (): void {
+        Route::get('finished', ShowFinishedController::class)->name('finished');
         Route::post('complete-step', CompleteStepController::class)->name('complete-step');
         Route::post('skip-step', SkipStepController::class)->name('skip-step');
         Route::post('pause', PauseSessionController::class)->name('pause');
