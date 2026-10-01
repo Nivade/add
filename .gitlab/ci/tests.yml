@@ -18,11 +18,13 @@
     - key:
         files:
           - 'backend/composer.lock'
+        prefix: root
       paths:
         - '.cache/composer/'
     - key:
         files:
           - 'package-lock.json'
+        prefix: root
       paths:
         - '.cache/npm/'
     - key: playwright
