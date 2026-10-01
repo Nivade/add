@@ -1,6 +1,12 @@
 ---
 name: laravel-attributes
 description: "Use whenever writing or reviewing Laravel PHP code (Laravel 13+). Prefer PHP attributes over class properties for models, jobs, commands, controllers, form requests, tests, factories, API resources, and container bindings. Trigger on $fillable, $table, $queue, $tries, $signature, $redirect, $errorBag, $seeder, constructor middleware, singleton registration, and any new Laravel class."
+paths:
+  - 'backend/app/Models/**'
+  - 'backend/app/Http/**'
+metadata:
+  keywords:
+    - '\b(migration|eloquent|fillable)\b'
 ---
 
 # Laravel PHP Attributes (Laravel 13+)

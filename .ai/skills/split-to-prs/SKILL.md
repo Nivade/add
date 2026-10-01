@@ -3,6 +3,9 @@ name: split-to-prs
 description: >-
   Split current work into small reviewable branches or PRs. Use when the user
   asks to split a chat, set of changes, branch, or PR.
+metadata:
+  keywords:
+    - '\bsplit\b.{0,30}\b(prs?|mrs?|branch(es)?)\b'
 ---
 # Split to PRs
 

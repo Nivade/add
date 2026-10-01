@@ -1,6 +1,17 @@
 ---
 name: generated-artifacts
 description: Read before editing, creating or "fixing" any file that a command owns — `packages/shared/src/generated.ts`, `backend/resources/js/actions/**`, `backend/resources/js/routes/**`, `backend/resources/js/wayfinder/**`, `.ai/guidelines.md`, `.claude/skills/**`, `backend/compose.yaml`. Also use when a type, route helper or guideline looks wrong or missing and the instinct is to hand-write it, when a TypeScript import from `@add/shared` or `@/actions` does not resolve, or when a date field arrives as `undefined` on the frontend. Trigger on "generated", "regenerate", "types:generate", "wayfinder", "boost:update", "the type is wrong", "add this to generated.ts".
+paths:
+  - 'packages/shared/src/generated.ts'
+  - 'packages/shared/src/typescript-transformer-manifest.json'
+  - 'backend/resources/js/actions/**'
+  - 'backend/resources/js/routes/**'
+  - 'backend/resources/js/wayfinder/**'
+  - '.ai/guidelines.md'
+  - 'backend/compose.yaml'
+metadata:
+  keywords:
+    - '\b(generated|regenerate|types:generate|boost:update)\b'
 ---
 
 # Files a command owns
