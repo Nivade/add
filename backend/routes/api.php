@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ClarifyIntentionController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmCaptureKindController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
+use App\Http\Controllers\Api\V1\CorrectDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
@@ -68,6 +69,7 @@ Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('
         ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
+    Route::patch('intentions/{intention}/deadline/correct', CorrectDeadlineController::class)->name('intentions.deadline.correct');
     Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::get('commitments', ShowCommitmentsController::class)->name('commitments.index');

@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\ClarifyIntentionController;
 use App\Http\Controllers\Web\CompleteStepController;
 use App\Http\Controllers\Web\ConfirmCaptureKindController;
 use App\Http\Controllers\Web\ConfirmDeadlineController;
+use App\Http\Controllers\Web\CorrectDeadlineController;
 use App\Http\Controllers\Web\DismissReminderController;
 use App\Http\Controllers\Web\PauseFocusController;
 use App\Http\Controllers\Web\PromoteCurrentStepToCommitmentController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Web\RespondToCommitmentController;
 use App\Http\Controllers\Web\RespondToWaitingForController;
 use App\Http\Controllers\Web\ResumeFocusController;
 use App\Http\Controllers\Web\SetIntentionRecurrenceController;
+use App\Http\Controllers\Web\ShowAppointmentController;
 use App\Http\Controllers\Web\ShowCommitmentsController;
 use App\Http\Controllers\Web\ShowFinishedController;
 use App\Http\Controllers\Web\ShowFocusController;
@@ -51,6 +53,8 @@ Route::middleware(['auth', 'verified', RecordTimezone::class])->group(function (
         ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::post('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
+    Route::post('intentions/{intention}/deadline/correct', CorrectDeadlineController::class)->name('intentions.deadline.correct');
+    Route::get('appointments/{kind}/{id}', ShowAppointmentController::class)->name('appointments.show');
     Route::post('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::get('commitments', ShowCommitmentsController::class)->name('commitments.index');

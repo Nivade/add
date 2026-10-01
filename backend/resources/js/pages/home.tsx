@@ -1,12 +1,12 @@
-import type { HomeData, NeedsAttentionData } from '@add/shared';
+import type { ComingUpData, HomeData, NeedsAttentionData } from '@add/shared';
 import {
+    comingUpCopy,
     commitmentCopy,
     focusCopy,
     homeBands,
     homeCopy,
     nothingNeedsYou,
     partWayLine,
-    remindAfterCopy,
     restCountLine,
     returnCopy,
     rightNowMeta,
@@ -16,7 +16,6 @@ import {
 } from '@add/shared';
 import { Form, Head, Link, router, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { BackwardsPlan } from '@/components/backwards-plan';
 import { fieldClassName } from '@/lib/field';
 import { CheckIn } from '@/components/check-in';
 import { CommitmentRow } from '@/components/commitment-row';
@@ -33,7 +32,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { focus, overwhelmed } from '@/routes';
 import ai from '@/routes/ai';
-import calendarEvents from '@/routes/calendar-events';
+import appointments from '@/routes/appointments';
 import commitments from '@/routes/commitments';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
@@ -104,6 +103,51 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
                 responses={waitingForResponses}
             />
         </div>
+    );
+}
+
+/** When it is and what to do about it; the settings live on the appointment's own page. */
+function ComingUp({ comingUp }: { comingUp: ComingUpData }) {
+    const leave = comingUp.plan?.rungs.find((rung) => rung.rung === 'leave');
+    const page = appointments.show({ kind: comingUp.kind, id: comingUp.id });
+
+    return (
+        <Band label={homeBands.comingUp}>
+            <p>
+                {comingUpCopy.line(comingUp.title, comingUp.inWords)}
+                {comingUp.kind === 'calendar_event' && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        {comingUpCopy.fromCalendar}
+                    </span>
+                )}
+            </p>
+            {leave && (
+                <p className="text-muted-foreground">
+                    {comingUpCopy.leaveAt(leave.clock)}
+                </p>
+            )}
+            {comingUp.inferred && (
+                <Form
+                    {...intentions.deadline.form(comingUp.id)}
+                    options={{ preserveScroll: true }}
+                    className="mt-2 flex flex-wrap items-baseline gap-x-4"
+                >
+                    <span className="text-muted-foreground">
+                        {comingUpCopy.inferred}
+                    </span>
+                    <Button type="submit" variant="quiet">
+                        {comingUpCopy.confirm}
+                    </Button>
+                    <Link href={page} className={quietLineClassName}>
+                        {comingUpCopy.change}
+                    </Link>
+                </Form>
+            )}
+            <Link href={page} className={quietLineClassName}>
+                {comingUpCopy.planFor}
+            </Link>
+        </Band>
     );
 }
 
@@ -250,65 +294,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                     </Band>
                 )}
 
-                {comingUp && (
-                    <Band label={homeBands.comingUp}>
-                        <p>
-                            {comingUp.title}
-                            <span className="text-muted-foreground">
-                                {' '}
-                                · {comingUp.inWords}
-                                {comingUp.kind === 'calendar_event' &&
-                                    ' · from your calendar'}
-                            </span>
-                        </p>
-                        {comingUp.inferred && (
-                            <Form
-                                {...intentions.deadline.form(comingUp.id)}
-                                className="mt-2 flex flex-wrap items-baseline gap-3"
-                            >
-                                <span className="text-muted-foreground">
-                                    read from what you wrote
-                                </span>
-                                <Button type="submit" variant="quiet">
-                                    That{"'"}s right
-                                </Button>
-                            </Form>
-                        )}
-                        {comingUp.plan && (
-                            <BackwardsPlan plan={comingUp.plan} />
-                        )}
-                        {comingUp.kind === 'calendar_event' && (
-                            <Form
-                                {...calendarEvents.futureReminder.form(
-                                    comingUp.id,
-                                )}
-                                options={{ preserveScroll: true }}
-                                resetOnSuccess
-                                className="mt-3 flex flex-wrap items-center gap-3"
-                            >
-                                <input
-                                    name="message"
-                                    placeholder={remindAfterCopy.question}
-                                    aria-label={remindAfterCopy.question}
-                                    className={cn(
-                                        fieldClassName,
-                                        'w-auto min-w-0 flex-1',
-                                    )}
-                                />
-                                <input
-                                    type="number"
-                                    name="offset_minutes"
-                                    defaultValue={30}
-                                    aria-label="Minutes after"
-                                    className={cn(fieldClassName, 'w-20')}
-                                />
-                                <Button type="submit" variant="quiet">
-                                    {remindAfterCopy.action}
-                                </Button>
-                            </Form>
-                        )}
-                    </Band>
-                )}
+                {comingUp && <ComingUp comingUp={comingUp} />}
 
                 {needsAttention.length > 0 && (
                     <Band label={homeBands.needsAttention}>

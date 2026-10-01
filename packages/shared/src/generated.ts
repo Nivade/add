@@ -30,6 +30,7 @@ kind: AppointmentKind,
 id: string,
 title: string,
 inWords: string,
+localAt: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };

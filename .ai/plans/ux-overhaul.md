@@ -322,7 +322,7 @@ desktop                                          phone
   - `AdvanceSession::handle` also passes over steps this session reported stuck with a reason whose `resolution()` is `StuckResolution::Split` (`$session->events()->where('type', ExecutionEventType::Stuck)->whereIn('payload->reason', [...])->pluck('step_id')`), combined with the caller's `$passOver` in the same `reject()`; such steps still count as left. A split's new steps have new ids and are offered.
   - Tests in `backend/tests/Feature/Execution/StuckTest.php`: each acknowledgement; the notice clears after the next Done; a too-big step is not offered again in the same session after its sibling is done, and the session ends `Continued` when only it is left; a note is stored.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution` passes.
-- [ ] **4.6 Home stops asking for configuration.** Invoke skills: `laravel-actions`, `inertia-react-development`.
+- [x] **4.6 Home stops asking for configuration.** Invoke skills: `laravel-actions`, `inertia-react-development`.
   - `ComingUpData` gains `string $localAt` (`Y-m-d\TH:i` in the person's zone).
   - New `backend/app/Actions/Intentions/CorrectDeadline.php`: `handle(Intention $intention, ?CarbonImmutable $deadlineAt): Intention`; sets `deadline_at` (null clears it) and `deadline_confirmed_at = now()` when not null.
   - New `backend/app/Http/Requests/CorrectDeadlineRequest.php`: `deadline_at` nullable `date_format:Y-m-d\TH:i`; `deadlineAt(User $user): ?CarbonImmutable` reads it in the person's zone.

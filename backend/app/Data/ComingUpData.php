@@ -21,6 +21,7 @@ class ComingUpData extends Data
         public string $id,
         public string $title,
         public string $inWords,
+        public string $localAt,
         public bool $inferred,
         public ?BackwardsPlanData $plan,
     ) {}
@@ -41,6 +42,7 @@ class ComingUpData extends Data
                 'other' => $now,
                 'syntax' => CarbonInterface::DIFF_RELATIVE_TO_NOW,
             ]),
+            $at->setTimezone($now->getTimezone())->format('Y-m-d\TH:i'),
             $appointment->appointmentInferred(),
             BackwardsPlan::for($appointment, $now),
         );

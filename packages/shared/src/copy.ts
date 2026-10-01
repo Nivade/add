@@ -183,6 +183,22 @@ export const homeBands = {
     sorted: 'What you just wrote',
 } as const;
 
+/** The next real time constraint as sentences on home, and the page where its settings live. */
+export const comingUpCopy = {
+    line: (title: string, inWords: string) => `${title}, ${inWords}.`,
+    leaveAt: (clock: string) => `Leave at ${clock}.`,
+    fromCalendar: 'From your calendar.',
+    planFor: 'Plan for it',
+    inferred: 'Read from what you wrote.',
+    confirm: "That's right",
+    change: 'Change',
+    when: (inWords: string) => `${inWords.charAt(0).toUpperCase()}${inWords.slice(1)}.`,
+    whenQuestion: 'When is it?',
+    save: 'Save',
+    noDeadline: "There's no deadline",
+    back: 'Back to home',
+} as const;
+
 export const remindAfterCopy = {
     action: 'Remind me after',
     question: 'What should future you hear?',
