@@ -1,7 +1,7 @@
 import type { ExecutionStateData } from '@add/shared';
 import { focusCopy, returnCopy, stepMeta, stuckReasonsFor } from '@add/shared';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useId, useLayoutEffect, useState } from 'react';
 import { KeyHint } from '@/components/key-hint';
 import { NowButton } from '@/components/now-button';
 import { Meta, OneThing } from '@/components/one-thing';
@@ -18,15 +18,40 @@ import {
 import { useShortcuts } from '@/hooks/use-shortcuts';
 import focusRoutes from '@/routes/focus';
 
+const controlClassName =
+    'h-full min-h-16 w-full flex-col gap-0.5 py-2 whitespace-normal';
+
+/** Three equal controls under a plain name for what they act on. */
+function ControlRow({
+    label,
+    children,
+}: {
+    label: string;
+    children: React.ReactNode;
+}) {
+    const id = useId();
+
+    return (
+        <div role="group" aria-labelledby={id} className="flex flex-col gap-2">
+            <p id={id} className="text-muted-foreground text-small">
+                {label}
+            </p>
+            <div className="grid grid-cols-3 gap-3">{children}</div>
+        </div>
+    );
+}
+
 /** Six controls, one size, one weight: skipping weighs what finishing weighs. */
 function Control({
     label,
+    hint,
     keys,
     form,
     stepId,
     onClick,
 }: {
     label: string;
+    hint: string;
     keys: string[];
     form?: { action: string; method: 'post' };
     stepId?: string;
@@ -37,10 +62,19 @@ function Control({
             keys.map((key) => [key, () => ref.current?.click()]),
         ),
     );
+    const hintId = useId();
     const content = (
         <>
-            {label}
-            <KeyHint>{keys[0]}</KeyHint>
+            <span className="flex items-baseline gap-2">
+                {label}
+                <KeyHint>{keys[0]}</KeyHint>
+            </span>
+            <span
+                id={hintId}
+                className="text-small text-muted-foreground hidden font-normal sm:block"
+            >
+                {hint}
+            </span>
         </>
     );
 
@@ -51,8 +85,10 @@ function Control({
                 type="button"
                 variant="outline"
                 size="control"
-                className="w-full"
+                className={controlClassName}
                 aria-keyshortcuts={keys.join(' ')}
+                aria-label={label}
+                aria-describedby={hintId}
                 onClick={onClick}
             >
                 {content}
@@ -68,8 +104,10 @@ function Control({
                     type="submit"
                     variant="outline"
                     size="control"
-                    className="w-full"
+                    className={controlClassName}
                     aria-keyshortcuts={keys.join(' ')}
+                    aria-label={label}
+                    aria-describedby={hintId}
                     aria-disabled={processing}
                 >
                     {content}
@@ -110,6 +148,10 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
     const step = session.currentStep;
     const paused = session.pausedAt !== null;
 
+    useLayoutEffect(() => {
+        document.querySelector<HTMLElement>('main h1')?.focus();
+    }, [state]);
+
     return (
         <>
             <Head title={intention.title} />
@@ -148,7 +190,10 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                     </div>
                 ) : (
                     <>
-                        <div className="flex flex-col items-start gap-4">
+                        <div
+                            key={step?.id}
+                            className="animate-in fade-in slide-in-from-bottom-2 flex flex-col items-start gap-4 duration-300 motion-reduce:animate-none"
+                        >
                             <OneThing>{step?.title}</OneThing>
                             {step && <Meta>{stepMeta(step)}</Meta>}
                             {step && (
@@ -161,43 +206,51 @@ export default function Focus({ state }: { state: ExecutionStateData }) {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        <ControlRow label={focusCopy.thisStep}>
                             <Control
                                 label={focusCopy.done}
+                                hint={focusCopy.hints.done}
                                 keys={['d']}
                                 form={focusRoutes.completeStep.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.skip}
+                                hint={focusCopy.hints.skip}
                                 keys={['s']}
                                 form={focusRoutes.skipStep.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
+                                label={focusCopy.stuck}
+                                hint={focusCopy.hints.stuck}
+                                keys={['?', 'h']}
+                                onClick={() => setStuckOpen(true)}
+                            />
+                        </ControlRow>
+                        <ControlRow label={focusCopy.stepAway}>
+                            <Control
                                 label={focusCopy.pause}
+                                hint={focusCopy.hints.pause}
                                 keys={['p']}
                                 form={focusRoutes.pause.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
-                                label={focusCopy.stuck}
-                                keys={['?', 'h']}
-                                onClick={() => setStuckOpen(true)}
-                            />
-                            <Control
                                 label={focusCopy.distracted}
+                                hint={focusCopy.hints.distracted}
                                 keys={['r']}
                                 form={focusRoutes.distracted.form(session.id)}
                                 stepId={step?.id}
                             />
                             <Control
                                 label={focusCopy.stop}
+                                hint={focusCopy.hints.stop}
                                 keys={['x']}
                                 form={focusRoutes.stop.form(session.id)}
                                 stepId={step?.id}
                             />
-                        </div>
+                        </ControlRow>
                     </>
                 )}
 

@@ -25,7 +25,8 @@ function focusedDescriptor(mixed $page): string
             var el = document.activeElement;
             if (!el) { return JSON.stringify({label: '', visible: false}); }
             var style = getComputedStyle(el);
-            var visible = style.boxShadow !== 'none' || style.outlineStyle !== 'none';
+            var parked = el.tagName === 'H1' && el.getAttribute('tabindex') === '-1';
+            var visible = parked || style.boxShadow !== 'none' || style.outlineStyle !== 'none';
             var copy = el.cloneNode(true);
             copy.querySelectorAll('kbd').forEach(function (kbd) { kbd.remove(); });
             var label = el.getAttribute('aria-label') || (copy.textContent || '').trim();
@@ -79,10 +80,10 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
 
     // Start.
     $page->keys(button('Start'), 'Enter');
-
-    expect(focusedDescriptor($page))->toBe('Start');
     $page->assertPathIs('/focus')
         ->assertSee('Put the thing you need on the desk.');
+
+    expect(focusedDescriptor($page))->toBe('Put the thing you need on the desk.');
 
     // Done, by its key rather than by reaching the button.
     $page->keys('h1[tabindex]', 'd');
@@ -91,25 +92,29 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     $page->assertSee('Open it.')
         ->assertSee('1 of 3 steps done.');
 
+    expect(focusedDescriptor($page))->toBe('Open it.');
+
     // Distracted, and welcomed back.
     $page->keys(button('I got distracted'), 'Enter');
-    expect(focusedDescriptor($page))->toBe('I got distracted');
     $page->assertSee('Welcome back.')
         ->assertSee('You were working on');
+
+    // Focus follows the screen to its one thing, rather than staying on a button that is gone.
+    expect(focusedDescriptor($page))->toBe('Welcome back.');
 
     $page->keys('h1[tabindex]', 'Enter');
     $page->assertSee('Open it.');
 
     // Paused, which is not a return.
     $page->keys(button('Pause'), 'Enter');
-
-    expect(focusedDescriptor($page))->toBe('Pause');
     $page->assertSee('Paused.');
 
-    $page->keys(button('Continue'), 'Enter');
+    expect(focusedDescriptor($page))->toBe('Paused.');
 
-    expect(focusedDescriptor($page))->toBe('Continue');
+    $page->keys(button('Continue'), 'Enter');
     $page->assertSee('Open it.');
+
+    expect(focusedDescriptor($page))->toBe('Open it.');
 
     $page->keys('h1[tabindex]', 'd');
     $page->assertSee('Write the first line.')

@@ -299,7 +299,7 @@ desktop                                          phone
   - New `NowButton` in `backend/resources/js/components/now-button.tsx`: `variant="now" size="action"`, its key hint and `aria-keyshortcuts`; Start and Continue in `one-thing.tsx`, `home.tsx` and `focus.tsx` use it and nothing else does.
   - `JourneyTest.php` drives Done and Continue by these keys.
   - Check: `npm run test:browser` passes.
-- [ ] **4.3 Six controls in two honest rows.** Invoke skills: `frontend-design`.
+- [x] **4.3 Six controls in two honest rows.** Invoke skills: `frontend-design`.
   - Focus controls as two `role="group"` rows, all six equal (`size="control"`): "This step" — Done, Skip, I'm stuck; "Step away" — Pause, I got distracted, Stop.
   - `packages/shared/src/copy.ts` `focusCopy` gains `hints`: Done "Finished it", Skip "Not this one now", I'm stuck "Tell me what's in the way", Pause "Back in a bit", I got distracted "I drifted off", Stop "Done for now".
   - After any control, focus moves to the `h1`; the step container is keyed by step id for the motion beat.

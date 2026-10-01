@@ -203,6 +203,16 @@ export const focusCopy = {
     stop: 'Stop',
     stuck: "I'm stuck",
     distracted: 'I got distracted',
+    thisStep: 'This step',
+    stepAway: 'Step away',
+    hints: {
+        done: 'Finished it',
+        skip: 'Not this one now',
+        stuck: "Tell me what's in the way",
+        pause: 'Back in a bit',
+        distracted: 'I drifted off',
+        stop: 'Done for now',
+    },
     stuckQuestion: "What's blocking you?",
     stuckMeta: 'every answer leads somewhere',
 } as const;
