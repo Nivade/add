@@ -1,0 +1,107 @@
+# Built by the ci-image job from docker/ci/Dockerfile: PHP, its extensions, Composer and Node, installed once.
+.laravel:
+  image: $CI_REGISTRY_IMAGE/ci:$CI_IMAGE_TAG
+  needs:
+    - job: ci-image
+      optional: true
+  variables:
+    CI_IMAGE_TAG: php-8.5
+    COMPOSER_CACHE_DIR: .cache/composer
+    npm_config_cache: .cache/npm
+    CACHE_STORE: array
+    SESSION_DRIVER: array
+    QUEUE_CONNECTION: sync
+    HUSKY: '0'
+    PLAYWRIGHT_BROWSERS_PATH: $CI_PROJECT_DIR/backend/.cache/ms-playwright
+  cache:
+    - key:
+        files:
+          - 'backend/composer.lock'
+      paths:
+        - 'backend/.cache/composer/'
+    - key:
+        files:
+          - 'package-lock.json'
+      paths:
+        - 'backend/.cache/npm/'
+    - key: playwright
+      paths:
+        - 'backend/.cache/ms-playwright/'
+    # GitLab keeps protected-branch caches apart by default, so the default-branch fallback needs that setting off.
+    - key: analysis-$CI_COMMIT_REF_SLUG
+      fallback_keys:
+        - analysis-$CI_DEFAULT_BRANCH
+      paths:
+        - 'backend/storage/phpstan/'
+        - 'backend/storage/rector/'
+  # One shell runs before_script and script, so the cd holds for both.
+  before_script:
+    - cd backend
+    - composer setup
+
+# composer:2 already has composer and git, only npm is missing; no vendor install or PHP extensions needed.
+audit:
+  image: composer:2
+  stage: test
+  before_script:
+    - apk add --no-cache npm
+  cache: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - cd backend
+    - composer audit --locked --abandoned=report
+    # The workspaces share the root lockfile.
+    - cd .. && npm audit --omit=dev --audit-level=high
+
+# No database service: phpunit.xml pins the suite to sqlite :memory:, which is
+# what every developer runs. PHPUnit <env> does not override an already-set
+# process variable unless force="true", so do not add DB_* variables here.
+tests:
+  extends: .laravel
+  stage: test
+  rules:
+    # The image ci-image built for this merge request, when it changes the Dockerfile.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - docker/ci/Dockerfile
+      variables:
+        CI_IMAGE_TAG: php-8.5-mr$CI_MERGE_REQUEST_IID
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - composer ci:check
+    - node_modules/.bin/playwright install --with-deps chromium
+    - composer test:browser
+    # Both frontends read packages/shared, and ci:check only typechecks backend's own tree.
+    - (cd .. && npm run typecheck)
+    # A stale generated.ts breaks both frontends at once and nothing else notices.
+    - php artisan typescript:transform
+    - git diff --exit-code ../packages/shared/src/generated.ts
+
+# Real MySQL for what sqlite cannot see: fulltext, JSON columns, collation,
+# strict mode. Runs from a pipeline schedule or a manual "Run pipeline".
+tests:mysql:
+  extends: .laravel
+  stage: test
+  interruptible: false
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  services:
+    - name: mysql:8.4
+      alias: mysql
+  variables:
+    MYSQL_ROOT_PASSWORD: password
+    MYSQL_DATABASE: laravel
+    DB_CONNECTION: mysql
+    DB_HOST: mysql
+    DB_PORT: 3306
+    DB_DATABASE: laravel
+    DB_USERNAME: root
+    DB_PASSWORD: password
+  script:
+    - composer setup:db
+    - php artisan test --parallel

@@ -1,0 +1,12 @@
+# The pre-push hook is local and --no-verify skips it; this is the gate.
+branch-name:
+  stage: test
+  image: alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    GIT_DEPTH: 1
+  before_script: []
+  cache: []
+  script:
+    - sh .husky/check-branch-name "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" --ci
