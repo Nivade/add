@@ -1,0 +1,1 @@
+../../backend/.ai/rules/api-and-data.md

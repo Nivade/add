@@ -1,22 +1,92 @@
 ---
 name: finish-branch
-description: Run the fixed sequence that turns a branch into an open PR — code-review, then simplify, then reconcile plan state, then the local suite, then push. Use when the person says a branch is ready to merge, done, or asks to finish the branch or open the PR. Does not merge; that stays the person's call after CI.
+description: Turn a finished branch into an open MR/PR — review sized to the diff, suite green, pushed. Use when the work is done, or on "finish the branch", "push and open an MR/PR", "ready to merge". Stops before merging.
+metadata:
+  version: 3.0.0
+  gate: claude
+  keywords:
+    - '\bfinish(ing)?\b.{0,20}\bbranch\b'
+    - '\b(push|open|create)\b.{0,20}\b(mr|pr|merge request|pull request)s?\b'
+    - '\bready to merge\b'
 ---
 
-The person's word that a branch is done triggers this, not any commit or file condition. Runs `code-review` then `simplify`, in that order, exactly once each — `merge-gate` (`.ai/hooks/merge-gate.py`) refuses `gh pr merge` on this branch until both are recorded against its current fork point, so skipping a step here only delays it to the merge attempt.
+# Finish Branch
 
-## Steps
+Six steps, in order. Each ends on its check; the next starts only once it holds.
 
-1. **Refuse a dirty tree.** `git status --short`. If anything is uncommitted, ask the person whether to commit it or leave it out — do not guess.
-2. **Pin the fork point once.** `git fetch origin main` then `git merge-base origin/main HEAD`. Reuse this value for both sub-skills; recomputing mid-run risks the two skills disagreeing about the diff.
-3. **`code-review`**, with the fork point as the fixed point. Present its findings to the person, apply the ones they accept, and commit the fixes.
-4. **`simplify`**, on `git diff <fork>...HEAD` — the whole branch, not only step 3's commits. Apply and commit.
-5. **Reconcile plan state.** Does this branch's diff execute a plan under `.ai/plans/` — a slice file, or a root-level one-off like `hardening.md` or an archived refactor pass? If so, flip its `**State:**` header (and the spine row, for a slice) before opening the PR, not after — `update-resume`'s "A plan this session finished" section and `slice-workflow`'s archive checklist carry how. A plan outside the spine table is the easiest to forget, because nothing else gates it.
-6. **The local suite**: `npm run composer -- ci:check` and `npm run test:browser`, which is what CI runs, then `npm run typecheck` for mobile. Fix or report failures before continuing.
-7. **Push and open the PR** (`gh pr create`, or update the existing one). No attribution lines.
+## 1. Clean tree, fork point
 
-Stop here. Merging is the person's call, after CI — this skill never runs `gh pr merge`.
+`git status --short` prints nothing. If it prints anything, ask whether to commit it or leave it out.
 
-## Why the order is fixed
+```bash
+git fetch origin <default>
+fork=$(git merge-base origin/<default> HEAD)
+```
 
-`simplify` after `code-review` means it sees the fixed diff, not a version `code-review` is about to flag. Running them in the other order, or only one, is what `merge-gate` exists to catch — it reads `claude-review/<branch>.json` under the git common dir and checks for a `code-review` entry followed by a `simplify` entry, both stamped with the fork point the branch carries right now. A commit made after `simplify` passes: it is the fix for what `simplify` found, not new unreviewed work. A rebase or a merge from `main` moves the fork point and asks for both again, from this skill, not by chasing the two sub-skills separately.
+`<default>` is `origin/HEAD`'s target, else a local `main` or `master`. Pin `fork` once and reuse it.
+
+The branch name `feat|fix/<n>-<slug>` gives the ticket `<n>`. Read it with `glab issue view <n>` or `gh issue view <n>`. Its `Part of #<spec>` line names the spec; with none, the ticket is the spec.
+
+## 2. Size the review
+
+When `code-review` already ran this session over `$fork...HEAD` (the last step of `/implement` and `/implement-spec`), reuse its findings and size only the commits after it: `.claude/hooks/lifecycle.sh tier <reviewed HEAD>`. Otherwise:
+
+```bash
+.claude/hooks/lifecycle.sh tier "$fork"
+```
+
+One JSON line: `tier` (`none`, `docs`, `light`, `full`), `security`, `reason`. Without the script, the tier is `full` and `security` is true.
+
+## 3. Review
+
+| Tier | Run |
+| --- | --- |
+| `none` | nothing |
+| `docs`, `light` | `code-review` |
+| `full` | `simplify`, args `<branch>`; apply and commit its fixes; then `code-review` |
+
+When `security` is true, run `security-review` after that.
+
+`code-review` args: `<fork sha>. Spec: #<spec>. Standards: CODING_STANDARDS.md. Launch both sub-agents with subagent_type caveman:cavecrew-reviewer.`
+
+- `simplify` goes first so `code-review` reads the code that will merge, `simplify`'s rewrites included.
+- Launch `simplify`'s four review agents and `security-review`'s sub-tasks with `subagent_type: caveman:cavecrew-reviewer`.
+
+Route every finding:
+
+- Standards hard violation, Spec "missing", "partial" or "looks wrong", any `simplify` or `security-review` fix: apply.
+- Smell (a judgement call): apply when the fix is local and obvious, otherwise `note-finding`.
+- Scope creep: keep it and list it as noted.
+- About code the branch did not touch: `note-finding`.
+
+Commit the fixes (`fix:`, `refactor:`), then pin `reviewed=$(git rev-parse --short HEAD)`: the commit the review covers. Check: every finding sits in exactly one list, applied or noted.
+
+## 4. Suite
+
+The project's CI entry point: `composer ci:check` where it exists, else `composer test`, or the scripts its `CLAUDE.md` names. Fix and commit until it exits 0.
+
+When step 4 added commits, `.claude/hooks/lifecycle.sh tier "$reviewed"` sizes them. Anything but `none` goes back through step 3 for that delta, then moves `reviewed` to the new `HEAD`.
+
+## 5. Push and open
+
+```bash
+git push -u origin HEAD
+glab mr create --target-branch <default> --remove-source-branch --label <label> --title "<conventional header>" --description "<body>"
+gh pr create --base <default> --label <label> --title "<conventional header>" --body "<body>"
+```
+
+`glab` on a GitLab remote, `gh` on GitHub; on any other remote, push and say there is nowhere to open it. `<label>` is `bug` when the issue carries it, else `enhancement`. The body follows the `pr` template (Summary, Evidence, Merge Danger), then:
+
+- `## Findings`: the applied list and the noted list, each noted item with its issue link.
+- `Closes #<ticket>` per ticket this MR finishes.
+- `Closes #<spec>` when this MR closes the spec's last open ticket.
+- Last line: `Review: <tier> @ <reviewed> — applied <a>, noted <n>`, adding `, security` when it ran. The merge gate re-sizes everything after `<reviewed>`, so later commits never ride on an old review.
+- No attribution lines.
+
+## 6. Report and stop
+
+Give the MR/PR link, the tier, and both finding lists. Merging is the user's call; `after-merge` takes over once it is merged.
+
+## After the MR is open
+
+Commits pushed later (a CI fix, review feedback) need review when `lifecycle.sh tier <reviewed>` says so: run step 3 on that delta, step 4, push, then replace the `Review:` line (`glab mr update <n> --description`, `gh pr edit <n> --body`). The merge gate refuses a head that moved past the reviewed commit with anything that needs review.

@@ -87,15 +87,16 @@ and the codebase holds that line structurally:
 - About 450 Pest tests, including scenario tests for the resolver and browser
   tests in real Chromium via `pest-plugin-browser`.
 - PHPStan (Larastan) level 7, Pint, Rector, and `tsc` across all workspaces.
-- GitHub Actions: tests on SQLite and on MySQL 8.4, commit message and branch
+- GitLab CI: tests on SQLite and on MySQL 8.4, commit message and branch
   name checks, and a lint for sloppy code patterns.
 - Accessibility is part of the definition of done: keyboard reachable, screen
   reader labels, visible focus, reduced motion honoured, no colour-only state.
   Lighthouse scores 100 for accessibility on the main web screens.
-- Work is planned as slices in [`.ai/plans/`](.ai/plans/), each usable on its
-  own, with design, threat model where needed, and a done-when bar.
-  [`.ai/plans/executive-function-os.md`](.ai/plans/executive-function-os.md) is
-  the map. Invariants and traps live in [`.ai/rules/`](.ai/rules/).
+- Work is tracked as specs and tickets in the issue tracker. The product
+  spec is [`docs/product-spec.md`](docs/product-spec.md), deliberate deviations
+  from it are [ADRs](docs/adr/), and invariants and traps live in
+  [`.ai/rules/`](.ai/rules/). The slice plans the first eleven slices were
+  built from are kept in [`.ai/plans/legacy/`](.ai/plans/legacy/).
 
 ## Running it
 

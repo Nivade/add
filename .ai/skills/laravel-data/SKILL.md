@@ -2,8 +2,12 @@
 name: laravel-data
 description: 'Use when creating, editing, or reviewing spatie/laravel-data Data objects in this package — anything under src/Data/**, any class extending Spatie\LaravelData\Data, Data as an Action input/output type crossing Fortify''s array $input boundary, a Data class cast on an Eloquent JSON column, or an API endpoint returning a Data object. Covers: make:data (moved into src/ by hand, Testbench-style), domain namespacing, validation (rules(), validation attributes, inference, ::validateAndCreate), Eloquent casting, Optional/partial updates, DataCollection, API output, and when a Data object is the wrong tool. Trigger on "DTO", "data transfer object", "typed input", "Data object", spatie/laravel-data, Optional::class, or DataCollectionOf.'
 license: MIT
+paths:
+  - 'backend/app/Data/**'
 metadata:
   author: project
+  keywords:
+    - '\b(data object|dto|laravel-data)\b'
 ---
 
 # spatie/laravel-data (this package)

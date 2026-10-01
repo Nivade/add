@@ -24,9 +24,10 @@
     "lint": "cd backend && ./vendor/bin/sail php vendor/bin/pint --test",
     "stan": "cd backend && ./vendor/bin/sail php vendor/bin/phpstan analyse --memory-limit=1G",
     "types:generate": "cd backend && ./vendor/bin/sail artisan typescript:transform",
-    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update",
+    "boost:update": "cd backend && ./vendor/bin/sail artisan boost:update && cd .. && npm run skills:link",
     "postinstall": "mkdir -p backend/node_modules/.bin && ln -sf ../../../node_modules/playwright/cli.js backend/node_modules/.bin/playwright",
-    "skills:restore": "npx skills experimental_install && rm -rf $(node -e \"console.log(Object.keys(require('./skills-lock.json').skills).map(k=>'.ai/skills/'+k).join(' '))\") && mv .agents/skills/* .ai/skills/ && rm -rf .agents"
+    "skills:restore": "npx -y skills experimental_install && npm run skills:link",
+    "skills:link": "mkdir -p .claude/skills && for d in .agents/skills/*/; do n=$(basename \"$d\"); ln -sfn \"../../.agents/skills/$n\" \".claude/skills/$n\"; done"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

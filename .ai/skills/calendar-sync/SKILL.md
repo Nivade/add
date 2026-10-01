@@ -1,6 +1,14 @@
 ---
 name: calendar-sync
 description: Use when touching the calendar surface — `backend/app/Actions/Calendar/**`, `backend/app/Support/Calendar/**`, `backend/app/Data/Calendar/**`, `App\Contracts\CalendarSource`, `App\Contracts\Appointment`, the `calendar_events` table, or `backend/config/calendar.php`. Also use when adding a calendar provider, when an event is stale or disappears, and when deciding whether something belongs on the `Appointment` contract. Trigger on "calendar", "calendar event", "sync", "ics", "google calendar", "appointment", "CalendarSource", "calendar:sync".
+paths:
+  - 'backend/app/Actions/Calendar/**'
+  - 'backend/app/Support/Calendar/**'
+  - 'backend/app/Data/Calendar/**'
+  - 'backend/config/calendar.php'
+metadata:
+  keywords:
+    - '\b(calendar|appointment|ics)\b'
 ---
 
 # Calendar

@@ -1,6 +1,10 @@
 ---
 name: sail-and-root-scripts
 description: Use before running any PHP, Artisan, Composer, npm, Pest, Pint or PHPStan command in this repo — and before telling the user to run one. This monorepo's commands go through root npm scripts that wrap Sail, so a bare `php artisan`, a bare `composer`, or a `vendor/bin/sail` invoked from the wrong directory either fails or runs against the wrong PHP. Trigger on "run the tests", "run artisan", "migrate", "install a package", "lint", "phpstan", "regenerate types", "boost:update", "sail", "start the containers", or any command a reply is about to put in a code block.
+metadata:
+  keywords:
+    - '\b(artisan|composer|sail|migrate|npm run|lint|pint|container)\b'
+    - '\brun\b.{0,10}\btests?\b'
 ---
 
 # Running commands in this repo

@@ -1,0 +1,1 @@
+../../backend/.ai/rules/ai-layer.md

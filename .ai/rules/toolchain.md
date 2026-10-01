@@ -9,7 +9,9 @@ paths:
   - 'backend/composer.json'
   - 'backend/composer-dependency-analyser.php'
   - '.husky/**'
-  - '.github/workflows/**'
+  - '.gitlab-ci.yml'
+  - '.gitlab/ci/**'
+  - 'docker/ci/**'
 ---
 # Toolchain and Monorepo
 
@@ -25,9 +27,9 @@ tree in the root `node_modules` also makes npm nest what should hoist, so a
 consolidation is `rm -rf node_modules */node_modules package-lock.json` and one
 install, never an incremental fix.
 
-CI checks out the repo root, so every workflow needs
-`defaults.run.working-directory: backend` and root-relative paths in any `with:`
-block — `hashFiles('backend/composer.lock')`, not `composer.lock`.
+CI checks out the repo root, so every GitLab job `cd backend`s first, and a
+cache key names its file from the root: `backend/composer.lock`, but the root
+`package-lock.json`, since no workspace has one of its own.
 
 Every root script routes through Sail — `artisan`, `composer`, `test`,
 `test:serial`, `test:impact`, `lint`, `stan`, `types:generate`, `boost:update`. The container is
@@ -104,20 +106,22 @@ Removing a service means removing its named volume **and** that volume's
 `driver: local` line; orphaning one breaks the YAML in a
 way the error does not point at. Validate with `docker compose config --quiet`.
 
-## devtools: read the report, write one component at a time
+## devtools runs on the host, and its monorepo gaps are fixed by hand
 
 `devtools:sync` without `--write` only reports, and is how a devtools upgrade is
-read. Writing goes through `--only=<component>`: a bare `--write` also reverts the
-customised `setup` and `ci:check` scripts. Edited files are merged by hand from
-`--diff`.
+read; the `upgrade-dependency` skill carries the rest. Run it on the host
+(`npm run artisan:host -- devtools:sync`): third-party skills install through
+`npx skills` from the git root, which Sail cannot see. A bare `--write` leaves the
+customised `setup`, `test` and `ci:check` scripts alone and reports them as
+differing; edited files are merged by hand from `--diff`.
 
-The `claude` component's hooks stay out: `.ai/hooks/` keeps skill naming and the
-merge gate, because it also names the rules for a path and prompts before a
-generated file is written. Revisit once devtools' skill hook loads `vendor/` from
-`backend/` rather than the repo root.
+In this monorepo, `sync --write` does not write a hook script that is missing,
+and `devtools:install` writes its gitignore entries into `backend/.gitignore`;
+both are fixed by hand, the second in the root `.gitignore`.
 
-Shipped rules stay out too: `.ai/rules/index.md` is hand-maintained, and the
-agent-context install regenerates it, with `html/` paths when run inside Sail.
+devtools' own skills (`start-work`, `whats-next`, `after-merge` and the rest) are
+copied into `.ai/skills/`, because the skill hook reads only there; the
+third-party ones in `.agents/skills/` are started by hand and need no hook. `phpstan-larastan` is this repo's own rewrite and stays one.
 
 `devtools:check-agent-content` stays out of `composer test`: it wants
 `metadata.version` on every skill, vendored ones included.

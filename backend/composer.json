@@ -177,7 +177,7 @@
                 "sloppy",
                 "vite"
             ],
-            "ci-host": "github",
+            "ci-host": "gitlab",
             "php": "8.5",
             "added": {
                 "sloppy": {
@@ -198,7 +198,11 @@
                 },
                 "claude": {
                     "packages": [],
-                    "gitignore": [],
+                    "gitignore": [
+                        "/.ai/plans/*",
+                        "!/.ai/plans/legacy/",
+                        "/.claude/plans/"
+                    ],
                     "entries": {
                         ".claude/settings.json permissions.allow": {
                             "Bash(composer test *)": null,
@@ -263,7 +267,40 @@
                     "gitignore": [],
                     "entries": []
                 }
-            }
+            },
+            "declined": [
+                "diagnosing-bugs",
+                "handoff",
+                "laravel-attributes",
+                "laravel-security",
+                "refactor-freely",
+                "research",
+                "running-commands",
+                "solid-php",
+                "tdd",
+                "vite",
+                "writing-for-agents"
+            ],
+            "agent-context": {
+                "backend/.ai/rules/nvade-devtools-general.md": "2b316f93ee808d1c",
+                "backend/.ai/rules/nvade-devtools-laravel.md": "e444885dda0d8824",
+                "backend/.ai/rules/nvade-devtools-rector.md": "429dfc12d96cb1e7",
+                "backend/.ai/rules/nvade-devtools-testing.md": "dee4871ff6c08648",
+                ".claude/rules/backend-ai-layer.md": "",
+                ".claude/rules/backend-api-and-data.md": "",
+                ".claude/rules/backend-domain-model.md": "",
+                ".claude/rules/backend-general.md": "",
+                ".claude/rules/backend-nvade-devtools-general.md": "",
+                ".claude/rules/backend-nvade-devtools-laravel.md": "",
+                ".claude/rules/backend-nvade-devtools-rector.md": "",
+                ".claude/rules/backend-nvade-devtools-testing.md": "",
+                ".claude/rules/backend-overview.md": "",
+                ".claude/rules/backend-product-invariants.md": "",
+                ".claude/rules/backend-support-and-concerns.md": "",
+                ".claude/rules/backend-testing.md": "",
+                ".claude/rules/backend-toolchain.md": ""
+            },
+            "db": "mysql"
         }
     },
     "config": {
