@@ -1,12 +1,11 @@
 # Executive Function OS — product spec
 
 The prompt the repo was created from, verbatim. Source of truth for product
-intent; `executive-function-os.md` is the build plan derived from it and records
-where the build deliberately deviates.
+intent; [`adr/`](adr/) records where the build deliberately deviates from it.
 
-Section numbers are anchors — the slice plans cite them. Edit the text here only
-to correct a transcription error, and never renumber. A slice plan references a
-section rather than restating it, so that the two cannot drift.
+Section numbers are anchors — rules, ADRs and specs in the tracker cite them.
+Edit the text here only to correct a transcription error, and never renumber.
+Cite a section rather than restating it, so that the two cannot drift.
 
 ---
 

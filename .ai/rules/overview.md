@@ -26,12 +26,13 @@ that look wrong without their reason.
 ## Everything for an agent lives in `.ai/`
 
 `.claude/` holds settings and whatever a tool insists on generating there.
-`settings.json` is the one authored file in it, because the harness reads
-settings from that path and nowhere else; everything it points at lives in
-`.ai/`. Skills are written in `.ai/skills/` and Boost mirrors them into
-`.claude/skills/`, which is gitignored, because that is the only place Claude
-Code discovers project skills. Edit the copy in `.ai/`; the other one is
-overwritten.
+`settings.json` and `.claude/hooks/` come from devtools' `claude` component;
+`.claude/rules/` links each rule here so Claude Code loads it by its `paths`.
+Skills are written in `.ai/skills/` and Boost mirrors them into `.claude/skills/`,
+which is gitignored, because that is the only place Claude Code discovers project
+skills. Edit the copy in `.ai/`; the other one is overwritten. Third-party skills
+live in `.agents/skills/`, restored from `skills-lock.json` and linked by
+`npm run skills:link`.
 
 ## Rule, skill, or hook
 
@@ -41,15 +42,16 @@ The three carry different kinds of knowledge and are not interchangeable.
 | --- | --- | --- |
 | A constraint that is always true | `.ai/rules/` | the path matches |
 | A procedure with steps | `.ai/skills/` | the task starts |
-| The reminder that either exists | `.ai/hooks/` | the harness fires it |
+| The reminder that either exists | `.claude/hooks/` | the harness fires it |
 
 A standing constraint does not become a skill because it keeps getting missed.
-`.ai/hooks/skill-gate.py` names the skills and rules that own a path as that
-path is edited, and prompts before a write to a file a generator owns;
-`.ai/hooks/skill-roster.py` names what a prompt points at before any file is
-open. `.claude/settings.json` wires both, and switches off installed skills
-whose advice contradicts a rule here — `laravel-patterns` recommending API
-Resources is the reason that list exists.
+`.claude/hooks/skill-hook.sh` names a skill when a prompt matches its
+`metadata.keywords` or an edited file matches its `paths`, so a skill this repo
+owns carries both in its frontmatter. `.claude/hooks/lifecycle.sh` gates merges
+on the review line `finish-branch` writes into the MR. `.claude/settings.json`
+wires them, and switches off installed skills whose advice contradicts a rule
+here — `laravel-patterns` recommending API Resources is the reason that list
+exists.
 
 Prose asking an agent to remember something is the weakest of the three. Prefer
 a rule a guard test can fail, then a hook that fires at the moment of the
@@ -59,8 +61,9 @@ mistake, then a skill.
 hand-edit it. `CLAUDE.md` pulls it in, and stays hand-written itself.
 
 Boost resolves its paths from the Laravel base path, which is `backend/`, so
-`backend/.ai` is a gitignored symlink to the real `.ai/` at the root. Deleting it
-sends the next `boost:update` into `backend/.ai/`.
+`backend/.ai` is a committed symlink to the real `.ai/` at the root. Deleting it
+sends the next `boost:update` into `backend/.ai/`, and breaks the `.claude/rules/`
+links, which point through it.
 
 ## Product in one line
 
@@ -68,9 +71,10 @@ The person should never have to work out what to do next when the application
 can work it out for them. Every screen answers "what do I need to think about
 right now", and the answer is usually one thing.
 
-The spec is `.ai/plans/product-spec.md`, verbatim and cited by section number.
-`.ai/plans/executive-function-os.md` is the build plan over it and records what
-is deliberately not built yet; per-slice design lives in `.ai/plans/slices/`.
+The spec is [`docs/product-spec.md`](../../docs/product-spec.md), verbatim and
+cited by section number. [`docs/adr/`](../../docs/adr/) records where the build
+deviates from it and what is deliberately not built; the work itself is in the
+tracker.
 
 ## Counts and dates
 

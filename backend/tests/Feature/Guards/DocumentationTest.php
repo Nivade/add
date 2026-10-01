@@ -6,27 +6,31 @@ declare(strict_types=1);
 function documentFiles(): array
 {
     $files = [];
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(repoPath('.ai')));
 
-    foreach ($iterator as $file) {
-        if (! $file->isFile() || $file->getExtension() !== 'md') {
-            continue;
+    foreach (['.ai', 'docs'] as $directory) {
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(repoPath($directory)));
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || $file->getExtension() !== 'md') {
+                continue;
+            }
+
+            // guidelines.md is Boost's output; product-spec.md is the spec, verbatim.
+            if (in_array($file->getFilename(), ['guidelines.md', 'product-spec.md'], true)) {
+                continue;
+            }
+
+            // Skills and nvade-devtools-* rules ship from elsewhere and teach with example paths of their own; legacy plans are history.
+            if (str_contains($file->getPathname(), '/.ai/skills/') || str_contains($file->getPathname(), '/.ai/plans/') || str_starts_with($file->getFilename(), 'nvade-devtools-')) {
+                continue;
+            }
+
+            $files[] = $file->getPathname();
         }
-
-        // guidelines.md is Boost's output; product-spec.md is the spec, verbatim.
-        if (in_array($file->getFilename(), ['guidelines.md', 'product-spec.md'], true)) {
-            continue;
-        }
-
-        // Skills come from the sibling repos and teach with example paths of their own.
-        if (str_contains($file->getPathname(), '/.ai/skills/')) {
-            continue;
-        }
-
-        $files[] = $file->getPathname();
     }
 
     $files[] = repoPath('CLAUDE.md');
+    $files[] = repoPath('GLOSSARY.md');
 
     return $files;
 }
@@ -86,29 +90,14 @@ it('resolves every relative link in an agent document', function (): void {
 
 // .ai/rules/general.md: state the decision rather than the shape, and when the shape is named, name the real one.
 it('names only paths that exist', function (): void {
-    // Designed but unbuilt. Delete an entry in the change that builds it.
-    // .ai/plans/ux-overhaul.md
-    $planned = [
-        'mobile/app/finished/[session].tsx',
-        'mobile/src/api/use-write.ts',
-        'mobile/src/capture/pending-captures.ts',
-        'mobile/src/components/bottom-bar.tsx',
-        'mobile/src/components/day-strip.tsx',
-        'mobile/src/components/sorted-band.tsx',
-    ];
-
-    foreach ($planned as $path) {
-        expect(documentedPathExists($path))->toBeFalse($path.' exists — drop it from the planned list');
-    }
-
-    $violations = documentViolations(function (string $contents) use ($planned): array {
+    $violations = documentViolations(function (string $contents): array {
         preg_match_all('/`([^`\s]+\.(?:php|ts|tsx|js|json|yaml|yml|xml|lock|example))`/', $contents, $matches);
 
         $missing = [];
 
         foreach ($matches[1] as $path) {
             // A bare filename names no location; `OutputCleaner.php` is a vendor symptom, not a repo path.
-            if (! str_contains($path, '/') || str_contains($path, '*') || in_array($path, $planned, true)) {
+            if (! str_contains($path, '/') || str_contains($path, '*')) {
                 continue;
             }
 
@@ -169,90 +158,4 @@ it('indexes every rule file', function (): void {
 
         expect($index)->toContain(basename($file));
     }
-});
-
-/** @return list<string> every plan that carries a state; the spec is verbatim and the spine is the table itself. */
-function planFiles(): array
-{
-    $files = [];
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(repoPath('.ai/plans')));
-
-    foreach ($iterator as $file) {
-        if (! $file->isFile() || $file->getExtension() !== 'md') {
-            continue;
-        }
-
-        if (in_array($file->getFilename(), ['product-spec.md', 'executive-function-os.md'], true)) {
-            continue;
-        }
-
-        $files[] = $file->getPathname();
-    }
-
-    return $files;
-}
-
-function planState(string $file): ?string
-{
-    preg_match('/^\*\*State:\*\* (.+)$/m', (string) file_get_contents($file), $matches);
-
-    return $matches[1] ?? null;
-}
-
-// .ai/skills/slice-workflow: whoever follows a link into a plan never sees the spine, so the plan says its own state.
-it('opens every plan with a state the vocabulary allows', function (): void {
-    $violations = [];
-
-    foreach (planFiles() as $file) {
-        $state = planState($file);
-
-        if ($state === null) {
-            $violations[] = documentName($file).': states no **State:** line';
-
-            continue;
-        }
-
-        $dated = preg_match('/^(designed|building|done), \d{4}-\d{2}-\d{2} · /', $state) === 1;
-        $closed = preg_match('/^(superseded by |abandoned, )\S/', $state) === 1;
-
-        if (! $dated && ! $closed) {
-            $violations[] = documentName($file).': states '.$state;
-        }
-    }
-
-    expect($violations)->toBe([]);
-});
-
-// The state is deliberately in two places; this is what keeps the copy from drifting.
-it('agrees with the spine about every plan it links', function (): void {
-    $spine = (string) file_get_contents(repoPath('.ai/plans/executive-function-os.md'));
-
-    preg_match_all('/^\|[^|]*\|\s*\[[^\]]*\]\(([^)]+)\)[^|]*\|[^|]*\|\s*([a-z]+)/m', $spine, $rows, PREG_SET_ORDER);
-
-    $violations = [];
-
-    foreach ($rows as $row) {
-        $file = repoPath('.ai/plans/'.$row[1]);
-        $state = planState($file);
-
-        if ($state === null || ! str_starts_with($state, $row[2])) {
-            $violations[] = $row[1].': the spine says '.$row[2].', the plan says '.($state ?? 'nothing');
-        }
-    }
-
-    expect($rows)->not->toBeEmpty();
-    expect($violations)->toBe([]);
-});
-
-// Archiving is routing the open items out first; an Open heading down here means one was buried.
-it('archives no plan that still has something open', function (): void {
-    $violations = [];
-
-    foreach (glob(repoPath('.ai/plans/archive/*.md')) ?: [] as $file) {
-        if (preg_match('/^#+ Open\b/m', (string) file_get_contents($file)) === 1) {
-            $violations[] = documentName($file).': is archived with an Open section';
-        }
-    }
-
-    expect($violations)->toBe([]);
 });

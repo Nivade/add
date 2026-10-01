@@ -20,14 +20,27 @@ npm workspaces at root: `backend`, `mobile` and `packages/*`. One lockfile, and
 | You want | Read |
 | --- | --- |
 | Invariants and traps | `.ai/rules/overview.md`, then `.ai/rules/index.md` |
-| What the product is and what is deliberately unbuilt | `.ai/plans/executive-function-os.md` |
-| The original spec, verbatim and authoritative on intent | `.ai/plans/product-spec.md` |
-| The design for the slice being built | `.ai/plans/slices/` |
+| The original spec, verbatim and authoritative on intent | [`docs/product-spec.md`](docs/product-spec.md) |
+| Where the build deliberately deviates, and what stays unbuilt | [`docs/adr/`](docs/adr/) |
+| The domain's words | [`GLOSSARY.md`](GLOSSARY.md) |
+| How any screen looks, on either frontend | [`docs/design/identity.md`](docs/design/identity.md) |
 | What the UI must never do | `.ai/rules/product-invariants.md` |
-| Where the last session stopped | `.ai/RESUME.md` |
+| What to work on, and where it stands | the GitLab tracker, through `whats-next` |
 
-Everything an agent reads is authored in `.ai/`. `.claude/` holds settings and
-generated mirrors only — `overview.md` explains which is which and why.
+Everything an agent reads is authored in `.ai/`, `docs/` or the tracker. `.claude/`
+holds settings, hooks and generated mirrors only — `overview.md` explains which is
+which and why.
+
+## Workflow
+
+The tracker (GitLab `_nvade/add`, read through `glab`) is the source of truth for
+work: specs, tickets and findings are issues, never files. `docs/agents/` says how
+the skills use it. `.ai/plans/legacy/` holds the hand-written plans the tracker
+replaced, for people; agents are denied `.ai/plans/`.
+
+The CI entry point `finish-branch` runs is three commands, which is what the
+GitLab `tests` job runs: `npm run composer -- ci:check`, `npm run test:browser`
+and `npm run typecheck`.
 
 ## Work from the repo root
 
@@ -48,8 +61,8 @@ npm run test:browser           # tests/Browser only, real Chromium via pest-plug
 npm run lint                  # pint --test; `npm run composer -- lint` writes the fixes
 npm run stan                  # phpstan
 npm run types:generate        # PHP Data classes -> packages/shared/src/generated.ts
-npm run boost:update          # .ai/guidelines.md + the .claude/skills mirror
-npm run skills:restore        # after npm install on a fresh clone: the vendored Expo skills, from skills-lock.json
+npm run boost:update          # .ai/guidelines.md + the .claude/skills mirror, then skills:link
+npm run skills:restore        # after npm install on a fresh clone: third-party skills into .agents/, from skills-lock.json
 npm run web                   # vite
 npm run mobile                # expo start, outside sail
 npm run typecheck             # tsc across every workspace
