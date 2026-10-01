@@ -88,6 +88,7 @@ it('says how long it took without the pauses, how early it was, and how long it 
 it('says a deadline it read out of what they wrote is only going by that', function (): void {
     $intention = kitchen(1);
     $intention->update(['deadline_at' => now()->addDays(2)->addHour()]);
+
     $session = StartSession::run($intention->user, $intention->steps()->first());
     $session = CompleteStep::run($session, (string) $session->current_step_id);
 
