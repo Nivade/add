@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ClarifyIntentionController;
 use App\Http\Controllers\Api\V1\CompleteStepController;
 use App\Http\Controllers\Api\V1\ConfirmCaptureKindController;
 use App\Http\Controllers\Api\V1\ConfirmDeadlineController;
+use App\Http\Controllers\Api\V1\CorrectDeadlineController;
 use App\Http\Controllers\Api\V1\DestroyTokenController;
 use App\Http\Controllers\Api\V1\DismissReminderController;
 use App\Http\Controllers\Api\V1\PauseSessionController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Api\V1\ShowAiConsentController;
 use App\Http\Controllers\Api\V1\ShowAppointmentController;
 use App\Http\Controllers\Api\V1\ShowCommitmentsController;
 use App\Http\Controllers\Api\V1\ShowCurrentSessionController;
+use App\Http\Controllers\Api\V1\ShowFinishedController;
 use App\Http\Controllers\Api\V1\ShowHomeController;
 use App\Http\Controllers\Api\V1\ShowNextActionController;
 use App\Http\Controllers\Api\V1\ShowOverwhelmedController;
@@ -67,6 +69,7 @@ Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('
         ->defaults('appointment_kind', AppointmentKind::CalendarEvent)
         ->name('calendar-events.plan');
     Route::patch('intentions/{intention}/deadline', ConfirmDeadlineController::class)->name('intentions.deadline');
+    Route::patch('intentions/{intention}/deadline/correct', CorrectDeadlineController::class)->name('intentions.deadline.correct');
     Route::patch('intentions/{intention}/clarification', ClarifyIntentionController::class)->name('intentions.clarification');
     Route::post('waiting-fors/{waitingFor}/respond', RespondToWaitingForController::class)->name('waiting-fors.respond');
     Route::get('commitments', ShowCommitmentsController::class)->name('commitments.index');
@@ -81,6 +84,7 @@ Route::middleware(['auth:sanctum', RecordTimezone::class])->prefix('v1')->name('
     Route::get('sessions/current', ShowCurrentSessionController::class)->name('sessions.current');
 
     Route::prefix('sessions/{session}')->name('sessions.')->group(function (): void {
+        Route::get('finished', ShowFinishedController::class)->name('finished');
         Route::post('complete-step', CompleteStepController::class)->name('complete-step');
         Route::post('skip-step', SkipStepController::class)->name('skip-step');
         Route::post('pause', PauseSessionController::class)->name('pause');

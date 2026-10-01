@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sessions\CompleteStep;
+use App\Actions\Sessions\RecordDistraction;
 use App\Actions\Sessions\StopSession;
 use App\Enums\IntentionStatus;
 use App\Enums\StepStatus;
@@ -72,26 +73,26 @@ it('answers 200 for each control that mutates an open session', function (): voi
         ->assertOk();
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/distracted")
+        ->postJson("/api/v1/sessions/{$session->id}/distracted", ['seen_event_id' => seenEvent($session)])
         ->assertOk()
         ->assertJsonPath('session.endedAt', null)
         ->assertJsonPath('returning', true);
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/resume")
+        ->postJson("/api/v1/sessions/{$session->id}/resume", ['seen_event_id' => seenEvent($session)])
         ->assertOk()
         ->assertJsonPath('returning', false);
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/pause")
+        ->postJson("/api/v1/sessions/{$session->id}/pause", ['seen_event_id' => seenEvent($session)])
         ->assertOk();
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/resume")
+        ->postJson("/api/v1/sessions/{$session->id}/resume", ['seen_event_id' => seenEvent($session)])
         ->assertOk();
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/stop")
+        ->postJson("/api/v1/sessions/{$session->id}/stop", ['seen_event_id' => seenEvent($session)])
         ->assertOk()
         ->assertJsonPath('session.outcome', 'stopped');
 });
@@ -116,7 +117,7 @@ it('hides a session that belongs to somebody else', function (): void {
     $session = started();
 
     $this->actingAs(User::factory()->create())
-        ->postJson("/api/v1/sessions/{$session->id}/pause")
+        ->postJson("/api/v1/sessions/{$session->id}/pause", ['seen_event_id' => seenEvent($session)])
         ->assertNotFound();
 });
 
@@ -139,7 +140,7 @@ it('reports an ended session as a conflict rather than a crash', function (): vo
     StopSession::run($session);
 
     $this->actingAs($session->user)
-        ->postJson("/api/v1/sessions/{$session->id}/pause")
+        ->postJson("/api/v1/sessions/{$session->id}/pause", ['seen_event_id' => seenEvent($session)])
         ->assertStatus(409);
 
     Exceptions::assertNothingReported();
@@ -260,4 +261,66 @@ it('opens one session when start is pressed twice', function (): void {
     }
 
     expect(ExecutionSession::query()->where('user_id', $intention->user->id)->count())->toBe(1);
+});
+
+it('refuses a second tap on a session control once the session has moved on', function (string $control, string $first): void {
+    Exceptions::fake();
+    $session = started();
+    $stale = seenEvent($session);
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/{$first}", ['seen_event_id' => $stale])
+        ->assertOk();
+
+    $events = $session->events()->count();
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/{$control}", ['seen_event_id' => $stale])
+        ->assertConflict();
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route("focus.{$control}", $session), ['seen_event_id' => $stale])
+        ->assertRedirect(route('focus'));
+
+    expect($session->events()->count())->toBe($events)
+        ->and($session->refresh()->ended_at)->toBeNull();
+
+    Exceptions::assertNothingReported();
+})->with([
+    'pause after resume' => ['pause', 'resume'],
+    'stop after distracted' => ['stop', 'distracted'],
+    'distracted after pause' => ['distracted', 'pause'],
+]);
+
+it('asks every session control which moment it was tapped against', function (string $control): void {
+    $session = started();
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/{$control}")
+        ->assertUnprocessable()
+        ->assertJsonValidationErrorFor('seen_event_id');
+})->with(['pause', 'resume', 'distracted', 'stop']);
+
+it('still stops when a stuck answer says to, with no tap to compare against', function (): void {
+    $session = started();
+
+    $this->actingAs($session->user)
+        ->postJson("/api/v1/sessions/{$session->id}/stuck", ['step_id' => $session->current_step_id, 'reason' => 'dont_want_to'])
+        ->assertOk()
+        ->assertJsonPath('session.outcome', 'stopped');
+});
+
+it('resumes from home and lands on focus, once', function (): void {
+    $session = started();
+    RecordDistraction::run($session);
+
+    $this->actingAs($session->user)
+        ->from(route('home'))
+        ->post(route('focus.resume', $session), ['seen_event_id' => seenEvent($session)])
+        ->assertRedirect(route('focus'));
+
+    $this->actingAs($session->user)
+        ->get(route('focus'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('state.returning', false));
 });

@@ -13,8 +13,15 @@ final class StopSession
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session): ExecutionSession
+    /** Null only for the app's own callers; a person's tap always says what it saw. */
+    public function handle(ExecutionSession $session, ?string $seenEventId = null): ExecutionSession
     {
-        return LandSession::run($session, SessionOutcome::Stopped);
+        return $session->transition(function () use ($session, $seenEventId): ExecutionSession {
+            if ($seenEventId !== null) {
+                $session->assertSeen($seenEventId);
+            }
+
+            return LandSession::run($session, SessionOutcome::Stopped);
+        });
     }
 }

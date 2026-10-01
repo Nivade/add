@@ -42,7 +42,7 @@ it('answers with one thing and says why it is that one', function (): void {
             ->where('home.rightNow.step.title', 'Step 1.')
             ->where('home.rightNow.intention.title', 'Clean the kitchen')
             ->where('home.rightNow.why', [
-                'It is the first thing left in this one.',
+                'It comes first in “Clean the kitchen”.',
                 'This takes about 1 minute.',
             ])
             ->where('home.session', null)
@@ -232,30 +232,6 @@ it('counts open commitments beyond the one on show', function (): void {
             ->where('home.restCount', 2));
 });
 
-it('offers what was just finished so it can be set to repeat, and lets it go after an hour', function (): void {
-    $user = User::factory()->create();
-    $finished = Intention::factory()->for($user)->done()->create(['title' => 'Water the plants', 'completed_at' => now()->subMinutes(20)]);
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('home.justFinished.id', $finished->id)
-            ->where('home.justFinished.recurrenceEveryDays', null));
-
-    $this->actingAs($user)->post(route('intentions.recurrence', $finished), ['every_days' => 7]);
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('home.justFinished.recurrenceEveryDays', 7));
-
-    $this->travel(2)->hours();
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('home.justFinished', null));
-});
-
 it('sends focus back home when no session is open', function (): void {
     $this->actingAs(User::factory()->create())
         ->get(route('focus'))
@@ -300,7 +276,7 @@ it("hides another person's session behind the web controls too", function (): vo
     $session = started();
 
     $this->actingAs(User::factory()->create())
-        ->post(route('focus.pause', $session))
+        ->post(route('focus.pause', $session), ['seen_event_id' => seenEvent($session)])
         ->assertNotFound();
 });
 
@@ -320,7 +296,7 @@ it('sends the person home once the session has ended', function (): void {
 
     $this->actingAs($session->user)
         ->from(route('focus'))
-        ->post(route('focus.stop', $session))
+        ->post(route('focus.stop', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($session->user)

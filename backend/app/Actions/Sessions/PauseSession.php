@@ -14,9 +14,13 @@ final class PauseSession
 {
     use AsObject;
 
-    public function handle(ExecutionSession $session): ExecutionSession
+    public function handle(ExecutionSession $session, ?string $seenEventId = null): ExecutionSession
     {
-        return $session->transition(function () use ($session): ExecutionSession {
+        return $session->transition(function () use ($session, $seenEventId): ExecutionSession {
+            if ($seenEventId !== null) {
+                $session->assertSeen($seenEventId);
+            }
+
             if ($session->paused_at !== null) {
                 throw new InvalidSessionTransition("Session {$session->id} is already paused.");
             }

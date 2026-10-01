@@ -25,8 +25,11 @@ function focusedDescriptor(mixed $page): string
             var el = document.activeElement;
             if (!el) { return JSON.stringify({label: '', visible: false}); }
             var style = getComputedStyle(el);
-            var visible = style.boxShadow !== 'none' || style.outlineStyle !== 'none';
-            var label = el.getAttribute('aria-label') || (el.textContent || '').trim();
+            var parked = el.tagName === 'H1' && el.getAttribute('tabindex') === '-1';
+            var visible = parked || style.boxShadow !== 'none' || style.outlineStyle !== 'none';
+            var copy = el.cloneNode(true);
+            copy.querySelectorAll('kbd').forEach(function (kbd) { kbd.remove(); });
+            var label = el.getAttribute('aria-label') || (copy.textContent || '').trim();
             return JSON.stringify({label: label, visible: visible});
         })()
     JS_WRAP), associative: true, flags: JSON_THROW_ON_ERROR);
@@ -34,6 +37,12 @@ function focusedDescriptor(mixed $page): string
     expect($result['visible'])->toBeTrue('Focus landed on "'.$result['label'].'" with no visible indicator.');
 
     return $result['label'];
+}
+
+/** A button by its accessible name, so the key hint drawn inside it does not change what it is called. */
+function button(string $name): string
+{
+    return 'internal:role=button[name="'.$name.'"]';
 }
 
 it('walks the §39 journey by keyboard, with focus visible at every control', function (): void {
@@ -70,50 +79,63 @@ it('walks the §39 journey by keyboard, with focus visible at every control', fu
     expect(focusedDescriptor($page))->toBe('Capture');
 
     // Start.
-    $page->keys('Start', 'Enter');
-
-    expect(focusedDescriptor($page))->toBe('Start');
+    $page->keys(button('Start'), 'Enter');
     $page->assertPathIs('/focus')
         ->assertSee('Put the thing you need on the desk.');
 
-    // Done.
-    $page->keys('Done', 'Enter');
-    expect(focusedDescriptor($page))->toBe('Done');
+    expect(focusedDescriptor($page))->toBe('Put the thing you need on the desk.');
+
+    // Done, by its key rather than by reaching the button.
+    $page->keys('h1[tabindex]', 'd');
 
     // The next step, and a progress line nobody wrote by hand.
     $page->assertSee('Open it.')
         ->assertSee('1 of 3 steps done.');
 
+    expect(focusedDescriptor($page))->toBe('Open it.');
+
     // Distracted, and welcomed back.
-    $page->keys('I got distracted', 'Enter');
-    expect(focusedDescriptor($page))->toBe('I got distracted');
+    $page->keys(button('I got distracted'), 'Enter');
     $page->assertSee('Welcome back.')
         ->assertSee('You were working on');
 
-    $page->keys('Continue', 'Enter');
+    // Focus follows the screen to its one thing, rather than staying on a button that is gone.
+    expect(focusedDescriptor($page))->toBe('Welcome back.');
 
-    expect(focusedDescriptor($page))->toBe('Continue');
+    $page->keys('h1[tabindex]', 'Enter');
     $page->assertSee('Open it.');
 
     // Paused, which is not a return.
-    $page->keys('Pause', 'Enter');
-
-    expect(focusedDescriptor($page))->toBe('Pause');
+    $page->keys(button('Pause'), 'Enter');
     $page->assertSee('Paused.');
 
-    $page->keys('Continue', 'Enter');
+    expect(focusedDescriptor($page))->toBe('Paused.');
 
-    expect(focusedDescriptor($page))->toBe('Continue');
+    $page->keys(button('Continue'), 'Enter');
     $page->assertSee('Open it.');
 
-    $page->keys('Done', 'Enter');
+    expect(focusedDescriptor($page))->toBe('Open it.');
+
+    // Capture still opens from focus, where the header is gone, and leaves the step where it was.
+    $page->keys('h1[tabindex]', 'c');
+    $page->type('[aria-label="What\'s on your mind?"]', 'water the plants');
+    $page->keys('Save', 'Enter');
+    $page->assertDontSee('Write it however it comes out.')
+        ->assertSee('Open it.');
+
+    $page->keys('h1[tabindex]', 'd');
     $page->assertSee('Write the first line.')
         ->assertSee('2 of 3 steps done.');
 
-    // Finish.
-    $page->keys('Done', 'Enter');
+    // Finish, on a closing screen that offers one thing next and asks nothing.
+    $page->keys('h1[tabindex]', 'd');
+    $page->assertPathContains('/finished')
+        ->assertSee('clean the kitchen before my parents arrive is handled.')
+        ->assertSee('Next, if you want:')
+        ->assertSee('Leave it there');
+
+    $page->keys('h1[tabindex]', 'Escape');
     $page->assertPathIs('/home')
-        ->assertSee('Nothing needs you right now.')
         ->assertNoJavaScriptErrors();
 });
 

@@ -8,7 +8,6 @@ import {
     railSummary,
 } from '@add/shared';
 import type { CSSProperties, ReactNode } from 'react';
-import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const HOURS = [6, 8, 10, 12, 14, 16, 18, 20, 22];
@@ -92,30 +91,6 @@ function labelGroups(marks: RailMarkData[]): RailMarkData[][] {
     }
 
     return groups;
-}
-
-/** The server said what minute it is in their zone; this only counts forward from it. */
-function useMinuteOfDay(from: number, live: boolean): number {
-    const [minute, setMinute] = useState(from);
-
-    useEffect(() => {
-        setMinute(from);
-
-        if (!live) {
-            return;
-        }
-
-        const startedAt = Date.now();
-        const tick = setInterval(
-            () =>
-                setMinute(from + Math.floor((Date.now() - startedAt) / 60_000)),
-            10_000,
-        );
-
-        return () => clearInterval(tick);
-    }, [from, live]);
-
-    return minute;
 }
 
 type Drawing = { rail: RailData; nowMinute: number; doneAt: number | null };
@@ -267,16 +242,15 @@ function Row(drawing: Drawing) {
 /** Today, drawn to scale: the hours, where now sits, the step on offer and the marks worth keeping in view. */
 export function DayStrip({
     rail,
+    nowMinute,
     orientation,
     className,
-    live = true,
 }: {
     rail: RailData;
+    nowMinute: number;
     orientation: Orientation;
     className?: string;
-    live?: boolean;
 }) {
-    const nowMinute = useMinuteOfDay(rail.nowMinute, live);
     const doneAt =
         rail.stepSeconds === null
             ? null

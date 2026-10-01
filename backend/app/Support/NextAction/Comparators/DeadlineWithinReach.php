@@ -19,8 +19,12 @@ final class DeadlineWithinReach extends Rung
     {
         $deadline = $candidate->deadlineInWords($context->now);
 
-        return $deadline === null
-            ? null
-            : "Your deadline is {$deadline} and what is left only just fits.";
+        if ($deadline === null) {
+            return null;
+        }
+
+        $whose = $candidate->deadlineSubject();
+
+        return "{$whose} is {$deadline} and what is left only just fits.";
     }
 }

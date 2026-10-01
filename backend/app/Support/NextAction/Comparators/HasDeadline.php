@@ -36,9 +36,11 @@ final class HasDeadline extends Rung
             return null;
         }
 
+        $whose = $candidate->deadlineSubject();
+
         // Past tense, stated flatly: the date moved, which is a fact about the day and not about them.
         return $candidate->deadlinePassed($context->now)
-            ? "Your deadline was {$deadline}."
-            : "Your deadline is {$deadline}.";
+            ? "{$whose} was {$deadline}."
+            : "{$whose} is {$deadline}.";
     }
 }

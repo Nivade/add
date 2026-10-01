@@ -301,8 +301,19 @@ it('counts progress rather than writing it', function (): void {
 
     CompleteStep::run($session, $session->current_step_id);
 
-    expect(BuildExecutionState::run($session->refresh())->progress)
-        ->toBe(['1 of 3 steps done.', '1 step done in this sitting.', '1 thing finished today.']);
+    expect(BuildExecutionState::run($session->refresh())->progress)->toBe(['1 of 3 steps done.']);
+});
+
+it('adds the sitting and the day only when they say something the first line does not', function (): void {
+    $first = started();
+    CompleteStep::run($first, $first->current_step_id);
+    StopSession::run($first->refresh());
+
+    $again = StartSession::run($first->user, $first->intention->remainingSteps()->first());
+    CompleteStep::run($again, $again->current_step_id);
+
+    expect(BuildExecutionState::run($again->refresh())->progress)
+        ->toBe(['2 of 3 steps done.', '1 step done in this sitting.', '2 steps finished today.']);
 });
 
 it('says it started this after putting it off, counted from when the step was first offered', function (): void {

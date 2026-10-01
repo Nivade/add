@@ -1,27 +1,26 @@
 import type {
   HomeData,
-  JustFinishedData,
   NeedsAttentionData,
 } from '@add/shared';
 import {
   checkInCopy,
   checkInQuestions,
   checkInResponses,
+  comingUpCopy,
   commitmentCopy,
+  estimateLine,
   focusCopy,
   homeBands,
   homeCopy,
   nothingNeedsYou,
   notHereLabels,
-  partWayLine,
-  recurrenceLine,
+  partOfLine,
   restCountLine,
   returnCopy,
-  rightNowMeta,
   sortingLine,
   waitingForResponses,
 } from '@add/shared';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
@@ -34,6 +33,7 @@ import { QuietAction } from '@/components/quiet-action';
 import { Responses } from '@/components/responses';
 import { Band, Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
+import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
 import { field, line, theme } from '@/theme';
 
 function Clarify({
@@ -104,7 +104,7 @@ function WaitingFor({
     <View style={styles.clarify}>
       <Text style={styles.line}>
         {item.title}
-        {item.detail ? ` · ${item.detail}` : ''}
+        {item.detail ? `: ${item.detail}` : ''}
       </Text>
       <Responses
         responses={waitingForResponses}
@@ -117,66 +117,9 @@ function WaitingFor({
   );
 }
 
-function JustFinished({
-  finished,
-  onRepeated,
-}: {
-  finished: JustFinishedData;
-  onRepeated: () => void;
-}) {
-  const { token } = useSession();
-  const [everyDays, setEveryDays] = useState('7');
-  const [saving, setSaving] = useState(false);
-
-  const repeat = async () => {
-    const days = Number(everyDays);
-
-    if (!Number.isInteger(days) || days < 1) {
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await api.repeatIntention(token as string, finished.id, days);
-      onRepeated();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Band label={homeBands.justFinished}>
-      <Text style={styles.line}>{finished.title}</Text>
-      {finished.recurrenceEveryDays ? (
-        <Meta>{recurrenceLine(finished.recurrenceEveryDays)}</Meta>
-      ) : (
-        <>
-          <View style={styles.repeat}>
-            <Meta>{homeCopy.repeatEvery}</Meta>
-            <TextInput
-              style={[styles.input, styles.days]}
-              value={everyDays}
-              onChangeText={setEveryDays}
-              keyboardType="number-pad"
-              inputMode="numeric"
-              accessibilityLabel="Repeat every how many days"
-            />
-            <Meta>days</Meta>
-          </View>
-          <Button
-            label={saving ? 'Saving' : 'Repeat'}
-            disabled={saving}
-            onPress={() => void repeat()}
-          />
-        </>
-      )}
-    </Band>
-  );
-}
-
 export default function Home() {
   const { token, signOut } = useSession();
+  const { notice } = useLocalSearchParams<{ notice?: string }>();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
   const sortingCount =
@@ -224,7 +167,6 @@ export default function Home() {
     session,
     comingUp,
     reminder,
-    justFinished,
     needsAttention,
     restCount,
     checkIn,
@@ -256,6 +198,11 @@ export default function Home() {
   return (
     <Screen>
       <StaleNote problem={problem} />
+      {notice && (
+        <Text accessibilityLiveRegion="polite" style={styles.line}>
+          {notice}
+        </Text>
+      )}
       {session ? (
         <>
           <OneThing>
@@ -266,7 +213,7 @@ export default function Home() {
           <Meta>
             {session.returning
               ? returnCopy.workingOn(session.intention.title)
-              : partWayLine(session.intention.title)}
+              : returnCopy.partWay(session.intention.title)}
           </Meta>
           <Button
             label={focusCopy.continue}
@@ -277,8 +224,11 @@ export default function Home() {
       ) : rightNow ? (
         <>
           <OneThing>{rightNow.step.title}</OneThing>
-          <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
+          <Meta>
+            {`${estimateLine(rightNow.step.estimatedSeconds, nowMinute())} ${partOfLine(rightNow.intention.title)}`}
+          </Meta>
           <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
+          {rightNow.step.generated && <SuggestedPill />}
           {rightNow.why.length > 0 && (
             <Band label={homeBands.why}>
               {rightNow.why.map((line) => (
@@ -310,10 +260,6 @@ export default function Home() {
         </>
       )}
 
-      {justFinished && (
-        <JustFinished finished={justFinished} onRepeated={() => void reload()} />
-      )}
-
       {reminder && (
         <Band label={homeBands.beforeYouGo}>
           {reminder.lines.map((line) => (
@@ -335,8 +281,8 @@ export default function Home() {
       {comingUp && (
         <Band label={homeBands.comingUp}>
           <Text style={styles.line}>
-            {comingUp.title} · {comingUp.inWords}
-            {comingUp.kind === 'calendar_event' ? ' · from your calendar' : ''}
+            {comingUpCopy.line(comingUp.title, comingUp.inWords)}
+            {comingUp.kind === 'calendar_event' ? ` ${comingUpCopy.fromCalendar}` : ''}
           </Text>
           <Button
             label="Open"
@@ -430,6 +376,4 @@ const styles = StyleSheet.create({
   clarify: { gap: theme.space(1) },
   input: field,
   thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
-  repeat: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1) },
-  days: { width: 72, textAlign: 'right' },
 });

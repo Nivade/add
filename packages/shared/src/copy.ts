@@ -17,10 +17,10 @@ import { formatEstimate } from './estimate';
 /** The count may be stated, never enumerated, so both frontends state it the same way. */
 export function restCountLine(count: number): string {
     if (count === 0) {
-        return 'nothing else is waiting';
+        return 'Nothing else is waiting.';
     }
 
-    return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about`;
+    return `${count} other ${count === 1 ? 'thing' : 'things'}, none of which you need to think about.`;
 }
 
 /** Settings names the zone every clock is read in, and where it came from. */
@@ -87,6 +87,7 @@ export function sortedMoreLine(count: number): string {
 /** Coming back is welcomed, never timed: both frontends say it in these words. */
 export const returnCopy = {
     welcome: 'Welcome back.',
+    partWay: (title: string): string => `Part-way through ${title}.`,
     paused: 'Paused.',
     pausedMeta: 'Continue whenever you are ready.',
     workingOn: (title: string): string => `You were working on ${title}.`,
@@ -148,32 +149,41 @@ export function rungMinutesNote(assumed: boolean): string {
     return assumed ? 'min, assumed' : 'min, yours';
 }
 
-type EstimatedStep = { estimatedSeconds: number | null; generated: boolean };
+function estimatedCost(seconds: number | null, nowMinute: number): string | null {
+    const estimate = formatEstimate(seconds);
 
-/** Going quiet on a missing estimate would read as zero minutes, and a guessed step must say who guessed. */
-export function stepMeta(step: EstimatedStep): string {
-    const estimate = formatEstimate(step.estimatedSeconds);
-
-    return (estimate ? `~${estimate}` : 'no guess yet') + (step.generated ? ' · suggested' : '');
+    return seconds === null || estimate === null
+        ? null
+        : `About ${estimate}, so done around ${clockOf(doneMinute(nowMinute, seconds))}`;
 }
 
-export function rightNowMeta(step: EstimatedStep, intentionTitle: string): string {
-    return `${stepMeta(step)} · ${intentionTitle.toLowerCase()}`;
+const notEstimated = 'Nobody has estimated this one.';
+
+/** What starting now costs, as a time on the clock; a missing estimate says so rather than reading as zero. */
+export function estimateLine(seconds: number | null, nowMinute: number): string {
+    const cost = estimatedCost(seconds, nowMinute);
+
+    return cost === null ? notEstimated : `${cost} if you start now.`;
 }
 
-export function smallestStepMeta(step: EstimatedStep): string {
-    return `${stepMeta(step)} · that is all you have to do`;
+/** The same cost once the step is under way, where "if you start now" would be a step behind. */
+export function underWayEstimateLine(seconds: number | null, nowMinute: number): string {
+    const cost = estimatedCost(seconds, nowMinute);
+
+    return cost === null ? notEstimated : `${cost}.`;
 }
 
-export function partWayLine(intentionTitle: string): string {
-    return `Part-way through ${intentionTitle}.`;
+/** A step the app wrote says who wrote it, beside Start, so it is never mistaken for one they did. */
+export const suggestedLabel = 'suggested step';
+
+export function partOfLine(intentionTitle: string): string {
+    return `Part of ${intentionTitle}.`;
 }
 
 export const nothingNeedsYou = 'Nothing needs you right now.';
 
 export const homeCopy = {
     wholeAnswer: 'That is the whole answer.',
-    repeatEvery: 'Repeat every',
 } as const;
 
 export const homeBands = {
@@ -181,8 +191,23 @@ export const homeBands = {
     comingUp: "What's coming up",
     beforeYouGo: 'Before you go',
     needsAttention: 'Needs you',
-    justFinished: 'Just finished',
     sorted: 'What you just wrote',
+} as const;
+
+/** The next real time constraint as sentences on home, and the page where its settings live. */
+export const comingUpCopy = {
+    line: (title: string, inWords: string) => `${title}, ${inWords}.`,
+    leaveAt: (clock: string) => `Leave at ${clock}.`,
+    fromCalendar: 'From your calendar.',
+    planFor: 'Plan for it',
+    inferred: 'Read from what you wrote.',
+    confirm: "That's right",
+    change: 'Change',
+    when: (inWords: string) => `${inWords.charAt(0).toUpperCase()}${inWords.slice(1)}.`,
+    whenQuestion: 'When is it?',
+    save: 'Save',
+    noDeadline: "There's no deadline",
+    back: 'Back to home',
 } as const;
 
 export const remindAfterCopy = {
@@ -191,6 +216,7 @@ export const remindAfterCopy = {
 } as const;
 
 export const overwhelmedCopy = {
+    lines: ["You've got a lot going on.", 'Ignore everything else for now.', "Let's do one thing."],
     back: 'Back to home',
 } as const;
 
@@ -203,7 +229,20 @@ export const focusCopy = {
     stop: 'Stop',
     stuck: "I'm stuck",
     distracted: 'I got distracted',
+    thisStep: 'This step',
+    stepAway: 'Step away',
+    hints: {
+        done: 'Finished it',
+        skip: 'Not this one now',
+        stuck: "Tell me what's in the way",
+        pause: 'Back in a bit',
+        distracted: 'I drifted off',
+        stop: 'Done for now',
+    },
     stuckQuestion: "What's blocking you?",
+    stuckNoteQuestion: "What's in the way? You can leave this empty.",
+    stuckNoteSend: 'Tell it',
+    stoppedForNow: 'Stopped for now. It will be here later.',
     stuckMeta: 'every answer leads somewhere',
 } as const;
 
@@ -264,9 +303,9 @@ export function commitmentResponses(
 }
 
 export const commitmentProvenanceLabels: Record<CommitmentProvenance, string> = {
-    user_task: 'from something you were doing',
-    user_stated: 'you said this',
-    system_inferred: 'read from what you wrote',
+    user_task: 'From something you were doing.',
+    user_stated: 'You said this.',
+    system_inferred: 'Read from what you wrote.',
 };
 
 /** Each is asked against when the person started, because a steady "less" is the claim worth testing. */
@@ -288,8 +327,20 @@ export const checkInCopy = {
 } as const;
 
 export function recurrenceLine(everyDays: number): string {
-    return everyDays === 1 ? 'repeats every day' : `repeats every ${everyDays} days`;
+    return everyDays === 1 ? 'It comes back every day.' : `It comes back every ${everyDays} days.`;
 }
+
+/** The closing screen: the intention handled, and nothing asked of the person but what they want next. */
+export const finishedCopy = {
+    handled: (title: string) => `${title} is handled.`,
+    next: 'Next, if you want:',
+    leave: 'Leave it there',
+    home: 'Back to home',
+    comesBack: 'Does this come back?',
+    every: 'Every',
+    days: 'days',
+    repeat: 'Repeat',
+} as const;
 
 /** Both frontends open the one box with the same words. */
 export const captureCopy = {

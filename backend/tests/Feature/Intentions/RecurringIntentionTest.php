@@ -9,7 +9,6 @@ use App\Models\Intention;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
-use Inertia\Testing\AssertableInertia;
 use Lorisleiva\Actions\Decorators\JobDecorator;
 
 it('sets recurrence on a done intention from the web', function (): void {
@@ -91,7 +90,7 @@ it('creates one intention for a template overdue by several periods, and schedul
         ->and($template->refresh()->recurrence_next_at?->equalTo($now->subDays(30)->addDays(35)))->toBeTrue();
 });
 
-it('shows a finished copy repeating on its template, and refuses to start a second schedule from it', function (): void {
+it('refuses to start a second schedule from a finished copy of a template', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
@@ -102,12 +101,6 @@ it('shows a finished copy repeating on its template, and refuses to start a seco
     ]);
     $copy = SendDueRecurringIntentions::run($user, CarbonImmutable::now())[0];
     $copy->update(['status' => IntentionStatus::Done, 'completed_at' => now()]);
-
-    $this->actingAs($user)
-        ->get(route('home'))
-        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('home.justFinished.id', $copy->id)
-            ->where('home.justFinished.recurrenceEveryDays', 7));
 
     $this->actingAs($user)
         ->postJson(route('api.v1.intentions.recurrence', $copy), ['every_days' => 3])

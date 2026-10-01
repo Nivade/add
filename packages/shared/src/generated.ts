@@ -30,6 +30,7 @@ kind: AppointmentKind,
 id: string,
 title: string,
 inWords: string,
+localAt: string,
 inferred: boolean,
 plan: BackwardsPlanData | null,
 };
@@ -71,6 +72,14 @@ elapsed: string,
 currentStepIsCommitment: boolean,
 returning: boolean,
 stepsDone: number,
+notice: string | null,
+seenEventId: string,
+};
+export type FinishedData = {
+intention: IntentionData,
+lines: string[],
+next: NextActionData | null,
+recurrenceEveryDays: number | null,
 };
 export type FutureReminderData = {
 id: string,
@@ -85,7 +94,6 @@ rightNowIsCommitment: boolean,
 session: ExecutionStateData | null,
 comingUp: ComingUpData | null,
 reminder: ReminderData | null,
-justFinished: JustFinishedData | null,
 needsAttention: NeedsAttentionData[],
 restCount: number,
 sortingCount: number,
@@ -107,11 +115,6 @@ clarifyingQuestion: string | null,
 recurrenceEveryDays: number | null,
 };
 export type IntentionStatus = 'captured' | 'active' | 'done' | 'set_aside';
-export type JustFinishedData = {
-id: string,
-title: string,
-recurrenceEveryDays: number | null,
-};
 export type NeedsAttentionData = {
 kind: NeedsAttentionKind,
 id: string,

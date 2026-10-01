@@ -3,23 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\CalendarEvent;
-use App\Models\Intention;
-use App\Models\Step;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Inertia\Testing\AssertableInertia;
-
-function dated(User $user): Intention
-{
-    $intention = Intention::factory()->decomposed()->for($user)->create([
-        'title' => 'Renew the passport',
-        'deadline_at' => CarbonImmutable::now()->addDays(2),
-    ]);
-
-    Step::factory()->for($intention)->create(['position' => 1]);
-
-    return $intention;
-}
 
 it('says a deadline it read is inferred, and stops saying it once confirmed', function (): void {
     $user = User::factory()->create();

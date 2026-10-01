@@ -1,44 +1,45 @@
-import type {
-    HomeData,
-    JustFinishedData,
-    NeedsAttentionData,
-} from '@add/shared';
+import type { ComingUpData, HomeData, NeedsAttentionData } from '@add/shared';
 import {
+    comingUpCopy,
     commitmentCopy,
     focusCopy,
     homeBands,
     homeCopy,
     nothingNeedsYou,
-    partWayLine,
-    recurrenceLine,
-    remindAfterCopy,
+    partOfLine,
     restCountLine,
     returnCopy,
-    rightNowMeta,
     sortingLine,
     unsortedLine,
     waitingForResponses,
 } from '@add/shared';
-import { Form, Head, Link, usePoll } from '@inertiajs/react';
+import { Form, Head, Link, router, usePoll } from '@inertiajs/react';
 import { useEffect } from 'react';
-import { BackwardsPlan } from '@/components/backwards-plan';
 import { fieldClassName } from '@/lib/field';
 import { CheckIn } from '@/components/check-in';
 import { CommitmentRow } from '@/components/commitment-row';
 import { Band } from '@/components/band';
 import InputError from '@/components/input-error';
 import { NotHere } from '@/components/not-here';
-import { Meta, OneThing, StartStep } from '@/components/one-thing';
+import { NowButton } from '@/components/now-button';
+import { OneTapForm } from '@/components/one-tap-form';
+import {
+    EstimateLine,
+    Meta,
+    OneThing,
+    StartStep,
+} from '@/components/one-thing';
 import { quietLineClassName, Responses } from '@/components/responses';
 import { SaidIdDoThis } from '@/components/said-id-do-this';
 import { SortedBand } from '@/components/sorted-band';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { focus, overwhelmed } from '@/routes';
+import { focus } from '@/routes';
 import ai from '@/routes/ai';
-import calendarEvents from '@/routes/calendar-events';
+import appointments from '@/routes/appointments';
 import commitments from '@/routes/commitments';
+import focusRoutes from '@/routes/focus';
 import intentions from '@/routes/intentions';
 import reminders from '@/routes/reminders';
 import waitingFors from '@/routes/waiting-fors';
@@ -98,8 +99,7 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
                 {item.title}
                 {item.detail && (
                     <span className="text-muted-foreground">
-                        {' '}
-                        · {item.detail}
+                        : {item.detail}
                     </span>
                 )}
             </p>
@@ -111,48 +111,48 @@ function WaitingFor({ item }: { item: NeedsAttentionData }) {
     );
 }
 
-function JustFinished({ finished }: { finished: JustFinishedData }) {
+/** When it is and what to do about it; the settings live on the appointment's own page. */
+function ComingUp({ comingUp }: { comingUp: ComingUpData }) {
+    const leave = comingUp.plan?.rungs.find((rung) => rung.rung === 'leave');
+    const page = appointments.show({ kind: comingUp.kind, id: comingUp.id });
+
     return (
-        <Band label={homeBands.justFinished}>
-            <p>{finished.title}</p>
-            {finished.recurrenceEveryDays ? (
-                <p className="text-muted-foreground mt-2">
-                    {recurrenceLine(finished.recurrenceEveryDays)}
+        <Band label={homeBands.comingUp}>
+            <p>
+                {comingUpCopy.line(comingUp.title, comingUp.inWords)}
+                {comingUp.kind === 'calendar_event' && (
+                    <span className="text-muted-foreground">
+                        {' '}
+                        {comingUpCopy.fromCalendar}
+                    </span>
+                )}
+            </p>
+            {leave && (
+                <p className="text-muted-foreground">
+                    {comingUpCopy.leaveAt(leave.clock)}
                 </p>
-            ) : (
+            )}
+            {comingUp.inferred && (
                 <Form
-                    {...intentions.recurrence.form(finished.id)}
+                    {...intentions.deadline.form(comingUp.id)}
                     options={{ preserveScroll: true }}
-                    className="mt-3 flex flex-wrap items-center gap-3"
+                    className="mt-2 flex flex-wrap items-baseline gap-x-4"
                 >
-                    {({ errors }) => (
-                        <>
-                            <label
-                                htmlFor="repeat-every-days"
-                                className="text-muted-foreground"
-                            >
-                                {homeCopy.repeatEvery}
-                            </label>
-                            <input
-                                id="repeat-every-days"
-                                type="number"
-                                name="every_days"
-                                min={1}
-                                max={365}
-                                defaultValue={7}
-                                className={cn(fieldClassName, 'w-20')}
-                            />
-                            <span className="text-muted-foreground">days</span>
-                            <Button type="submit" variant="quiet">
-                                Repeat
-                            </Button>
-                            <InputError
-                                message={errors.every_days}
-                                className="basis-full"
-                            />
-                        </>
-                    )}
+                    <span className="text-muted-foreground">
+                        {comingUpCopy.inferred}
+                    </span>
+                    <Button type="submit" variant="quiet">
+                        {comingUpCopy.confirm}
+                    </Button>
+                    <Link href={page} className={quietLineClassName}>
+                        {comingUpCopy.change}
+                    </Link>
                 </Form>
+            )}
+            {(comingUp.plan || comingUp.kind === 'calendar_event') && (
+                <Link href={page} className={quietLineClassName}>
+                    {comingUpCopy.planFor}
+                </Link>
             )}
         </Band>
     );
@@ -171,11 +171,24 @@ function RightNow({ rightNow, session }: HomeData) {
                 <Meta>
                     {session.returning
                         ? returnCopy.workingOn(session.intention.title)
-                        : partWayLine(session.intention.title)}
+                        : returnCopy.partWay(session.intention.title)}
                 </Meta>
-                <Button asChild variant="now" size="action">
-                    <Link href={focus()}>{focusCopy.continue}</Link>
-                </Button>
+                {session.returning || session.session.pausedAt !== null ? (
+                    <OneTapForm
+                        form={focusRoutes.resume.form(session.session.id)}
+                        fields={{ seen_event_id: session.seenEventId }}
+                    >
+                        {(processing) => (
+                            <NowButton type="submit" aria-disabled={processing}>
+                                {focusCopy.continue}
+                            </NowButton>
+                        )}
+                    </OneTapForm>
+                ) : (
+                    <NowButton onClick={() => router.visit(focus())}>
+                        {focusCopy.continue}
+                    </NowButton>
+                )}
             </div>
         );
     }
@@ -192,8 +205,14 @@ function RightNow({ rightNow, session }: HomeData) {
     return (
         <div className="flex flex-col items-start gap-5">
             <OneThing>{rightNow.step.title}</OneThing>
-            <Meta>{rightNowMeta(rightNow.step, rightNow.intention.title)}</Meta>
-            <StartStep stepId={rightNow.step.id} />
+            <Meta>
+                <EstimateLine seconds={rightNow.step.estimatedSeconds} />{' '}
+                {partOfLine(rightNow.intention.title)}
+            </Meta>
+            <StartStep
+                stepId={rightNow.step.id}
+                suggested={rightNow.step.generated}
+            />
         </div>
     );
 }
@@ -205,7 +224,6 @@ export default function Home({ home: data }: { home: HomeData }) {
         hasOpenCommitments,
         comingUp,
         reminder,
-        justFinished,
         needsAttention,
         restCount,
         sortingCount,
@@ -284,8 +302,6 @@ export default function Home({ home: data }: { home: HomeData }) {
 
                 <SortedBand sorted={sorted} more={sortedMore} />
 
-                {justFinished && <JustFinished finished={justFinished} />}
-
                 {reminder && (
                     <Band label={homeBands.beforeYouGo}>
                         <ul className="space-y-1">
@@ -304,65 +320,7 @@ export default function Home({ home: data }: { home: HomeData }) {
                     </Band>
                 )}
 
-                {comingUp && (
-                    <Band label={homeBands.comingUp}>
-                        <p>
-                            {comingUp.title}
-                            <span className="text-muted-foreground">
-                                {' '}
-                                · {comingUp.inWords}
-                                {comingUp.kind === 'calendar_event' &&
-                                    ' · from your calendar'}
-                            </span>
-                        </p>
-                        {comingUp.inferred && (
-                            <Form
-                                {...intentions.deadline.form(comingUp.id)}
-                                className="mt-2 flex flex-wrap items-baseline gap-3"
-                            >
-                                <span className="text-muted-foreground">
-                                    read from what you wrote
-                                </span>
-                                <Button type="submit" variant="quiet">
-                                    That{"'"}s right
-                                </Button>
-                            </Form>
-                        )}
-                        {comingUp.plan && (
-                            <BackwardsPlan plan={comingUp.plan} />
-                        )}
-                        {comingUp.kind === 'calendar_event' && (
-                            <Form
-                                {...calendarEvents.futureReminder.form(
-                                    comingUp.id,
-                                )}
-                                options={{ preserveScroll: true }}
-                                resetOnSuccess
-                                className="mt-3 flex flex-wrap items-center gap-3"
-                            >
-                                <input
-                                    name="message"
-                                    placeholder={remindAfterCopy.question}
-                                    aria-label={remindAfterCopy.question}
-                                    className={cn(
-                                        fieldClassName,
-                                        'w-auto min-w-0 flex-1',
-                                    )}
-                                />
-                                <input
-                                    type="number"
-                                    name="offset_minutes"
-                                    defaultValue={30}
-                                    aria-label="Minutes after"
-                                    className={cn(fieldClassName, 'w-20')}
-                                />
-                                <Button type="submit" variant="quiet">
-                                    {remindAfterCopy.action}
-                                </Button>
-                            </Form>
-                        )}
-                    </Band>
-                )}
+                {comingUp && <ComingUp comingUp={comingUp} />}
 
                 {needsAttention.length > 0 && (
                     <Band label={homeBands.needsAttention}>
@@ -405,12 +363,6 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {commitmentCopy.list}
                         </Link>
                     )}
-                    <Link
-                        href={overwhelmed()}
-                        className={cn(quietLineClassName, 'ml-auto')}
-                    >
-                        {"I'm overwhelmed"}
-                    </Link>
                 </div>
             </div>
         </>

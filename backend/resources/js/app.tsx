@@ -2,8 +2,9 @@ import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import Shell from '@/layouts/shell';
 import AuthLayout from '@/layouts/auth-layout';
+import FocusFrame from '@/layouts/focus-frame';
+import Shell from '@/layouts/shell';
 import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -15,6 +16,9 @@ void createInertiaApp({
             case name === 'welcome':
             case name === 'overwhelmed':
                 return null;
+            case name === 'focus':
+            case name === 'finished':
+                return FocusFrame;
             case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):

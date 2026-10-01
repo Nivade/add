@@ -26,6 +26,7 @@ enum AppointmentKind: string
         };
     }
 
+    /** @return (Appointment&Model)|null */
     public function find(string $id): ?Appointment
     {
         return $this->model()::query()->find($id);

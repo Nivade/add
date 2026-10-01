@@ -11,18 +11,15 @@ use App\Contracts\NextActionResolver;
 use App\Data\ComingUpData;
 use App\Data\ExecutionStateData;
 use App\Data\HomeData;
-use App\Data\JustFinishedData;
 use App\Data\NeedsAttentionData;
 use App\Data\NextActionData;
 use App\Data\ReminderData;
 use App\Enums\AppointmentKind;
 use App\Enums\CaptureKind;
-use App\Enums\IntentionStatus;
 use App\Enums\NeedsAttentionKind;
 use App\Models\Capture;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
-use App\Models\Intention;
 use App\Models\User;
 use App\Notifications\AppointmentReminder;
 use App\Support\NextAction\ResolutionContext;
@@ -33,9 +30,6 @@ use Lorisleiva\Actions\Concerns\AsObject;
 final class BuildHome
 {
     use AsObject;
-
-    /** Long enough to come back from a break and still see what you finished. */
-    private const int JUST_FINISHED_WITHIN_MINUTES = 60;
 
     /** Past a day, an unsorted capture is stuck rather than being sorted. */
     private const int SORTING_WITHIN_HOURS = 24;
@@ -64,7 +58,6 @@ final class BuildHome
             session: $session,
             comingUp: $this->comingUp($context),
             reminder: $reminder,
-            justFinished: $this->justFinished($user, $context->now),
             needsAttention: $needsAttention,
             restCount: $this->restCount($user, $needsAttention, $session?->intention->id ?? $rightNow?->intention->id),
             sortingCount: $this->sortingCount($user, $context->now),
@@ -117,19 +110,6 @@ final class BuildHome
             ->whereNull('failed_at')
             ->where('created_at', '>=', $now->subHours(self::SORTING_WITHIN_HOURS))
             ->count();
-    }
-
-    private function justFinished(User $user, CarbonImmutable $now): ?JustFinishedData
-    {
-        $intention = Intention::query()
-            ->where('user_id', $user->id)
-            ->where('status', IntentionStatus::Done)
-            ->where('completed_at', '>=', $now->subMinutes(self::JUST_FINISHED_WITHIN_MINUTES))
-            ->latest('completed_at')
-            ->with('recurrenceTemplate')
-            ->first();
-
-        return $intention instanceof Intention ? new JustFinishedData($intention->id, $intention->title, $intention->repeatsEveryDays()) : null;
     }
 
     private function session(User $user): ?ExecutionStateData

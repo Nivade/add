@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\Sessions\BuildExecutionState;
+use App\Actions\Sessions\CompleteStep;
 use App\Actions\Sessions\ReportStuck;
 use App\Actions\Sessions\StartSession;
 use App\Actions\Steps\SkipStep;
@@ -267,4 +269,67 @@ it('just moves on from a step with no place, reporting nothing', function (): vo
     expect($session->refresh()->current_step_id)->not->toBe($first->id)
         ->and($session->user->notHereReports()->count())->toBe(0)
         ->and($first->refresh()->skip_count)->toBe(0);
+});
+
+it('answers back above the step it moves to, until the next thing they do', function (StuckReason $reason, string $notice): void {
+    Queue::fake();
+
+    $session = startedWithPlaces([Place::Out, Place::Home, Place::Home]);
+
+    ReportStuck::run($session, $session->current_step_id, $reason);
+
+    expect(BuildExecutionState::run($session)->notice)->toBe($notice);
+
+    CompleteStep::run($session, (string) $session->refresh()->current_step_id);
+
+    expect(BuildExecutionState::run($session)->notice)->toBeNull();
+})->with([
+    [StuckReason::TooBig, "Let's make it smaller. Forget the rest of Clean the kitchen for now."],
+    [StuckReason::DontKnowWhatToDo, "Let's make it smaller. Forget the rest of Clean the kitchen for now."],
+    [StuckReason::NeedSomething, 'That one can wait until you have what it needs. Here is something you can do now.'],
+    [StuckReason::NotEnoughInformation, 'That one can wait until you have what it needs. Here is something you can do now.'],
+    [StuckReason::NotHere, 'That one waits until you are there. Here is one you can do here.'],
+    [StuckReason::SomethingElse, 'Noted. This one is still here when you want it.'],
+]);
+
+it('says nothing extra for an answer that stops, and sends the web home with a line', function (StuckReason $reason): void {
+    $session = started();
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route('focus.stuck', $session), ['step_id' => $session->current_step_id, 'reason' => $reason->value])
+        ->assertRedirect(route('home'))
+        ->assertInertiaFlash('toast.message', 'Stopped for now. It will be here later.');
+
+    expect($reason->acknowledgement('Clean the kitchen'))->toBeNull();
+})->with([StuckReason::Tired, StuckReason::DontWantTo]);
+
+it('does not hand a step called too big back in the same sitting', function (): void {
+    Queue::fake();
+
+    $session = started(2);
+    $big = $session->currentStep()->sole();
+
+    ReportStuck::run($session, $session->current_step_id, StuckReason::TooBig);
+
+    $sibling = $session->refresh()->current_step_id;
+    CompleteStep::run($session, (string) $sibling);
+
+    expect($session->refresh()->outcome)->toBe(SessionOutcome::Continued)
+        ->and($big->refresh()->status)->toBe(StepStatus::Pending);
+});
+
+it('stores the note typed under something else', function (): void {
+    $session = started();
+
+    $this->actingAs($session->user)
+        ->from(route('focus'))
+        ->post(route('focus.stuck', $session), [
+            'step_id' => $session->current_step_id,
+            'reason' => StuckReason::SomethingElse->value,
+            'note' => 'The cat is on the keyboard.',
+        ])
+        ->assertRedirect(route('focus'));
+
+    expect($session->events()->where('type', 'stuck')->sole()->payload['note'])->toBe('The cat is on the keyboard.');
 });

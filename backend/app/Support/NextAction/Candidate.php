@@ -43,6 +43,12 @@ final readonly class Candidate
         return $this->intention->deadline_at;
     }
 
+    /** A deadline read out of what they wrote is said as that, until they confirm it. */
+    public function deadlineSubject(): string
+    {
+        return $this->intention->deadline_inferred ? 'Going by what you wrote, the deadline' : 'Your deadline';
+    }
+
     public function deadlineInWords(CarbonImmutable $now): ?string
     {
         return $this->deadlineAt()?->setTimezone($now->getTimezone())->diffForHumans([

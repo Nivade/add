@@ -1,5 +1,5 @@
 import type { OverwhelmedData } from '@add/shared';
-import { focusCopy, nothingNeedsYou, overwhelmedCopy, restCountLine, smallestStepMeta } from '@add/shared';
+import { estimateLine, focusCopy, nothingNeedsYou, overwhelmedCopy, restCountLine } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { api } from '@/api/endpoints';
@@ -8,6 +8,7 @@ import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
+import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
 
 /** No bands, no capture, one way back: this screen exists to remove everything else. */
 export default function Overwhelmed() {
@@ -38,11 +39,12 @@ export default function Overwhelmed() {
       {step ? (
         <>
           <OneThing>{step.step.title}</OneThing>
-          <Meta>{smallestStepMeta(step.step)}</Meta>
+          <Meta>{estimateLine(step.step.estimatedSeconds, nowMinute())}</Meta>
           {step.why.map((line) => (
             <Meta key={line}>{line}</Meta>
           ))}
           <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
+          {step.step.generated && <SuggestedPill />}
         </>
       ) : (
         <OneThing>{nothingNeedsYou}</OneThing>

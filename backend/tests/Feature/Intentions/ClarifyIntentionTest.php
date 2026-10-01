@@ -93,7 +93,7 @@ it('reads a date in the answer as a deadline to confirm, and ranks on it', funct
     expect($passport->refresh()->deadline_at?->setTimezone('Europe/Amsterdam')->toDateTimeString())->toBe('2027-03-01 00:00:00')
         ->and($passport->deadline_confirmed_at)->toBeNull()
         ->and($answer?->step->title)->toBe('Find the old passport.')
-        ->and($answer?->why)->toBe(['Your deadline is 5 months from now.', 'This takes about 4 minutes.']);
+        ->and($answer?->why)->toBe(['Going by what you wrote, the deadline is 5 months from now.', 'This takes about 4 minutes.']);
 });
 
 it('never lets an answer move a date the person already gave', function (): void {

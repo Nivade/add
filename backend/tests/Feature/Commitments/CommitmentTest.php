@@ -213,7 +213,7 @@ it('promotes the step on screen, and keeps the commitment when that step is done
 
     $this->actingAs($session->user)
         ->from(route('focus'))
-        ->post(route('focus.commitment', $session))
+        ->post(route('focus.commitment', $session), ['step_id' => $session->current_step_id])
         ->assertRedirect(route('focus'));
 
     $commitment = Commitment::query()->sole();
@@ -235,11 +235,11 @@ it('promotes the step on screen over the API too, and only for its owner', funct
     $session = started(2);
 
     $this->actingAs(User::factory()->create())
-        ->postJson(route('api.v1.sessions.commitment', $session))
+        ->postJson(route('api.v1.sessions.commitment', $session), ['step_id' => $session->current_step_id])
         ->assertNotFound();
 
     $this->actingAs($session->user)
-        ->postJson(route('api.v1.sessions.commitment', $session))
+        ->postJson(route('api.v1.sessions.commitment', $session), ['step_id' => $session->current_step_id])
         ->assertCreated()
         ->assertJsonPath('provenance', 'user_task');
 });

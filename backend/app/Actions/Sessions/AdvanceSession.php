@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\Sessions;
 
 use App\Enums\CommitmentStatus;
+use App\Enums\ExecutionEventType;
 use App\Enums\IntentionStatus;
 use App\Enums\SessionOutcome;
+use App\Enums\StuckReason;
+use App\Enums\StuckResolution;
 use App\Models\Commitment;
 use App\Models\ExecutionSession;
 use App\Models\Step;
@@ -24,7 +27,10 @@ final class AdvanceSession
     {
         return $session->transition(function () use ($session, $passOver): ExecutionSession {
             $pending = $session->intention->remainingSteps()->orderBy('position')->get();
-            $offerable = $passOver instanceof Closure ? $pending->reject($passOver) : $pending;
+            $tooBig = $this->reportedTooBig($session);
+            $offerable = $pending->reject(
+                fn (Step $step): bool => in_array($step->id, $tooBig, true) || ($passOver instanceof Closure && $passOver($step)),
+            );
             $next = $this->next($offerable, $session);
 
             if (! $next instanceof Step) {
@@ -35,6 +41,27 @@ final class AdvanceSession
 
             return $session;
         });
+    }
+
+    /**
+     * A step they said was too big stays theirs, but is not handed back in the same sitting.
+     *
+     * @return list<string>
+     */
+    private function reportedTooBig(ExecutionSession $session): array
+    {
+        $splitReasons = array_values(array_map(
+            fn (StuckReason $reason): string => $reason->value,
+            array_filter(StuckReason::cases(), fn (StuckReason $reason): bool => $reason->resolution() === StuckResolution::Split),
+        ));
+
+        /** @var list<string> */
+        return $session->events()
+            ->where('type', ExecutionEventType::Stuck)
+            ->whereIn('payload->reason', $splitReasons)
+            ->whereNotNull('step_id')
+            ->pluck('step_id')
+            ->all();
     }
 
     /** @param  Collection<int, Step>  $offerable */

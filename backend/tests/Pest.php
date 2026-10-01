@@ -176,6 +176,25 @@ function kitchen(int $steps = 3, ?User $user = null): Intention
     return $intention;
 }
 
+/** An intention with a deadline read out of what they wrote, two days off and not yet confirmed. */
+function dated(User $user): Intention
+{
+    $intention = Intention::factory()->decomposed()->for($user)->create([
+        'title' => 'Renew the passport',
+        'deadline_at' => CarbonImmutable::now()->addDays(2),
+    ]);
+
+    Step::factory()->for($intention)->create(['position' => 1]);
+
+    return $intention;
+}
+
+/** What a screen built now would post back as the moment the person saw. */
+function seenEvent(ExecutionSession $session): string
+{
+    return (string) $session->latestEvent()?->id;
+}
+
 function started(int $steps = 3): ExecutionSession
 {
     $intention = kitchen($steps);

@@ -169,7 +169,7 @@ it('never imports a global class in a Pest file', function (): void {
 
 // Two taps can both pass an unlocked open check, so every transition re-reads its session under the row lock.
 it('locks the session before any transition reads it', function (): void {
-    $notTransitions = ['BuildExecutionState', 'RecordExecutionEvent', 'StopSession'];
+    $notTransitions = ['BuildExecutionState', 'BuildFinished', 'RecordExecutionEvent'];
 
     foreach (glob(app_path('Actions/Sessions/*.php')) ?: [] as $file) {
         if (in_array(basename($file, '.php'), $notTransitions, true)) {

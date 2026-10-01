@@ -114,7 +114,20 @@ class ExecutionSession extends Model
         }
     }
 
-    public function currentStepOrFail(?string $expectedStepId = null): Step
+    /** The newest event is what the person last saw; ordering matches what the screen was built from. */
+    public function latestEvent(): ?ExecutionEvent
+    {
+        return $this->events()->latest()->orderByDesc('id')->first();
+    }
+
+    public function assertSeen(string $eventId): void
+    {
+        if ($this->latestEvent()?->id !== $eventId) {
+            throw new InvalidSessionTransition("Session {$this->id} has moved on since event {$eventId}.");
+        }
+    }
+
+    public function currentStepOrFail(string $expectedStepId): Step
     {
         $this->assertOpen();
 
@@ -124,7 +137,7 @@ class ExecutionSession extends Model
             throw new InvalidSessionTransition("Session {$this->id} is not pointing at a step.");
         }
 
-        if ($expectedStepId !== null && $step->id !== $expectedStepId) {
+        if ($step->id !== $expectedStepId) {
             throw new InvalidSessionTransition("Session {$this->id} has moved past step {$expectedStepId}.");
         }
 

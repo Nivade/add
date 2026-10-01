@@ -17,15 +17,12 @@ export function CommitmentRow({
 }) {
     return (
         <div className="space-y-2">
-            <p>
-                {description}
-                {provenance && (
-                    <span className="text-muted-foreground">
-                        {' '}
-                        · {commitmentProvenanceLabels[provenance]}
-                    </span>
-                )}
-            </p>
+            <p>{description}</p>
+            {provenance && (
+                <p className="text-muted-foreground">
+                    {commitmentProvenanceLabels[provenance]}
+                </p>
+            )}
             <Responses
                 action={commitments.respond.form(id)}
                 responses={commitmentResponses(awaitingConfirmation)}

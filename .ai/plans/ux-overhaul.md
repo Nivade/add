@@ -287,24 +287,24 @@ desktop                                          phone
 
 ## Phase 4 — the journey (`feature/ux-journey`)
 
-- [ ] **4.1 Focus drops the chrome.** Invoke skills: `inertia-react-development`.
+- [x] **4.1 Focus drops the chrome.** Invoke skills: `inertia-react-development`.
   - New `backend/resources/js/layouts/focus-frame.tsx`: the day strip and the page, no header; mounts `CaptureHost`.
   - One clock per page: move `useMinuteOfDay(from, live)` out of `day-strip.tsx` into `backend/resources/js/hooks/use-minute-of-day.ts`; `shell.tsx` and `focus-frame.tsx` call it once and pass `nowMinute` to both `DayStrip`s (column and row), which stop running their own interval.
   - `backend/resources/js/app.tsx`: `focus` and `finished` use `FocusFrame`.
   - Check: `/focus` shows no header; `c` still opens capture.
-- [ ] **4.2 A keyboard layer.** Invoke skills: `inertia-react-development`.
+- [x] **4.2 A keyboard layer.** Invoke skills: `inertia-react-development`.
   - New `backend/resources/js/hooks/use-shortcuts.ts`: `useShortcuts(map: Record<string, () => void>, enabled = true)`; ignores typing targets, modifier keys, and any open `[role="dialog"]` other than the one that registered it.
   - Keys: shell `c` capture, `o` overwhelmed; home `Enter` starts when `document.activeElement === document.body`; focus `d` Done, `s` Skip, `?` and `h` I'm stuck, `p` Pause, `r` I got distracted, `x` Stop; stuck dialog `1`–`8`; overwhelmed `Enter` start, `Escape` home; finished `Enter` start next, `Escape` home.
   - Every button with a key shows a `<kbd>` hint and carries `aria-keyshortcuts`.
   - New `NowButton` in `backend/resources/js/components/now-button.tsx`: `variant="now" size="action"`, its key hint and `aria-keyshortcuts`; Start and Continue in `one-thing.tsx`, `home.tsx` and `focus.tsx` use it and nothing else does.
   - `JourneyTest.php` drives Done and Continue by these keys.
   - Check: `npm run test:browser` passes.
-- [ ] **4.3 Six controls in two honest rows.** Invoke skills: `frontend-design`.
+- [x] **4.3 Six controls in two honest rows.** Invoke skills: `frontend-design`.
   - Focus controls as two `role="group"` rows, all six equal (`size="control"`): "This step" — Done, Skip, I'm stuck; "Step away" — Pause, I got distracted, Stop.
   - `packages/shared/src/copy.ts` `focusCopy` gains `hints`: Done "Finished it", Skip "Not this one now", I'm stuck "Tell me what's in the way", Pause "Back in a bit", I got distracted "I drifted off", Stop "Done for now".
   - After any control, focus moves to the `h1`; the step container is keyed by step id for the motion beat.
   - Check: screenshots at 1440 and 390; `JourneyTest.php` passes.
-- [ ] **4.4 Finishing is a moment.** Invoke skills: `laravel-actions`, `laravel-data`, `frontend-design`, `pest-testing`.
+- [x] **4.4 Finishing is a moment.** Invoke skills: `laravel-actions`, `laravel-data`, `frontend-design`, `pest-testing`.
   - New `backend/app/Data/FinishedData.php`, `#[TypeScript]`: `IntentionData $intention`, `list<string> $lines`, `?NextActionData $next`, `?int $recurrenceEveryDays`.
   - New `backend/app/Actions/Sessions/BuildFinished.php`: `handle(ExecutionSession $session): FinishedData`. Lines, each only when true: "{n} steps done." or "{n} steps done, {m} skipped."; "About {duration} of work." (the sum of the intention's sessions, paused time excluded); "{words} before the deadline."; "It had been on your list for {d} days." (two days or more); "{t} things finished today." (intentions). `next` from `NextActionResolver::resolve`.
   - Routes: web `GET focus/{session}/finished` named `focus.finished` → `backend/app/Http/Controllers/Web/ShowFinishedController.php`; API `GET /api/v1/sessions/{session}/finished` → `backend/app/Http/Controllers/Api/V1/ShowFinishedController.php`. Both owned, both 404 unless the outcome is `Completed`.
@@ -314,7 +314,7 @@ desktop                                          phone
   - New `backend/tests/Feature/Execution/FinishedTest.php`: the last Done redirects there; each line appears only when true; the API answers `FinishedData`; another person's session and a running session are refused.
   - `JourneyTest.php` ends on "is handled." and "Leave it there".
   - Check: `npm run artisan -- test --compact tests/Feature/Execution tests/Feature/Home` and `npm run test:browser` pass.
-- [ ] **4.5 Stuck answers back, and does not bounce.** Invoke skills: `laravel-actions`.
+- [x] **4.5 Stuck answers back, and does not bounce.** Invoke skills: `laravel-actions`.
   - `StuckReason::acknowledgement(string $intentionTitle): ?string`: TooBig and DontKnowWhatToDo "Let's make it smaller. Forget the rest of {title} for now."; NeedSomething and NotEnoughInformation "That one can wait until you have what it needs. Here is something you can do now."; NotHere "That one waits until you are there. Here is one you can do here."; SomethingElse "Noted. This one is still here when you want it."; Tired and DontWantTo null.
   - `ExecutionStateData` gains `?string $notice`, set when the session's latest event is `Stuck`. Web and mobile render it as `role="status"` above the step.
   - A stuck answer that stops the session: web flashes the toast "Stopped for now. It will be here later." and redirects home; mobile routes home with the same line.
@@ -322,7 +322,7 @@ desktop                                          phone
   - `AdvanceSession::handle` also passes over steps this session reported stuck with a reason whose `resolution()` is `StuckResolution::Split` (`$session->events()->where('type', ExecutionEventType::Stuck)->whereIn('payload->reason', [...])->pluck('step_id')`), combined with the caller's `$passOver` in the same `reject()`; such steps still count as left. A split's new steps have new ids and are offered.
   - Tests in `backend/tests/Feature/Execution/StuckTest.php`: each acknowledgement; the notice clears after the next Done; a too-big step is not offered again in the same session after its sibling is done, and the session ends `Continued` when only it is left; a note is stored.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution` passes.
-- [ ] **4.6 Home stops asking for configuration.** Invoke skills: `laravel-actions`, `inertia-react-development`.
+- [x] **4.6 Home stops asking for configuration.** Invoke skills: `laravel-actions`, `inertia-react-development`.
   - `ComingUpData` gains `string $localAt` (`Y-m-d\TH:i` in the person's zone).
   - New `backend/app/Actions/Intentions/CorrectDeadline.php`: `handle(Intention $intention, ?CarbonImmutable $deadlineAt): Intention`; sets `deadline_at` (null clears it) and `deadline_confirmed_at = now()` when not null.
   - New `backend/app/Http/Requests/CorrectDeadlineRequest.php`: `deadline_at` nullable `date_format:Y-m-d\TH:i`; `deadlineAt(User $user): ?CarbonImmutable` reads it in the person's zone.
@@ -331,7 +331,7 @@ desktop                                          phone
   - Home's "What's coming up": "{title}, {inWords}." and "Leave at {clock}." when planned; "Plan for it" links to the appointment page; an inferred deadline shows "Read from what you wrote." with That's right and "Change" (to the page). The future-reminder form and the plan editor leave home.
   - New `backend/tests/Feature/Intentions/CorrectDeadlineTest.php`: set, clear, zone, ownership.
   - Check: `npm run artisan -- test --compact tests/Feature/Intentions tests/Feature/Home` passes.
-- [ ] **4.7 Say it plainly.** Invoke skills: `next-action-resolver`.
+- [x] **4.7 Say it plainly.** Invoke skills: `next-action-resolver`.
   - Remove every `.toLowerCase()` applied to titles or server lines in `backend/resources/js` and `mobile/`.
   - `BuildExecutionState` progress: "{done} of {n} steps done."; the sitting line only when `steps_completed` differs from the intention's done count; the today line reads "{t} steps finished today." and only when above the sitting count.
   - `PrerequisiteFirst::decides` → "It comes first in “{title}”." `HasDeadline::qualifies` and `DeadlineWithinReach::decides`, when `$candidate->intention->deadline_inferred`: "Going by what you wrote, the deadline is {d}." / "…was {d}." / "Going by what you wrote, the deadline is {d} and what is left only just fits."
@@ -339,18 +339,18 @@ desktop                                          phone
   - No middle-dot joins in UI copy: waiting-for rows read "{subject}: {note}", coming-up reads as a sentence.
   - Tests: update strings in `backend/tests/Feature/NextAction/ResolverTest.php`, `HomeTest.php`, `backend/tests/Feature/Intentions/ClarifyIntentionTest.php`, `SessionTest.php`; add a scenario for the inferred-deadline wording.
   - Check: `npm run test` passes.
-- [ ] **4.8 Accessibility pass.** Invoke skills: `chrome-devtools-mcp:a11y-debugging`.
+- [x] **4.8 Accessibility pass.** Invoke skills: `chrome-devtools-mcp:a11y-debugging`.
   - Each page has one `h1` (the one thing, or the page's question) before any `h2`; bands are `h2`.
   - After the step changes, focus moves to the `h1`; the notice is `role="status"`.
   - The day strip's drawing is `aria-hidden`; `railSummary()` is its one visually hidden sentence.
   - Every tap target is at least 2.75rem; the overwhelmed page, Esc and Enter work without a mouse.
   - Check: Lighthouse accessibility 100 on `/home`, `/focus`, `/overwhelmed`, `/focus/{session}/finished` in both themes; the snapshot shows the heading order; `DesignTokensTest.php` passes.
-- [ ] **4.9 The overwhelmed screen is the calmest one.** Invoke skills: `frontend-design`.
+- [x] **4.9 The overwhelmed screen is the calmest one.** Invoke skills: `frontend-design`.
   - `packages/shared/src/copy.ts` `overwhelmedCopy` gains `lines`: "You've got a lot going on.", "Ignore everything else for now.", "Let's do one thing."
   - `backend/resources/js/pages/overwhelmed.tsx`: those three lines, then the step, its why, Start; the rest line; "Back to home" (Esc). More space, no motion.
   - Header "I'm overwhelmed" is visible ink text, body size, key `o`; the footer link on home goes.
   - Check: screenshot at 1440 and 390.
-- [ ] **4.10 No stale tap lands.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`, `pest-testing`.
+- [x] **4.10 No stale tap lands.** Invoke skills: `laravel-actions`, `laravel-data`, `expo-react-native`, `pest-testing`.
   - `ExecutionSession::assertSeen(string $eventId): void` throws `InvalidSessionTransition("Session {$this->id} has moved on since event {$eventId}.")` when the session's latest event id (ulid, `events()->latest('id')->value('id')`) differs.
   - `PauseSession`, `ResumeSession`, `RecordDistraction`, `StopSession` gain `?string $seenEventId = null`, checked first inside their `transition()`; null is only for internal callers (`ReportStuck`, `StartSession` stopping a session), never a controller.
   - New `backend/app/Http/Requests/SessionControlRequest.php`: `seen_event_id` required string; `seenEventId(): string`. The web `PauseFocusController`, `ResumeFocusController`, `RecordDistractionController`, `StopFocusController` and API `PauseSessionController`, `ResumeSessionController`, `RecordDistractionController`, `StopSessionController` take it and pass it through.
@@ -359,7 +359,17 @@ desktop                                          phone
   - `ExecutionStateData` gains `string $seenEventId`. Web `focus.tsx` posts it as a hidden `seen_event_id`. Home's Continue for a returning or paused session becomes a `OneTapForm` posting `resume` with it (today it only links to focus, so focus says "Welcome back." a second time), and `ResumeFocusController` redirects to `focus` rather than `back()`; the promise form posts `step_id`. Mobile `mobile/src/api/endpoints.ts` sends `seen_event_id` for pause, resume, distracted and stop, and `step_id` for commitment.
   - Tests in `SessionTest.php` and `ExecutionEndpointTest.php`: a second Pause, Stop and I got distracted with the old event id is refused (API 409, web redirect, nothing recorded); a missing `seen_event_id` is 422; `ReportStuck` with a stop resolution still stops.
   - Check: `npm run artisan -- test --compact tests/Feature/Execution tests/Feature/Commitments` and `npm run typecheck` pass.
-- [ ] **4.11 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
+- [x] **4.11 Finish.** Invoke skills: `phpstan-larastan`, `finish-branch`.
+
+## Phase 4 as built, 2026-10-01
+
+- 4.4: the steps line reads "{n} steps done, {m} skipped along the way.", since nothing sets a step `skipped` and m counts steps skipped at least once.
+- 4.4: with no next step the closing screen offers "Back to home", not "Leave it there"; an inferred deadline reads "Going by what you wrote, that is {words} before the deadline."
+- 4.6: home shows "Plan for it" only when the appointment page has a plan or a calendar reminder to set.
+- 4.7: focus uses `underWayEstimateLine`, which drops "if you start now"; pages read the minute from `useNowMinute()`, the layout's one clock.
+- 4.2: key hints hide on coarse pointers; `aria-keyshortcuts` stays, so the keys are still announced.
+- 4.8 landed after 4.9 and 4.10 so the audit ran once; dark `/focus` was checked with axe-core in a throwaway browser test, as the demo had nothing startable.
+- Mobile's something-else note and the closing screen's repeat offer wait for 5.3.
 
 ## Phase 5 — mobile (`feature/mobile-parity`)
 

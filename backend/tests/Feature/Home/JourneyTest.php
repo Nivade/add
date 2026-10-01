@@ -59,7 +59,7 @@ it('carries one typed thought all the way to a finished intention', function ():
 
     $this->actingAs($user)
         ->from(route('focus'))
-        ->post(route('focus.distracted', $session))
+        ->post(route('focus.distracted', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($user)
@@ -68,12 +68,12 @@ it('carries one typed thought all the way to a finished intention', function ():
 
     $this->actingAs($user)
         ->from(route('focus'))
-        ->post(route('focus.resume', $session))
+        ->post(route('focus.resume', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($user)
         ->from(route('focus'))
-        ->post(route('focus.pause', $session))
+        ->post(route('focus.pause', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($user)
@@ -83,13 +83,13 @@ it('carries one typed thought all the way to a finished intention', function ():
 
     $this->actingAs($user)
         ->from(route('focus'))
-        ->post(route('focus.resume', $session))
+        ->post(route('focus.resume', $session), ['seen_event_id' => seenEvent($session)])
         ->assertRedirect(route('focus'));
 
     $this->actingAs($user)
         ->from(route('focus'))
         ->post(route('focus.complete-step', $session), ['step_id' => $session->refresh()->current_step_id])
-        ->assertRedirect(route('focus'));
+        ->assertRedirect(route('focus.finished', $session));
 
     $this->actingAs($user)
         ->get(route('home'))

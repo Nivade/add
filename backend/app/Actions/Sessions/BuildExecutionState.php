@@ -9,6 +9,7 @@ use App\Data\ExecutionStateData;
 use App\Data\IntentionData;
 use App\Enums\ExecutionEventType;
 use App\Enums\StepStatus;
+use App\Enums\StuckReason;
 use App\Models\Commitment;
 use App\Models\ExecutionEvent;
 use App\Models\ExecutionSession;
@@ -35,6 +36,7 @@ final class BuildExecutionState
     public function handle(ExecutionSession $session): ExecutionStateData
     {
         $session->refresh()->load(['currentStep', 'intention.steps', 'user']);
+        $latest = $session->latestEvent();
 
         return new ExecutionStateData(
             ExecutionSessionData::from($session),
@@ -42,19 +44,20 @@ final class BuildExecutionState
             $this->progressLines($session),
             $this->elapsedWords($session),
             $session->current_step_id !== null && Commitment::query()->open()->forStep($session->current_step_id)->exists(),
-            $this->returning($session),
+            $this->returning($session, $latest),
             $session->intention->steps->where('status', StepStatus::Done)->count(),
+            $this->notice($session, $latest),
+            $latest->id ?? '',
         );
     }
 
     /** Coming back after a distraction, a long pause or a long quiet gets a welcome, not a bare step. */
-    private function returning(ExecutionSession $session): bool
+    private function returning(ExecutionSession $session, ?ExecutionEvent $latest): bool
     {
         if (! $session->isRunning()) {
             return false;
         }
 
-        $latest = $session->events()->latest()->orderByDesc('id')->first();
         $now = $session->user->now();
 
         if ($session->paused_at !== null) {
@@ -64,6 +67,18 @@ final class BuildExecutionState
 
         return $latest instanceof ExecutionEvent
             && $latest->created_at->lt($now->subMinutes(self::RETURNING_AFTER_IDLE_MINUTES));
+    }
+
+    /** What the app heard when they said they were stuck, until the next thing they do. */
+    private function notice(ExecutionSession $session, ?ExecutionEvent $latest): ?string
+    {
+        if ($latest?->type !== ExecutionEventType::Stuck) {
+            return null;
+        }
+
+        $reason = StuckReason::tryFrom((string) ($latest->payload['reason'] ?? ''));
+
+        return $reason?->acknowledgement($session->intention->title);
     }
 
     /** @return list<string> */
@@ -78,7 +93,8 @@ final class BuildExecutionState
             $lines[] = $done.' of '.$steps->count().' steps done.';
         }
 
-        if ($session->steps_completed > 0) {
+        // Said only when it adds something: on a first sitting it repeats the line above.
+        if ($session->steps_completed > 0 && $session->steps_completed !== $done) {
             $lines[] = $session->steps_completed.' '
                 .($session->steps_completed === 1 ? 'step' : 'steps')
                 .' done in this sitting.';
@@ -86,8 +102,8 @@ final class BuildExecutionState
 
         $today = $this->doneToday($session);
 
-        if ($today > 0) {
-            $lines[] = $today.' '.($today === 1 ? 'thing' : 'things').' finished today.';
+        if ($today > $session->steps_completed) {
+            $lines[] = $today.' '.($today === 1 ? 'step' : 'steps').' finished today.';
         }
 
         $avoided = $this->avoidedLine($session);
