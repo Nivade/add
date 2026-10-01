@@ -173,6 +173,7 @@
                 "pint",
                 "precommit",
                 "rector",
+                "renovate",
                 "scripts",
                 "sloppy",
                 "vite"
@@ -263,6 +264,11 @@
                     }
                 },
                 "dependencies": {
+                    "packages": [],
+                    "gitignore": [],
+                    "entries": []
+                },
+                "renovate": {
                     "packages": [],
                     "gitignore": [],
                     "entries": []

@@ -55,7 +55,8 @@ range rather than the exact version Expo pins and the root hoists a single copy
 for both frontends. `expo-doctor` then reports a minor mismatch against the SDK's
 pinned version; `expo.install.exclude` in `mobile/package.json` is what records
 that this is a decision. Pinning the exact version back is how the nested copy
-returns.
+returns. `renovate.json` leaves `mobile/package.json` alone for the same reason: its
+versions move as one SDK, through an Expo upgrade.
 
 ## Redis only exists inside Compose
 

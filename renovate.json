@@ -1,0 +1,56 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended"],
+    "enabledManagers": ["composer", "npm", "docker-compose", "gitlabci"],
+    "semanticCommits": "enabled",
+    "minimumReleaseAge": "5 days",
+    "lockFileMaintenance": {
+        "enabled": true,
+        "extends": ["schedule:monthly"]
+    },
+    "packageRules": [
+        {
+            "matchManagers": ["composer"],
+            "matchDepTypes": ["require"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "composer-production"
+        },
+        {
+            "matchManagers": ["composer"],
+            "matchDepTypes": ["require-dev"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "composer-development"
+        },
+        {
+            "matchManagers": ["npm"],
+            "matchDepTypes": ["dependencies"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "npm-production"
+        },
+        {
+            "matchManagers": ["npm"],
+            "matchDepTypes": ["devDependencies"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "npm-development"
+        },
+        {
+            "matchManagers": ["docker-compose"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "docker-compose"
+        },
+        {
+            "matchManagers": ["gitlabci"],
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "ci"
+        },
+        {
+            "matchPackageNames": ["pestphp/**"],
+            "groupName": "pest"
+        },
+        {
+            "description": "Expo pins the mobile app's versions as one SDK; they move through expo upgrades, not one by one.",
+            "matchFileNames": ["mobile/package.json"],
+            "enabled": false
+        }
+    ]
+}
