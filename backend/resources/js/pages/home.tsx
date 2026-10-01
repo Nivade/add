@@ -34,7 +34,7 @@ import { SortedBand } from '@/components/sorted-band';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { focus, overwhelmed } from '@/routes';
+import { focus } from '@/routes';
 import ai from '@/routes/ai';
 import appointments from '@/routes/appointments';
 import commitments from '@/routes/commitments';
@@ -346,12 +346,6 @@ export default function Home({ home: data }: { home: HomeData }) {
                             {commitmentCopy.list}
                         </Link>
                     )}
-                    <Link
-                        href={overwhelmed()}
-                        className={cn(quietLineClassName, 'ml-auto')}
-                    >
-                        {"I'm overwhelmed"}
-                    </Link>
                 </div>
             </div>
         </>

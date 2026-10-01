@@ -37,7 +37,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                         <Link
                             href={overwhelmed()}
                             aria-keyshortcuts="o"
-                            className="inline-flex min-h-11 items-center gap-2"
+                            className="text-ink text-body inline-flex min-h-11 items-center gap-2 px-2 underline-offset-4 hover:underline"
                         >
                             {"I'm overwhelmed"}
                             <KeyHint>o</KeyHint>

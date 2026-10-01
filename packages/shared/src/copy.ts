@@ -203,6 +203,7 @@ export const remindAfterCopy = {
 } as const;
 
 export const overwhelmedCopy = {
+    lines: ["You've got a lot going on.", 'Ignore everything else for now.', "Let's do one thing."],
     back: 'Back to home',
 } as const;
 

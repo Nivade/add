@@ -345,7 +345,7 @@ desktop                                          phone
   - The day strip's drawing is `aria-hidden`; `railSummary()` is its one visually hidden sentence.
   - Every tap target is at least 2.75rem; the overwhelmed page, Esc and Enter work without a mouse.
   - Check: Lighthouse accessibility 100 on `/home`, `/focus`, `/overwhelmed`, `/focus/{session}/finished` in both themes; the snapshot shows the heading order; `DesignTokensTest.php` passes.
-- [ ] **4.9 The overwhelmed screen is the calmest one.** Invoke skills: `frontend-design`.
+- [x] **4.9 The overwhelmed screen is the calmest one.** Invoke skills: `frontend-design`.
   - `packages/shared/src/copy.ts` `overwhelmedCopy` gains `lines`: "You've got a lot going on.", "Ignore everything else for now.", "Let's do one thing."
   - `backend/resources/js/pages/overwhelmed.tsx`: those three lines, then the step, its why, Start; the rest line; "Back to home" (Esc). More space, no motion.
   - Header "I'm overwhelmed" is visible ink text, body size, key `o`; the footer link on home goes.

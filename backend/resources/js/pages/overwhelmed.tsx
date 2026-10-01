@@ -24,36 +24,44 @@ export default function Overwhelmed({
         <>
             <Head title="One thing" />
 
-            <div className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-20">
-                <div className="max-w-content mx-auto flex w-full flex-col items-start gap-8">
-                    <p className="text-muted-foreground text-lead">One thing</p>
+            <div className="bg-background text-foreground flex min-h-screen flex-col justify-center px-6 py-24">
+                <div className="max-w-content mx-auto flex w-full flex-col items-start gap-12">
+                    <div className="text-muted-foreground text-lead space-y-1">
+                        {overwhelmedCopy.lines.map((line) => (
+                            <p key={line}>{line}</p>
+                        ))}
+                    </div>
 
-                    <OneThing>
-                        {smallestStep
-                            ? smallestStep.step.title
-                            : nothingNeedsYou}
-                    </OneThing>
+                    <div className="flex flex-col items-start gap-6">
+                        <OneThing>
+                            {smallestStep
+                                ? smallestStep.step.title
+                                : nothingNeedsYou}
+                        </OneThing>
 
-                    {smallestStep && (
-                        <>
-                            <Meta>
-                                <EstimateLine
-                                    seconds={smallestStep.step.estimatedSeconds}
+                        {smallestStep && (
+                            <>
+                                <Meta>
+                                    <EstimateLine
+                                        seconds={
+                                            smallestStep.step.estimatedSeconds
+                                        }
+                                    />
+                                </Meta>
+
+                                <ul className="text-muted-foreground space-y-1">
+                                    {smallestStep.why.map((line) => (
+                                        <li key={line}>{line}</li>
+                                    ))}
+                                </ul>
+
+                                <StartStep
+                                    stepId={smallestStep.step.id}
+                                    suggested={smallestStep.step.generated}
                                 />
-                            </Meta>
-
-                            <ul className="text-muted-foreground space-y-1">
-                                {smallestStep.why.map((line) => (
-                                    <li key={line}>{line}</li>
-                                ))}
-                            </ul>
-
-                            <StartStep
-                                stepId={smallestStep.step.id}
-                                suggested={smallestStep.step.generated}
-                            />
-                        </>
-                    )}
+                            </>
+                        )}
+                    </div>
 
                     <p className="text-muted-foreground">
                         {restCountLine(restCount)}
