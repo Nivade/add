@@ -33,7 +33,7 @@ which and why.
 
 ## Workflow
 
-The tracker (GitLab `_nvade/add`, read through `glab`) is the source of truth for
+The tracker (GitLab `nvade-apps/add`, read through `glab`) is the source of truth for
 work: specs, tickets and findings are issues, never files. `docs/agents/` says how
 the skills use it. `.ai/plans/legacy/` holds the hand-written plans the tracker
 replaced, for people; agents are denied `.ai/plans/`.
