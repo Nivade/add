@@ -65,7 +65,9 @@
             }
         },
         "dependencies": {},
+        "phpstorm": {},
         "precommit": {},
+        "release": {},
         "renovate": {},
         "sloppy": {
             "packages": [
@@ -85,9 +87,20 @@
         "backend/.ai/rules/nvade-devtools-general.md": "2b316f93ee808d1c",
         "backend/.ai/rules/nvade-devtools-laravel.md": "e444885dda0d8824",
         "backend/.ai/rules/nvade-devtools-rector.md": "429dfc12d96cb1e7",
-        "backend/.ai/rules/nvade-devtools-testing.md": "dee4871ff6c08648"
+        "backend/.ai/rules/nvade-devtools-testing.md": "dee4871ff6c08648",
+        "backend/.ai/skills/ai-sdk-development": "08e4e03e5c4b8806",
+        "backend/.ai/skills/debug-using-debugbar": "2449969de7840b1b",
+        "backend/.ai/skills/fortify-development": "1d945041ccaed46d",
+        "backend/.ai/skills/telescope-debugging": "db9f6c9b152edfe3"
     },
     "agent-packages": [
+        "fruitcake/laravel-debugbar",
+        "inertiajs/inertia-laravel",
+        "laravel/ai",
+        "laravel/fortify",
+        "laravel/telescope",
+        "laravel/wayfinder",
+        "lorisleiva/laravel-actions",
         "nvade/devtools"
     ],
     "components": [
@@ -102,10 +115,12 @@
         "npm",
         "npmrc",
         "phpstan",
+        "phpstorm",
         "phpunit",
         "pint",
         "precommit",
         "rector",
+        "release",
         "renovate",
         "scripts",
         "sloppy",

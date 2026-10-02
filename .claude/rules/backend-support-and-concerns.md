@@ -1,1 +1,0 @@
-../../backend/.ai/rules/support-and-concerns.md
