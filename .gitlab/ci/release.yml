@@ -1,0 +1,56 @@
+# A button on every default-branch pipeline, or automatic with the CI/CD variable RELEASE_ON_MERGE=true.
+# Build > Pipelines > New pipeline on the default branch releases too; the tag push then runs its own pipeline.
+# ci.skip spares the release commit a pipeline; the tag is pushed separately so its pipeline still runs.
+release:
+  stage: deploy
+  image: alpine
+  interruptible: false
+  resource_group: release
+  environment:
+    name: release
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "push" && $RELEASE_ON_MERGE == "true"
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: manual
+      allow_failure: true
+  variables:
+    GIT_DEPTH: 0
+    GIT_STRATEGY: clone
+  before_script: []
+  cache: []
+  script:
+    - apk add --no-cache git git-cliff openssh-client
+    - git fetch --quiet origin "$CI_DEFAULT_BRANCH"
+    - if [ "$(git rev-parse FETCH_HEAD)" != "$CI_COMMIT_SHA" ]; then echo "$CI_DEFAULT_BRANCH has moved on; its own pipeline releases."; exit 0; fi
+    - VERSION=$(git-cliff --bumped-version)
+    - if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then echo "Nothing to release since $VERSION."; exit 0; fi
+    - git-cliff --bump -o CHANGELOG.md
+    - git config user.name "$GITLAB_USER_NAME"
+    - git config user.email "$GITLAB_USER_EMAIL"
+    - git add CHANGELOG.md
+    - 'git commit -m "chore(release): $VERSION"'
+    - git-cliff --unreleased --bump --strip header -o /tmp/notes.md
+    - git tag -a "$VERSION" --cleanup=verbatim -F /tmp/notes.md
+    - umask 077 && mkdir -p ~/.ssh && echo "$RELEASE_KEY" | base64 -d > ~/.ssh/release
+    - ssh-keyscan -p "$CI_SERVER_SHELL_SSH_PORT" "$CI_SERVER_SHELL_SSH_HOST" > ~/.ssh/known_hosts
+    - git config core.sshCommand "ssh -i $HOME/.ssh/release -o IdentitiesOnly=yes"
+    - REMOTE="ssh://git@${CI_SERVER_SHELL_SSH_HOST}:${CI_SERVER_SHELL_SSH_PORT}/${CI_PROJECT_PATH}.git"
+    - git push -o ci.skip "$REMOTE" "HEAD:$CI_DEFAULT_BRANCH"
+    - git push "$REMOTE" "$VERSION"
+
+# The tag message holds the release notes; the job token may create the Release itself.
+release-notes:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v[0-9]/
+  before_script: []
+  cache: []
+  script:
+    - git for-each-ref --format='%(contents)' "refs/tags/$CI_COMMIT_TAG" > notes.md
+  release:
+    tag_name: $CI_COMMIT_TAG
+    description: notes.md
