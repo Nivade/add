@@ -3,7 +3,7 @@
 
 project=$(cd -- "${CLAUDE_PROJECT_DIR:-$PWD}" && pwd -P) || exit 0
 app_dir="backend"
-[ "$1" = tier ] && input= || input=$(cat)
+case "$1" in gate|merged) input=$(cat) ;; *) input= ;; esac
 cd -- "$project" || exit 0
 export CLAUDE_PROJECT_DIR="$project"
 

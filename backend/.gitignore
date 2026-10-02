@@ -48,3 +48,5 @@ yarn-error.log
 /opencode.jsonc
 /storage/phpunit
 /storage/ai-fixtures
+/storage/rector/
+/storage/phpunit/

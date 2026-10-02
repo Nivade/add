@@ -7,9 +7,11 @@ commitlint:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_BEFORE_SHA != "0000000000000000000000000000000000000000"
   variables:
     GIT_DEPTH: 0
-    npm_config_cache: .cache/npm
+    # Cached at the project root, outside the app dir the checks format; the key prefix retires the old in-app archives.
+    npm_config_cache: $CI_PROJECT_DIR/.cache/npm
   cache:
     key:
+      prefix: npm
       files:
         - package-lock.json
     paths:
