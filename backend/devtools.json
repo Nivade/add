@@ -1,9 +1,7 @@
 {
     "added": {
         "arch": {
-            "packages": [
-                "pestphp/pest-plugin-type-coverage"
-            ],
+            "packages": ["pestphp/pest-plugin-type-coverage"],
             "entries": {
                 "composer.json arch scripts": {
                     "types:coverage": null
@@ -70,17 +68,13 @@
         "release": {},
         "renovate": {},
         "sloppy": {
-            "packages": [
-                "heyosseus/sloppy"
-            ],
+            "packages": ["heyosseus/sloppy"],
             "entries": {
                 "composer.json sloppy scripts": {
                     "slop:check": null
                 }
             },
-            "rootGitignore": [
-                "/.cache/"
-            ]
+            "rootGitignore": ["/.cache/"]
         }
     },
     "agent-context": {
