@@ -135,6 +135,7 @@
         "writing-for-agents"
     ],
     "settings": {
+        "ci-image-runner-tag": "buildah",
         "db": "mysql",
         "php": "8.5"
     }
