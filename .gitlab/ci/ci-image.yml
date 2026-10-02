@@ -3,6 +3,7 @@
 ci-image:
   stage: .pre
   image: quay.io/buildah/stable
+  tags: ['buildah']
   interruptible: false
   cache: []
   variables:
