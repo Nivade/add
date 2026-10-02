@@ -121,6 +121,12 @@
       "skillPath": "skills/engineering/retro/SKILL.md",
       "computedHash": "b8d55851a2909e26c2dbb2e8563719c87b3b700559f604e4df344f8c27e21047"
     },
+    "solid-php": {
+      "source": "fusengine/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/laravel-expert/skills/solid-php/SKILL.md",
+      "computedHash": "0f7029b5b03d4b383cdd2386c570a2ea674335a33682ba99cf548d44379858e0"
+    },
     "tdd": {
       "source": "mattpocock/skills",
       "sourceType": "github",
