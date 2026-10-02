@@ -91,6 +91,12 @@
       "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
       "computedHash": "ac2c94885f34ff8492dc12aa4543182f661f32ea1722b8d6b6c2c7045af33ae3"
     },
+    "laravel-security": {
+      "source": "eugene-ee/affaan-m-ecc",
+      "sourceType": "github",
+      "skillPath": "skills/laravel-security/SKILL.md",
+      "computedHash": "6ec0611d65b0787530f725ca630d9075e5e2eb3d7779abb43447983174dce854"
+    },
     "pr": {
       "source": "mattpocock/skills",
       "sourceType": "github",
