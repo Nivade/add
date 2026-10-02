@@ -1,8 +1,8 @@
 ---
 name: start-work
-description: Start work on a tracker issue on a fresh branch from the default branch. Use on "start issue <n>", "address issue <n>", "pick up #<n>", or "in a worktree".
+description: Start work on a tracker issue on a fresh branch from the default branch. Use on "start issue <n>", "address issue <n>", "pick up #<n>", or "in a worktree". Add `--implement` to go straight on into `/implement`.
 metadata:
-  version: 2.0.0
+  version: 2.1.2
   gate: claude
   keywords:
     - '\b(start|begin|address|pick up|take)\b.{0,20}(\bissue\b|#\d+)'
@@ -13,7 +13,7 @@ metadata:
 
 # Start Work
 
-Four steps. Each ends on its check. The input is an issue number.
+Four steps. Each ends on its check. The input is an issue number, optionally with `--implement`.
 
 ## 1. The issue
 
@@ -42,11 +42,24 @@ Conventional Branches, per the project's `branches` guideline: `feat/<n>-<slug>`
 git fetch origin <default>
 ```
 
-- Use `EnterWorktree` when the user asks for a worktree, when `git status --short` prints anything, or when the current branch is not the default and is not merged. It branches from `origin/<default>`.
+- Use a worktree when the user asks for one, when `git status --short` prints anything, or when the current branch is not the default and is not merged. `EnterWorktree` with `name` makes its own `worktree-<name>` branch, so never let it name the branch: create it yourself, then enter it by path.
+
+  ```bash
+  git worktree add -b <name> .claude/worktrees/<slug> origin/<default>
+  ```
+
+  `<slug>` is `<name>` with `/` as `-`. Run it from the main checkout, without `cd`. Then `EnterWorktree` with `path` set to the worktree's absolute path (ToolSearch loads it), and only then run the check below. If `EnterWorktree` reports the path is already the current working directory, run the check and carry on.
 - Otherwise: `git switch -c <name> origin/<default>`.
 
 Check: `git log -1 --format=%H` equals `git rev-parse origin/<default>` and the current branch is `<name>`.
 
 ## 4. Claim and hand off
 
-`glab issue update <n> --assignee @me`, or `gh issue edit <n> --add-assignee @me`. Then name `/implement #<n>` as the user's next command. `implement` is user-only: never call it.
+`glab issue update <n> --assignee @me`, or `gh issue edit <n> --add-assignee @me`. Then:
+
+- No `--implement`: name `/implement #<n>` as the user's next command. `implement` is user-only: never call it unasked.
+- `--implement` typed by the user: read `.claude/skills/implement/SKILL.md` and follow it for `#<n>`. The Skill tool refuses `implement`. No such file: name `/implement #<n>`.
+
+Step 2's gates stop first, flag or not.
+
+Check: the issue is assigned to you, and `/implement #<n>` is named or implement is running on `#<n>`.

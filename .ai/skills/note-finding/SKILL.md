@@ -1,8 +1,8 @@
 ---
 name: note-finding
-description: File something noticed mid-task that isn't this task's job (a bug, a risk, tech debt, an open question) as a needs-triage issue in the tracker of the repo that owns it. Use when the user says "note this finding", "log this", "file an issue", or when you notice something worth flagging but out of scope for the current change.
+description: File something noticed mid-task that isn't this task's job (a bug, a risk, tech debt, an open question) as a needs-triage issue, filed upstream when the maintainer owns the cause's repo, otherwise in this repo's tracker. Use when the user says "note this finding", "log this", "file an issue", or when you notice something worth flagging but out of scope for the current change.
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   keywords:
     - '\b(note|log)\b.{0,20}\b(this|that|a)\b.{0,10}\bfinding\b'
     - '\bfile\b.{0,40}\b(on|in|to)\b.{0,10}\bdevtools\b'
@@ -29,7 +29,16 @@ gh issue create --title "<claim>" --body "<body>" --label needs-triage
 
 ## Which repo
 
-The repo that owns the cause. When that is an `nvade/*` requirement from `composer.json`, file upstream: `glab issue create -R nvade-packages/<package> ...`. For a package on GitHub, `gh issue create -R <owner>/<repo> ...`. Name the repo you hit it in, since the maintainer cannot see it.
+Upstream filing is allowed only on repos the maintainer owns:
+
+- GitHub/GitLab owners: `nvade`, `Nivade`, `_nvade`, `nvade_`, `nhavandeursen`, `NVADE__`
+- GitLab groups: `nvade-packages`, `nvade-apps`
+
+When the repo that owns the cause is under one of those, file there: `glab issue create -R <group>/<repo> ...` or `gh issue create -R <owner>/<repo> ...`. Name the repo you hit it in, since the maintainer cannot see it.
+
+Any other cause, such as a bug in a third-party package, goes in the current repo's tracker. The body names the upstream package, the file and installed version, the symptom, and the workaround this repo carries and where, so the issue tracks when the workaround can go.
+
+Never file an issue, comment, or open an MR/PR on a repo outside that list.
 
 ## Permission
 

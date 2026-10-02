@@ -84,7 +84,10 @@
         "backend/.ai/skills/ai-sdk-development": "08e4e03e5c4b8806",
         "backend/.ai/skills/debug-using-debugbar": "2449969de7840b1b",
         "backend/.ai/skills/fortify-development": "1d945041ccaed46d",
-        "backend/.ai/skills/telescope-debugging": "db9f6c9b152edfe3"
+        "backend/.ai/skills/telescope-debugging": "db9f6c9b152edfe3",
+        "backend/.ai/skills/after-merge": "ddf5f5271fb08d24",
+        "backend/.ai/skills/note-finding": "ab93685faaf9c46e",
+        "backend/.ai/skills/start-work": "705fd6fe05f1fe7c"
     },
     "agent-packages": [
         "fruitcake/laravel-debugbar",

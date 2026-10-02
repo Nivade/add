@@ -2,7 +2,7 @@
 name: after-merge
 description: Clean up once a branch's MR/PR is merged — back on a fresh default branch, branch and worktree removed, finished spec closed, then release or what's next. Use when the user says it is merged, or a hook reports the MR/PR merged.
 metadata:
-  version: 2.0.0
+  version: 2.0.2
   gate: claude
   keywords:
     - '\bmerged\b'
@@ -51,4 +51,4 @@ A ticket that was its own spec has nothing to close. Check: `glab issue view <sp
 
 ## 5. What next
 
-`git log --format=%s "$before"..origin/<default>` lists what the merge brought. When it holds a `feat` or `fix` commit and `.gitlab/ci/release.yml` or `.github/workflows/release.yml` exists, hand off to `release`. Otherwise hand off to `whats-next`. Name the downstream repos that wait on a release, if this repo is a package others consume.
+`git log --format=%s "$before"..origin/<default>` lists what the merge brought. When it holds a `feat` or `fix` commit and the repo has a release job, hand off to `release`. The repo has a release job when GitLab has a `release` job in `.gitlab-ci.yml` or a local file it `include`s, or GitHub has a workflow named `release` under `.github/workflows/`. Otherwise hand off to `whats-next`. Name the downstream repos that wait on a release, if this repo is a package others consume.
