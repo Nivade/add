@@ -64,6 +64,8 @@ const LC_LOCKFILES = ['composer.lock', 'package-lock.json', 'yarn.lock', 'pnpm-l
 
 const LC_MANIFESTS = ['composer.json', 'package.json'];
 
+const LC_DEVTOOLS_JSON = 'devtools.json';
+
 const LC_DEPENDENCY_KEYS = [
     'require', 'require-dev', 'conflict', 'replace', 'provide',
     'dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'overrides',
@@ -106,7 +108,7 @@ function lcTier(string $root, string $app, string $from, string $to, ?array $wit
         $files++;
         $lines += $added + $deleted;
         $docsOnly = $docsOnly && lcMatchesAny(LC_DOCS, $path);
-        $security = $security || lcMatchesAny(LC_SECURITY, $path);
+        $security = $security || lcMatchesAny(LC_SECURITY, $path) || (basename($path) === LC_DEVTOOLS_JSON && lcReviewSettingChanged($root, $from, $to, $path));
     }
 
     [$fullLines, $fullFiles] = lcThresholds($app);
@@ -157,8 +159,26 @@ function lcNeedsNoReview(string $root, string $from, string $to, string $path): 
     return match (true) {
         in_array($name, LC_LOCKFILES, true), lcMatchesAny(LC_NO_REVIEW, $path) => true,
         in_array($name, LC_MANIFESTS, true) => lcManifestUnchanged($root, "{$from}:{$path}", "{$to}:{$path}"),
+        $name === LC_DEVTOOLS_JSON => lcSettingsUnchanged($root, "{$from}:{$path}", "{$to}:{$path}"),
         default => false,
     };
+}
+
+function lcSettingsUnchanged(string $root, string $before, string $after): bool
+{
+    $old = lcJson($root, ['git', 'show', $before]);
+    $new = lcJson($root, ['git', 'show', $after]);
+
+    return $old !== null && $new !== null && ($old['settings'] ?? null) === ($new['settings'] ?? null);
+}
+
+// A review gate that cannot be read on either side counts as loosened.
+function lcReviewSettingChanged(string $root, string $from, string $to, string $path): bool
+{
+    $old = lcJson($root, ['git', 'show', "{$from}:{$path}"]);
+    $new = lcJson($root, ['git', 'show', "{$to}:{$path}"]);
+
+    return $old === null || $new === null || ($old['settings']['review'] ?? null) !== ($new['settings']['review'] ?? null);
 }
 
 function lcManifestUnchanged(string $root, string $before, string $after): bool
@@ -181,6 +201,8 @@ function lcManifestWithoutDependencies(string $root, string $object): ?array
     }
 
     // devtools records the agent context it wrote here, so a sync rewrites it.
+    unset($decoded['agent-context']);
+
     if (is_array($decoded['extra']['devtools'] ?? null)) {
         unset($decoded['extra']['devtools']['agent-context']);
     }
@@ -209,12 +231,28 @@ function lcManaged(string $app): array
 }
 
 /**
+ * @return array<string, mixed> devtools.json's settings, else an unmigrated host's extra.devtools
+ */
+function lcSettings(string $dir): array
+{
+    $manifest = json_decode((string) @file_get_contents("{$dir}/devtools.json"), true);
+
+    if (is_array($manifest)) {
+        return is_array($manifest['settings'] ?? null) ? $manifest['settings'] : [];
+    }
+
+    $composer = json_decode((string) @file_get_contents("{$dir}/composer.json"), true);
+
+    return is_array($composer) && is_array($composer['extra']['devtools'] ?? null) ? $composer['extra']['devtools'] : [];
+}
+
+/**
  * @return array{int, int}
  */
 function lcThresholds(string $app): array
 {
-    $composer = json_decode((string) @file_get_contents("{$app}/composer.json"), true);
-    $review = is_array($composer) ? ($composer['extra']['devtools']['review'] ?? []) : [];
+    $review = lcSettings($app)['review'] ?? [];
+    $review = is_array($review) ? $review : [];
 
     return [
         is_int($review['full-lines'] ?? null) ? $review['full-lines'] : 400,
@@ -589,8 +627,7 @@ function lcDefaultBranch(string $root): ?string
         }
     }
 
-    $composer = json_decode((string) @file_get_contents("{$root}/composer.json"), true);
-    $configured = is_array($composer) ? ($composer['extra']['devtools']['default-branch'] ?? null) : null;
+    $configured = lcSettings($root)['default-branch'] ?? null;
 
     return is_string($configured) && $configured !== '' ? $configured : null;
 }

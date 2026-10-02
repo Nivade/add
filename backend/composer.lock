@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2102f58cb5fca985cdd33473db698c63",
+    "content-hash": "49c374d82140dc7409e053684a28e1b1",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -460,16 +460,16 @@
         },
         {
             "name": "doctrine/lexer",
-            "version": "3.0.2",
+            "version": "3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/lexer.git",
-                "reference": "e96fe45e92a54233726014a7cc7340abf29bb14c"
+                "reference": "71d305eaa6480d3d3460c7d053d1da7749fa9cca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/lexer/zipball/e96fe45e92a54233726014a7cc7340abf29bb14c",
-                "reference": "e96fe45e92a54233726014a7cc7340abf29bb14c",
+                "url": "https://api.github.com/repos/doctrine/lexer/zipball/71d305eaa6480d3d3460c7d053d1da7749fa9cca",
+                "reference": "71d305eaa6480d3d3460c7d053d1da7749fa9cca",
                 "shasum": ""
             },
             "require": {
@@ -515,7 +515,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/lexer/issues",
-                "source": "https://github.com/doctrine/lexer/tree/3.0.2"
+                "source": "https://github.com/doctrine/lexer/tree/3.0.3"
             },
             "funding": [
                 {
@@ -531,7 +531,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-14T20:44:06+00:00"
+            "time": "2026-10-01T06:59:29+00:00"
         },
         {
             "name": "dragonmantank/cron-expression",
@@ -2981,16 +2981,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.14.1",
+            "version": "3.14.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "34e9109535165bf1d7ff17a610492372ae73a896"
+                "reference": "94cfc34887f07ab5c0efa07914c8f527544e3224"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/34e9109535165bf1d7ff17a610492372ae73a896",
-                "reference": "34e9109535165bf1d7ff17a610492372ae73a896",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/94cfc34887f07ab5c0efa07914c8f527544e3224",
+                "reference": "94cfc34887f07ab5c0efa07914c8f527544e3224",
                 "shasum": ""
             },
             "require": {
@@ -3010,7 +3010,7 @@
                 "doctrine/orm": "^2.15.2 || ^3.0",
                 "friendsofphp/php-cs-fixer": "^v3.87.1",
                 "kylekatarnls/multi-tester": "^2.5.3",
-                "phpmd/phpmd": "^2.15.0",
+                "phpmd/phpmd": "^3.0@dev",
                 "phpstan/extension-installer": "^1.4.3",
                 "phpstan/phpstan": "^2.1.22",
                 "phpunit/phpunit": "^10.5.53",
@@ -3082,7 +3082,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-27T12:07:26+00:00"
+            "time": "2026-10-02T07:26:52+00:00"
         },
         {
             "name": "nette/schema",
@@ -6905,16 +6905,16 @@
         },
         {
             "name": "symfony/polyfill-intl-idn",
-            "version": "v1.42.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-idn.git",
-                "reference": "51b5ff5ba85452b31ec6f55490b08148612339d9"
+                "reference": "533d68cf99c8f8ee2e8893c59ed59192e92cfd74"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/51b5ff5ba85452b31ec6f55490b08148612339d9",
-                "reference": "51b5ff5ba85452b31ec6f55490b08148612339d9",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/533d68cf99c8f8ee2e8893c59ed59192e92cfd74",
+                "reference": "533d68cf99c8f8ee2e8893c59ed59192e92cfd74",
                 "shasum": ""
             },
             "require": {
@@ -6968,7 +6968,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-intl-idn/tree/v1.42.0"
+                "source": "https://github.com/symfony/polyfill-intl-idn/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -6988,7 +6988,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-24T10:51:20+00:00"
+            "time": "2026-09-23T14:40:04+00:00"
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
@@ -7326,16 +7326,16 @@
         },
         {
             "name": "symfony/polyfill-php82",
-            "version": "v1.38.1",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php82.git",
-                "reference": "002dc0cfe5fd4ed6033d48f27d4f19a486c4b04b"
+                "reference": "843bbe8b2a7934307b749751eede0f111f5d1cfc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php82/zipball/002dc0cfe5fd4ed6033d48f27d4f19a486c4b04b",
-                "reference": "002dc0cfe5fd4ed6033d48f27d4f19a486c4b04b",
+                "url": "https://api.github.com/repos/symfony/polyfill-php82/zipball/843bbe8b2a7934307b749751eede0f111f5d1cfc",
+                "reference": "843bbe8b2a7934307b749751eede0f111f5d1cfc",
                 "shasum": ""
             },
             "require": {
@@ -7382,7 +7382,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php82/tree/v1.38.1"
+                "source": "https://github.com/symfony/polyfill-php82/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -7402,20 +7402,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-26T12:45:58+00:00"
+            "time": "2026-09-25T15:50:05+00:00"
         },
         {
             "name": "symfony/polyfill-php84",
-            "version": "v1.38.1",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php84.git",
-                "reference": "f4e1dfaee5b74aba5964fe1fd4dfc7ba5e3085fa"
+                "reference": "22c6548499cbe5c5bb072fc0c42312dff062a015"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/f4e1dfaee5b74aba5964fe1fd4dfc7ba5e3085fa",
-                "reference": "f4e1dfaee5b74aba5964fe1fd4dfc7ba5e3085fa",
+                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/22c6548499cbe5c5bb072fc0c42312dff062a015",
+                "reference": "22c6548499cbe5c5bb072fc0c42312dff062a015",
                 "shasum": ""
             },
             "require": {
@@ -7462,7 +7462,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php84/tree/v1.38.1"
+                "source": "https://github.com/symfony/polyfill-php84/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -7482,7 +7482,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-26T12:51:13+00:00"
+            "time": "2026-09-23T22:01:09+00:00"
         },
         {
             "name": "symfony/polyfill-php85",
@@ -7566,16 +7566,16 @@
         },
         {
             "name": "symfony/polyfill-php86",
-            "version": "v1.41.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php86.git",
-                "reference": "6bc356ed3d8dbfeea8f0de235e34d670704e880e"
+                "reference": "8840df45b24f33a49dc419fa18dc0057231ae1d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php86/zipball/6bc356ed3d8dbfeea8f0de235e34d670704e880e",
-                "reference": "6bc356ed3d8dbfeea8f0de235e34d670704e880e",
+                "url": "https://api.github.com/repos/symfony/polyfill-php86/zipball/8840df45b24f33a49dc419fa18dc0057231ae1d8",
+                "reference": "8840df45b24f33a49dc419fa18dc0057231ae1d8",
                 "shasum": ""
             },
             "require": {
@@ -7622,7 +7622,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php86/tree/v1.41.0"
+                "source": "https://github.com/symfony/polyfill-php86/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -7642,20 +7642,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-02T13:42:24+00:00"
+            "time": "2026-09-25T15:46:47+00:00"
         },
         {
             "name": "symfony/polyfill-uuid",
-            "version": "v1.37.0",
+            "version": "v1.43.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-uuid.git",
-                "reference": "26dfec253c4cf3e51b541b52ddf7e42cb0908e94"
+                "reference": "b23ff8245cc5c4479ea2be3d0132d2e6dd433993"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-uuid/zipball/26dfec253c4cf3e51b541b52ddf7e42cb0908e94",
-                "reference": "26dfec253c4cf3e51b541b52ddf7e42cb0908e94",
+                "url": "https://api.github.com/repos/symfony/polyfill-uuid/zipball/b23ff8245cc5c4479ea2be3d0132d2e6dd433993",
+                "reference": "b23ff8245cc5c4479ea2be3d0132d2e6dd433993",
                 "shasum": ""
             },
             "require": {
@@ -7705,7 +7705,7 @@
                 "uuid"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-uuid/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-uuid/tree/v1.43.0"
             },
             "funding": [
                 {
@@ -7725,7 +7725,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T16:19:22+00:00"
+            "time": "2026-09-24T05:20:52+00:00"
         },
         {
             "name": "symfony/process",
@@ -11514,16 +11514,16 @@
         },
         {
             "name": "laravel/boost",
-            "version": "v2.10.0",
+            "version": "v2.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "76c236d4eb7d51698f882d149bc367c1ebc0d078"
+                "reference": "3e7bab5c7c80b6d2764ef3db1e3eb801204da84e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/76c236d4eb7d51698f882d149bc367c1ebc0d078",
-                "reference": "76c236d4eb7d51698f882d149bc367c1ebc0d078",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/3e7bab5c7c80b6d2764ef3db1e3eb801204da84e",
+                "reference": "3e7bab5c7c80b6d2764ef3db1e3eb801204da84e",
                 "shasum": ""
             },
             "require": {
@@ -11576,7 +11576,7 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-09-23T09:33:31+00:00"
+            "time": "2026-10-01T02:02:28+00:00"
         },
         {
             "name": "laravel/mcp",
@@ -12539,16 +12539,16 @@
         },
         {
             "name": "nvade/devtools",
-            "version": "v0.34.1",
+            "version": "v0.36.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/nvade-packages/devtools.git",
-                "reference": "f9c62ffa9a3711079e170446410097d15049a641"
+                "reference": "681a7ea3385721d5ddc617455dbbed6ab0257f95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=f9c62ffa9a3711079e170446410097d15049a641",
-                "reference": "f9c62ffa9a3711079e170446410097d15049a641",
+                "url": "https://gitlab.com/api/v4/projects/nvade-packages%2Fdevtools/repository/archive.zip?sha=681a7ea3385721d5ddc617455dbbed6ab0257f95",
+                "reference": "681a7ea3385721d5ddc617455dbbed6ab0257f95",
                 "shasum": ""
             },
             "require": {
@@ -12583,88 +12583,6 @@
                 "laravel": {
                     "providers": [
                         "Nvade\\Devtools\\DevtoolsServiceProvider"
-                    ]
-                },
-                "devtools": {
-                    "agent-packages": [
-                        "nvade/devtools"
-                    ],
-                    "components": [
-                        "claude"
-                    ],
-                    "added": {
-                        "claude": {
-                            "packages": [],
-                            "gitignore": [
-                                "/.ai/plans/*",
-                                "!/.ai/plans/legacy/",
-                                "/.claude/plans/"
-                            ],
-                            "entries": {
-                                ".claude/settings.json permissions.allow": {
-                                    "Bash(composer test *)": null,
-                                    "Bash(composer lint *)": null,
-                                    "Bash(composer lint:dirty *)": null,
-                                    "Bash(composer lint:check *)": null,
-                                    "Bash(composer types:check *)": null,
-                                    "Bash(composer refactor *)": null,
-                                    "Bash(composer refactor:check *)": null,
-                                    "Bash(composer deps:check *)": null,
-                                    "Bash(vendor/bin/pint *)": null,
-                                    "Bash(vendor/bin/pest *)": null,
-                                    "Bash(vendor/bin/testbench route:list *)": null,
-                                    "Bash(vendor/bin/testbench about *)": null,
-                                    "Bash(./vendor/bin/pint *)": null,
-                                    "Bash(./vendor/bin/pest *)": null,
-                                    "Bash(./vendor/bin/testbench route:list *)": null,
-                                    "Bash(./vendor/bin/testbench about *)": null
-                                },
-                                ".claude/settings.json permissions.deny": {
-                                    "Read(/.ai/plans/**)": null
-                                },
-                                ".claude/settings.json settings": {
-                                    "plansDirectory": null
-                                },
-                                ".claude/settings.json hooks": {
-                                    "PostToolUse Edit|Write": null,
-                                    "PreToolUse Edit|Write": null,
-                                    "UserPromptSubmit ": null,
-                                    "UserPromptSubmit #merged": null,
-                                    "PreToolUse Bash": null,
-                                    "SessionStart #plans": null
-                                }
-                            }
-                        }
-                    },
-                    "agent-context": {
-                        "CLAUDE.md": "block",
-                        ".ai/skills/after-merge": "161534dda3df989a",
-                        ".ai/skills/codebase-learnings": "cf348f2a12500254",
-                        ".ai/skills/finish-branch": "8a87c3fcce8812d8",
-                        ".ai/skills/laravel-packages": "ae53447e2d851bdf",
-                        ".ai/skills/note-finding": "9080b2874f521442",
-                        ".ai/skills/release": "7548577eb1936005",
-                        ".ai/skills/start-work": "5d6625a82bb98b57",
-                        ".ai/skills/upgrade-dependency": "7e17ec4e63f5df7a",
-                        ".ai/skills/whats-next": "8a67bcebfcdabae1",
-                        ".ai/rules/nvade-devtools-general.md": "a75e035b78019abe",
-                        ".ai/rules/nvade-devtools-package-testing.md": "fe8ca8a485653403",
-                        ".ai/rules/nvade-devtools-testing.md": "ee662ebbd9d8f03d",
-                        ".claude/skills/after-merge": "",
-                        ".claude/skills/codebase-learnings": "",
-                        ".claude/skills/finish-branch": "",
-                        ".claude/skills/laravel-packages": "",
-                        ".claude/skills/note-finding": "",
-                        ".claude/skills/release": "",
-                        ".claude/skills/start-work": "",
-                        ".claude/skills/upgrade-dependency": "",
-                        ".claude/skills/whats-next": "",
-                        ".claude/rules/nvade-devtools-general.md": "",
-                        ".claude/rules/nvade-devtools-package-testing.md": "",
-                        ".claude/rules/nvade-devtools-testing.md": ""
-                    },
-                    "declined": [
-                        "rule:laravel"
                     ]
                 }
             },
@@ -12733,7 +12651,7 @@
                 "issues": "https://gitlab.com/nvade-packages/devtools/-/issues",
                 "source": "https://gitlab.com/nvade-packages/devtools"
             },
-            "time": "2026-10-01T14:20:08+00:00"
+            "time": "2026-10-02T15:18:51+00:00"
         },
         {
             "name": "pestphp/pest",

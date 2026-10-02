@@ -55,8 +55,7 @@ audit:
   script:
     - cd backend
     - composer audit --locked --abandoned=report
-    # The workspaces share the root lockfile.
-    - cd .. && npm audit --omit=dev --audit-level=high
+    # npm audit is off: node-forge, pulled in by Expo's CLI, has no patched release (nvade-apps/add#28).
 
 # No database service: phpunit.xml pins the suite to sqlite :memory:, which is
 # what every developer runs. PHPUnit <env> does not override an already-set

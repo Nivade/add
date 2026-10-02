@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // Claude Code hook logic for skill-hook.sh: names skills whose paths or keywords match, from a
-// per-session cache of .ai/skills/*/SKILL.md frontmatter, already compiled to regex.
+// per-session cache of .ai/skills and .claude/skills SKILL.md frontmatter, already compiled to regex.
 
 // stdout is a JSON-only contract; a vendor deprecation notice on autoload must not land there.
 ini_set('display_errors', 'stderr');
@@ -124,13 +124,18 @@ function skillHookSkills(string $root, string $sessionId): array
 
     $skills = [];
 
-    foreach (glob("{$root}/.ai/skills/*/SKILL.md") ?: [] as $file) {
-        $skill = skillHookParse((string) file_get_contents($file));
+    // Boost syncs a package's skills straight into .claude/skills; on a name clash .ai/skills wins.
+    foreach (['.ai/skills', '.claude/skills'] as $directory) {
+        foreach (glob("{$root}/{$directory}/*/SKILL.md") ?: [] as $file) {
+            $skill = skillHookParse((string) file_get_contents($file));
 
-        if ($skill !== null) {
-            $skills[] = $skill;
+            if ($skill !== null) {
+                $skills[$skill['name']] ??= $skill;
+            }
         }
     }
+
+    $skills = array_values($skills);
 
     file_put_contents($cache, json_encode($skills, JSON_THROW_ON_ERROR));
 

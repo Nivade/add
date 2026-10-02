@@ -16,3 +16,4 @@ node_modules/
 
 # Hash of the generated TypeScript, rewritten by every `types:generate`.
 packages/shared/src/typescript-transformer-manifest.json
+/.cache/

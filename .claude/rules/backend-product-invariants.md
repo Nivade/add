@@ -1,1 +1,0 @@
-../../backend/.ai/rules/product-invariants.md
