@@ -30,10 +30,12 @@ export function railOf(home: HomeData, now: Date): RailData {
       }
     }
 
-    marks.push({
-      rung: null,
-      minute: minuteOfClock(comingUp.localAt.slice(11, 16)),
-    });
+    if (comingUp.localAt.startsWith(today)) {
+      marks.push({
+        rung: null,
+        minute: minuteOfClock(comingUp.localAt.slice(11, 16)),
+      });
+    }
   }
 
   return {

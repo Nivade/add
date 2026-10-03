@@ -223,7 +223,7 @@ export default function Home() {
     <Screen
       top={
         <View style={styles.top}>
-          <DayStrip rail={rail} nowMinute={rail.nowMinute} />
+          <DayStrip rail={rail} />
           <View style={styles.settings}>
             <QuietAction label="Settings" onPress={() => router.push('/settings')} />
           </View>
@@ -351,12 +351,14 @@ export default function Home() {
             {comingUp.kind === 'calendar_event' ? ` ${comingUpCopy.fromCalendar}` : ''}
           </Text>
           {leave && <Meta>{comingUpCopy.leaveAt(leave.clock)}</Meta>}
-          <Button
-            label={comingUpCopy.planFor}
-            onPress={() =>
-              router.push(`/appointment/${comingUp.kind}/${comingUp.id}`)
-            }
-          />
+          {(comingUp.plan || comingUp.kind === 'calendar_event') && (
+            <Button
+              label={comingUpCopy.planFor}
+              onPress={() =>
+                router.push(`/appointment/${comingUp.kind}/${comingUp.id}`)
+              }
+            />
+          )}
         </Band>
       )}
 

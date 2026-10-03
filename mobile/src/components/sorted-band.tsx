@@ -1,4 +1,4 @@
-import type { SortedCaptureData } from '@add/shared';
+import type { CaptureKind, SortedCaptureData } from '@add/shared';
 import {
   captureKindChoices,
   homeBands,
@@ -28,7 +28,7 @@ function SortedItem({ item, onChanged }: { item: SortedCaptureData; onChanged: (
   const [choosing, setChoosing] = useState(false);
   const notForYou = item.kind === 'not_for_you';
 
-  const change = async (kind: Parameters<typeof api.changeCaptureKind>[2]) => {
+  const change = async (kind: CaptureKind) => {
     await api.changeCaptureKind(token as string, item.id, kind);
     onChanged();
   };
@@ -44,10 +44,11 @@ function SortedItem({ item, onChanged }: { item: SortedCaptureData; onChanged: (
             onRespond={change}
           />
         )}
-        <Button
-          label={sortedCopy.right}
-          onPress={() => {
-            void api.confirmCaptureKind(token as string, item.id).then(onChanged);
+        <Responses
+          responses={[{ value: 'confirm', label: sortedCopy.right }]}
+          onRespond={async () => {
+            await api.confirmCaptureKind(token as string, item.id);
+            onChanged();
           }}
         />
         {!notForYou && (

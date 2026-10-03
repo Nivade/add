@@ -28,8 +28,9 @@ const from = (minute: number): `${number}%` => `${dayStripFraction(minute) * 100
 const until = (minute: number): `${number}%` => `${100 - dayStripFraction(minute) * 100}%`;
 
 /** Today to scale; a screen reader gets the one sentence and never the drawing. */
-export function DayStrip({ rail, nowMinute }: { rail: RailData; nowMinute: number }) {
+export function DayStrip({ rail }: { rail: RailData }) {
   const styles = useStyles();
+  const { nowMinute } = rail;
   const stops = useColorScheme() === 'dark' ? dayStripDark : dayStripLight;
   const doneAt = rail.stepSeconds === null ? null : doneMinute(nowMinute, rail.stepSeconds);
   const nearEnd = dayStripFraction(nowMinute) >= 0.75;
