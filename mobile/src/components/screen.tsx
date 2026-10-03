@@ -15,19 +15,39 @@ const useStyles = makeStyles(({ colors, type, space }) => ({
   oneThing: { ...type.oneThing, color: colors.ink },
   meta: { ...type.body, color: colors.muted },
   band: { gap: space(1) },
+  bottom: {
+    flexDirection: 'row',
+    gap: space(1),
+    paddingHorizontal: space(2.5),
+    paddingVertical: space(1.5),
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    backgroundColor: colors.paper,
+  },
 }));
 
-export function Screen({ children }: { children: ReactNode }) {
+/** `top` and `bottom` stay put while the rest scrolls, so what must be within a thumb's reach always is. */
+export function Screen({
+  children,
+  top,
+  bottom,
+}: {
+  children: ReactNode;
+  top?: ReactNode;
+  bottom?: ReactNode;
+}) {
   const styles = useStyles();
 
   return (
     <SafeAreaView style={styles.safe}>
+      {top}
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         {children}
       </ScrollView>
+      {bottom && <View style={styles.bottom}>{bottom}</View>}
     </SafeAreaView>
   );
 }

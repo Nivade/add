@@ -18,6 +18,7 @@ import {
   restCountLine,
   returnCopy,
   sortingLine,
+  unsortedLine,
   waitingForResponses,
 } from '@add/shared';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -29,18 +30,23 @@ import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { CommitmentRow } from '@/components/commitment-row';
+import { DayStrip } from '@/components/day-strip';
 import { QuietAction } from '@/components/quiet-action';
 import { Responses } from '@/components/responses';
 import { Band, Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
-import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
+import { SortedBand } from '@/components/sorted-band';
+import { SuggestedPill } from '@/components/suggested-pill';
+import { railOf } from '@/rail';
 import { makeStyles } from '@/theme';
 
 const useStyles = makeStyles(({ colors, type, field, space }) => ({
   line: { ...type.body, color: colors.ink },
   clarify: { gap: space(1) },
   input: field,
-  thumbReach: { gap: space(1.5), marginTop: space(2) },
+  top: { paddingHorizontal: space(2.5), paddingTop: space(1), gap: space(0.5) },
+  settings: { alignItems: 'flex-end' },
+  capture: { flex: 1 },
 }));
 
 function Clarify({
@@ -127,7 +133,7 @@ function WaitingFor({
 }
 
 export default function Home() {
-  const { token, signOut } = useSession();
+  const { token } = useSession();
   const styles = useStyles();
   const { notice } = useLocalSearchParams<{ notice?: string }>();
   const load = useCallback(() => api.home(token as string), [token]);
@@ -180,7 +186,13 @@ export default function Home() {
     needsAttention,
     restCount,
     checkIn,
+    sorted,
+    sortedMore,
+    unsortedCount,
+    aiConsented,
   } = data;
+  const unsorted = unsortedLine(unsortedCount, aiConsented);
+  const leave = comingUp?.plan?.rungs.find(({ rung }) => rung === 'leave');
 
   const promote = async () => {
     if (rightNow) {
@@ -205,8 +217,34 @@ export default function Home() {
     router.push('/focus');
   };
 
+  const rail = railOf(data, new Date());
+
   return (
-    <Screen>
+    <Screen
+      top={
+        <View style={styles.top}>
+          <DayStrip rail={rail} />
+          <View style={styles.settings}>
+            <QuietAction label="Settings" onPress={() => router.push('/settings')} />
+          </View>
+        </View>
+      }
+      bottom={
+        <>
+          <View style={styles.capture}>
+            <Button
+              label="Capture a thought"
+              tone="primary"
+              onPress={() => router.push('/capture')}
+            />
+          </View>
+          <Button
+            label="I'm overwhelmed"
+            onPress={() => router.push('/overwhelmed')}
+          />
+        </>
+      }
+    >
       <StaleNote problem={problem} />
       {notice && (
         <Text accessibilityLiveRegion="polite" style={styles.line}>
@@ -235,33 +273,10 @@ export default function Home() {
         <>
           <OneThing>{rightNow.step.title}</OneThing>
           <Meta>
-            {`${estimateLine(rightNow.step.estimatedSeconds, nowMinute())} ${partOfLine(rightNow.intention.title)}`}
+            {`${estimateLine(rightNow.step.estimatedSeconds, rail.nowMinute)} ${partOfLine(rightNow.intention.title)}`}
           </Meta>
           <Button label={focusCopy.start} tone="primary" onPress={() => void start()} />
           {rightNow.step.generated && <SuggestedPill />}
-          {rightNow.why.length > 0 && (
-            <Band label={homeBands.why}>
-              {rightNow.why.map((line) => (
-                <Text key={line} style={styles.line}>
-                  {line}
-                </Text>
-              ))}
-              {rightNow.assumedPlace && (
-                <QuietAction
-                  label={notHereLabels[rightNow.assumedPlace]}
-                  onPress={() => void notHere()}
-                />
-              )}
-              {rightNowIsCommitment ? (
-                <Text style={styles.line}>{commitmentCopy.promised}</Text>
-              ) : (
-                <QuietAction
-                  label={commitmentCopy.promise}
-                  onPress={() => void promote()}
-                />
-              )}
-            </Band>
-          )}
         </>
       ) : (
         <>
@@ -269,6 +284,47 @@ export default function Home() {
           <Meta>{homeCopy.wholeAnswer}</Meta>
         </>
       )}
+
+      <Text accessibilityLiveRegion="polite" style={styles.line}>
+        {sortingCount > 0 ? sortingLine(sortingCount) : ''}
+      </Text>
+
+      {unsortedCount > 0 && (
+        <View>
+          <Text accessibilityLiveRegion="polite" style={styles.line}>
+            {unsorted.line}
+          </Text>
+          {unsorted.action && (
+            <QuietAction label={unsorted.action} onPress={() => router.push('/settings')} />
+          )}
+        </View>
+      )}
+
+      {!session && rightNow && rightNow.why.length > 0 && (
+        <Band label={homeBands.why}>
+          {rightNow.why.map((line) => (
+            <Text key={line} style={styles.line}>
+              {line}
+            </Text>
+          ))}
+          {rightNow.assumedPlace && (
+            <QuietAction
+              label={notHereLabels[rightNow.assumedPlace]}
+              onPress={() => void notHere()}
+            />
+          )}
+          {rightNowIsCommitment ? (
+            <Text style={styles.line}>{commitmentCopy.promised}</Text>
+          ) : (
+            <QuietAction
+              label={commitmentCopy.promise}
+              onPress={() => void promote()}
+            />
+          )}
+        </Band>
+      )}
+
+      <SortedBand sorted={sorted} more={sortedMore} onChanged={() => void reload()} />
 
       {reminder && (
         <Band label={homeBands.beforeYouGo}>
@@ -294,12 +350,15 @@ export default function Home() {
             {comingUpCopy.line(comingUp.title, comingUp.inWords)}
             {comingUp.kind === 'calendar_event' ? ` ${comingUpCopy.fromCalendar}` : ''}
           </Text>
-          <Button
-            label="Open"
-            onPress={() =>
-              router.push(`/appointment/${comingUp.kind}/${comingUp.id}`)
-            }
-          />
+          {leave && <Meta>{comingUpCopy.leaveAt(leave.clock)}</Meta>}
+          {(comingUp.plan || comingUp.kind === 'calendar_event') && (
+            <Button
+              label={comingUpCopy.planFor}
+              onPress={() =>
+                router.push(`/appointment/${comingUp.kind}/${comingUp.id}`)
+              }
+            />
+          )}
         </Band>
       )}
 
@@ -353,9 +412,6 @@ export default function Home() {
         </Band>
       )}
 
-      <Text accessibilityLiveRegion="polite" style={styles.line}>
-        {sortingCount > 0 ? sortingLine(sortingCount) : ''}
-      </Text>
       <Meta>{restCountLine(restCount)}</Meta>
       {hasOpenCommitments && (
         <QuietAction
@@ -363,20 +419,6 @@ export default function Home() {
           onPress={() => router.push('/commitments')}
         />
       )}
-
-      <View style={styles.thumbReach}>
-        <Button
-          label="Capture a thought"
-          tone="primary"
-          onPress={() => router.push('/capture')}
-        />
-        <Button
-          label="I'm overwhelmed"
-          onPress={() => router.push('/overwhelmed')}
-        />
-        <Button label="Settings" onPress={() => router.push('/settings')} />
-        <Button label="Sign out" onPress={() => void signOut()} />
-      </View>
     </Screen>
   );
 }
