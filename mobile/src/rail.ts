@@ -1,10 +1,5 @@
 import type { HomeData, RailData, RailMarkData } from '@add/shared';
-
-function minuteOfClock(clock: string): number {
-  const [hours, minutes] = clock.split(':').map(Number);
-
-  return hours * 60 + minutes;
-}
+import { minuteOfClock } from '@add/shared';
 
 function minuteOf(at: Date): number {
   return at.getHours() * 60 + at.getMinutes();

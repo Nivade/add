@@ -14,6 +14,10 @@ export function clockOf(minuteOfDay: number): string {
     return `${hours}:${String(minuteOfDay % 60).padStart(2, '0')}`;
 }
 
+export function minuteOfClock(clock: string): number {
+    return Number(clock.slice(0, 2)) * 60 + Number(clock.slice(3, 5));
+}
+
 export function doneMinute(nowMinute: number, seconds: number): number {
     return nowMinute + Math.max(1, Math.ceil(seconds / 60));
 }
