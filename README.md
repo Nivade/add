@@ -1,5 +1,7 @@
 # add
 
+[![pipeline](https://gitlab.com/nvade-apps/add/badges/main/pipeline.svg)](https://gitlab.com/nvade-apps/add/-/pipelines)
+
 An executive-function aid for adults with ADHD. Most task managers hand the
 person a list and leave the hardest part, deciding what to do, to them. `add`
 does the deciding. Every screen answers one question, "what do I do right
@@ -9,8 +11,7 @@ attached.
 A Laravel 13 backend serves an Inertia + React web app and an Expo / React
 Native mobile app from the same domain code.
 
-**Status:** in active development. Slices 1–11 of the build plan are done; a UX
-overhaul is underway. Not deployed.
+**Status:** in active development, not deployed.
 
 ## How it works
 
@@ -84,8 +85,8 @@ and the codebase holds that line structurally:
 
 ## Quality
 
-- About 450 Pest tests, including scenario tests for the resolver and browser
-  tests in real Chromium via `pest-plugin-browser`.
+- A Pest suite with scenario tests for the resolver and browser tests in real
+  Chromium via `pest-plugin-browser`.
 - PHPStan (Larastan) level 7, Pint, Rector, and `tsc` across all workspaces.
 - GitLab CI: tests on SQLite and on MySQL 8.4, commit message and branch
   name checks, and a lint for sloppy code patterns.
@@ -118,3 +119,7 @@ npm run web                 # Vite for the web app
 npm run mobile              # Expo
 npm run types:generate      # regenerate packages/shared from PHP Data classes
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

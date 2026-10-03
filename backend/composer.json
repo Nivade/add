@@ -1,11 +1,12 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "nvade/add",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "External executive-function system for people with ADHD.",
     "keywords": [
         "laravel",
-        "framework"
+        "adhd",
+        "executive-function"
     ],
     "license": "MIT",
     "require": {
