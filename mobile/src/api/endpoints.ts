@@ -14,6 +14,7 @@ import type {
   DeviceData,
   DevicePlatform,
   ExecutionStateData,
+  FinishedData,
   FutureReminderData,
   HomeData,
   IntentionData,
@@ -146,12 +147,16 @@ export const api = {
     sessionId: string,
     stepId: string | null,
     reason: StuckReason,
+    note = '',
   ) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/stuck`, {
       method: 'POST',
       token,
-      body: { step_id: stepId, reason },
+      body: { step_id: stepId, reason, note },
     }),
+
+  finished: (token: string, sessionId: string) =>
+    request<FinishedData>(`/sessions/${sessionId}/finished`, { token }),
 
   respondToWaitingFor: (
     token: string,
