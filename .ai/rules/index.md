@@ -18,4 +18,6 @@ read that rule file.
 | `backend/**/*.php` | [nvade-devtools-general.md](nvade-devtools-general.md) — shipped by devtools: one-fact comments, no counts in documents, a rule needs a test, Pint does not run Rector. |
 | `backend/app/**/*.php` | [nvade-devtools-laravel.md](nvade-devtools-laravel.md) — shipped by devtools: never rethrow `getCode()`, never name a job helper `fail()`, dispatch each fact from one site. |
 | `backend/rector.php` | [nvade-devtools-rector.md](nvade-devtools-rector.md) — shipped by devtools: `withSkipPath()` for host paths, `withComposerBased` already gates the Laravel sets. |
+| `backend/vite.config.ts` | [vite.md](vite.md) — activate the `vite` skill first; it is locked upstream and cannot carry a `paths` trigger. |
+| `.ai/skills/**`, `.ai/rules/**`, `CLAUDE.md`, `AGENTS.md` | [writing-for-agents.md](writing-for-agents.md) — activate the `writing-for-agents` skill first; same reason. |
 | `backend/tests/**` | [nvade-devtools-testing.md](nvade-devtools-testing.md) — shipped by devtools: Pest import traps under `--parallel`, pinned `memory_limit`, Laravel test-harness timing traps. |
