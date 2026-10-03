@@ -384,7 +384,7 @@ function startedPayload(ExecutionSession $session): ?array
 it('records the rung that recommended the step the person started', function (): void {
     $session = started();
 
-    expect(startedPayload($session))->toBe(['recommended' => true, 'rung' => 'prerequisite_first']);
+    expect(startedPayload($session))->toEqual(['recommended' => true, 'rung' => 'prerequisite_first']);
 });
 
 it('records a start the resolver would not have offered as unrecommended', function (): void {
@@ -392,7 +392,7 @@ it('records a start the resolver would not have offered as unrecommended', funct
 
     $session = StartSession::run($intention->user, $intention->steps()->where('position', 3)->sole());
 
-    expect(startedPayload($session))->toBe(['recommended' => false, 'rung' => null]);
+    expect(startedPayload($session))->toEqual(['recommended' => false, 'rung' => null]);
 });
 
 it('attributes a move to another intention against the step the person was part-way through', function (): void {
@@ -402,5 +402,5 @@ it('attributes a move to another intention against the step the person was part-
 
     $next = StartSession::run($session->user, $elsewhere);
 
-    expect(startedPayload($next))->toBe(['recommended' => false, 'rung' => null]);
+    expect(startedPayload($next))->toEqual(['recommended' => false, 'rung' => null]);
 });
