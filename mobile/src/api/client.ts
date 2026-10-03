@@ -20,6 +20,11 @@ export function deviceTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
+/** The language speech is heard in. */
+export function deviceLocale(): string {
+  return Intl.DateTimeFormat().resolvedOptions().locale;
+}
+
 export const UNREACHABLE = 'The app could not reach the server.';
 
 /** Every form words a write that did not land the same way. */

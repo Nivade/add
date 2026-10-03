@@ -28,6 +28,7 @@ import { writeProblem } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
+import { useSendKeptCaptures } from '@/capture/outbox';
 import { Button } from '@/components/button';
 import { CommitmentRow } from '@/components/commitment-row';
 import { DayStrip } from '@/components/day-strip';
@@ -136,6 +137,7 @@ export default function Home() {
   const { token } = useSession();
   const styles = useStyles();
   const { notice } = useLocalSearchParams<{ notice?: string }>();
+  useSendKeptCaptures();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
   const sortingCount =

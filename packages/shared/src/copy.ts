@@ -347,6 +347,8 @@ export const captureCopy = {
     question: "What's on your mind?",
     description: "Write it however it comes out. Sorting it out is the app's job.",
     save: 'Save',
+    keptOffline: 'Saved on this phone. It goes through when you are back online.',
+    listening: 'Listening. Tap to stop.',
 } as const;
 
 export const commitmentCopy = {
