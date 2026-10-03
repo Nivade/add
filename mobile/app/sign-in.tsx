@@ -1,13 +1,20 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { ApiError, writeProblem } from '@/api/client';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
-import { field, theme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
+
+const useStyles = makeStyles(({ field, space }) => ({
+  fields: { gap: space(1.5) },
+  input: field,
+}));
 
 export default function SignIn() {
   const { signIn } = useSession();
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -43,7 +50,7 @@ export default function SignIn() {
           value={email}
           onChangeText={setEmail}
           placeholder="Email"
-          placeholderTextColor={theme.color.muted}
+          placeholderTextColor={colors.muted}
           autoCapitalize="none"
           autoComplete="email"
           keyboardType="email-address"
@@ -55,7 +62,7 @@ export default function SignIn() {
           value={password}
           onChangeText={setPassword}
           placeholder="Password"
-          placeholderTextColor={theme.color.muted}
+          placeholderTextColor={colors.muted}
           autoCapitalize="none"
           autoComplete="current-password"
           secureTextEntry
@@ -67,7 +74,7 @@ export default function SignIn() {
             value={code}
             onChangeText={setCode}
             placeholder="Authentication code"
-            placeholderTextColor={theme.color.muted}
+            placeholderTextColor={colors.muted}
             keyboardType="number-pad"
             inputMode="numeric"
             accessibilityLabel="Authentication code"
@@ -86,8 +93,3 @@ export default function SignIn() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  fields: { gap: theme.space(1.5) },
-  input: field,
-});

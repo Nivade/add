@@ -1,8 +1,16 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { TOUCH_TARGET, theme } from '@/theme';
+import { Pressable, Text } from 'react-native';
+import { makeStyles, TOUCH_TARGET } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type }) => ({
+  base: { minHeight: TOUCH_TARGET, justifyContent: 'center' },
+  pressed: { opacity: 0.6 },
+  label: { ...type.body, color: colors.muted, textDecorationLine: 'underline' },
+}));
 
 /** Off the one-tap path: still a full touch target, but reads as a line, not a control. */
 export function QuietAction({ label, onPress }: { label: string; onPress: () => void }) {
+  const styles = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -14,13 +22,3 @@ export function QuietAction({ label, onPress }: { label: string; onPress: () => 
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: { minHeight: TOUCH_TARGET, justifyContent: 'center' },
-  pressed: { opacity: 0.6 },
-  label: {
-    color: theme.color.muted,
-    fontSize: 15,
-    textDecorationLine: 'underline',
-  },
-});

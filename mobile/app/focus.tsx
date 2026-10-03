@@ -2,7 +2,7 @@ import type { ExecutionStateData } from '@add/shared';
 import { commitmentCopy, focusCopy, returnCopy, stuckReasonsFor, underWayEstimateLine } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { Modal, Text, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { api, type SessionControl } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
@@ -12,10 +12,21 @@ import { QuietAction } from '@/components/quiet-action';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
 import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
-import { theme } from '@/theme';
+import { makeStyles } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type, space }) => ({
+  controls: { gap: space(1.5) },
+  notice: { ...type.lead, color: colors.muted },
+  progress: {
+    paddingTop: space(2),
+    gap: space(0.5),
+  },
+  progressLine: { ...type.small, color: colors.muted },
+}));
 
 export default function Focus() {
   const { token } = useSession();
+  const styles = useStyles();
   const load = useCallback(() => api.currentSession(token as string), [token]);
   const resource = useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
@@ -217,15 +228,3 @@ export default function Focus() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  controls: { gap: theme.space(1.5) },
-  notice: { color: theme.color.muted, fontSize: 18 },
-  progress: {
-    borderTopColor: theme.color.border,
-    borderTopWidth: 1,
-    paddingTop: theme.space(2),
-    gap: theme.space(0.5),
-  },
-  progressLine: { color: theme.color.muted, fontSize: 14 },
-});

@@ -22,7 +22,7 @@ import {
 } from '@add/shared';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { writeProblem } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
@@ -34,7 +34,14 @@ import { Responses } from '@/components/responses';
 import { Band, Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
 import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
-import { field, line, theme } from '@/theme';
+import { makeStyles } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type, field, space }) => ({
+  line: { ...type.body, color: colors.ink },
+  clarify: { gap: space(1) },
+  input: field,
+  thumbReach: { gap: space(1.5), marginTop: space(2) },
+}));
 
 function Clarify({
   item,
@@ -44,6 +51,7 @@ function Clarify({
   onAnswered: () => void;
 }) {
   const { token } = useSession();
+  const styles = useStyles();
   const [answer, setAnswer] = useState('');
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -99,6 +107,7 @@ function WaitingFor({
   onResponded: () => void;
 }) {
   const { token } = useSession();
+  const styles = useStyles();
 
   return (
     <View style={styles.clarify}>
@@ -119,6 +128,7 @@ function WaitingFor({
 
 export default function Home() {
   const { token, signOut } = useSession();
+  const styles = useStyles();
   const { notice } = useLocalSearchParams<{ notice?: string }>();
   const load = useCallback(() => api.home(token as string), [token]);
   const resource = useResource<HomeData>(load);
@@ -370,10 +380,3 @@ export default function Home() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  line,
-  clarify: { gap: theme.space(1) },
-  input: field,
-  thumbReach: { gap: theme.space(1.5), marginTop: theme.space(2) },
-});
