@@ -48,7 +48,7 @@ git fetch origin <default>
   git worktree add -b <name> .claude/worktrees/<slug> origin/<default>
   ```
 
-  `<slug>` is `<name>` with `/` as `-`. Run it from the main checkout, without `cd`. Then `EnterWorktree` with `path` set to the worktree's absolute path (ToolSearch loads it), and only then run the check below. If `EnterWorktree` reports the path is already the current working directory, run the check and carry on.
+  `<slug>` is `<name>` with `/` as `-`. Run it from the main checkout, without `cd`. Then `EnterWorktree` with `path` set to the worktree's absolute path (ToolSearch loads it), then run `CLAUDE_PROJECT_DIR=<worktree path> .claude/hooks/worktree-bootstrap.sh` from the worktree, since SessionStart does not fire on entering one. Only then run the check below. If `EnterWorktree` reports the path is already the current working directory, run the check and carry on.
 - Otherwise: `git switch -c <name> origin/<default>`.
 
 Check: `git log -1 --format=%H` equals `git rev-parse origin/<default>` and the current branch is `<name>`.
