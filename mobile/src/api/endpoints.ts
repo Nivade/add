@@ -3,6 +3,7 @@ import type {
   AiConsentData,
   AppointmentKind,
   CaptureData,
+  CaptureKind,
   CaptureSource,
   CheckInAnswer,
   CheckInTopic,
@@ -78,6 +79,19 @@ export const api = {
       method: 'POST',
       token,
       body: { body, source },
+    }),
+
+  confirmCaptureKind: (token: string, captureId: string) =>
+    request<CaptureData>(`/captures/${captureId}/confirm`, {
+      method: 'POST',
+      token,
+    }),
+
+  changeCaptureKind: (token: string, captureId: string, kind: CaptureKind) =>
+    request<CaptureData>(`/captures/${captureId}/kind`, {
+      method: 'POST',
+      token,
+      body: { kind },
     }),
 
   adjustPlan: (

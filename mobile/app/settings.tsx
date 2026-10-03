@@ -9,7 +9,7 @@ import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
 
 export default function Settings() {
-  const { token } = useSession();
+  const { token, signOut } = useSession();
   const load = useCallback(() => api.aiConsent(token as string), [token]);
   const resource = useResource(load);
   const [saving, setSaving] = useState(false);
@@ -46,6 +46,7 @@ export default function Settings() {
       <Meta>
         {timezoneLine(deviceTimezone())}
       </Meta>
+      <Button label="Sign out" onPress={() => void signOut()} />
     </Screen>
   );
 }
