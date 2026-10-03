@@ -242,27 +242,27 @@ export default function Focus() {
           <OneThing>{focusCopy.stuckQuestion}</OneThing>
           <Meta>{focusCopy.stuckMeta}</Meta>
 
-          {askingNote ? (
-            <View style={styles.controls}>
-              <Text style={styles.noteLabel}>{focusCopy.stuckNoteQuestion}</Text>
-              <TextInput
-                style={styles.note}
-                value={note}
-                onChangeText={setNote}
-                placeholderTextColor={colors.muted}
-                multiline
-                autoFocus
-                accessibilityLabel={focusCopy.stuckNoteQuestion}
-              />
-              <Button
-                label={focusCopy.stuckNoteSend}
-                tone="primary"
-                onPress={() => reportStuck('something_else', note.trim())}
-              />
-            </View>
-          ) : (
-            <View style={styles.controls}>
-              {stuckReasonsFor(step?.place ?? null).map((reason) => (
+          <View style={styles.controls}>
+            {askingNote ? (
+              <>
+                <Text style={styles.noteLabel}>{focusCopy.stuckNoteQuestion}</Text>
+                <TextInput
+                  style={styles.note}
+                  value={note}
+                  onChangeText={setNote}
+                  placeholderTextColor={colors.muted}
+                  multiline
+                  autoFocus
+                  accessibilityLabel={focusCopy.stuckNoteQuestion}
+                />
+                <Button
+                  label={focusCopy.stuckNoteSend}
+                  tone="primary"
+                  onPress={() => reportStuck('something_else', note.trim())}
+                />
+              </>
+            ) : (
+              stuckReasonsFor(step?.place ?? null).map((reason) => (
                 <Button
                   key={reason.value}
                   label={reason.label}
@@ -272,9 +272,9 @@ export default function Focus() {
                       : reportStuck(reason.value)
                   }
                 />
-              ))}
-            </View>
-          )}
+              ))
+            )}
+          </View>
         </Screen>
       </Modal>
     </Screen>
