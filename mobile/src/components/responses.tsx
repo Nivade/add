@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Button } from '@/components/button';
-import { theme } from '@/theme';
+import { makeStyles } from '@/theme';
+
+const useStyles = makeStyles(({ space }) => ({
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: space(1) },
+}));
 
 /** Every answer weighs the same, and one tap at a time: the row locks until the server answers. */
 export function Responses<T extends string>({
@@ -11,6 +15,7 @@ export function Responses<T extends string>({
   responses: { value: T; label: string }[];
   onRespond: (value: T) => Promise<void>;
 }) {
+  const styles = useStyles();
   const [saving, setSaving] = useState(false);
 
   const respond = async (value: T) => {
@@ -36,7 +41,3 @@ export function Responses<T extends string>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(1) },
-});

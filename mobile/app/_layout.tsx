@@ -1,19 +1,38 @@
+import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { Stack, router, useRootNavigationState, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider, useSession } from '@/auth/session';
 import { startErrorReporting, withErrorReporting } from '@/errors/reporting';
-import { theme } from '@/theme';
+import { fonts, useTheme } from '@/theme';
 
 startErrorReporting();
+void SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
+  const [loaded, error] = useFonts(fonts);
+
+  useEffect(() => {
+    if (loaded || error) {
+      void SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (error) {
+    throw error;
+  }
+
+  if (!loaded) {
+    return null;
+  }
+
   return (
     <SafeAreaProvider>
       <SessionProvider>
-        <StatusBar style="light" />
+        <StatusBar style="auto" />
         <Gate />
       </SessionProvider>
     </SafeAreaProvider>
@@ -24,6 +43,7 @@ export default withErrorReporting(RootLayout);
 
 function Gate() {
   const { token, loading } = useSession();
+  const { colors } = useTheme();
   const segments = useSegments();
   const navigationReady = useRootNavigationState()?.key !== undefined;
 
@@ -49,7 +69,7 @@ function Gate() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: theme.color.background },
+        contentStyle: { backgroundColor: colors.paper },
         animation: 'fade',
       }}
     />

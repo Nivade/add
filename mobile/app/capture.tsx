@@ -6,15 +6,27 @@ import {
 } from 'expo-speech-recognition';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
+import { TextInput } from 'react-native';
 import { api } from '@/api/endpoints';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
-import { theme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
+
+const useStyles = makeStyles(({ type, field, space }) => ({
+  input: {
+    ...field,
+    ...type.lead,
+    minHeight: 160,
+    padding: space(2),
+    textAlignVertical: 'top',
+  },
+}));
 
 export default function Capture() {
   const { token } = useSession();
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [body, setBody] = useState('');
   const [listening, setListening] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -76,7 +88,7 @@ export default function Capture() {
           setBody(text);
         }}
         placeholder="Type it, or hold the mic."
-        placeholderTextColor={theme.color.muted}
+        placeholderTextColor={colors.muted}
         multiline
         autoFocus
         accessibilityLabel="Your thought"
@@ -100,18 +112,3 @@ export default function Capture() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  input: {
-    minHeight: 160,
-    padding: theme.space(2),
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.color.border,
-    backgroundColor: theme.color.surface,
-    color: theme.color.text,
-    fontSize: 20,
-    lineHeight: 28,
-    textAlignVertical: 'top',
-  },
-});
