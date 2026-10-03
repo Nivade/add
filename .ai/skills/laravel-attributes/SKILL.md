@@ -1,28 +1,54 @@
 ---
 name: laravel-attributes
-description: "Use whenever writing or reviewing Laravel PHP code (Laravel 13+). Prefer PHP attributes over class properties for models, jobs, commands, controllers, form requests, tests, factories, API resources, and container bindings. Trigger on $fillable, $table, $queue, $tries, $signature, $redirect, $errorBag, $seeder, constructor middleware, singleton registration, and any new Laravel class."
+description: "Use whenever writing, reviewing or migrating Laravel PHP code (Laravel 13+). Prefer PHP attributes over class properties for models, jobs, commands, controllers, form requests, tests, factories, API resources and container bindings. Trigger on $fillable, $hidden, $table, $queue, $tries, $signature, $redirect, $errorBag, $seeder, constructor middleware, singleton registration, and any new Laravel class."
+paths:
+  - 'backend/app/**'
+  - 'backend/database/factories/**'
+  - 'backend/database/seeders/**'
+metadata:
+  keywords:
+    - '\$(fillable|hidden|guarded|appends|touches|table|connection|queue|tries|timeout|backoff|signature|redirectTo|errorBag)\b'
+    - '\bPHP attributes?\b'
 ---
 
 # Laravel PHP Attributes (Laravel 13+)
 
-Rather than scattering configuration across class properties, Laravel lets you declare intent directly above the class using PHP attributes. It's cleaner, more expressive, and easier to scan.
+Declare configuration above the class with an attribute instead of a class property. `LARAVEL_130` in `rector.php` enforces most of these, so a leftover property shows up in `composer refactor:check`.
 
-Before writing a class property, check the [README](https://github.com/MrPunyapal/laravel-attributes-list/blob/main/README.md) — there's likely an attribute for it. Open the relevant file under [attributes/](https://github.com/MrPunyapal/laravel-attributes-list/tree/main/attributes) to get the exact namespace and parameters, then apply it. Always include the `use` import — attributes do nothing without it.
+## Rules
+
+1. **Never mix an attribute with its legacy property on one class.** `#[Fillable('name')]` plus `protected $fillable = [...]` leaves Laravel ignoring one of them without an error. Convert the whole class in one pass and delete the property.
+2. **Always import the attribute.** Without the `use` line it is a plain unknown attribute and does nothing.
+3. **There is no `#[Casts]`.** Casts stay in the `casts()` method.
+4. **A container attribute only works on a class the container resolves.** `#[Singleton]` on a class you `new` yourself does nothing.
+5. **Check the name against the installed framework**, not memory: `find backend/vendor/laravel/framework/src -path '*Attributes*' -name '*.php'`. Most take variadic or array arguments, so `#[Fillable('a', 'b')]` and `#[Fillable(['a', 'b'])]` both work.
+
+## Where each one lives
+
+| Area | Attributes | Namespace |
+| --- | --- | --- |
+| Eloquent model | `Table` `Connection` `Fillable` `Guarded` `Unguarded` `Hidden` `Visible` `Appends` `Touches` `WithoutTimestamps` `WithoutIncrementing` `DateFormat` `RouteKey` | `Illuminate\Database\Eloquent\Attributes` |
+| Eloquent wiring | `ObservedBy` `ScopedBy` `UseFactory` `UsePolicy` `CollectedBy` `UseResource` `UseEloquentBuilder` | `Illuminate\Database\Eloquent\Attributes` |
+| Queue job | `Connection` `Queue` `Tries` `Timeout` `Backoff` `MaxExceptions` `FailOnTimeout` `UniqueFor` `Delay` `DebounceFor` `DeleteWhenMissingModels` `WithoutRelations` | `Illuminate\Queue\Attributes` |
+| Console command | `Signature` `Description` `Aliases` `Help` `Usage` | `Illuminate\Console\Attributes` |
+| Controller | `Middleware` `WithoutMiddleware` `Authorize`, also valid on an action method | `Illuminate\Routing\Attributes\Controllers` |
+| Form request | `RedirectTo` `RedirectToRoute` `ErrorBag` `StopOnFirstFailure` `FailOnUnknownFields` | `Illuminate\Foundation\Http\Attributes` |
+| API resource | `Collects` `PreserveKeys` | `Illuminate\Http\Resources\Attributes` |
+| Factory | `UseModel` | `Illuminate\Database\Eloquent\Factories\Attributes` |
+| Test class | `Seed` `Seeder` `UnitTest` | `Illuminate\Foundation\Testing\Attributes` |
+| Container | `Singleton` `Scoped` `Bind` `BindWhen` `Give` `Tag`, plus the injection ones: `Config` `Auth` `Cache` `Log` `DB` `Storage` `CurrentUser` | `Illuminate\Container\Attributes` |
 
 ## Examples
 
-**Model**
 ```php
-use Illuminate\Database\Eloquent\Attributes\{Table, Fillable, Hidden, Connection};
+use Illuminate\Database\Eloquent\Attributes\{Table, Fillable, Hidden};
 
 #[Table('users')]
 #[Fillable('name', 'email')]
 #[Hidden('password')]
-#[Connection('mysql')]
 class User extends Model {}
 ```
 
-**Job**
 ```php
 use Illuminate\Queue\Attributes\{Connection, Queue, Tries, Timeout, Backoff};
 
@@ -34,7 +60,6 @@ use Illuminate\Queue\Attributes\{Connection, Queue, Tries, Timeout, Backoff};
 class ProcessOrder implements ShouldQueue {}
 ```
 
-**Command**
 ```php
 use Illuminate\Console\Attributes\{Signature, Description};
 
@@ -43,18 +68,26 @@ use Illuminate\Console\Attributes\{Signature, Description};
 class SyncUsers extends Command {}
 ```
 
-**Form Request**
 ```php
-use Illuminate\Foundation\Http\Attributes\{RedirectTo, RedirectToRoute, StopOnFirstFailure, ErrorBag};
+use Illuminate\Routing\Attributes\Controllers\{Middleware, Authorize};
 
-#[RedirectTo('/profile')]
+#[Middleware('auth')]
+class PostController
+{
+    #[Authorize('update', 'post')]
+    public function update(Post $post) {}
+}
+```
+
+```php
+use Illuminate\Foundation\Http\Attributes\{RedirectToRoute, StopOnFirstFailure, ErrorBag};
+
 #[RedirectToRoute('profile.edit')]
 #[StopOnFirstFailure]
 #[ErrorBag('updateProfile')]
 class UpdateProfileRequest extends FormRequest {}
 ```
 
-**Container binding** — declare on the class rather than in a service provider. The class still needs to be resolved through the container (constructor injection, etc.) for the attribute to take effect.
 ```php
 use Illuminate\Container\Attributes\Singleton;
 
@@ -62,12 +95,4 @@ use Illuminate\Container\Attributes\Singleton;
 class StripeGateway implements PaymentGateway {}
 ```
 
-**PHP built-in**
-```php
-// Prevent sensitive values from leaking into stack traces
-function login(string $user, #[\SensitiveParameter] string $password): void {}
-
-// Warn when a return value is accidentally discarded (PHP 8.5+)
-#[\NoDiscard('check for per-item errors')]
-function bulkProcess(array $items): array {}
-```
+PHP's own attributes belong here too: `#[\SensitiveParameter]` keeps a value out of stack traces, and `#[\NoDiscard]` warns when a return value is dropped (PHP 8.5).

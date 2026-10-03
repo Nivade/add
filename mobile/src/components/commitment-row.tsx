@@ -1,11 +1,16 @@
 import type { CommitmentProvenance } from '@add/shared';
 import { commitmentProvenanceLabels, commitmentResponses } from '@add/shared';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { api } from '@/api/endpoints';
 import { useSession } from '@/auth/session';
 import { Responses } from '@/components/responses';
 import { Meta } from '@/components/screen';
-import { line, theme } from '@/theme';
+import { makeStyles } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type, space }) => ({
+  row: { gap: space(1) },
+  line: { ...type.body, color: colors.ink },
+}));
 
 /** One commitment and its answers, the same on home's band and on the full list. */
 export function CommitmentRow({
@@ -22,6 +27,7 @@ export function CommitmentRow({
   onResponded: () => void;
 }) {
   const { token } = useSession();
+  const styles = useStyles();
 
   return (
     <View style={styles.row}>
@@ -37,8 +43,3 @@ export function CommitmentRow({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { gap: theme.space(1) },
-  line,
-});

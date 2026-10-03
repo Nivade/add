@@ -1,0 +1,129 @@
+{
+    "added": {
+        "arch": {
+            "packages": ["pestphp/pest-plugin-type-coverage"],
+            "entries": {
+                "composer.json arch scripts": {
+                    "types:coverage": null
+                }
+            }
+        },
+        "claude": {
+            "gitignore": [
+                "/.ai/plans/*",
+                "!/.ai/plans/legacy/",
+                "/.claude/plans/"
+            ],
+            "entries": {
+                ".claude/settings.json permissions.allow": {
+                    "Bash(composer test *)": null,
+                    "Bash(composer test:impact *)": null,
+                    "Bash(composer test:serial *)": null,
+                    "Bash(composer lint *)": null,
+                    "Bash(composer lint:dirty *)": null,
+                    "Bash(composer lint:check *)": null,
+                    "Bash(composer types:check *)": null,
+                    "Bash(composer refactor *)": null,
+                    "Bash(composer refactor:check *)": null,
+                    "Bash(php artisan test *)": null,
+                    "Bash(php artisan route:list *)": null,
+                    "Bash(php artisan about *)": null,
+                    "Bash(vendor/bin/pint *)": null,
+                    "Bash(vendor/bin/pest *)": null,
+                    "Bash(vendor/bin/sail composer test *)": null,
+                    "Bash(vendor/bin/sail composer test:impact *)": null,
+                    "Bash(vendor/bin/sail composer test:serial *)": null,
+                    "Bash(vendor/bin/sail composer lint *)": null,
+                    "Bash(vendor/bin/sail composer lint:dirty *)": null,
+                    "Bash(vendor/bin/sail composer lint:check *)": null,
+                    "Bash(vendor/bin/sail composer types:check *)": null,
+                    "Bash(vendor/bin/sail composer refactor *)": null,
+                    "Bash(vendor/bin/sail composer refactor:check *)": null,
+                    "Bash(vendor/bin/sail artisan test *)": null,
+                    "Bash(vendor/bin/sail artisan route:list *)": null,
+                    "Bash(vendor/bin/sail artisan about *)": null,
+                    "Bash(./vendor/bin/pint *)": null,
+                    "Bash(./vendor/bin/pest *)": null,
+                    "Bash(./vendor/bin/sail composer test *)": null,
+                    "Bash(./vendor/bin/sail composer test:impact *)": null,
+                    "Bash(./vendor/bin/sail composer test:serial *)": null,
+                    "Bash(./vendor/bin/sail composer lint *)": null,
+                    "Bash(./vendor/bin/sail composer lint:dirty *)": null,
+                    "Bash(./vendor/bin/sail composer lint:check *)": null,
+                    "Bash(./vendor/bin/sail composer types:check *)": null,
+                    "Bash(./vendor/bin/sail composer refactor *)": null,
+                    "Bash(./vendor/bin/sail composer refactor:check *)": null,
+                    "Bash(./vendor/bin/sail artisan test *)": null,
+                    "Bash(./vendor/bin/sail artisan route:list *)": null,
+                    "Bash(./vendor/bin/sail artisan about *)": null
+                },
+                ".claude/settings.json hooks": {
+                    "PostToolUse Edit|Write": null
+                }
+            }
+        },
+        "dependencies": {},
+        "phpstorm": {},
+        "precommit": {},
+        "renovate": {},
+        "sloppy": {
+            "packages": ["heyosseus/sloppy"],
+            "entries": {
+                "composer.json sloppy scripts": {
+                    "slop:check": null
+                }
+            },
+            "rootGitignore": ["/.cache/"]
+        }
+    },
+    "agent-context": {
+        "backend/.ai/rules/nvade-devtools-general.md": "2b316f93ee808d1c",
+        "backend/.ai/rules/nvade-devtools-laravel.md": "e444885dda0d8824",
+        "backend/.ai/rules/nvade-devtools-rector.md": "429dfc12d96cb1e7",
+        "backend/.ai/rules/nvade-devtools-testing.md": "dee4871ff6c08648",
+        "backend/.ai/skills/after-merge": "ddf5f5271fb08d24",
+        "backend/.ai/skills/note-finding": "ab93685faaf9c46e",
+        "backend/.ai/skills/start-work": "705fd6fe05f1fe7c"
+    },
+    "agent-packages": ["nvade/devtools"],
+    "components": [
+        "arch",
+        "branches",
+        "ci",
+        "claude",
+        "commits",
+        "dependencies",
+        "editorconfig",
+        "gitattributes",
+        "npm",
+        "npmrc",
+        "phpstan",
+        "phpstorm",
+        "phpunit",
+        "pint",
+        "precommit",
+        "rector",
+        "renovate",
+        "scripts",
+        "sloppy",
+        "vite"
+    ],
+    "declined": [
+        "diagnosing-bugs",
+        "handoff",
+        "laravel-attributes",
+        "laravel-security",
+        "refactor-freely",
+        "research",
+        "running-commands",
+        "solid-php",
+        "tdd",
+        "vite",
+        "writing-for-agents"
+    ],
+    "settings": {
+        "ci-image-runner-tag": "buildah",
+        "db": "mysql",
+        "php": "8.5"
+    }
+}

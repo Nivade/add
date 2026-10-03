@@ -1,0 +1,1 @@
+../../.ai/rules/nvade-devtools-rector.md

@@ -7,19 +7,39 @@ import {
 } from '@add/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { api } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
-import { field, TOUCH_TARGET, theme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type, field, space }) => ({
+  after: { gap: space(1), marginTop: space(2) },
+  afterLabel: { ...type.small, color: colors.muted, flex: 1 },
+  message: field,
+  rung: { flexDirection: 'row', alignItems: 'center', gap: space(1.5) },
+  clock: { ...type.numeric, color: colors.ink, width: 56 },
+  passed: { color: colors.muted, textDecorationLine: 'line-through' },
+  rungLabel: { ...type.body, color: colors.muted, flex: 1 },
+  minutes: {
+    ...field,
+    ...type.numeric,
+    width: 72,
+    paddingHorizontal: space(1),
+    textAlign: 'right',
+  },
+  assumed: { ...type.small, color: colors.muted, width: 84 },
+}));
 
 /** Where a reminder lands. Every number here is the person's to overrule, resolved by id so a stale deep link never trusts what home shows next. */
 export default function Appointment() {
   const { kind, id } = useLocalSearchParams<{ kind: AppointmentKind; id: string }>();
   const { token } = useSession();
+  const styles = useStyles();
+  const { colors } = useTheme();
   const load = useCallback(
     () => api.appointment(token as string, kind, id),
     [token, kind, id],
@@ -135,7 +155,7 @@ export default function Appointment() {
               setRemindSaved(false);
             }}
             placeholder={remindAfterCopy.question}
-            placeholderTextColor={theme.color.muted}
+            placeholderTextColor={colors.muted}
             accessibilityLabel={remindAfterCopy.question}
           />
           <View style={styles.rung}>
@@ -158,26 +178,3 @@ export default function Appointment() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  after: { gap: theme.space(1), marginTop: theme.space(2) },
-  afterLabel: { color: theme.color.muted, fontSize: 13, flex: 1 },
-  message: field,
-  rung: { flexDirection: 'row', alignItems: 'center', gap: theme.space(1.5) },
-  clock: { color: theme.color.text, fontSize: 16, width: 56 },
-  passed: { color: theme.color.muted, textDecorationLine: 'line-through' },
-  rungLabel: { color: theme.color.muted, fontSize: 15, flex: 1 },
-  minutes: {
-    minHeight: TOUCH_TARGET,
-    width: 72,
-    paddingHorizontal: theme.space(1),
-    borderRadius: theme.radius,
-    borderWidth: 1,
-    borderColor: theme.color.border,
-    backgroundColor: theme.color.surface,
-    color: theme.color.text,
-    fontSize: 17,
-    textAlign: 'right',
-  },
-  assumed: { color: theme.color.muted, fontSize: 13, width: 84 },
-});

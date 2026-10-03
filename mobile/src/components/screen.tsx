@@ -1,17 +1,53 @@
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from '@/theme';
+import { makeStyles } from '@/theme';
 
-export function Screen({ children }: { children: ReactNode }) {
+const useStyles = makeStyles(({ colors, type, space }) => ({
+  safe: { flex: 1, backgroundColor: colors.paper },
+  content: {
+    paddingHorizontal: space(2.5),
+    paddingTop: space(3),
+    paddingBottom: space(12),
+    gap: space(5),
+  },
+  label: { ...type.bandHeading, color: colors.muted },
+  oneThing: { ...type.oneThing, color: colors.ink },
+  meta: { ...type.body, color: colors.muted },
+  band: { gap: space(1) },
+  bottom: {
+    flexDirection: 'row',
+    gap: space(1),
+    paddingHorizontal: space(2.5),
+    paddingVertical: space(1.5),
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    backgroundColor: colors.paper,
+  },
+}));
+
+/** `top` and `bottom` stay put while the rest scrolls, so what must be within a thumb's reach always is. */
+export function Screen({
+  children,
+  top,
+  bottom,
+}: {
+  children: ReactNode;
+  top?: ReactNode;
+  bottom?: ReactNode;
+}) {
+  const styles = useStyles();
+
   return (
     <SafeAreaView style={styles.safe}>
+      {top}
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
         {children}
       </ScrollView>
+      {bottom && <View style={styles.bottom}>{bottom}</View>}
     </SafeAreaView>
   );
 }
@@ -26,6 +62,8 @@ export function Loading() {
 }
 
 function Label({ children }: { children: ReactNode }) {
+  const styles = useStyles();
+
   return (
     <Text accessibilityRole="header" style={styles.label}>
       {children}
@@ -35,14 +73,21 @@ function Label({ children }: { children: ReactNode }) {
 
 /** The one thing. Nothing on a screen is allowed to compete with it. */
 export function OneThing({ children }: { children: ReactNode }) {
+  const styles = useStyles();
+
   return <Text style={styles.oneThing}>{children}</Text>;
 }
 
 export function Meta({ children }: { children: ReactNode }) {
+  const styles = useStyles();
+
   return <Text style={styles.meta}>{children}</Text>;
 }
 
+/** A band is a question and its answer, set apart by space. No boxes: a box implies a list to work through. */
 export function Band({ label, children }: { label: string; children: ReactNode }) {
+  const styles = useStyles();
+
   return (
     <View style={styles.band}>
       <Label>{label}</Label>
@@ -50,34 +95,3 @@ export function Band({ label, children }: { label: string; children: ReactNode }
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: theme.color.background },
-  content: {
-    padding: theme.space(3),
-    paddingBottom: theme.space(12),
-    gap: theme.space(4),
-  },
-  label: {
-    color: theme.color.muted,
-    fontSize: 11,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: theme.space(1),
-  },
-  oneThing: {
-    color: theme.color.text,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: '600',
-  },
-  meta: { color: theme.color.muted, fontSize: 15, lineHeight: 22 },
-  band: {
-    backgroundColor: theme.color.surface,
-    borderColor: theme.color.border,
-    borderWidth: 1,
-    borderRadius: theme.radius,
-    padding: theme.space(2),
-    gap: theme.space(1),
-  },
-});

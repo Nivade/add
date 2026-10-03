@@ -1,6 +1,14 @@
 ---
 name: ai-layer-changes
 description: Use when adding or changing anything that asks a model a question — a new `AiOperation`, a prompt edit, a JSON schema, a parser, a provider driver, or a fixture. Also use when a test fails with `AiFixtureMissing`, `AiResponseInvalid`, `AiUnavailable` or `AiRateLimited`, when deciding whether a feature should call a model at all, and before adding a field to an AI answer. Trigger on "prompt", "schema", "fixture", "decompose", "parse capture", "split step", "the model returned", "AiProvider", "openai driver", "ai-toolkit.driver", `backend/app/Support/Ai/**`.
+paths:
+  - 'backend/app/Support/Ai/**'
+  - 'backend/app/Providers/AiServiceProvider.php'
+  - 'backend/config/ai-toolkit.php'
+  - 'backend/app/Enums/Ai/**'
+metadata:
+  keywords:
+    - '\b(prompt|schema|fixture|decompose|llm|openai|ai layer|model answer)\b'
 ---
 
 # Changing the AI layer

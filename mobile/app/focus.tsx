@@ -1,24 +1,42 @@
-import type { ExecutionStateData } from '@add/shared';
+import type { ExecutionStateData, StuckReason } from '@add/shared';
 import { commitmentCopy, focusCopy, returnCopy, stuckReasonsFor, underWayEstimateLine } from '@add/shared';
 import { router } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { Modal, Text, TextInput, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { api, type SessionControl } from '@/api/endpoints';
 import { useResource } from '@/api/use-resource';
 import { useSession } from '@/auth/session';
 import { Button } from '@/components/button';
+import { Control, ControlRow } from '@/components/control-row';
 import { QuietAction } from '@/components/quiet-action';
 import { Meta, OneThing, Screen } from '@/components/screen';
 import { Pending, StaleNote } from '@/components/resource-state';
 import { nowMinute, SuggestedPill } from '@/components/suggested-pill';
-import { theme } from '@/theme';
+import { makeStyles, useTheme } from '@/theme';
+
+const useStyles = makeStyles(({ colors, type, space, field }) => ({
+  controls: { gap: space(1.5) },
+  pinned: { flex: 1, gap: space(1.5) },
+  notice: { ...type.lead, color: colors.muted },
+  progress: {
+    paddingTop: space(2),
+    gap: space(0.5),
+  },
+  progressLine: { ...type.small, color: colors.muted },
+  note: { ...field, ...type.body, minHeight: 96, padding: space(2), textAlignVertical: 'top' },
+  noteLabel: { ...type.body, color: colors.ink },
+}));
 
 export default function Focus() {
   const { token } = useSession();
+  const styles = useStyles();
+  const { colors } = useTheme();
   const load = useCallback(() => api.currentSession(token as string), [token]);
   const resource = useResource<ExecutionStateData | null>(load);
   const [stuckOpen, setStuckOpen] = useState(false);
+  const [askingNote, setAskingNote] = useState(false);
+  const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
 
@@ -40,9 +58,16 @@ export default function Focus() {
   const { session, intention, progress, elapsed } = data;
   const step = session.currentStep;
   const paused = session.pausedAt !== null;
+  const stepAway = data.returning || paused;
 
   /** A stuck answer that stops the session says so on home; Stop itself needs no line. */
   const take = (state: ExecutionStateData, fromStuck: boolean): void => {
+    if (state.session.outcome === 'completed') {
+      router.replace({ pathname: '/finished/[session]', params: { session: state.session.id } });
+
+      return;
+    }
+
     if (state.session.endedAt !== null || state.session.currentStep === null) {
       router.replace(
         fromStuck && state.session.outcome === 'stopped'
@@ -99,12 +124,71 @@ export default function Focus() {
       }),
     );
 
+  const closeStuck = (): void => {
+    setStuckOpen(false);
+    setAskingNote(false);
+    setNote('');
+  };
+
+  const reportStuck = (reason: StuckReason, said = ''): void => {
+    closeStuck();
+    void send(
+      () => api.stuck(token as string, session.id, step?.id ?? null, reason, said),
+      true,
+    );
+  };
+
+  const controls = stepAway ? undefined : (
+    <View style={styles.pinned}>
+      <ControlRow label={focusCopy.thisStep}>
+        <Control
+          label={focusCopy.done}
+          hint={focusCopy.hints.done}
+          disabled={busy}
+          onPress={() => void control('complete-step')}
+        />
+        <Control
+          label={focusCopy.skip}
+          hint={focusCopy.hints.skip}
+          disabled={busy}
+          onPress={() => void control('skip-step')}
+        />
+        <Control
+          label={focusCopy.stuck}
+          hint={focusCopy.hints.stuck}
+          disabled={busy}
+          onPress={() => setStuckOpen(true)}
+        />
+      </ControlRow>
+      <ControlRow label={focusCopy.stepAway}>
+        <Control
+          label={focusCopy.pause}
+          hint={focusCopy.hints.pause}
+          disabled={busy}
+          onPress={() => void control('pause')}
+        />
+        <Control
+          label={focusCopy.distracted}
+          hint={focusCopy.hints.distracted}
+          disabled={busy}
+          onPress={() => void control('distracted')}
+        />
+        <Control
+          label={focusCopy.stop}
+          hint={focusCopy.hints.stop}
+          disabled={busy}
+          onPress={() => void control('stop')}
+        />
+      </ControlRow>
+    </View>
+  );
+
   return (
-    <Screen>
+    <Screen bottom={controls}>
       <StaleNote problem={problem} />
       <Meta>{intention.title}</Meta>
 
-      {data.returning || paused ? (
+      {stepAway ? (
         <>
           <OneThing>
             {data.returning ? returnCopy.welcome : returnCopy.paused}
@@ -136,39 +220,6 @@ export default function Focus() {
           ) : (
             <QuietAction label={commitmentCopy.promise} onPress={() => void promise()} />
           )}
-
-          <View style={styles.controls}>
-            <Button
-              label={focusCopy.done}
-              disabled={busy}
-              onPress={() => void control('complete-step')}
-            />
-            <Button
-              label={focusCopy.skip}
-              disabled={busy}
-              onPress={() => void control('skip-step')}
-            />
-            <Button
-              label={focusCopy.pause}
-              disabled={busy}
-              onPress={() => void control('pause')}
-            />
-            <Button
-              label={focusCopy.stuck}
-              disabled={busy}
-              onPress={() => setStuckOpen(true)}
-            />
-            <Button
-              label={focusCopy.distracted}
-              disabled={busy}
-              onPress={() => void control('distracted')}
-            />
-            <Button
-              label={focusCopy.stop}
-              disabled={busy}
-              onPress={() => void control('stop')}
-            />
-          </View>
         </>
       )}
 
@@ -185,47 +236,47 @@ export default function Focus() {
         visible={stuckOpen}
         animationType="slide"
         transparent={false}
-        onRequestClose={() => setStuckOpen(false)}
+        onRequestClose={closeStuck}
       >
         <Screen>
           <OneThing>{focusCopy.stuckQuestion}</OneThing>
           <Meta>{focusCopy.stuckMeta}</Meta>
 
           <View style={styles.controls}>
-            {stuckReasonsFor(step?.place ?? null).map((reason) => (
-              <Button
-                key={reason.value}
-                label={reason.label}
-                onPress={() => {
-                  setStuckOpen(false);
-                  void send(
-                    () =>
-                      api.stuck(
-                        token as string,
-                        session.id,
-                        step?.id ?? null,
-                        reason.value,
-                      ),
-                    true,
-                  );
-                }}
-              />
-            ))}
+            {askingNote ? (
+              <>
+                <Text style={styles.noteLabel}>{focusCopy.stuckNoteQuestion}</Text>
+                <TextInput
+                  style={styles.note}
+                  value={note}
+                  onChangeText={setNote}
+                  placeholderTextColor={colors.muted}
+                  multiline
+                  autoFocus
+                  accessibilityLabel={focusCopy.stuckNoteQuestion}
+                />
+                <Button
+                  label={focusCopy.stuckNoteSend}
+                  tone="primary"
+                  onPress={() => reportStuck('something_else', note.trim())}
+                />
+              </>
+            ) : (
+              stuckReasonsFor(step?.place ?? null).map((reason) => (
+                <Button
+                  key={reason.value}
+                  label={reason.label}
+                  onPress={() =>
+                    reason.value === 'something_else'
+                      ? setAskingNote(true)
+                      : reportStuck(reason.value)
+                  }
+                />
+              ))
+            )}
           </View>
         </Screen>
       </Modal>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  controls: { gap: theme.space(1.5) },
-  notice: { color: theme.color.muted, fontSize: 18 },
-  progress: {
-    borderTopColor: theme.color.border,
-    borderTopWidth: 1,
-    paddingTop: theme.space(2),
-    gap: theme.space(0.5),
-  },
-  progressLine: { color: theme.color.muted, fontSize: 14 },
-});

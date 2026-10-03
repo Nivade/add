@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { TOUCH_TARGET, theme } from '@/theme';
+import { Pressable, Text } from 'react-native';
+import { makeStyles, TOUCH_TARGET } from '@/theme';
 
 type Props = {
   label: string;
@@ -8,8 +8,26 @@ type Props = {
   disabled?: boolean;
 };
 
+const useStyles = makeStyles(({ colors, type, radius, space }) => ({
+  base: {
+    minHeight: TOUCH_TARGET,
+    paddingHorizontal: space(2),
+    borderRadius: radius.control,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  outline: { backgroundColor: colors.paper, borderColor: colors.field },
+  primary: { backgroundColor: colors.now, borderColor: colors.now },
+  pressed: { opacity: 0.6 },
+  label: { ...type.controlLabel, color: colors.ink },
+  primaryLabel: { ...type.actionLabel, color: colors.onNow },
+}));
+
 /** One size for every control: skipping weighs what finishing weighs. */
 export function Button({ label, onPress, tone = 'outline', disabled }: Props) {
+  const styles = useStyles();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -29,26 +47,3 @@ export function Button({ label, onPress, tone = 'outline', disabled }: Props) {
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    minHeight: TOUCH_TARGET,
-    paddingHorizontal: theme.space(2),
-    borderRadius: theme.radius,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  outline: {
-    backgroundColor: theme.color.surface,
-    borderColor: theme.color.border,
-  },
-  primary: { backgroundColor: theme.color.now, borderColor: theme.color.now },
-  pressed: { opacity: 0.6 },
-  label: { color: theme.color.text, fontSize: 16, fontWeight: '600' },
-  primaryLabel: {
-    color: theme.color.background,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});

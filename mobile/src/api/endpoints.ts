@@ -3,6 +3,7 @@ import type {
   AiConsentData,
   AppointmentKind,
   CaptureData,
+  CaptureKind,
   CaptureSource,
   CheckInAnswer,
   CheckInTopic,
@@ -13,6 +14,7 @@ import type {
   DeviceData,
   DevicePlatform,
   ExecutionStateData,
+  FinishedData,
   FutureReminderData,
   HomeData,
   IntentionData,
@@ -80,6 +82,19 @@ export const api = {
       body: { body, source },
     }),
 
+  confirmCaptureKind: (token: string, captureId: string) =>
+    request<CaptureData>(`/captures/${captureId}/confirm`, {
+      method: 'POST',
+      token,
+    }),
+
+  changeCaptureKind: (token: string, captureId: string, kind: CaptureKind) =>
+    request<CaptureData>(`/captures/${captureId}/kind`, {
+      method: 'POST',
+      token,
+      body: { kind },
+    }),
+
   adjustPlan: (
     token: string,
     kind: AppointmentKind,
@@ -132,12 +147,16 @@ export const api = {
     sessionId: string,
     stepId: string | null,
     reason: StuckReason,
+    note = '',
   ) =>
     request<ExecutionStateData>(`/sessions/${sessionId}/stuck`, {
       method: 'POST',
       token,
-      body: { step_id: stepId, reason },
+      body: { step_id: stepId, reason, note },
     }),
+
+  finished: (token: string, sessionId: string) =>
+    request<FinishedData>(`/sessions/${sessionId}/finished`, { token }),
 
   respondToWaitingFor: (
     token: string,

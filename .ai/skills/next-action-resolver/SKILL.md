@@ -1,6 +1,11 @@
 ---
 name: next-action-resolver
 description: Use when touching how the single next step is chosen or explained — `backend/app/Support/NextAction/**`, `App\Contracts\NextActionResolver`, any comparator or rung, `ResolutionContext`, `Candidate`, `CandidatePool`, `NextActionData`, or the `why` string. Also use when the recommendation or its explanation is wrong, when adding a ranking input, when writing tests for the engine, and before changing the `GET /api/v1/next-action` response. Trigger on "next action", "which step comes first", "ranking", "the why is wrong", "resolver", "prioritise", "comparator", "rung".
+paths:
+  - 'backend/app/Support/NextAction/**'
+metadata:
+  keywords:
+    - '\b(next action|ranking|which step|resolver|why string|prioriti[sz]e|comparator)\b'
 ---
 
 # The next-action engine

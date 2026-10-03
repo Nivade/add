@@ -1,118 +1,149 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/skill-gate.py\""
-          }
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/skill-hook.sh",
+                        "timeout": 10
+                    }
+                ]
+            },
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lifecycle.sh gate",
+                        "timeout": 30
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "matcher": "Edit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pint.sh",
+                        "timeout": 30
+                    }
+                ]
+            }
+        ],
+        "UserPromptSubmit": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/skill-hook.sh",
+                        "timeout": 10
+                    }
+                ]
+            },
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lifecycle.sh merged",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
+        "SessionStart": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/worktree-bootstrap.sh",
+                        "timeout": 600
+                    }
+                ]
+            },
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lifecycle.sh plans",
+                        "timeout": 60,
+                        "async": true
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/merge-gate.py\""
-          }
+    },
+    "enabledPlugins": {
+        "stripe@claude-plugins-official": false,
+        "desktop-commander@claude-plugins-official": false
+    },
+    "skillOverrides": {
+        "laravel-patterns": "off",
+        "laravel-specialist": "off",
+        "laravel-plugin-discovery": "off",
+        "livewire-development": "off",
+        "grill-me": "off",
+        "tailwind-design-system": "off",
+        "dataviz": "off",
+        "unslop": "off"
+    },
+    "permissions": {
+        "allow": [
+            "Bash(composer test *)",
+            "Bash(composer test:impact *)",
+            "Bash(composer test:serial *)",
+            "Bash(composer lint *)",
+            "Bash(composer lint:dirty *)",
+            "Bash(composer lint:check *)",
+            "Bash(composer types:check *)",
+            "Bash(composer refactor *)",
+            "Bash(composer refactor:check *)",
+            "Bash(composer deps:check *)",
+            "Bash(php artisan test *)",
+            "Bash(php artisan route:list *)",
+            "Bash(php artisan about *)",
+            "Bash(vendor/bin/pint *)",
+            "Bash(vendor/bin/pest *)",
+            "Bash(vendor/bin/sail composer test *)",
+            "Bash(vendor/bin/sail composer test:impact *)",
+            "Bash(vendor/bin/sail composer test:serial *)",
+            "Bash(vendor/bin/sail composer lint *)",
+            "Bash(vendor/bin/sail composer lint:dirty *)",
+            "Bash(vendor/bin/sail composer lint:check *)",
+            "Bash(vendor/bin/sail composer types:check *)",
+            "Bash(vendor/bin/sail composer refactor *)",
+            "Bash(vendor/bin/sail composer refactor:check *)",
+            "Bash(vendor/bin/sail composer deps:check *)",
+            "Bash(vendor/bin/sail artisan test *)",
+            "Bash(vendor/bin/sail artisan route:list *)",
+            "Bash(vendor/bin/sail artisan about *)",
+            "Bash(./vendor/bin/pint *)",
+            "Bash(./vendor/bin/pest *)",
+            "Bash(./vendor/bin/sail composer test *)",
+            "Bash(./vendor/bin/sail composer test:impact *)",
+            "Bash(./vendor/bin/sail composer test:serial *)",
+            "Bash(./vendor/bin/sail composer lint *)",
+            "Bash(./vendor/bin/sail composer lint:dirty *)",
+            "Bash(./vendor/bin/sail composer lint:check *)",
+            "Bash(./vendor/bin/sail composer types:check *)",
+            "Bash(./vendor/bin/sail composer refactor *)",
+            "Bash(./vendor/bin/sail composer refactor:check *)",
+            "Bash(./vendor/bin/sail composer deps:check *)",
+            "Bash(./vendor/bin/sail artisan test *)",
+            "Bash(./vendor/bin/sail artisan route:list *)",
+            "Bash(./vendor/bin/sail artisan about *)"
+        ],
+        "deny": [
+            "Read(/.ai/plans/**)"
         ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/review-ledger.py\""
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pint.sh",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.ai/hooks/skill-roster.py\""
-          }
-        ]
-      }
-    ]
-  },
-  "enabledPlugins": {
-    "stripe@claude-plugins-official": false,
-    "desktop-commander@claude-plugins-official": false
-  },
-  "skillOverrides": {
-    "laravel-patterns": "off",
-    "laravel-specialist": "off",
-    "laravel-plugin-discovery": "off",
-    "livewire-development": "off",
-    "improve-codebase-architecture": "off",
-    "grill-me": "off",
-    "tailwind-design-system": "off",
-    "dataviz": "off",
-    "unslop": "off"
-  },
-  "permissions": {
-    "allow": [
-      "Bash(composer test *)",
-      "Bash(composer test:impact *)",
-      "Bash(composer test:serial *)",
-      "Bash(composer lint *)",
-      "Bash(composer lint:dirty *)",
-      "Bash(composer lint:check *)",
-      "Bash(composer types:check *)",
-      "Bash(composer refactor *)",
-      "Bash(composer refactor:check *)",
-      "Bash(composer deps:check *)",
-      "Bash(php artisan test *)",
-      "Bash(php artisan route:list *)",
-      "Bash(php artisan about *)",
-      "Bash(vendor/bin/pint *)",
-      "Bash(vendor/bin/pest *)",
-      "Bash(vendor/bin/sail composer test *)",
-      "Bash(vendor/bin/sail composer test:impact *)",
-      "Bash(vendor/bin/sail composer test:serial *)",
-      "Bash(vendor/bin/sail composer lint *)",
-      "Bash(vendor/bin/sail composer lint:dirty *)",
-      "Bash(vendor/bin/sail composer lint:check *)",
-      "Bash(vendor/bin/sail composer types:check *)",
-      "Bash(vendor/bin/sail composer refactor *)",
-      "Bash(vendor/bin/sail composer refactor:check *)",
-      "Bash(vendor/bin/sail composer deps:check *)",
-      "Bash(vendor/bin/sail artisan test *)",
-      "Bash(vendor/bin/sail artisan route:list *)",
-      "Bash(vendor/bin/sail artisan about *)",
-      "Bash(./vendor/bin/pint *)",
-      "Bash(./vendor/bin/pest *)",
-      "Bash(./vendor/bin/sail composer test *)",
-      "Bash(./vendor/bin/sail composer test:impact *)",
-      "Bash(./vendor/bin/sail composer test:serial *)",
-      "Bash(./vendor/bin/sail composer lint *)",
-      "Bash(./vendor/bin/sail composer lint:dirty *)",
-      "Bash(./vendor/bin/sail composer lint:check *)",
-      "Bash(./vendor/bin/sail composer types:check *)",
-      "Bash(./vendor/bin/sail composer refactor *)",
-      "Bash(./vendor/bin/sail composer refactor:check *)",
-      "Bash(./vendor/bin/sail composer deps:check *)",
-      "Bash(./vendor/bin/sail artisan test *)",
-      "Bash(./vendor/bin/sail artisan route:list *)",
-      "Bash(./vendor/bin/sail artisan about *)"
-    ]
-  }
+    },
+    "plansDirectory": ".claude/plans"
 }

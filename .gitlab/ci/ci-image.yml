@@ -1,0 +1,32 @@
+# Builds the image the test jobs run in, from docker/ci/Dockerfile, into this project's container registry.
+# Buildah needs seccomp and AppArmor unconfined: GitLab.com runners allow it, a self-hosted docker runner needs that set.
+ci-image:
+  stage: .pre
+  image: quay.io/buildah/stable
+  tags: ['buildah']
+  interruptible: false
+  cache: []
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+    BUILDAH_ISOLATION: chroot
+    CI_IMAGE_TAG: php-8.5
+  rules:
+    # A merge request that changes the Dockerfile gets its own tag, so main keeps testing in main's image.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - docker/ci/Dockerfile
+      variables:
+        CI_IMAGE_TAG: php-8.5-mr$CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web"
+    - changes:
+        paths:
+          - docker/ci/Dockerfile
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - buildah build --pull -t "$CI_REGISTRY_IMAGE/ci:$CI_IMAGE_TAG" docker/ci
+    - buildah push "$CI_REGISTRY_IMAGE/ci:$CI_IMAGE_TAG"

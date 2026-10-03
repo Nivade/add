@@ -1,0 +1,25 @@
+# The Code Quality widget works on every tier; inline merge request annotations need Premium.
+sloppy:
+  image: composer:2
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    # Cached at the project root, outside the app dir the checks format; the key prefix retires the old in-app archives.
+    COMPOSER_CACHE_DIR: $CI_PROJECT_DIR/.cache/composer
+  cache:
+    key:
+      prefix: composer
+      files:
+        - 'backend/composer.lock'
+    paths:
+      - .cache/composer/
+  script:
+    - cd backend
+    - composer install --no-interaction --no-progress --no-scripts --ignore-platform-reqs
+    - vendor/bin/sloppy ci --format=gitlab --report=gl-code-quality-report.json
+  artifacts:
+    when: always
+    reports:
+      codequality: 'backend/gl-code-quality-report.json'

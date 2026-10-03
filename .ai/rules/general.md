@@ -59,16 +59,12 @@ sentence — "the suite is green", "nothing is committed" — that a command ans
 faster and a commit falsifies silently.
 
 `tests/Feature/Guards/DocumentationTest.php` holds down the part of this a
-machine can see, across `.ai/**` and `CLAUDE.md`: relative links resolve, a
-backticked path exists, and a documented `npm run` or `composer` script is a real
-script. `.ai/skills/**` is exempt, because those come from the sibling repos and
-teach with example paths of their own.
+machine can see, across `.ai/**`, `docs/**`, `CLAUDE.md` and `GLOSSARY.md`:
+relative links resolve, a backticked path exists, and a documented `npm run` or
+`composer` script is a real script. `.ai/skills/**` is exempt, because those come
+from devtools and the catalog and teach with example paths of their own;
+`.ai/plans/legacy/` is exempt, because it is history.
 
-A path the design names before it is built goes in that test's `$planned` list,
-which fails once the path exists — so building it forces the document to be
-reread. Everything the guard cannot see is the same trade as the rest of this
-file: the shape belongs in the code, and the document says why.
-
-`.ai/RESUME.md` says where the build stopped and nothing else. An inventory of
-what was done belongs in `git log`, the slice states belong in the plan's table,
-and decisions belong here.
+Everything the guard cannot see is the same trade as the rest of this file: the
+shape belongs in the code, and the document says why. Where the build stands
+belongs in the tracker and `git log`, never in a file here.

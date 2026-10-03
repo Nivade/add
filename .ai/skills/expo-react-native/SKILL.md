@@ -1,6 +1,11 @@
 ---
 name: expo-react-native
 description: Use for any work in `mobile/**` — scaffolding the Expo app, adding a screen, wiring Sanctum auth, calling the JSON API, or sharing code with the web client. Also use when deciding whether something belongs in `packages/shared`, and when tempted to reuse an Inertia React component on mobile. Trigger on "mobile", "expo", "react native", "the app", "native screen", "sanctum token", "push notification", "slice 7".
+paths:
+  - 'mobile/**'
+metadata:
+  keywords:
+    - '\b(mobile|expo|react native|native app|push notification)\b'
 ---
 
 # Mobile (Expo / React Native)

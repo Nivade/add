@@ -1,6 +1,11 @@
 ---
 name: phpstan-larastan
 description: Use when PHPStan or Larastan reports an error, when adding or changing PHPDoc for static analysis, when `npm run stan` fails, and before finishing any PHP change. Also use when tempted to add `@phpstan-ignore`, a baseline entry, or a cast purely to silence analysis. Trigger on "phpstan", "larastan", "stan", "level 7", "type error", "ignoreErrors", "baseline", "@phpstan-ignore", "never returns", "no value type specified".
+paths:
+  - 'backend/phpstan.neon'
+metadata:
+  keywords:
+    - '\b(phpstan|larastan|stan|level 7|type error)\b'
 ---
 
 # Static analysis

@@ -2,8 +2,12 @@
 name: inertia-react-development
 description: "Develops Inertia.js v3 React client-side applications. Activates when creating React pages, forms, or navigation; using <Link>, <Form>, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions React with Inertia, React pages, React forms, or React navigation."
 license: MIT
+paths:
+  - 'backend/resources/js/**'
 metadata:
   author: laravel
+  keywords:
+    - '\b(inertia|react page|component|tailwind)\b'
 ---
 # Inertia React Development
 

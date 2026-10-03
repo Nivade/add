@@ -1,5 +1,7 @@
 # add
 
+[![pipeline](https://gitlab.com/nvade-apps/add/badges/main/pipeline.svg)](https://gitlab.com/nvade-apps/add/-/pipelines)
+
 An executive-function aid for adults with ADHD. Most task managers hand the
 person a list and leave the hardest part, deciding what to do, to them. `add`
 does the deciding. Every screen answers one question, "what do I do right
@@ -9,8 +11,7 @@ attached.
 A Laravel 13 backend serves an Inertia + React web app and an Expo / React
 Native mobile app from the same domain code.
 
-**Status:** in active development. Slices 1–11 of the build plan are done; a UX
-overhaul is underway. Not deployed.
+**Status:** in active development, not deployed.
 
 ## How it works
 
@@ -84,18 +85,19 @@ and the codebase holds that line structurally:
 
 ## Quality
 
-- About 450 Pest tests, including scenario tests for the resolver and browser
-  tests in real Chromium via `pest-plugin-browser`.
+- A Pest suite with scenario tests for the resolver and browser tests in real
+  Chromium via `pest-plugin-browser`.
 - PHPStan (Larastan) level 7, Pint, Rector, and `tsc` across all workspaces.
-- GitHub Actions: tests on SQLite and on MySQL 8.4, commit message and branch
+- GitLab CI: tests on SQLite and on MySQL 8.4, commit message and branch
   name checks, and a lint for sloppy code patterns.
 - Accessibility is part of the definition of done: keyboard reachable, screen
   reader labels, visible focus, reduced motion honoured, no colour-only state.
   Lighthouse scores 100 for accessibility on the main web screens.
-- Work is planned as slices in [`.ai/plans/`](.ai/plans/), each usable on its
-  own, with design, threat model where needed, and a done-when bar.
-  [`.ai/plans/executive-function-os.md`](.ai/plans/executive-function-os.md) is
-  the map. Invariants and traps live in [`.ai/rules/`](.ai/rules/).
+- Work is tracked as specs and tickets in the issue tracker. The product
+  spec is [`docs/product-spec.md`](docs/product-spec.md), deliberate deviations
+  from it are [ADRs](docs/adr/), and invariants and traps live in
+  [`.ai/rules/`](.ai/rules/). The slice plans the first eleven slices were
+  built from are kept in [`.ai/plans/legacy/`](.ai/plans/legacy/).
 
 ## Running it
 
@@ -117,3 +119,7 @@ npm run web                 # Vite for the web app
 npm run mobile              # Expo
 npm run types:generate      # regenerate packages/shared from PHP Data classes
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).

@@ -1,0 +1,23 @@
+# The commit-msg hook is local and --no-verify skips it; this is the gate.
+commitlint:
+  stage: test
+  image: node:22-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_BEFORE_SHA != "0000000000000000000000000000000000000000"
+  variables:
+    GIT_DEPTH: 0
+    # Cached at the project root, outside the app dir the checks format; the key prefix retires the old in-app archives.
+    npm_config_cache: $CI_PROJECT_DIR/.cache/npm
+  cache:
+    key:
+      prefix: npm
+      files:
+        - package-lock.json
+    paths:
+      - .cache/npm/
+  before_script:
+    - apk add --no-cache git
+    - if [ -f package-lock.json ]; then npm ci --ignore-scripts; else npm install --ignore-scripts --no-audit --no-fund; fi
+  script:
+    - npx commitlint --from "${CI_MERGE_REQUEST_DIFF_BASE_SHA:-$CI_COMMIT_BEFORE_SHA}" --to HEAD --verbose

@@ -1,0 +1,23 @@
+# Scheduled pipelines only, and only once RENOVATE_TOKEN exists: a protected variable reaches protected branches alone.
+# Scoped to this project, no autodiscover, so the bot token never touches another repository it can see.
+renovate:
+  stage: deploy
+  image: renovate/renovate:44
+  interruptible: false
+  resource_group: renovate
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $RENOVATE_TOKEN
+  variables:
+    RENOVATE_PLATFORM: gitlab
+    RENOVATE_ENDPOINT: $CI_API_V4_URL
+    RENOVATE_REPOSITORIES: $CI_PROJECT_PATH
+    RENOVATE_BASE_DIR: $CI_PROJECT_DIR/.cache/renovate
+    RENOVATE_REPOSITORY_CACHE: enabled
+    LOG_LEVEL: info
+  before_script: []
+  cache:
+    key: renovate
+    paths:
+      - .cache/renovate/cache/renovate/repository/
+  script:
+    - renovate
