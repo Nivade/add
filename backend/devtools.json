@@ -81,24 +81,11 @@
         "backend/.ai/rules/nvade-devtools-laravel.md": "e444885dda0d8824",
         "backend/.ai/rules/nvade-devtools-rector.md": "429dfc12d96cb1e7",
         "backend/.ai/rules/nvade-devtools-testing.md": "dee4871ff6c08648",
-        "backend/.ai/skills/ai-sdk-development": "08e4e03e5c4b8806",
-        "backend/.ai/skills/debug-using-debugbar": "2449969de7840b1b",
-        "backend/.ai/skills/fortify-development": "1d945041ccaed46d",
-        "backend/.ai/skills/telescope-debugging": "db9f6c9b152edfe3",
         "backend/.ai/skills/after-merge": "ddf5f5271fb08d24",
         "backend/.ai/skills/note-finding": "ab93685faaf9c46e",
         "backend/.ai/skills/start-work": "705fd6fe05f1fe7c"
     },
-    "agent-packages": [
-        "fruitcake/laravel-debugbar",
-        "inertiajs/inertia-laravel",
-        "laravel/ai",
-        "laravel/fortify",
-        "laravel/telescope",
-        "laravel/wayfinder",
-        "lorisleiva/laravel-actions",
-        "nvade/devtools"
-    ],
+    "agent-packages": ["nvade/devtools"],
     "components": [
         "arch",
         "branches",
