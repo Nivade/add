@@ -80,14 +80,21 @@ function Closing({ finished, reload }: { finished: FinishedData; reload: () => P
   const { token } = useSession();
   const styles = useStyles();
   const { intention, lines, next, recurrenceEveryDays } = finished;
+  const [starting, setStarting] = useState(false);
 
   const startNext = async (): Promise<void> => {
-    if (!next) {
+    if (!next || starting) {
       return;
     }
 
-    await api.startSession(token as string, next.step.id);
-    router.replace('/focus');
+    setStarting(true);
+
+    try {
+      await api.startSession(token as string, next.step.id);
+      router.replace('/focus');
+    } finally {
+      setStarting(false);
+    }
   };
 
   return (
@@ -106,7 +113,7 @@ function Closing({ finished, reload }: { finished: FinishedData; reload: () => P
           <Text style={styles.next}>{next.step.title}</Text>
           {next.why[0] && <Meta>{next.why[0]}</Meta>}
           <View style={styles.actions}>
-            <Button label={focusCopy.start} tone="primary" onPress={() => void startNext()} />
+            <Button label={focusCopy.start} tone="primary" disabled={starting} onPress={() => void startNext()} />
             <Button label={finishedCopy.leave} onPress={() => router.replace('/')} />
           </View>
         </Band>
@@ -129,9 +136,13 @@ export default function Finished() {
   const load = useCallback(() => api.finished(token as string, session), [token, session]);
   const resource = useResource<FinishedData>(load);
 
+  const ready = resource.status === 'ready';
+
   useEffect(() => {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, []);
+    if (ready) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  }, [ready]);
 
   if (resource.status !== 'ready') {
     return <Pending resource={resource} />;
