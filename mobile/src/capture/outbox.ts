@@ -2,7 +2,6 @@ import type { CaptureSource } from '@add/shared';
 import { File, Paths } from 'expo-file-system';
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
-import { ApiError } from '@/api/client';
 import { api } from '@/api/endpoints';
 import { useSession } from '@/auth/session';
 
@@ -42,30 +41,26 @@ export function keepCapture(body: string, source: CaptureSource): Promise<void> 
   return inTurn(async () => write([...(await read()), { body, source }]));
 }
 
-/** A rejection the server will give again is dropped; anything else stays for the next try. */
-function willBeRefusedAgain(error: unknown): boolean {
-  return (
-    error instanceof ApiError &&
-    error.status >= 400 &&
-    error.status < 500 &&
-    ![401, 408, 429].includes(error.status)
-  );
-}
-
+/** A capture the server refused stays on the phone: the person's words are never dropped. */
 export function sendKeptCaptures(token: string): Promise<void> {
   return inTurn(async () => {
+    const left: Kept[] = [];
     const kept = await read();
 
     for (const [index, capture] of kept.entries()) {
       try {
         await api.capture(token, capture.body, capture.source);
       } catch (error) {
-        if (!willBeRefusedAgain(error)) {
-          return;
+        left.push(capture);
+
+        if (wasNeverAnswered(error)) {
+          left.push(...kept.slice(index + 1));
+
+          break;
         }
       }
 
-      write(kept.slice(index + 1));
+      write([...left, ...kept.slice(index + 1)]);
     }
   });
 }
